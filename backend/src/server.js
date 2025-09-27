@@ -70,6 +70,16 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// --- TEMPLATES (тимчасово статично) ---
+app.get("/api/templates", (req, res) => {
+  res.json([
+    { id: "shop-demo",     name: "Магазин — демо",    features: ["Каталог","Кошик","Checkout"] },
+    { id: "landing-clean", name: "Лендінг — чистий",  features: ["Секції","Форми","Галерея"] },
+    { id: "empty",         name: "Порожній шаблон",   features: [] }
+  ]);
+});
+
+
 // --- KV (конфіг) ---
 app.get("/api/kv", async (req, res) => {
   try {
@@ -79,6 +89,13 @@ app.get("/api/kv", async (req, res) => {
     res.status(500).json({ error: String(e) });
   }
 });
+
+
+
+
+
+
+
 
 app.post("/api/kv", async (req, res) => {
   try {
