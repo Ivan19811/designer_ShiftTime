@@ -7,28 +7,52 @@
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; background: #0f1115; color: #eaeef2; }
     header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #243042; }
-    .wrap { max-width: 1080px; margin: 24px auto; padding: 0 16px; }
+    .wrap { max-width: 1080px; margin: 24px auto; padding: 0 16px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
     .card { background:#131722; border:1px solid #243042; border-radius:12px; padding:16px; }
     button { background:#2563eb; color:#fff; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; }
     button:disabled { opacity:.6; cursor:default; }
-    code { background:#0b0f16; padding:2px 6px; border-radius:6px; border:1px solid #1e293b; }
+    input, select { width:100%; padding:10px; border-radius:8px; border:1px solid #243042; background:#0b0f16; color:#eaeef2; }
+    label { display:block; margin:8px 0 6px; font-size:14px; opacity:.85; }
+    ul { margin:0; padding-left:18px; }
+    pre { white-space:pre-wrap; margin:0 }
+    .full { grid-column: 1 / -1; }
   </style>
 </head>
 <body>
   <header>
     <div>🧩 <strong>designer_ShiftTime</strong></div>
-    <div><small>Netlify + Render + GAS</small></div>
+    <div><small>Netlify ⇄ Render ⇄ GAS</small></div>
   </header>
 
   <div class="wrap">
-    <div class="card" id="status">
-      <h3>Статус підключень</h3>
+    <div class="card">
+      <h3>Статус</h3>
       <p>
-        <button id="btnHealth">Перевірити /api/health</button>
-        <button id="btnKV">Зчитати KV</button>
-        <button id="btnTpl">Шаблони</button>
+        <button id="btnHealth">/api/health</button>
+        <button id="btnKV">/api/kv</button>
+        <button id="btnTpl">/api/templates</button>
       </p>
-      <pre id="out" style="white-space:pre-wrap;"></pre>
+      <pre id="outStatus"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Створити проект</h3>
+      <label>Назва</label>
+      <input id="prjName" placeholder="Мій перший проект" />
+      <label>Шаблон</label>
+      <select id="prjTpl"></select>
+      <label>Домен (необов’язково)</label>
+      <input id="prjDomain" placeholder="myshop.netlify.app або порожньо" />
+      <p style="margin-top:12px;">
+        <button id="btnCreate">Створити</button>
+      </p>
+      <pre id="outCreate"></pre>
+    </div>
+
+    <div class="card full">
+      <h3>Мої проекти</h3>
+      <p><button id="btnList">Оновити список</button></p>
+      <pre id="outList"></pre>
     </div>
   </div>
 
