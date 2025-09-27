@@ -6,7 +6,7 @@
 # Після деплою на Render ЗАМІНИ домен нижче на твій onrender.com
 [[redirects]]
   from = "/api/*"
-  to   = "https://designer-shifttime-api.onrender.com/api/:splat"
+  to   = "https://designer-shifttime.onrender.com/api/:splat"
   status = 200
   force = true
 
