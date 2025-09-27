@@ -53,14 +53,20 @@ app.use("/api/", rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
 // ===== ХЕЛПЕРИ =====
 function buildGASUrl(pathQuery) {
-  // pathQuery може бути рядок типу "?res=designer&mode=list" або об'єкт {res:"designer",mode:"list"}
   if (!SHEETS_WEBAPP_URL) return "";
-  const base = SHEETS_WEBAPP_URL; // може вже містити "?"
-  const query =
-    typeof pathQuery === "string"
-      ? pathQuery.replace(/^\?/, "")
-      : new URLSearchParams(pathQuery || {}).toString();
+  // Нормалізуємо параметри
+  let params = new URLSearchParams();
+  if (typeof pathQuery === "string") {
+    params = new URLSearchParams(pathQuery.replace(/^\?/, ""));
+  } else if (pathQuery && typeof pathQuery === "object") {
+    for (const [k, v] of Object.entries(pathQuery)) params.set(k, String(v));
+  }
+  // cache-buster
+  params.set("_t", Date.now().toString());
+
+  const base = SHEETS_WEBAPP_URL;
   const sep = base.includes("?") ? "&" : "?";
+  const query = params.toString();
   return query ? `${base}${sep}${query}` : base;
 }
 
@@ -69,7 +75,14 @@ async function forwardToGAS({ pathQuery, method = "GET", bodyObj = null }) {
     return { status: 500, body: { error: "SHEETS_WEBAPP_URL is not set" } };
   }
   const url = buildGASUrl(pathQuery);
-  const init = { method, headers: { "User-Agent": "designer_ShiftTime/1.0" } };
+  const init = {
+    method,
+    headers: {
+      "User-Agent": "designer_ShiftTime/1.0",
+      "Accept": "application/json",
+      // нижче додасться Content-Type для POST
+    }
+  };
   if (bodyObj != null) {
     init.headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(bodyObj);
@@ -77,11 +90,15 @@ async function forwardToGAS({ pathQuery, method = "GET", bodyObj = null }) {
   const r = await fetch(url, init);
   const text = await r.text();
   let data = text;
-  try {
-    data = JSON.parse(text);
-  } catch {}
+  try { data = JSON.parse(text); } catch {}
   return { status: r.status, body: data };
 }
+
+
+
+
+
+
 
 // ===== ENDPOINTS =====
 
