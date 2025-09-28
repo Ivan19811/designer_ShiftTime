@@ -190,12 +190,28 @@ app.get("/api/templates", (req, res) => {
 });
 
 // KV
+// KV (нормалізуємо відповідь у масив елементів {key,value})
 app.get("/api/kv", async (req, res) => {
   try {
     const { status, body } = await forwardToGAS({ pathQuery: { res: "kv", mode: "list" } });
-    res.status(status).json(body);
-  } catch (e) { res.status(500).json({ error: String(e) }); }
+
+    let normalized = body;
+
+    // якщо GAS повернув { data: [...] } — беремо data
+    if (body && Array.isArray(body.data)) {
+      normalized = body.data;
+    }
+    // якщо повернув мапу { "k1": {...}, "k2": {...} } — конвертуємо у [{key,value}]
+    else if (body && typeof body === "object" && !Array.isArray(body)) {
+      normalized = Object.entries(body).map(([key, value]) => ({ key, value }));
+    }
+
+    res.status(status).json(normalized);
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
 });
+
 
 app.post("/api/kv", async (req, res) => {
   try {
