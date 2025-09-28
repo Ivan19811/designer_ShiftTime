@@ -269,32 +269,23 @@ app.post("/api/netlify/site", async (req, res) => {
 
     const siteName = (name || `p-${projectId}-${Math.random().toString(36).slice(2,7)}`).toLowerCase();
 
-    // створюємо завжди через /api/v1/sites
-    // якщо NETLIFY_TEAM_SLUG заданий — додаємо його в payload як account_slug
-    const payload = NETLIFY_TEAM_SLUG
-      ? { name: siteName, account_slug: NETLIFY_TEAM_SLUG }
-      : { name: siteName };
+    const url = NETLIFY_TEAM_SLUG
+      ? `https://api.netlify.com/api/v1/${encodeURIComponent(NETLIFY_TEAM_SLUG)}/sites`
+      : `https://api.netlify.com/api/v1/sites`;
 
-    const r = await fetch("https://api.netlify.com/api/v1/sites", {
+    const r = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${NETLIFY_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
+      headers: { Authorization: `Bearer ${NETLIFY_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ name: siteName })
     });
-
-    let data; try { data = await r.json(); } catch { data = await r.text(); }
+    const data = await r.json();
     if (r.status >= 300) return res.status(r.status).json(data);
 
-    // збережемо мапу в KV, щоб /api/deploy знав, куди заливати
-await kvUpsert([
-  { key: `site:${projectId}`, value: { siteId: data.id, url: data.ssl_url, name: data.name, adminUrl: data.admin_url } }
-]);
-
-
-
-
+    // ⬇️ зберігаємо adminUrl у KV
+    await kvUpsert([{
+      key: `site:${projectId}`,
+      value: { siteId: data.id, url: data.ssl_url, name: data.name, adminUrl: data.admin_url }
+    }]);
 
     res.json({ ok: true, siteId: data.id, url: data.ssl_url, name: data.name, admin_url: data.admin_url });
   } catch (e) {
