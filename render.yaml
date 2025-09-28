@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: designer_ShiftTime
+    env: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: SHEETS_WEBAPP_URL
+        sync: false     # значення задаси у Dashboard → Environment
+      - key: NETLIFY_AUTH_TOKEN
+        sync: false
+      - key: CORS_ORIGIN
+        value: ""
+      - key: CORS_ALLOWLIST
+        value: https://designer-shifttime.netlify.app,http://localhost:8888,http://localhost:3000
