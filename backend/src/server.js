@@ -288,16 +288,21 @@ app.post("/api/netlify/site", async (req, res) => {
     if (r.status >= 300) return res.status(r.status).json(data);
 
     // збережемо мапу в KV, щоб /api/deploy знав, куди заливати
-    await kvUpsert([{
-  key: `site:${projectId}`,
-  value: { siteId: data.id, url: data.ssl_url, name: data.name, admin_url: data.admin_url }
-}]);
+await kvUpsert([
+  { key: `site:${projectId}`, value: { siteId: data.id, url: data.ssl_url, name: data.name, adminUrl: data.admin_url } }
+]);
+
+
+
+
 
     res.json({ ok: true, siteId: data.id, url: data.ssl_url, name: data.name, admin_url: data.admin_url });
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
 });
+
+
 
 
 
