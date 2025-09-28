@@ -288,7 +288,10 @@ app.post("/api/netlify/site", async (req, res) => {
     if (r.status >= 300) return res.status(r.status).json(data);
 
     // збережемо мапу в KV, щоб /api/deploy знав, куди заливати
-    await kvUpsert([{ key: `site:${projectId}`, value: { siteId: data.id, url: data.ssl_url, name: data.name } }]);
+    await kvUpsert([{
+  key: `site:${projectId}`,
+  value: { siteId: data.id, url: data.ssl_url, name: data.name, admin_url: data.admin_url }
+}]);
 
     res.json({ ok: true, siteId: data.id, url: data.ssl_url, name: data.name, admin_url: data.admin_url });
   } catch (e) {
@@ -350,3 +353,20 @@ app.post("/api/deploy", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`designer_ShiftTime_api running on :${PORT}`);
 });
+
+// GET /api/netlify/status/:siteId -> { state: 'ready' | 'uploaded' | ... }
+app.get('/api/netlify/status/:siteId', async (req, res) => {
+  try {
+    if (!NETLIFY_TOKEN) return res.status(500).json({ error: "NETLIFY_AUTH_TOKEN is not set" });
+    const siteId = req.params.siteId;
+    const r = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys?per_page=1`, {
+      headers: { Authorization: `Bearer ${NETLIFY_TOKEN}` }
+    });
+    const arr = await r.json();
+    const last = Array.isArray(arr) ? arr[0] : null;
+    res.json({ state: last?.state || 'unknown', deploy: last || null });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+

@@ -1,0 +1,7 @@
+# Local Netlify folder
+.netlify
+frontend/
+node_modules/
+*.zip
+*.log
+
