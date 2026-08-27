@@ -1,21 +1,25 @@
 {
-  "name": "designer_shifttime_api",
-  "version": "1.0.0",
+  "name": "shifttime-commerce-backend-01081",
+  "version": "0.10.81",
+  "private": true,
   "type": "module",
-  "description": "Backend API for designer_ShiftTime (Render)",
-  "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
-  },
-  "engines": {
-    "node": ">=18"
+    "dev": "node --watch src/server.mjs",
+    "start": "node src/server.mjs",
+    "db:preflight": "node scripts/db-preflight.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:migrate:status": "node scripts/migrate.mjs --status",
+    "db:migrate:plan": "node scripts/migrate.mjs --dry-run",
+    "db:bootstrap-owner": "node scripts/bootstrap-owner.mjs",
+    "db:import-store": "node scripts/import-store-snapshot.mjs",
+    "db:verify": "node scripts/db-verify.mjs",
+    "db:backup": "node scripts/db-backup.mjs",
+    "db:seed-dev": "node scripts/seed-dev.mjs",
+    "check": "node --check src/server.mjs && node --check src/db.mjs && node --check src/config.mjs && node --check src/auth.mjs && node --check src/migration-service.mjs && node --check src/deployment-service.mjs && node --check src/deployment-local-import-service.mjs && node --check src/http-utils.mjs && node --check src/commerce-snapshot-service.mjs && node --check src/marketplace-network-service.mjs && node --check src/marketplace-public-catalog-service.mjs && node --check src/marketplace-cart-service.mjs && node --check src/marketplace-order-service.mjs && node --check src/marketplace-payment-service.mjs && node --check src/marketplace-pricing-service.mjs && node --check src/marketplace-inventory-service.mjs && node --check src/shipping-provider-contract.mjs && node --check src/shipping-providers/manual-dev-shipping-provider.mjs && node --check src/marketplace-shipping-service.mjs && node --check src/storage-provider-contract.mjs && node --check src/storage-providers/s3-compatible-storage-provider.mjs && node --check src/media-cloud-service.mjs && node --check scripts/migrate.mjs && node --check scripts/db-preflight.mjs && node --check scripts/bootstrap-owner.mjs && node --check scripts/import-store-snapshot.mjs && node --check scripts/db-verify.mjs && node --check scripts/db-backup.mjs && node --check scripts/seed-dev.mjs"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0",
-    "helmet": "^7.1.0",
-    "jszip": "^3.10.1"
+    "pg": "^8.13.1",
+    "@aws-sdk/client-s3": "^3.1115.0",
+    "@aws-sdk/s3-request-presigner": "^3.1115.0"
   }
 }
