@@ -1,0 +1,1570 @@
+[
+  {
+    "id": "create",
+    "label": "Створити",
+    "aliases": [
+      "створи",
+      "додай",
+      "встав",
+      "create",
+      "add"
+    ],
+    "category": "structure",
+    "mode": "create",
+    "description": "Створює новий елемент",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "delete",
+    "label": "Видалити",
+    "aliases": [
+      "видали",
+      "прибери",
+      "стерти",
+      "delete",
+      "remove"
+    ],
+    "category": "structure",
+    "mode": "delete",
+    "description": "Видаляє елемент",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": false,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "duplicate",
+    "label": "Дублювати",
+    "aliases": [
+      "дублюй",
+      "скопіюй",
+      "duplicate",
+      "clone"
+    ],
+    "category": "structure",
+    "mode": "duplicate",
+    "description": "Створює копію елемента",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "move",
+    "label": "Перемістити",
+    "aliases": [
+      "перемісти",
+      "посунь",
+      "move"
+    ],
+    "category": "structure",
+    "mode": "move",
+    "description": "Переміщує елемент",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "reorder",
+    "label": "Пересортувати",
+    "aliases": [
+      "пересортуй",
+      "зміни порядок",
+      "reorder"
+    ],
+    "category": "structure",
+    "mode": "move",
+    "description": "Змінює порядок елементів",
+    "requiresProperty": false,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "select",
+    "label": "Вибрати",
+    "aliases": [
+      "вибери",
+      "виділи",
+      "select"
+    ],
+    "category": "structure",
+    "mode": "select",
+    "description": "Вибирає елемент",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": false,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "rename",
+    "label": "Перейменувати",
+    "aliases": [
+      "перейменуй",
+      "зміни назву",
+      "rename"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює назву або label",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "reset",
+    "label": "Скинути",
+    "aliases": [
+      "скинь",
+      "reset",
+      "очисти налаштування"
+    ],
+    "category": "structure",
+    "mode": "reset",
+    "description": "Скидає налаштування до базових",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": false,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_background",
+    "label": "Змінити фон",
+    "aliases": [
+      "зафарбуй",
+      "зміни фон",
+      "зроби фон",
+      "залий",
+      "set background"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає фон елемента",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "reset_background",
+    "label": "Скинути фон",
+    "aliases": [
+      "прибери фон",
+      "очисти фон",
+      "reset background"
+    ],
+    "category": "style",
+    "mode": "reset",
+    "description": "Скидає фон",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": false,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_gradient",
+    "label": "Задати градієнт",
+    "aliases": [
+      "зроби градієнт",
+      "градієнт",
+      "set gradient"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає градієнтний фон",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_gradient_direction",
+    "label": "Змінити напрямок градієнта",
+    "aliases": [
+      "горизонтальний градієнт",
+      "вертикальний градієнт",
+      "діагональний градієнт",
+      "напрямок градієнта"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає напрямок або кут градієнта",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "adjust_gradient_color_share",
+    "label": "Змінити частку кольору в градієнті",
+    "aliases": [
+      "додай більше",
+      "зменш",
+      "збільш",
+      "посиль колір",
+      "make more",
+      "make less"
+    ],
+    "category": "style",
+    "mode": "adjust",
+    "description": "Коригує частку кольору в градієнті",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "+10%",
+    "oppositeAction": null
+  },
+  {
+    "id": "set_background_image",
+    "label": "Поставити фонову картинку",
+    "aliases": [
+      "постав картинку",
+      "постав фон картинку",
+      "background image"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає фонове зображення",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "remove_background_image",
+    "label": "Прибрати фонову картинку",
+    "aliases": [
+      "прибери картинку",
+      "remove background image"
+    ],
+    "category": "style",
+    "mode": "remove",
+    "description": "Прибирає фонову картинку",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_overlay",
+    "label": "Задати overlay",
+    "aliases": [
+      "додай overlay",
+      "зроби overlay",
+      "filter overlay"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає фільтр overlay",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_opacity",
+    "label": "Змінити прозорість",
+    "aliases": [
+      "add transparency",
+      "decrease transparency",
+      "increase transparency",
+      "less transparent",
+      "make more transparent",
+      "make transparent",
+      "more transparent",
+      "opacity",
+      "opaque",
+      "reduce transparency",
+      "semi-transparent",
+      "transparency",
+      "transparent",
+      "абсолютно прозорий",
+      "более прозрачный",
+      "більш прозорий",
+      "більш прозорим",
+      "добавь прозрачности",
+      "додай прозорості",
+      "додай прозорість",
+      "додай прозорість 10%",
+      "збільш прозорості",
+      "збільш прозорість",
+      "зменш прозорості",
+      "зменш прозорість",
+      "зміни прозорість",
+      "зроби більш прозорим",
+      "зроби менш прозорим",
+      "зроби напівпрозорим",
+      "зроби не таким прозорим",
+      "зроби непрозорим",
+      "зроби прозорим",
+      "зроби прозоріше",
+      "зроби прозорішим",
+      "менее прозрачный",
+      "менш прозорий",
+      "менш прозорим",
+      "напівпрозорий",
+      "напівпрозорим",
+      "не така прозора",
+      "не таким прозорим",
+      "повністю прозорий",
+      "повністю прозорим",
+      "полупрозрачный",
+      "посиль прозорість",
+      "прозоріше",
+      "прозорішим",
+      "прозорішою",
+      "прозрачнее",
+      "підніми прозорість",
+      "сделай менее прозрачным",
+      "сделай непрозрачным",
+      "сделай прозрачнее",
+      "сделай прозрачным",
+      "увеличь прозрачность",
+      "уменьши прозрачность"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює прозорість",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_grayscale",
+    "label": "Змінити grayscale",
+    "aliases": [
+      "зроби чорно білим",
+      "зміни grayscale",
+      "grayscale"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює grayscale",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_border",
+    "label": "Змінити рамку",
+    "aliases": [
+      "додай рамку",
+      "зміни рамку",
+      "set border"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Задає рамку",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "remove_border",
+    "label": "Прибрати рамку",
+    "aliases": [
+      "прибери рамку",
+      "remove border"
+    ],
+    "category": "style",
+    "mode": "remove",
+    "description": "Прибирає рамку",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_border_color",
+    "label": "Змінити колір рамки",
+    "aliases": [
+      "колір рамки",
+      "border color"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює колір рамки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_border_width",
+    "label": "Змінити товщину рамки",
+    "aliases": [
+      "товщина рамки",
+      "border width"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює товщину рамки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_border_style",
+    "label": "Змінити стиль рамки",
+    "aliases": [
+      "стиль рамки",
+      "пунктирна рамка",
+      "dashed border"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює стиль рамки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_radius",
+    "label": "Змінити скруглення",
+    "aliases": [
+      "скругли",
+      "зміни радіус",
+      "border radius"
+    ],
+    "category": "style",
+    "mode": "set",
+    "description": "Змінює border radius",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "increase_radius",
+    "label": "Збільшити скруглення",
+    "aliases": [
+      "збільш скруглення",
+      "more round"
+    ],
+    "category": "style",
+    "mode": "adjust",
+    "description": "Збільшує радіус скруглення",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "+10px",
+    "oppositeAction": null
+  },
+  {
+    "id": "decrease_radius",
+    "label": "Зменшити скруглення",
+    "aliases": [
+      "зменш скруглення",
+      "less round"
+    ],
+    "category": "style",
+    "mode": "adjust",
+    "description": "Зменшує радіус скруглення",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "-10px",
+    "oppositeAction": null
+  },
+  {
+    "id": "set_shadow",
+    "label": "Додати тінь",
+    "aliases": [
+      "додай тінь",
+      "зміни тінь",
+      "set shadow"
+    ],
+    "category": "effects",
+    "mode": "set",
+    "description": "Задає тінь",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "remove_shadow",
+    "label": "Прибрати тінь",
+    "aliases": [
+      "прибери тінь",
+      "remove shadow",
+      "прибери тінь повністю",
+      "видали тінь",
+      "видали тінь повністю",
+      "забери тінь",
+      "очисти тінь",
+      "скинь тінь",
+      "зніми тінь",
+      "вимкни тінь",
+      "відключи тінь",
+      "без тіні",
+      "без тіней",
+      "зроби тінь прозорою",
+      "зроби тінь 100% прозорою",
+      "зроби тінь повністю прозорою",
+      "make shadow transparent",
+      "remove shadow completely",
+      "delete shadow",
+      "clear shadow",
+      "disable shadow",
+      "no shadow",
+      "without shadow"
+    ],
+    "category": "effects",
+    "mode": "remove",
+    "description": "Прибирає тінь",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_inner_shadow",
+    "label": "Зробити inner shadow",
+    "aliases": [
+      "inner shadow",
+      "внутрішня тінь"
+    ],
+    "category": "effects",
+    "mode": "set",
+    "description": "Задає внутрішню тінь",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_outer_shadow",
+    "label": "Зробити outer shadow",
+    "aliases": [
+      "outer shadow",
+      "зовнішня тінь"
+    ],
+    "category": "effects",
+    "mode": "set",
+    "description": "Задає зовнішню тінь",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_blur",
+    "label": "Змінити розмиття",
+    "aliases": [
+      "розмиття",
+      "blur"
+    ],
+    "category": "effects",
+    "mode": "set",
+    "description": "Змінює blur",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_glow",
+    "label": "Змінити glow",
+    "aliases": [
+      "glow",
+      "підсвітка",
+      "світіння"
+    ],
+    "category": "effects",
+    "mode": "set",
+    "description": "Задає glow",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_text",
+    "label": "Змінити текст",
+    "aliases": [
+      "зміни текст",
+      "заміни текст",
+      "set text"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює текстовий контент",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_text_color",
+    "label": "Змінити колір тексту",
+    "aliases": [
+      "зафарбуй текст",
+      "зроби текст",
+      "text color"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює колір тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "increase_text_size",
+    "label": "Збільшити текст",
+    "aliases": [
+      "збільш текст",
+      "зроби текст більшим",
+      "bigger text"
+    ],
+    "category": "content",
+    "mode": "adjust",
+    "description": "Збільшує розмір тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "+2px",
+    "oppositeAction": null
+  },
+  {
+    "id": "decrease_text_size",
+    "label": "Зменшити текст",
+    "aliases": [
+      "зменш текст",
+      "зроби текст меншим",
+      "smaller text"
+    ],
+    "category": "content",
+    "mode": "adjust",
+    "description": "Зменшує розмір тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "-2px",
+    "oppositeAction": null
+  },
+  {
+    "id": "set_font_weight",
+    "label": "Змінити жирність",
+    "aliases": [
+      "зроби жирним",
+      "тоншим",
+      "font weight"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює вагу шрифту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_font_style",
+    "label": "Змінити стиль шрифту",
+    "aliases": [
+      "зроби курсив",
+      "italic"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює стиль шрифту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_text_align",
+    "label": "Вирівняти текст",
+    "aliases": [
+      "вирівняй текст",
+      "по центру",
+      "text align"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює горизонтальне вирівнювання тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_line_height",
+    "label": "Змінити line-height",
+    "aliases": [
+      "line height",
+      "міжрядковий інтервал"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює міжрядковий інтервал",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_letter_spacing",
+    "label": "Змінити інтервал літер",
+    "aliases": [
+      "letter spacing",
+      "інтервал літер"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює інтервал між літерами",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_text_shadow",
+    "label": "Змінити тінь тексту",
+    "aliases": [
+      "тінь тексту",
+      "text shadow"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює тінь тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_text_stroke",
+    "label": "Змінити stroke тексту",
+    "aliases": [
+      "stroke тексту",
+      "контур тексту"
+    ],
+    "category": "content",
+    "mode": "set",
+    "description": "Змінює stroke тексту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon",
+    "label": "Поставити іконку",
+    "aliases": [
+      "додай іконку",
+      "постав іконку",
+      "set icon"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Встановлює іконку",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "remove_icon",
+    "label": "Прибрати іконку",
+    "aliases": [
+      "прибери іконку",
+      "remove icon"
+    ],
+    "category": "icon",
+    "mode": "remove",
+    "description": "Прибирає іконку",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_color",
+    "label": "Змінити колір іконки",
+    "aliases": [
+      "колір іконки",
+      "icon color"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює колір іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "increase_icon_size",
+    "label": "Збільшити іконку",
+    "aliases": [
+      "збільш іконку",
+      "bigger icon"
+    ],
+    "category": "icon",
+    "mode": "adjust",
+    "description": "Збільшує іконку",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "+2px",
+    "oppositeAction": null
+  },
+  {
+    "id": "decrease_icon_size",
+    "label": "Зменшити іконку",
+    "aliases": [
+      "зменш іконку",
+      "smaller icon"
+    ],
+    "category": "icon",
+    "mode": "adjust",
+    "description": "Зменшує іконку",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": "-2px",
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_background",
+    "label": "Змінити фон іконки",
+    "aliases": [
+      "фон іконки",
+      "icon background"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює фон іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_border",
+    "label": "Змінити рамку іконки",
+    "aliases": [
+      "рамка іконки",
+      "icon border"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює рамку іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_radius",
+    "label": "Змінити скруглення іконки",
+    "aliases": [
+      "скруглення іконки",
+      "icon radius"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює radius іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_shadow",
+    "label": "Змінити тінь іконки",
+    "aliases": [
+      "тінь іконки",
+      "icon shadow"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює тінь іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_icon_position",
+    "label": "Змінити позицію іконки",
+    "aliases": [
+      "позиція іконки",
+      "icon position"
+    ],
+    "category": "icon",
+    "mode": "set",
+    "description": "Змінює розташування іконки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_width",
+    "label": "Змінити ширину",
+    "aliases": [
+      "ширина",
+      "set width"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює ширину",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_height",
+    "label": "Змінити висоту",
+    "aliases": [
+      "висота",
+      "set height"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює висоту",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_size_mode",
+    "label": "Змінити режим розміру",
+    "aliases": [
+      "auto",
+      "fill",
+      "hug",
+      "size mode"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює режим розміру",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_padding",
+    "label": "Змінити padding",
+    "aliases": [
+      "padding",
+      "внутрішній відступ"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює padding",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_margin",
+    "label": "Змінити margin",
+    "aliases": [
+      "margin",
+      "зовнішній відступ"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює margin",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_gap",
+    "label": "Змінити gap",
+    "aliases": [
+      "gap",
+      "відступ між елементами"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює gap",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_orientation",
+    "label": "Змінити орієнтацію",
+    "aliases": [
+      "орієнтація",
+      "row",
+      "column",
+      "set orientation"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює орієнтацію layout",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_align_x",
+    "label": "Вирівняти по X",
+    "aliases": [
+      "по горизонталі",
+      "align x",
+      "justify x"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює вирівнювання по горизонталі",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_align_y",
+    "label": "Вирівняти по Y",
+    "aliases": [
+      "по вертикалі",
+      "align y"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює вирівнювання по вертикалі",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_columns",
+    "label": "Змінити колонки",
+    "aliases": [
+      "кількість колонок",
+      "columns"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює кількість колонок",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_fr_weight",
+    "label": "Змінити FR вагу",
+    "aliases": [
+      "fr вага",
+      "fr weight"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює FR вагу",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "resize",
+    "label": "Resize",
+    "aliases": [
+      "resize",
+      "розтягни",
+      "зміни розмір"
+    ],
+    "category": "layout",
+    "mode": "set",
+    "description": "Змінює розмір елемента",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_link",
+    "label": "Змінити посилання",
+    "aliases": [
+      "посилання",
+      "href",
+      "link"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює посилання",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "remove_link",
+    "label": "Прибрати посилання",
+    "aliases": [
+      "прибери посилання",
+      "remove link"
+    ],
+    "category": "interaction",
+    "mode": "remove",
+    "description": "Прибирає посилання",
+    "requiresProperty": true,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_click_area",
+    "label": "Змінити click area",
+    "aliases": [
+      "click area",
+      "зона кліку"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює активну область кліку",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_hover_style",
+    "label": "Змінити hover стиль",
+    "aliases": [
+      "hover стиль",
+      "наведення стиль",
+      "hover style"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює hover-стилі",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_hover_scale",
+    "label": "Змінити hover scale",
+    "aliases": [
+      "hover scale",
+      "масштаб при наведенні"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює масштаб при наведенні",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_hover_opacity",
+    "label": "Змінити hover opacity",
+    "aliases": [
+      "hover opacity",
+      "прозорість при наведенні"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює прозорість при наведенні",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_hover_offset",
+    "label": "Змінити hover offset",
+    "aliases": [
+      "hover offset",
+      "зсув при наведенні"
+    ],
+    "category": "interaction",
+    "mode": "set",
+    "description": "Змінює зсув при наведенні",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "add_menu_item",
+    "label": "Додати пункт меню",
+    "aliases": [
+      "додай пункт меню",
+      "add menu item"
+    ],
+    "category": "menu",
+    "mode": "create",
+    "description": "Створює пункт меню",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "delete_menu_item",
+    "label": "Видалити пункт меню",
+    "aliases": [
+      "видали пункт меню",
+      "remove menu item"
+    ],
+    "category": "menu",
+    "mode": "delete",
+    "description": "Видаляє пункт меню",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_menu_structure",
+    "label": "Змінити структуру меню",
+    "aliases": [
+      "зміни структуру меню",
+      "menu structure"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює вкладеність або структуру меню",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_submenu_mode",
+    "label": "Змінити режим підменю",
+    "aliases": [
+      "режим підменю",
+      "submenu mode"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює режим hover/click/hidden",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_submenu_view",
+    "label": "Змінити вид підменю",
+    "aliases": [
+      "mega menu",
+      "dropdown",
+      "submenu view"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює тип dropdown/mega",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_menu_item_text",
+    "label": "Змінити текст пункту меню",
+    "aliases": [
+      "текст пункту меню",
+      "menu item text"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює текст menu item",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_menu_item_icon",
+    "label": "Змінити іконку пункту меню",
+    "aliases": [
+      "іконка пункту меню",
+      "menu item icon"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює іконку menu item",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_menu_alignment",
+    "label": "Змінити вирівнювання меню",
+    "aliases": [
+      "вирівнювання меню",
+      "menu align"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює вирівнювання меню",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_menu_offset",
+    "label": "Змінити відступ меню",
+    "aliases": [
+      "відступ меню",
+      "menu offset"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює відступ menu/dropdown",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_mega_columns",
+    "label": "Змінити кількість колонок mega menu",
+    "aliases": [
+      "кількість колонок mega menu",
+      "mega columns"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює кількість колонок mega panel",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_mega_gap",
+    "label": "Змінити gap mega menu",
+    "aliases": [
+      "gap mega menu",
+      "відступи mega menu"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює відступ між колонками mega panel",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_mega_panel_background",
+    "label": "Змінити фон mega panel",
+    "aliases": [
+      "фон mega panel",
+      "mega panel background"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює фон mega panel",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_mega_panel_blur",
+    "label": "Змінити blur mega panel",
+    "aliases": [
+      "blur mega panel",
+      "розмиття mega panel"
+    ],
+    "category": "menu",
+    "mode": "set",
+    "description": "Змінює blur mega panel",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "apply_template",
+    "label": "Застосувати шаблон",
+    "aliases": [
+      "застосуй шаблон",
+      "apply template"
+    ],
+    "category": "shell",
+    "mode": "set",
+    "description": "Застосовує шаблон до header/footer",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "clear_template",
+    "label": "Очистити шаблон",
+    "aliases": [
+      "очисти шаблон",
+      "clear template"
+    ],
+    "category": "shell",
+    "mode": "reset",
+    "description": "Скидає шаблон header/footer",
+    "requiresProperty": false,
+    "requiresValue": false,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_shell_position_mode",
+    "label": "Змінити режим позиції",
+    "aliases": [
+      "sticky",
+      "fixed",
+      "position mode"
+    ],
+    "category": "shell",
+    "mode": "set",
+    "description": "Змінює режим позиціонування header/footer",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_visibility",
+    "label": "Показати або приховати",
+    "aliases": [
+      "приховай",
+      "покажи",
+      "visibility",
+      "show",
+      "hide"
+    ],
+    "category": "shell",
+    "mode": "set",
+    "description": "Керує видимістю",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  },
+  {
+    "id": "set_global_page_mode",
+    "label": "Змінити режим global/page",
+    "aliases": [
+      "global",
+      "для сторінки",
+      "global page mode"
+    ],
+    "category": "shell",
+    "mode": "set",
+    "description": "Змінює режим глобальний/для сторінки",
+    "requiresProperty": true,
+    "requiresValue": true,
+    "canChain": true,
+    "defaultModifier": null,
+    "oppositeAction": null
+  }
+]

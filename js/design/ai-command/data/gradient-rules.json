@@ -1,0 +1,155 @@
+[
+  {
+    "id": "direction_horizontal",
+    "label": "Горизонтальний градієнт",
+    "aliases": [
+      "горизонтальний",
+      "зліва направо",
+      "left to right"
+    ],
+    "type": "direction",
+    "normalizedValue": "90deg",
+    "defaultPercent": null,
+    "description": "Градієнт іде зліва направо"
+  },
+  {
+    "id": "direction_vertical",
+    "label": "Вертикальний градієнт",
+    "aliases": [
+      "вертикальний",
+      "зверху вниз",
+      "top to bottom"
+    ],
+    "type": "direction",
+    "normalizedValue": "180deg",
+    "defaultPercent": null,
+    "description": "Градієнт іде зверху вниз"
+  },
+  {
+    "id": "direction_reverse_vertical",
+    "label": "Вертикальний знизу вгору",
+    "aliases": [
+      "знизу вгору",
+      "bottom to top"
+    ],
+    "type": "direction",
+    "normalizedValue": "0deg",
+    "defaultPercent": null,
+    "description": "Градієнт іде знизу вгору"
+  },
+  {
+    "id": "direction_reverse_horizontal",
+    "label": "Горизонтальний справа наліво",
+    "aliases": [
+      "справа наліво",
+      "right to left"
+    ],
+    "type": "direction",
+    "normalizedValue": "270deg",
+    "defaultPercent": null,
+    "description": "Градієнт іде справа наліво"
+  },
+  {
+    "id": "direction_diagonal",
+    "label": "Діагональний градієнт",
+    "aliases": [
+      "діагональний",
+      "diagonal"
+    ],
+    "type": "direction",
+    "normalizedValue": "135deg",
+    "defaultPercent": null,
+    "description": "Діагональний градієнт за замовчуванням"
+  },
+  {
+    "id": "position_top",
+    "label": "Верх",
+    "aliases": [
+      "зверху",
+      "з верху",
+      "top"
+    ],
+    "type": "position",
+    "normalizedValue": "0%",
+    "defaultPercent": 0,
+    "description": "Позиція зверху або на початку градієнта"
+  },
+  {
+    "id": "position_middle",
+    "label": "Середина",
+    "aliases": [
+      "по середині",
+      "посередині",
+      "в центрі",
+      "center",
+      "middle"
+    ],
+    "type": "position",
+    "normalizedValue": "50%",
+    "defaultPercent": 50,
+    "description": "Позиція посередині градієнта"
+  },
+  {
+    "id": "position_bottom",
+    "label": "Низ",
+    "aliases": [
+      "знизу",
+      "з низу",
+      "bottom"
+    ],
+    "type": "position",
+    "normalizedValue": "100%",
+    "defaultPercent": 100,
+    "description": "Позиція внизу або в кінці градієнта"
+  },
+  {
+    "id": "position_left",
+    "label": "Ліво",
+    "aliases": [
+      "зліва",
+      "left"
+    ],
+    "type": "position",
+    "normalizedValue": "0%",
+    "defaultPercent": 0,
+    "description": "Ліва позиція горизонтального градієнта"
+  },
+  {
+    "id": "position_right",
+    "label": "Право",
+    "aliases": [
+      "справа",
+      "right"
+    ],
+    "type": "position",
+    "normalizedValue": "100%",
+    "defaultPercent": 100,
+    "description": "Права позиція горизонтального градієнта"
+  },
+  {
+    "id": "more_color_default",
+    "label": "Додати більше кольору",
+    "aliases": [
+      "додай більше",
+      "більше кольору",
+      "посиль колір"
+    ],
+    "type": "color_share_adjustment",
+    "normalizedValue": "+10%",
+    "defaultPercent": 10,
+    "description": "Якщо користувач не вказав відсоток, додаємо 10% кольору"
+  },
+  {
+    "id": "less_color_default",
+    "label": "Зменшити частку кольору",
+    "aliases": [
+      "зменш",
+      "менше кольору",
+      "послаб колір"
+    ],
+    "type": "color_share_adjustment",
+    "normalizedValue": "-10%",
+    "defaultPercent": 10,
+    "description": "Якщо користувач не вказав відсоток, зменшуємо 10% кольору"
+  }
+]

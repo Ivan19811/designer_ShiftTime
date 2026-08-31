@@ -1,0 +1,93 @@
+{
+  "version": "00982",
+  "collectionId": "shifttime-marketplace-01",
+  "role": "homepage-background-slider",
+  "standardSize": "1920x768",
+  "useExistingBuilderBackgroundSlider": true,
+  "orderedSlides": [
+    {
+      "order": 1,
+      "category": "Сковорідки",
+      "fileName": "banner-01-skovoridky.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-01-skovoridky.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "right",
+      "brief": "Сковорода з диска борони на відкритому вогні; головний товар зліва, зона для HTML-тексту справа.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "7255a384bf0eca9082d3a6749d8925dd0dea9ff519f0239a3959c003d752d19b",
+      "sizeBytes": 229410
+    },
+    {
+      "order": 2,
+      "category": "Казани",
+      "fileName": "banner-02-kazany.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-02-kazany.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "right",
+      "brief": "Чавунний казан на декоративній печі біля озера; товар зліва, зона для HTML-тексту справа.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "0b260712b1746409db126394f22f363bd357d0a1c863cb1815efac3736965482",
+      "sizeBytes": 140660
+    },
+    {
+      "order": 3,
+      "category": "Мангали",
+      "fileName": "banner-03-mangaly.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-03-mangaly.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "right",
+      "brief": "Мангал із казаном, шашликом, жаром і легким димом на природі; товар зліва, зона для HTML-тексту справа.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "de43074040697e2ffc901c5ac5db95bdb91eeb6b05b20429e651d85d8bd227da",
+      "sizeBytes": 455400
+    },
+    {
+      "order": 4,
+      "category": "Шампура",
+      "fileName": "banner-04-shampury.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-04-shampury.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "right",
+      "brief": "Мангал із набором шампурів з дерев’яними ручками на сонячній галявині; товар зліва, зона для HTML-тексту справа.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "96ec98ceafa07c183712e0fc3e1c41536665ee99c2be06c62f08bcbbb5025d09",
+      "sizeBytes": 285552
+    },
+    {
+      "order": 5,
+      "category": "Наливатори",
+      "fileName": "banner-05-nalyvatory.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-05-nalyvatory.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "left",
+      "brief": "Подарунковий наливатор із мініатюрним комбайном та чарками на природі; товар справа, зона для HTML-тексту зліва.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "84db7d5b2a101c5b05f898213564c966c5762cc94dc2c2e39a5bd71895f1074f",
+      "sizeBytes": 319958
+    },
+    {
+      "order": 6,
+      "category": "Аксесуари",
+      "fileName": "banner-06-aksesuary.webp",
+      "path": "assets/collections/shifttime-marketplace-01/banner-slider/banner-06-aksesuary.webp",
+      "width": 1920,
+      "height": 768,
+      "textZone": "left",
+      "brief": "Чавунна решітка, чохол та аксесуари для гриля на природному фоні; товар справа, зона для HTML-тексту зліва.",
+      "role": "homepage-background-slider",
+      "status": "approved-for-home-banner",
+      "sha256": "a425ed6d4bd675ad42b01ca55017675781cbbd17d061c9c9147f687d7ae3e035",
+      "sizeBytes": 348690
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "root": [
+    {
+      "id": "pages",
+      "title": "Сторінки",
+      "type": "folder",
+      "children": [
+        {
+          "id": "pages/home",
+          "title": "Home",
+          "type": "folder",
+          "children": [
+            {
+              "id": "pages/home/a1",
+              "title": "Стаття 1 (Home)",
+              "type": "article",
+              "file": "library/articles/pages/home/a1.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "Товари",
+      "type": "folder",
+      "children": [
+        {
+          "id": "products/picnic",
+          "title": "Категорія: Пікнік",
+          "type": "folder",
+          "children": [
+            {
+              "id": "products/picnic/skillet-description",
+              "title": "Опис сковорідки",
+              "type": "article",
+              "file": "library/articles/products/picnic/skillet-description.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

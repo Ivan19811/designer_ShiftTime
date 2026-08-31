@@ -1,0 +1,143 @@
+/* Preview Orion (integrated) — scoped */
+
+.preview-orion{
+  position:absolute;
+  inset:0;
+  z-index:2; /* above Three canvas (z=1) */
+  /* IMPORTANT:
+     We need corner handles to be draggable.
+     If the root is pointer-events:none, children won't receive events.
+  */
+  pointer-events:auto;
+}
+
+.preview-orion__viewport{ position:absolute; inset:0; overflow:hidden; }
+.preview-orion__overlay{ position:absolute; inset:0; }
+
+.preview-orion__gridSvg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:auto; }
+
+/* Objects must receive pointer events for dragging */
+.preview-orion__objects{ position:absolute; inset:0; pointer-events:auto; }
+
+.preview-orion__textObj{
+  position:absolute;
+  left:0; top:0;
+  transform-origin:center center;
+  pointer-events:auto;
+  cursor: move;
+  padding:10px 14px;
+  border-radius:12px;
+  background: rgba(0,0,0,0.35);
+  border:1px solid rgba(255,255,255,0.16);
+  color:#fff;
+  font-weight:700;
+  letter-spacing:0.2px;
+  backdrop-filter: blur(6px);
+  user-select:none;
+  touch-action:none;
+
+  z-index: 20;
+}
+
+.preview-orion__textObj:active{ cursor: grabbing; }
+
+
+.preview-orion__handle{
+  position:absolute;
+  width:14px; height:14px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.95);
+  transform: translate(-50%, -50%);
+  z-index:10;
+  pointer-events:auto;
+  cursor:grab;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.preview-orion__handle:active{ cursor:grabbing; }
+.preview-orion__handle--active{
+  outline:3px solid rgba(120,180,255,0.9);
+  outline-offset:2px;
+}
+
+/* Edge handles (dragging the grid edges) */
+.preview-orion__edgeHandle{
+  position:absolute;
+  width:34px;
+  height:10px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(0,0,0,0.25);
+  z-index:9;
+  pointer-events:auto;
+  cursor:grab;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+.preview-orion__edgeHandle:active{ cursor:grabbing; }
+
+.preview-orion__gridHidden .preview-orion__gridSvg,
+.preview-orion__gridHidden .preview-orion__handle,
+.preview-orion__gridHidden .preview-orion__edgeHandle{
+  display:none !important;
+}
+
+
+/* Text wrapper + resize handles */
+.preview-orion__textWrap{
+  position:absolute;
+  left:0; top:0;
+  transform-origin:center center;
+  pointer-events:auto;
+  user-select:none;
+  touch-action:none;
+}
+
+.preview-orion__textResizeHandle{
+  position:absolute;
+  opacity: 0;            /* invisible */
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  pointer-events:auto;   /* still clickable */
+}
+
+.preview-orion__textResizeHandle[data-dir="n"]{ left:50%; top:-8px; transform:translate(-50%,-50%); cursor: ns-resize; }
+.preview-orion__textResizeHandle[data-dir="s"]{ left:50%; bottom:-8px; transform:translate(-50%,50%); cursor: ns-resize; }
+.preview-orion__textResizeHandle[data-dir="e"]{ right:-8px; top:50%; transform:translate(50%,-50%); cursor: ew-resize; }
+.preview-orion__textResizeHandle[data-dir="w"]{ left:-8px; top:50%; transform:translate(-50%,-50%); cursor: ew-resize; }
+
+.preview-orion__textResizeHandle[data-dir="ne"]{ right:-8px; top:-8px; transform:translate(50%,-50%); cursor: nesw-resize; }
+.preview-orion__textResizeHandle[data-dir="nw"]{ left:-8px; top:-8px; transform:translate(-50%,-50%); cursor: nwse-resize; }
+.preview-orion__textResizeHandle[data-dir="se"]{ right:-8px; bottom:-8px; transform:translate(50%,50%); cursor: nwse-resize; }
+.preview-orion__textResizeHandle[data-dir="sw"]{ left:-8px; bottom:-8px; transform:translate(-50%,50%); cursor: nesw-resize; }
+
+/* Invisible resize hit-zones (corners + sides) */
+.preview-orion__textResizeHandle[data-dir="n"],
+.preview-orion__textResizeHandle[data-dir="s"]{
+  left: 0; right: 0;
+  height: 10px;
+}
+.preview-orion__textResizeHandle[data-dir="n"]{ top: -6px; cursor: ns-resize; }
+.preview-orion__textResizeHandle[data-dir="s"]{ bottom: -6px; cursor: ns-resize; }
+
+.preview-orion__textResizeHandle[data-dir="e"],
+.preview-orion__textResizeHandle[data-dir="w"]{
+  top: 0; bottom: 0;
+  width: 10px;
+}
+.preview-orion__textResizeHandle[data-dir="e"]{ right: -6px; cursor: ew-resize; }
+.preview-orion__textResizeHandle[data-dir="w"]{ left: -6px; cursor: ew-resize; }
+
+.preview-orion__textResizeHandle[data-dir="ne"],
+.preview-orion__textResizeHandle[data-dir="nw"],
+.preview-orion__textResizeHandle[data-dir="se"],
+.preview-orion__textResizeHandle[data-dir="sw"]{
+  width: 14px; height: 14px;
+}
+.preview-orion__textResizeHandle[data-dir="ne"]{ right: -7px; top: -7px; cursor: nesw-resize; }
+.preview-orion__textResizeHandle[data-dir="nw"]{ left: -7px; top: -7px; cursor: nwse-resize; }
+.preview-orion__textResizeHandle[data-dir="se"]{ right: -7px; bottom: -7px; cursor: nwse-resize; }
+.preview-orion__textResizeHandle[data-dir="sw"]{ left: -7px; bottom: -7px; cursor: nesw-resize; }
+
+/* Drag cursor when hovering text */
+.preview-orion__textWrap{ cursor: default; }
+.preview-orion__textObj{ cursor: move; }

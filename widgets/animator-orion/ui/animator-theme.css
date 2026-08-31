@@ -1,0 +1,58 @@
+/* ui/animator-theme.css
+   Theme bridge for ShiftTime Builder.
+
+   Integrated mode: if the host app defines --st-* tokens, Animator will inherit them.
+   Standalone mode: we provide the same defaults as Builder (dark).
+*/
+
+:root {
+  --st-ink-0: #020617;   /* body bg */
+  --st-ink-1: #0b1220;   /* panels */
+  --st-ink-2: #0f172a;   /* deeper panels */
+  --st-ink-3: #121a2f;   /* hover */
+  --st-ink-4: #17233d;   /* active */
+
+  /* TEXT */
+  --st-text-main: #e5e7eb;
+  --st-text-soft: #b6c2d1;
+  --st-text-mute: #8a98ac;
+
+  /* ACCENT (cyan/blue glow like screenshot) */
+  --st-accent: #38bdf8;
+  --st-accent-2: #1d4ed8;
+  --st-accent-soft: rgba(56,189,248,0.14);
+  --st-accent-line: rgba(56,189,248,0.65);
+
+  /* BORDERS */
+  --st-border: 1px solid rgba(148,163,184,0.35);
+  --st-border-strong: 1px solid rgba(148,163,184,0.55);
+
+  /* RADIUS */
+  --st-radius-sm: 10px;
+  --st-radius-md: 14px;
+  --st-radius-lg: 18px;
+  --st-radius-pill: 999px;
+
+  /* SHADOWS / GLOW */
+  --st-shadow-soft: 0 8px 24px rgba(2,6,23,0.8);
+  --st-glow-corner:
+    radial-gradient(circle at 0 0, rgba(56,189,248,0.18), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(56,189,248,0.12), transparent 55%);
+
+  /* Animator internal palette mapping */
+  --bg: var(--st-ink-0, #020617);
+  --panel: var(--st-ink-1, #0b1220);
+  --panel2: var(--st-ink-2, #0f172a);
+  --text: var(--st-text-main, #e5e7eb);
+  --muted: var(--st-text-mute, #8a98ac);
+  --line: rgba(148,163,184,0.25);
+  --chip: rgba(255,255,255,.06);
+  --chip2: rgba(255,255,255,.10);
+  --accent: var(--st-accent, #38bdf8);
+  --radius-sm: var(--st-radius-sm, 10px);
+  --radius-md: var(--st-radius-md, 14px);
+  --radius-lg: var(--st-radius-lg, 18px);
+  --shadow-soft: var(--st-shadow-soft, 0 8px 24px rgba(2,6,23,0.8));
+  --border: var(--st-border, 1px solid rgba(148,163,184,0.35));
+  --border-strong: var(--st-border-strong, 1px solid rgba(148,163,184,0.55));
+}

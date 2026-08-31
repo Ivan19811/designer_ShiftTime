@@ -1,0 +1,248 @@
+/* 00964 · School 01 footer authored responsive + CTA collision parity layer.
+   This CSS belongs to the template itself. It only scopes the School-01 footer
+   and is shared by gallery preview + applied footer DOM. */
+/* 00963 · Typography safety. The editor's legacy footer rules used max-content +
+   overflow/paint containment on headings. On tight uppercase labels this rounded
+   the glyph box itself and visibly shaved the first/last letter. Authored footer
+   text remains square/visible; only real cards/buttons keep their own radii. */
+[data-hf-template-id="school-01-footer"].st-block--heading,
+[data-hf-template-id="school-01-footer"] .st-block--heading {
+  border-radius: 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+  isolation: auto !important;
+}
+[data-hf-template-id="school-01-footer"].st-block--heading > .st-text-edit,
+[data-hf-template-id="school-01-footer"] .st-block--heading > .st-text-edit {
+  border-radius: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+[data-hf-template-id="school-01-footer"] .school01-footer-nav-column > .st-block--heading {
+  padding: 2px 3px 3px !important;
+}
+/* Long authored headings must be allowed to wrap on narrow layouts. */
+[data-hf-template-id="school-01-footer"] .school01-footer-cta-copy > .st-block--heading,
+[data-hf-template-id="school-01-footer"] .school01-footer-admission > .st-block--heading {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+[data-hf-template-id="school-01-footer"] .school01-footer-cta-copy > .st-block--heading > .st-text-edit,
+[data-hf-template-id="school-01-footer"] .school01-footer-admission > .st-block--heading > .st-text-edit {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+/* Transparent structural blocks are not visual cards. Prevent editor default radii
+   from appearing on identity/navigation/legal wrappers. */
+[data-hf-template-id="school-01-footer"].school01-footer-nav-column,
+[data-hf-template-id="school-01-footer"] .school01-footer-nav-column,
+[data-hf-template-id="school-01-footer"] .school01-footer-identity,
+[data-hf-template-id="school-01-footer"] .school01-footer-contacts,
+[data-hf-template-id="school-01-footer"] .school01-footer-socials,
+[data-hf-template-id="school-01-footer"] .school01-footer-cta-copy,
+[data-hf-template-id="school-01-footer"] .school01-footer-cta-actions,
+[data-hf-template-id="school-01-footer"] .school01-footer-copyright,
+[data-hf-template-id="school-01-footer"] .school01-footer-legal,
+[data-hf-template-id="school-01-footer"] .school01-footer-backtop,
+[data-hf-template-id="school-01-footer"] .school01-footer-menu {
+  border-radius: 0 !important;
+}
+
+
+
+/* 00964 · The Builder can resize the site canvas while the browser window stays wide.
+   Media queries therefore do not always represent the actual rendered site width.
+   Make this footer its own query container and stack the CTA before its copy can
+   collide with the button group. */
+[data-hf-template-id="school-01-footer"].school01-footer-section {
+  container-type: inline-size;
+  container-name: school01-footer;
+}
+
+@container school01-footer (max-width: 1220px) {
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 20px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+  }
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-link,
+[data-hf-template-id="school-01-footer"] .school01-footer-menu__link,
+[data-hf-template-id="school-01-footer"] .school01-footer-contact__link,
+[data-hf-template-id="school-01-footer"] .school01-footer-icon-action__button,
+[data-hf-template-id="school-01-footer"] .school01-footer-button {
+  transition: transform .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-link:hover,
+[data-hf-template-id="school-01-footer"] .school01-footer-menu__link:hover,
+[data-hf-template-id="school-01-footer"] .school01-footer-contact__link:hover {
+  color: #fde68a !important;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-link:focus-visible,
+[data-hf-template-id="school-01-footer"] .school01-footer-menu__link:focus-visible,
+[data-hf-template-id="school-01-footer"] .school01-footer-contact__link:focus-visible,
+[data-hf-template-id="school-01-footer"] .school01-footer-icon-action__button:focus-visible {
+  outline: 3px solid #fcd34d !important;
+  outline-offset: 3px !important;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-icon-action__button:hover {
+  transform: translateY(-2px);
+  color: #102a43 !important;
+  background: #fcd34d !important;
+  border-color: #fcd34d !important;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(0,0,0,.26) !important;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-admission {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-link-block--accent .school01-footer-link {
+  color: #fde68a !important;
+  font-weight: 800 !important;
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-link-block--bottom {
+  width: auto !important;
+  min-height: 30px !important;
+}
+[data-hf-template-id="school-01-footer"] .school01-footer-link-block--bottom .school01-footer-link {
+  min-height: 30px !important;
+  color: #aebdcb !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+[data-hf-template-id="school-01-footer"] .school01-footer-link-block--bottom .school01-footer-link:hover {
+  color: #fde68a !important;
+}
+
+@media (max-width: 1280px) {
+  [data-hf-template-id="school-01-footer"].school01-footer-section {
+    padding-top: 34px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row {
+    grid-template-columns: minmax(260px,1.2fr) repeat(2,minmax(155px,.8fr)) minmax(230px,1fr) !important;
+    gap: 28px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row > .school01-footer-nav-column:nth-of-type(4) {
+    grid-column: 2 / 4 !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-admission {
+    grid-column: 4 !important;
+    grid-row: 1 / span 2 !important;
+  }
+}
+
+@media (max-width: 960px) {
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-row {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 30px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 30px 36px !important;
+    padding-top: 46px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-identity {
+    grid-column: 1 / -1 !important;
+    max-width: 620px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row > .school01-footer-nav-column:nth-of-type(4) {
+    grid-column: auto !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-admission {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    max-width: none !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-bottom-row {
+    grid-template-columns: 1fr auto !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-legal {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    justify-content: flex-start !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-backtop {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-hf-template-id="school-01-footer"].school01-footer-section {
+    padding-top: 24px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-row,
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row,
+  [data-hf-template-id="school-01-footer"] .school01-footer-bottom-row {
+    width: calc(100% - 28px) !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-row {
+    padding: 24px 20px !important;
+    border-radius: 22px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-title {
+    font-size: 25px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-cta-actions > .school01-footer-button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-main-row {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+    padding: 38px 0 34px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-identity,
+  [data-hf-template-id="school-01-footer"] .school01-footer-admission,
+  [data-hf-template-id="school-01-footer"] .school01-footer-nav-column {
+    grid-column: auto !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-logo__subtitle {
+    white-space: normal !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-bottom-row {
+    grid-template-columns: 1fr auto !important;
+    gap: 14px !important;
+    padding: 18px 0 24px !important;
+  }
+  [data-hf-template-id="school-01-footer"] .school01-footer-legal {
+    gap: 3px 12px !important;
+  }
+}
+
+[data-hf-template-id="school-01-footer"] .school01-footer-menu__link--compact:hover { color:#fde68a !important; }

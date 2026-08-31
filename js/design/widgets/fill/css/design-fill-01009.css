@@ -1,0 +1,499 @@
+/* js/design/widgets/fill/css/design-fill.css */
+/* Віджет "Заливка" для панелі "Дизайн" */
+
+.design-fill-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-fill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* -------- Custom size sliders (image background) -------- */
+/* У деяких темах повзунок виглядав як "радіо" через нульову ширину треку.
+   Тут примусово даємо ширину і контраст треку саме для Заливки. */
+[data-fill-customsize] .design-slider,
+[data-fill-custompos] .design-slider {
+  min-width: 140px;
+  height: 6px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.14);
+}
+
+[data-fill-customsize] .design-slider::-webkit-slider-thumb,
+[data-fill-custompos] .design-slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.design-fill-row .design-input {
+  flex: 1 1 auto;
+}
+
+.design-fill-label {
+  min-width: 82px;
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.design-fill-extra-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.design-fill-extra-label {
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.design-fill-apply-row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-target {
+  font-size: 11px;
+  color: #8b9ad8;
+}
+
+/* Кнопка "Застосувати" в стилі пігулки */
+.design-button {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #0b1220;
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.8), 0 8px 18px rgba(0,0,0,0.45);
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.design-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.55);
+}
+
+.design-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+
+/* Значення повзунка (як у віджеті 'Фон сторінки') */
+.design-range-val{
+  font-size:11px;
+  color:#c4d3ff;
+  min-width:44px;
+  text-align:right;
+}
+
+
+/* ============================================================
+   01001 · SINGLE-AUTHORITY REAL-TIME VISUAL LAYERS
+
+   Non-surface BGFX:
+     ::before = explicit Fill
+     ::after  = Filter
+
+   Block-surface BGFX:
+     ::before = authored/template Surface
+     ::after  = explicit Fill
+     direct .st-fill-filter-layer = Filter
+
+   Continuous authorities:
+     background opacity  -> --st-bgfx-bg-opacity
+     block transparency  -> --st-block-surface-alpha
+     block blur          -> --st-block-surface-blur
+     element opacity     -> --st-element-fx-opacity
+     element blur        -> --st-element-fx-blur
+     background grayscale-> --st-bgfx-gray
+     filter opacity      -> --st-bgfx-filter-opacity
+
+   No opacity is baked into filter rgba colors in 00999.
+   ============================================================ */
+
+.st-bgfx::before{
+  /* 01001: --st-bgfx-bg is the only visual source for explicit Fill.
+     Do not override a solid-color shorthand with legacy transparent bg-color. */
+  background-repeat:var(--st-bgfx-bg-repeat,no-repeat);
+}
+
+/* Plain BGFX + optional whole-element visual FX. */
+.st-element-visualfx.st-bgfx:not(.st-block-surfacefx)::before{
+  opacity:calc(var(--st-bgfx-bg-opacity,1) * var(--st-element-fx-opacity,1));
+  filter:grayscale(var(--st-bgfx-gray,0)) blur(var(--st-element-fx-blur,0px));
+}
+.st-element-visualfx.st-bgfx:not(.st-block-surfacefx)::after{
+  opacity:calc(var(--st-bgfx-filter-opacity,0) * var(--st-element-fx-opacity,1));
+  filter:blur(var(--st-element-fx-blur,0px));
+}
+
+/* True block surface. Surface opacity is completely independent from Fill opacity. */
+.st-block-surfacefx.st-bgfx::before{
+  background:var(--st-block-surface-bg,none)!important;
+  background-color:var(--st-block-surface-bg-color,transparent)!important;
+  background-position:var(--st-block-surface-bg-pos,0% 0%)!important;
+  background-size:var(--st-block-surface-bg-size,auto)!important;
+  background-repeat:var(--st-block-surface-bg-repeat,repeat)!important;
+  opacity:calc(var(--st-block-surface-alpha,1) * var(--st-element-fx-opacity,1))!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+  z-index:0!important;
+}
+
+/* Fill only. Filter no longer shares this pseudo-element. */
+.st-block-surfacefx.st-bgfx::after{
+  /* One truth for Fill source: color / gradient / image all live in --st-bgfx-bg. */
+  background:var(--st-bgfx-bg,none)!important;
+  background-position:var(--st-bgfx-bg-pos,center center)!important;
+  background-size:var(--st-bgfx-bg-size,cover)!important;
+  background-repeat:var(--st-bgfx-bg-repeat,no-repeat)!important;
+  opacity:calc(var(--st-bgfx-bg-opacity,1) * var(--st-element-fx-opacity,1))!important;
+  filter:grayscale(var(--st-bgfx-gray,0)) blur(var(--st-element-fx-blur,0px))!important;
+  z-index:0!important;
+}
+
+/* Third physical layer: Filter only. */
+.st-block-surfacefx.st-bgfx > .st-fill-filter-layer[data-st-fill-visual-layer="filter"]{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  margin:0!important;
+  padding:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+  background:var(--st-bgfx-filter,none)!important;
+  background-color:transparent!important;
+  background-position:center center!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+  opacity:calc(var(--st-bgfx-filter-opacity,0) * var(--st-element-fx-opacity,1))!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+  pointer-events:none!important;
+  z-index:1!important;
+}
+
+/* Keep actual content above all three visual layers. */
+.st-block-surfacefx.st-bgfx > :not(.st-fill-filter-layer):not(.st-resize):not(.st-resize-handle):not([data-resize-handle]):not(.hb-resizer):not(.fb-resizer):not([data-st-selection-overlay]){
+  z-index:2!important;
+}
+
+/* Element FX affects content, not the outer border. */
+.st-element-visualfx > :not(.st-fill-filter-layer):not(.st-resize):not(.st-resize-handle):not([data-resize-handle]):not(.hb-resizer):not(.fb-resizer):not([data-st-selection-overlay]){
+  opacity:var(--st-element-fx-opacity,1)!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+}
+
+/* Backdrop blur consumes one canonical variable. Inline !important is also
+   installed by JS when necessary to defeat authored template !important rules. */
+.st-block-surfacefx{
+  -webkit-backdrop-filter:blur(var(--st-block-surface-blur,0px))!important;
+  backdrop-filter:blur(var(--st-block-surface-blur,0px))!important;
+}
+
+.design-fill-element-fx-group,
+.design-fill-block-surface-fx-group{
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.design-fill-block-surface-fx-note{
+  margin-top:-2px;
+  padding:6px 8px;
+  border-radius:8px;
+  background:rgba(255,255,255,.035);
+  line-height:1.35;
+}
+
+/* ============================================================
+   01002 · NATIVE COLOR PICKER COMPOSITOR HOT PATH
+   Color picker live preview is RAF-coalesced in JS and the visual
+   layers are explicitly compositor-isolated so text/buttons are not
+   repainted together with Fill/Filter on every palette movement.
+   ============================================================ */
+@property --st-bgfx-filter-color {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #000000;
+}
+@property --st-bgfx-filter-c1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #000000;
+}
+@property --st-bgfx-filter-c2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #000000;
+}
+@property --st-bgfx-filter-c3 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #000000;
+}
+
+.st-block-surfacefx.st-bgfx::before,
+.st-block-surfacefx.st-bgfx::after{
+  will-change:background,opacity,filter;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+
+.st-block-surfacefx.st-bgfx > .st-fill-filter-layer[data-st-fill-visual-layer="filter"]{
+  contain:strict!important;
+  will-change:background,opacity,filter;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+
+
+/* ============================================================
+   01003 · NATIVE SOLID COLOR PICKER — COMPOSITOR-ONLY PREVIEW
+   During native palette drag the real Fill / Filter source is frozen.
+   A temporary isolated RGB stack previews the chosen color using only
+   layer opacity changes. Canonical background/filter color is written
+   once when the picker finishes.
+   ============================================================ */
+.st-fill-live-rgb-layer{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  isolation:isolate!important;
+  contain:strict!important;
+  transform:translateZ(0)!important;
+  backface-visibility:hidden!important;
+}
+.st-fill-live-rgb-layer > [data-rgb]{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+  pointer-events:none!important;
+  will-change:opacity!important;
+  transform:translateZ(0)!important;
+  backface-visibility:hidden!important;
+}
+.st-fill-live-rgb-layer > [data-rgb="base"]{background:#000!important;opacity:1!important;}
+.st-fill-live-rgb-layer > [data-rgb="r"]{background:#f00!important;mix-blend-mode:screen!important;}
+.st-fill-live-rgb-layer > [data-rgb="g"]{background:#0f0!important;mix-blend-mode:screen!important;}
+.st-fill-live-rgb-layer > [data-rgb="b"]{background:#00f!important;mix-blend-mode:screen!important;}
+
+/* Freeze the real paint-heavy source only for the duration of the native picker. */
+.st-bgfx.st-fill-live-fill-color-01003:not(.st-block-surfacefx)::before{opacity:0!important;}
+.st-block-surfacefx.st-bgfx.st-fill-live-fill-color-01003::after{opacity:0!important;}
+.st-bgfx.st-fill-live-filter-color-01003:not(.st-block-surfacefx)::after{opacity:0!important;}
+.st-block-surfacefx.st-bgfx.st-fill-live-filter-color-01003 > .st-fill-filter-layer[data-st-fill-visual-layer="filter"]{opacity:0!important;}
+
+/* Temporary preview layers are visual-only, never editor content. */
+.st-block-surfacefx.st-bgfx > .st-fill-live-rgb-layer,
+.st-element-visualfx > .st-fill-live-rgb-layer{
+  position:absolute!important;
+}
+
+/* ============================================================
+   01006 · CUSTOM IN-APP COLOR PICKER · ACTIVE-SELECTION ISOLATION
+   Native Chrome/Windows <input type="color"> is not used by Fill.
+   The picker thumb is compositor-driven at display RAF speed.
+   Canvas color preview is intentionally capped to ~30fps while dragging.
+   ============================================================ */
+.st-color-trigger-01005{
+  width:50px;
+  height:27px;
+  min-width:32px;
+  flex:0 0 auto;
+  padding:3px!important;
+  border:1px solid rgba(148,163,184,.36)!important;
+  border-radius:7px!important;
+  background:rgba(15,23,42,.92)!important;
+  box-sizing:border-box!important;
+  cursor:pointer!important;
+  position:relative!important;
+  overflow:hidden!important;
+  vertical-align:middle;
+}
+.st-color-trigger-01005::before{
+  content:"";
+  position:absolute;
+  inset:3px;
+  border-radius:4px;
+  background:var(--st-color-trigger-value-01005,#000000);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+  pointer-events:none;
+}
+.st-color-trigger-01005:hover{border-color:rgba(96,165,250,.8)!important;}
+.st-color-trigger-01005:focus-visible{outline:2px solid rgba(56,189,248,.95);outline-offset:2px;}
+
+.st-fill-color-picker-01005{
+  position:fixed;
+  left:0;
+  top:0;
+  width:292px;
+  min-height:278px;
+  z-index:2147483100;
+  padding:10px;
+  box-sizing:border-box;
+  border:1px solid rgba(148,163,184,.34);
+  border-radius:14px;
+  background:rgba(8,15,29,.985);
+  box-shadow:0 24px 70px rgba(0,0,0,.56),0 0 0 1px rgba(255,255,255,.035) inset;
+  color:#e5eefc;
+  isolation:isolate;
+  contain:layout paint style;
+  transform:translate3d(-9999px,-9999px,0);
+  will-change:transform;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+}
+.st-fill-color-picker-01005[hidden]{display:none!important;}
+.st-fill-color-picker__head-01005{
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+  font-size:12px;
+}
+.st-fill-color-picker__head-01005 strong{font-size:12px;letter-spacing:.02em;}
+.st-fill-color-picker__head-01005 button{
+  width:26px;height:26px;border:0;border-radius:7px;cursor:pointer;
+  background:rgba(255,255,255,.07);color:#dbeafe;font-size:18px;line-height:1;
+}
+.st-fill-color-picker__sv-01005{
+  --st-picker-hue-01005:hsl(0 100% 50%);
+  position:relative;
+  width:100%;
+  height:158px;
+  overflow:hidden;
+  border-radius:9px;
+  cursor:crosshair;
+  background:
+    linear-gradient(to top,#000 0%,rgba(0,0,0,0) 100%),
+    linear-gradient(to right,#fff 0%,rgba(255,255,255,0) 100%),
+    var(--st-picker-hue-01005);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  contain:strict;
+  touch-action:none;
+}
+.st-fill-color-picker__sv-thumb-01005{
+  position:absolute;
+  left:0;top:0;
+  width:14px;height:14px;
+  margin:-7px 0 0 -7px;
+  border:2px solid #fff;
+  border-radius:50%;
+  box-sizing:border-box;
+  box-shadow:0 1px 5px rgba(0,0,0,.85),0 0 0 1px rgba(0,0,0,.48);
+  pointer-events:none;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+}
+.st-fill-color-picker__hue-01005{
+  position:relative;
+  height:18px;
+  margin-top:10px;
+  border-radius:999px;
+  cursor:ew-resize;
+  background:linear-gradient(to right,#f00 0%,#ff0 16.66%,#0f0 33.33%,#0ff 50%,#00f 66.66%,#f0f 83.33%,#f00 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  contain:strict;
+  touch-action:none;
+}
+.st-fill-color-picker__hue-thumb-01005{
+  position:absolute;
+  left:0;top:50%;
+  width:8px;height:24px;
+  margin:-12px 0 0 -4px;
+  border:2px solid #fff;
+  border-radius:4px;
+  box-sizing:border-box;
+  box-shadow:0 1px 5px rgba(0,0,0,.8);
+  pointer-events:none;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+}
+.st-fill-color-picker__bottom-01005{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto;
+  align-items:center;
+  gap:7px;
+  margin-top:10px;
+}
+.st-fill-color-picker__preview-01005{
+  width:30px;height:30px;border-radius:7px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 0 0 1px rgba(0,0,0,.4);
+}
+.st-fill-color-picker__bottom-01005 input{
+  width:100%;height:30px;box-sizing:border-box;
+  border:1px solid rgba(148,163,184,.28);border-radius:7px;
+  background:#0b1425;color:#e5eefc;padding:0 8px;font:600 12px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
+  outline:none;
+}
+.st-fill-color-picker__bottom-01005 input:focus{border-color:rgba(56,189,248,.85);}
+.st-fill-color-picker__bottom-01005 button{
+  height:30px;padding:0 11px;border:0;border-radius:7px;cursor:pointer;
+  background:#0ea5e9;color:#03111d;font-size:12px;font-weight:800;
+}
+.st-fill-color-picker__hint-01005{
+  margin-top:7px;
+  color:#8392ad;
+  font-size:10px;
+  text-align:right;
+}
+
+
+/* 01007 · ACTIVE NODE FULL STATE HYDRATION · UI mirrors SiteFrameStore; no visual overrides here. */
+
+/* 01009 · Explicit Fill owns the visible surface.
+   Template styles may use background:...!important. Once Fill creates its own layer,
+   suppress that authored base background so the first color movement does not stack
+   a second gradient over the original one. The copied Fill lives in ::before/::after. */
+.site-root .st-bgfx[data-st-fill-custom-layer="1"]{
+  background:none!important;
+  background-image:none!important;
+  background-color:transparent!important;
+}

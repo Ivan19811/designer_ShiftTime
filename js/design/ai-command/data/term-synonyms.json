@@ -1,0 +1,1428 @@
+{
+  "meta": {
+    "version": 1,
+    "locale": [
+      "uk",
+      "ru",
+      "en"
+    ],
+    "description": "Unified synonym dictionary for AI command parsing",
+    "status": "starter_pack"
+  },
+  "actions": [
+    {
+      "id": "create",
+      "label": "Створити",
+      "aliases": [
+        "створи",
+        "створити",
+        "додай",
+        "встав",
+        "зроби нову",
+        "make",
+        "create",
+        "add"
+      ],
+      "normalizedTo": "create"
+    },
+    {
+      "id": "delete",
+      "label": "Видалити",
+      "aliases": [
+        "видали",
+        "прибери",
+        "стерти",
+        "очисти",
+        "remove",
+        "delete"
+      ],
+      "normalizedTo": "delete"
+    },
+    {
+      "id": "set_background",
+      "label": "Змінити фон",
+      "aliases": [
+        "зафарбуй",
+        "залий",
+        "зроби фон",
+        "зміни фон",
+        "постав фон",
+        "paint",
+        "fill background",
+        "покрась"
+      ],
+      "normalizedTo": "set_background"
+    },
+    {
+      "id": "set_text_color",
+      "label": "Змінити колір тексту",
+      "aliases": [
+        "зафарбуй текст",
+        "зроби текст",
+        "зміни колір тексту",
+        "text color",
+        "color text",
+        "сделай текст"
+      ],
+      "normalizedTo": "set_text_color"
+    },
+    {
+      "id": "set_gradient",
+      "label": "Поставити градієнт",
+      "aliases": [
+        "зроби градієнт",
+        "додай градієнт",
+        "gradient",
+        "gradient fill",
+        "градиент"
+      ],
+      "normalizedTo": "set_gradient"
+    },
+    {
+      "id": "set_icon",
+      "label": "Поставити іконку",
+      "aliases": [
+        "додай іконку",
+        "постав іконку",
+        "заміни іконку",
+        "set icon",
+        "icon",
+        "значок постав"
+      ],
+      "normalizedTo": "set_icon"
+    },
+    {
+      "id": "increase",
+      "label": "Збільшити",
+      "aliases": [
+        "збільш",
+        "додай більше",
+        "посиль",
+        "підніми",
+        "make bigger",
+        "increase",
+        "увеличь"
+      ],
+      "normalizedTo": "increase"
+    },
+    {
+      "id": "decrease",
+      "label": "Зменшити",
+      "aliases": [
+        "зменш",
+        "зроби менше",
+        "послаб",
+        "опусти",
+        "make smaller",
+        "decrease",
+        "уменьши"
+      ],
+      "normalizedTo": "decrease"
+    },
+    {
+      "id": "align",
+      "label": "Вирівняти",
+      "aliases": [
+        "вирівняй",
+        "вистав",
+        "відцентруй",
+        "розмісти",
+        "align",
+        "выравняй",
+        "притисни",
+        "прижми"
+      ],
+      "normalizedTo": "align"
+    },
+    {
+      "id": "set_border",
+      "label": "Змінити рамку",
+      "aliases": [
+        "додай рамку",
+        "зміни рамку",
+        "зроби бордер",
+        "border",
+        "outline",
+        "обводка"
+      ],
+      "normalizedTo": "set_border"
+    },
+    {
+      "id": "set_radius",
+      "label": "Змінити скруглення",
+      "aliases": [
+        "скругли",
+        "округли",
+        "зміни радіус",
+        "radius",
+        "rounded",
+        "скругление"
+      ],
+      "normalizedTo": "set_radius"
+    },
+    {
+      "id": "set_shadow",
+      "label": "Змінити тінь",
+      "aliases": [
+        "додай тінь",
+        "зроби тінь",
+        "shadow",
+        "glow",
+        "підсвіти",
+        "сделай тень"
+      ],
+      "normalizedTo": "set_shadow"
+    },
+    {
+      "id": "set_opacity",
+      "label": "Змінити прозорість",
+      "aliases": [
+        "add transparency",
+        "decrease transparency",
+        "increase transparency",
+        "less transparent",
+        "make more transparent",
+        "make transparent",
+        "more transparent",
+        "opacity",
+        "opaque",
+        "reduce transparency",
+        "semi-transparent",
+        "transparency",
+        "transparent",
+        "абсолютно прозорий",
+        "более прозрачный",
+        "більш прозорий",
+        "більш прозорим",
+        "добавь прозрачности",
+        "додай прозорості",
+        "додай прозорість",
+        "збільш прозорості",
+        "збільш прозорість",
+        "зменш прозорості",
+        "зменш прозорість",
+        "зміни прозорість",
+        "зроби більш прозорим",
+        "зроби менш прозорим",
+        "зроби напівпрозорим",
+        "зроби не таким прозорим",
+        "зроби непрозорим",
+        "зроби прозорим",
+        "зроби прозоріше",
+        "зроби прозорішим",
+        "менее прозрачный",
+        "менш прозорий",
+        "менш прозорим",
+        "напівпрозорий",
+        "напівпрозорим",
+        "не така прозора",
+        "не таким прозорим",
+        "повністю прозорий",
+        "повністю прозорим",
+        "полупрозрачный",
+        "посиль прозорість",
+        "прозоріше",
+        "прозорішим",
+        "прозорішою",
+        "прозрачнее",
+        "підніми прозорість",
+        "сделай менее прозрачным",
+        "сделай непрозрачным",
+        "сделай прозрачнее",
+        "сделай прозрачным",
+        "увеличь прозрачность",
+        "уменьши прозрачность"
+      ],
+      "normalizedTo": "set_opacity"
+    },
+    {
+      "id": "set_size",
+      "label": "Змінити розмір",
+      "aliases": [
+        "зміни розмір",
+        "збільш розмір",
+        "зменш розмір",
+        "resize",
+        "size",
+        "измени размер"
+      ],
+      "normalizedTo": "set_size"
+    },
+    {
+      "id": "set_spacing",
+      "label": "Змінити відступи",
+      "aliases": [
+        "зміни відступ",
+        "padding",
+        "margin",
+        "gap",
+        "додай відступ",
+        "измени отступ"
+      ],
+      "normalizedTo": "set_spacing"
+    },
+    {
+      "id": "apply",
+      "label": "Застосувати",
+      "aliases": [
+        "застосуй",
+        "приміни",
+        "assign",
+        "apply",
+        "применить"
+      ],
+      "normalizedTo": "apply"
+    },
+    {
+      "id": "reset",
+      "label": "Скинути",
+      "aliases": [
+        "скинь",
+        "очисти",
+        "поверни назад",
+        "reset",
+        "clear",
+        "сбрось"
+      ],
+      "normalizedTo": "reset"
+    },
+    {
+      "id": "set_rotation",
+      "label": "Повернути",
+      "aliases": [
+        "поверни",
+        "розверни",
+        "оберни",
+        "крути",
+        "крутань",
+        "перекрути",
+        "прокрути",
+        "завали",
+        "rotate"
+      ],
+      "normalizedTo": "set_rotation"
+    },
+    {
+      "id": "flip_horizontal",
+      "label": "Віддзеркалити по горизонталі",
+      "aliases": [
+        "віддзеркаль",
+        "дзеркально",
+        "відобрази",
+        "flip horizontal",
+        "mirror horizontal",
+        "фліпни"
+      ],
+      "normalizedTo": "flip_horizontal"
+    },
+    {
+      "id": "flip_vertical",
+      "label": "Віддзеркалити по вертикалі",
+      "aliases": [
+        "віддзеркаль",
+        "дзеркально",
+        "відобрази",
+        "flip vertical",
+        "mirror vertical",
+        "фліпни"
+      ],
+      "normalizedTo": "flip_vertical"
+    }
+  ],
+  "targets": [
+    {
+      "id": "site_canvas",
+      "label": "Сайт / сторінка",
+      "aliases": [
+        "сайт",
+        "сторінка",
+        "фон сторінки",
+        "canvas",
+        "page"
+      ],
+      "normalizedTo": "site_canvas"
+    },
+    {
+      "id": "site_header",
+      "label": "Шапка",
+      "aliases": [
+        "шапка",
+        "header",
+        "верх сайта"
+      ],
+      "normalizedTo": "site_header"
+    },
+    {
+      "id": "site_footer",
+      "label": "Футер",
+      "aliases": [
+        "футер",
+        "footer",
+        "підвал"
+      ],
+      "normalizedTo": "site_footer"
+    },
+    {
+      "id": "section",
+      "label": "Секція",
+      "aliases": [
+        "секція",
+        "розділ",
+        "section"
+      ],
+      "normalizedTo": "section"
+    },
+    {
+      "id": "container",
+      "label": "Контейнер",
+      "aliases": [
+        "контейнер",
+        "блок",
+        "обгортка",
+        "коробка",
+        "container"
+      ],
+      "normalizedTo": "container"
+    },
+    {
+      "id": "row",
+      "label": "Ряд",
+      "aliases": [
+        "ряд",
+        "рівень",
+        "row",
+        "line"
+      ],
+      "normalizedTo": "row"
+    },
+    {
+      "id": "button_block",
+      "label": "Кнопка",
+      "aliases": [
+        "кнопка",
+        "button",
+        "cta",
+        "батон",
+        "кнопочка"
+      ],
+      "normalizedTo": "button_block"
+    },
+    {
+      "id": "text_block",
+      "label": "Текст",
+      "aliases": [
+        "текст",
+        "напис",
+        "підпис",
+        "text",
+        "label",
+        "надпись"
+      ],
+      "normalizedTo": "text_block"
+    },
+    {
+      "id": "heading_block",
+      "label": "Заголовок",
+      "aliases": [
+        "заголовок",
+        "title",
+        "heading",
+        "h1",
+        "h2",
+        "h3"
+      ],
+      "normalizedTo": "heading_block"
+    },
+    {
+      "id": "icon_block",
+      "label": "Іконка",
+      "aliases": [
+        "іконка",
+        "значок",
+        "icon",
+        "symbol",
+        "иконка"
+      ],
+      "normalizedTo": "icon_block"
+    },
+    {
+      "id": "image_block",
+      "label": "Зображення",
+      "aliases": [
+        "картинка",
+        "зображення",
+        "image",
+        "png",
+        "фото",
+        "изображение"
+      ],
+      "normalizedTo": "image_block"
+    },
+    {
+      "id": "logo_block",
+      "label": "Логотип",
+      "aliases": [
+        "лого",
+        "логотип",
+        "logo"
+      ],
+      "normalizedTo": "logo_block"
+    },
+    {
+      "id": "menu_block",
+      "label": "Меню",
+      "aliases": [
+        "меню",
+        "навігація",
+        "nav",
+        "navigation"
+      ],
+      "normalizedTo": "menu_block"
+    },
+    {
+      "id": "menu_item",
+      "label": "Пункт меню",
+      "aliases": [
+        "пункт меню",
+        "item",
+        "menu item",
+        "пункт"
+      ],
+      "normalizedTo": "menu_item"
+    },
+    {
+      "id": "submenu",
+      "label": "Підменю",
+      "aliases": [
+        "підменю",
+        "submenu",
+        "dropdown"
+      ],
+      "normalizedTo": "submenu"
+    },
+    {
+      "id": "mega_panel",
+      "label": "Mega panel",
+      "aliases": [
+        "mega menu",
+        "mega panel",
+        "мегаменю",
+        "мега панель"
+      ],
+      "normalizedTo": "mega_panel"
+    },
+    {
+      "id": "phone_block",
+      "label": "Телефон",
+      "aliases": [
+        "телефон",
+        "номер",
+        "phone"
+      ],
+      "normalizedTo": "phone_block"
+    },
+    {
+      "id": "line_block",
+      "label": "Лінія",
+      "aliases": [
+        "лінія",
+        "divider",
+        "розділювач",
+        "line"
+      ],
+      "normalizedTo": "line_block"
+    },
+    {
+      "id": "heading_block",
+      "label": "Заголовки",
+      "aliases": [
+        "заголовки",
+        "headings",
+        "усі заголовки"
+      ],
+      "normalizedTo": "heading_block"
+    },
+    {
+      "id": "button_block",
+      "label": "Кнопки",
+      "aliases": [
+        "кнопки",
+        "усі кнопки",
+        "всі кнопки"
+      ],
+      "normalizedTo": "button_block"
+    }
+  ],
+  "properties": [
+    {
+      "id": "background",
+      "label": "Фон",
+      "aliases": [
+        "фон",
+        "background",
+        "заливка",
+        "задній колір"
+      ],
+      "normalizedTo": "background"
+    },
+    {
+      "id": "background_gradient",
+      "label": "Градієнт фону",
+      "aliases": [
+        "градієнт",
+        "gradient",
+        "градієнт фону",
+        "градиент"
+      ],
+      "normalizedTo": "background_gradient"
+    },
+    {
+      "id": "text_color",
+      "label": "Колір тексту",
+      "aliases": [
+        "текст",
+        "колір тексту",
+        "text color",
+        "напис"
+      ],
+      "normalizedTo": "text_color"
+    },
+    {
+      "id": "text_content",
+      "label": "Текстовий вміст",
+      "aliases": [
+        "текст",
+        "напис",
+        "контент",
+        "label text",
+        "content"
+      ],
+      "normalizedTo": "text_content"
+    },
+    {
+      "id": "font_size",
+      "label": "Розмір тексту",
+      "aliases": [
+        "розмір тексту",
+        "font size",
+        "size text",
+        "великий текст"
+      ],
+      "normalizedTo": "font_size"
+    },
+    {
+      "id": "font_weight",
+      "label": "Жирність тексту",
+      "aliases": [
+        "жирність",
+        "товщина тексту",
+        "font weight",
+        "bold"
+      ],
+      "normalizedTo": "font_weight"
+    },
+    {
+      "id": "icon_name",
+      "label": "Іконка",
+      "aliases": [
+        "іконка",
+        "значок",
+        "icon"
+      ],
+      "normalizedTo": "icon_name"
+    },
+    {
+      "id": "icon_color",
+      "label": "Колір іконки",
+      "aliases": [
+        "колір іконки",
+        "icon color"
+      ],
+      "normalizedTo": "icon_color"
+    },
+    {
+      "id": "icon_size",
+      "label": "Розмір іконки",
+      "aliases": [
+        "розмір іконки",
+        "icon size"
+      ],
+      "normalizedTo": "icon_size"
+    },
+    {
+      "id": "border",
+      "label": "Рамка",
+      "aliases": [
+        "рамка",
+        "border",
+        "контур",
+        "обводка"
+      ],
+      "normalizedTo": "border"
+    },
+    {
+      "id": "border_color",
+      "label": "Колір рамки",
+      "aliases": [
+        "колір рамки",
+        "border color",
+        "рамку зроби"
+      ],
+      "normalizedTo": "border_color"
+    },
+    {
+      "id": "border_width",
+      "label": "Товщина рамки",
+      "aliases": [
+        "товщина рамки",
+        "border width"
+      ],
+      "normalizedTo": "border_width"
+    },
+    {
+      "id": "radius",
+      "label": "Скруглення",
+      "aliases": [
+        "скруглення",
+        "округлення",
+        "радіус",
+        "radius",
+        "rounded"
+      ],
+      "normalizedTo": "radius"
+    },
+    {
+      "id": "shadow",
+      "label": "Тінь",
+      "aliases": [
+        "тінь",
+        "shadow",
+        "glow",
+        "підсвітка"
+      ],
+      "normalizedTo": "shadow"
+    },
+    {
+      "id": "opacity",
+      "label": "Прозорість",
+      "aliases": [
+        "add transparency",
+        "decrease transparency",
+        "increase transparency",
+        "less transparent",
+        "make more transparent",
+        "make transparent",
+        "more transparent",
+        "opacity",
+        "opaque",
+        "reduce transparency",
+        "semi-transparent",
+        "transparency",
+        "transparent",
+        "абсолютно прозорий",
+        "более прозрачный",
+        "більш прозорий",
+        "більш прозорим",
+        "добавь прозрачности",
+        "додай прозорості",
+        "додай прозорість",
+        "збільш прозорості",
+        "збільш прозорість",
+        "зменш прозорості",
+        "зменш прозорість",
+        "зроби більш прозорим",
+        "зроби менш прозорим",
+        "зроби напівпрозорим",
+        "зроби не таким прозорим",
+        "зроби непрозорим",
+        "зроби прозорим",
+        "зроби прозоріше",
+        "зроби прозорішим",
+        "менее прозрачный",
+        "менш прозорий",
+        "менш прозорим",
+        "напівпрозорий",
+        "напівпрозорим",
+        "не така прозора",
+        "не таким прозорим",
+        "повністю прозорий",
+        "повністю прозорим",
+        "полупрозрачный",
+        "посиль прозорість",
+        "прозорість",
+        "прозоріше",
+        "прозорішим",
+        "прозорішою",
+        "прозрачнее",
+        "підніми прозорість",
+        "сделай менее прозрачным",
+        "сделай непрозрачным",
+        "сделай прозрачнее",
+        "сделай прозрачным",
+        "увеличь прозрачность",
+        "уменьши прозрачность"
+      ],
+      "normalizedTo": "opacity"
+    },
+    {
+      "id": "width",
+      "label": "Ширина",
+      "aliases": [
+        "ширина",
+        "width"
+      ],
+      "normalizedTo": "width"
+    },
+    {
+      "id": "height",
+      "label": "Висота",
+      "aliases": [
+        "висота",
+        "height"
+      ],
+      "normalizedTo": "height"
+    },
+    {
+      "id": "padding",
+      "label": "Внутрішній відступ",
+      "aliases": [
+        "padding",
+        "внутрішній відступ"
+      ],
+      "normalizedTo": "padding"
+    },
+    {
+      "id": "margin",
+      "label": "Зовнішній відступ",
+      "aliases": [
+        "margin",
+        "зовнішній відступ"
+      ],
+      "normalizedTo": "margin"
+    },
+    {
+      "id": "gap",
+      "label": "Проміжок",
+      "aliases": [
+        "gap",
+        "проміжок",
+        "відстань між"
+      ],
+      "normalizedTo": "gap"
+    },
+    {
+      "id": "align",
+      "label": "Вирівнювання",
+      "aliases": [
+        "вирівнювання",
+        "align",
+        "позиція"
+      ],
+      "normalizedTo": "align"
+    },
+    {
+      "id": "link",
+      "label": "Посилання",
+      "aliases": [
+        "лінк",
+        "посилання",
+        "href",
+        "link"
+      ],
+      "normalizedTo": "link"
+    },
+    {
+      "id": "hover_style",
+      "label": "Hover стиль",
+      "aliases": [
+        "hover",
+        "при наведенні",
+        "на ховер"
+      ],
+      "normalizedTo": "hover_style"
+    }
+  ],
+  "values": {
+    "colors": [
+      {
+        "id": "green",
+        "label": "Зелений",
+        "aliases": [
+          "зелений",
+          "зеленим",
+          "зелену",
+          "green",
+          "зеленою",
+          "зеленими",
+          "зелених"
+        ],
+        "normalizedTo": "green"
+      },
+      {
+        "id": "red",
+        "label": "Червоний",
+        "aliases": [
+          "червоний",
+          "червоним",
+          "червону",
+          "red",
+          "червоною",
+          "червоними"
+        ],
+        "normalizedTo": "red"
+      },
+      {
+        "id": "blue",
+        "label": "Синій",
+        "aliases": [
+          "синій",
+          "синім",
+          "синю",
+          "blue",
+          "синьою",
+          "синіми",
+          "синіх",
+          "синього"
+        ],
+        "normalizedTo": "blue"
+      },
+      {
+        "id": "yellow",
+        "label": "Жовтий",
+        "aliases": [
+          "жовтий",
+          "жовтим",
+          "жовту",
+          "yellow",
+          "gold",
+          "жовтою",
+          "жовтими",
+          "жовтих"
+        ],
+        "normalizedTo": "yellow"
+      },
+      {
+        "id": "white",
+        "label": "Білий",
+        "aliases": [
+          "білий",
+          "білим",
+          "білу",
+          "white",
+          "білою",
+          "білими"
+        ],
+        "normalizedTo": "white"
+      },
+      {
+        "id": "black",
+        "label": "Чорний",
+        "aliases": [
+          "чорний",
+          "чорним",
+          "чорну",
+          "black"
+        ],
+        "normalizedTo": "black"
+      },
+      {
+        "id": "transparent",
+        "label": "Прозорий",
+        "aliases": [
+          "прозорий",
+          "прозорим",
+          "transparent"
+        ],
+        "normalizedTo": "transparent"
+      }
+    ],
+    "directions": [
+      {
+        "id": "horizontal",
+        "label": "Горизонтальний",
+        "aliases": [
+          "горизонтальний",
+          "по горизонталі",
+          "зліва направо",
+          "left to right"
+        ],
+        "normalizedTo": "horizontal"
+      },
+      {
+        "id": "vertical",
+        "label": "Вертикальний",
+        "aliases": [
+          "вертикальний",
+          "по вертикалі",
+          "зверху вниз",
+          "top to bottom"
+        ],
+        "normalizedTo": "vertical"
+      },
+      {
+        "id": "diagonal",
+        "label": "Діагональний",
+        "aliases": [
+          "діагональний",
+          "по діагоналі",
+          "diagonal"
+        ],
+        "normalizedTo": "diagonal"
+      },
+      {
+        "id": "right_to_left",
+        "label": "Справа наліво",
+        "aliases": [
+          "справа наліво",
+          "right to left"
+        ],
+        "normalizedTo": "right_to_left"
+      },
+      {
+        "id": "bottom_to_top",
+        "label": "Знизу вгору",
+        "aliases": [
+          "знизу вгору",
+          "bottom to top"
+        ],
+        "normalizedTo": "bottom_to_top"
+      }
+    ],
+    "positions": [
+      {
+        "id": "top",
+        "label": "Зверху",
+        "aliases": [
+          "зверху",
+          "з верху",
+          "top"
+        ],
+        "normalizedTo": "top"
+      },
+      {
+        "id": "bottom",
+        "label": "Знизу",
+        "aliases": [
+          "знизу",
+          "з низу",
+          "bottom"
+        ],
+        "normalizedTo": "bottom"
+      },
+      {
+        "id": "left",
+        "label": "Зліва",
+        "aliases": [
+          "зліва",
+          "left",
+          "ліворуч"
+        ],
+        "normalizedTo": "left"
+      },
+      {
+        "id": "right",
+        "label": "Справа",
+        "aliases": [
+          "справа",
+          "right",
+          "праворуч"
+        ],
+        "normalizedTo": "right"
+      },
+      {
+        "id": "center",
+        "label": "По центру",
+        "aliases": [
+          "по центру",
+          "посередині",
+          "по середині",
+          "в центрі",
+          "center",
+          "middle",
+          "у центр",
+          "в центр"
+        ],
+        "normalizedTo": "center"
+      }
+    ],
+    "sizes": [
+      {
+        "id": "small",
+        "label": "Малий",
+        "aliases": [
+          "малий",
+          "маленький",
+          "менший",
+          "small"
+        ],
+        "normalizedTo": "small"
+      },
+      {
+        "id": "medium",
+        "label": "Середній",
+        "aliases": [
+          "середній",
+          "normal",
+          "medium"
+        ],
+        "normalizedTo": "medium"
+      },
+      {
+        "id": "large",
+        "label": "Великий",
+        "aliases": [
+          "великий",
+          "більший",
+          "large",
+          "big"
+        ],
+        "normalizedTo": "large"
+      }
+    ],
+    "weights": [
+      {
+        "id": "bold",
+        "label": "Жирний",
+        "aliases": [
+          "жирний",
+          "жирним",
+          "bold",
+          "товстий текст"
+        ],
+        "normalizedTo": "bold"
+      },
+      {
+        "id": "normal",
+        "label": "Звичайний",
+        "aliases": [
+          "звичайний",
+          "нормальний",
+          "normal"
+        ],
+        "normalizedTo": "normal"
+      },
+      {
+        "id": "light",
+        "label": "Тонкий",
+        "aliases": [
+          "тонкий",
+          "легкий",
+          "light"
+        ],
+        "normalizedTo": "light"
+      }
+    ],
+    "effects": [
+      {
+        "id": "transparent_effect",
+        "label": "Прозорість",
+        "aliases": [
+          "напівпрозорий",
+          "прозорий",
+          "transparent"
+        ],
+        "normalizedTo": "transparent_effect"
+      },
+      {
+        "id": "blur_effect",
+        "label": "Розмиття",
+        "aliases": [
+          "розмиття",
+          "blur"
+        ],
+        "normalizedTo": "blur_effect"
+      },
+      {
+        "id": "glow_effect",
+        "label": "Світіння",
+        "aliases": [
+          "світіння",
+          "glow",
+          "підсвітка"
+        ],
+        "normalizedTo": "glow_effect"
+      }
+    ],
+    "units": [
+      {
+        "id": "px",
+        "label": "Пікселі",
+        "aliases": [
+          "px",
+          "пікселів",
+          "пікселя"
+        ],
+        "normalizedTo": "px"
+      },
+      {
+        "id": "percent",
+        "label": "Відсотки",
+        "aliases": [
+          "%",
+          "відсотків",
+          "процентів"
+        ],
+        "normalizedTo": "percent"
+      },
+      {
+        "id": "deg",
+        "label": "Градуси",
+        "aliases": [
+          "градусів",
+          "градуси",
+          "deg",
+          "°"
+        ],
+        "normalizedTo": "deg"
+      }
+    ]
+  },
+  "scopes": [
+    {
+      "id": "selected_element",
+      "label": "Поточний елемент",
+      "aliases": [
+        "цей елемент",
+        "активний",
+        "вибраний",
+        "поточний"
+      ],
+      "normalizedTo": "selected_element"
+    },
+    {
+      "id": "all_elements",
+      "label": "Усі елементи",
+      "aliases": [
+        "усі",
+        "всі",
+        "до всіх",
+        "для всіх"
+      ],
+      "normalizedTo": "all_elements"
+    },
+    {
+      "id": "text_only",
+      "label": "Тільки текст",
+      "aliases": [
+        "тільки текст",
+        "лише текст",
+        "внутрішній текст",
+        "text only"
+      ],
+      "normalizedTo": "text_only"
+    },
+    {
+      "id": "icon_only",
+      "label": "Тільки іконка",
+      "aliases": [
+        "тільки іконка",
+        "лише іконка",
+        "тільки значок",
+        "icon only"
+      ],
+      "normalizedTo": "icon_only"
+    },
+    {
+      "id": "first_two",
+      "label": "Перші дві",
+      "aliases": [
+        "перші дві",
+        "перші 2"
+      ],
+      "normalizedTo": "first_two"
+    },
+    {
+      "id": "second_third",
+      "label": "Друга і третя",
+      "aliases": [
+        "друга і третя",
+        "2 і 3",
+        "другу і третю"
+      ],
+      "normalizedTo": "second_third"
+    },
+    {
+      "id": "last_one",
+      "label": "Останній елемент",
+      "aliases": [
+        "остання",
+        "останній",
+        "останню"
+      ],
+      "normalizedTo": "last_one"
+    },
+    {
+      "id": "all_buttons",
+      "label": "Усі кнопки",
+      "aliases": [
+        "усі кнопки",
+        "всі кнопки",
+        "до всіх кнопок"
+      ],
+      "normalizedTo": "all_buttons"
+    },
+    {
+      "id": "all_menu_items",
+      "label": "Усі пункти меню",
+      "aliases": [
+        "усі пункти меню",
+        "всі пункти меню",
+        "до всіх пунктів меню"
+      ],
+      "normalizedTo": "all_menu_items"
+    },
+    {
+      "id": "second_one",
+      "label": "Другий елемент",
+      "aliases": [
+        "друга",
+        "другий",
+        "другу",
+        "другої",
+        "другій",
+        "у другій"
+      ],
+      "normalizedTo": "second_one"
+    },
+    {
+      "id": "third_one",
+      "label": "Третій елемент",
+      "aliases": [
+        "третя",
+        "третій",
+        "третю",
+        "третьої",
+        "третій",
+        "у третій"
+      ],
+      "normalizedTo": "third_one"
+    },
+    {
+      "id": "all_headings",
+      "label": "Усі заголовки",
+      "aliases": [
+        "усі заголовки",
+        "всі заголовки",
+        "до всіх заголовків"
+      ],
+      "normalizedTo": "all_headings"
+    }
+  ],
+  "states": [
+    {
+      "id": "default",
+      "label": "Звичайний стан",
+      "aliases": [
+        "звичайний",
+        "default",
+        "основний стан"
+      ],
+      "normalizedTo": "default"
+    },
+    {
+      "id": "hover",
+      "label": "Hover",
+      "aliases": [
+        "hover",
+        "на ховер",
+        "при наведенні",
+        "наведення"
+      ],
+      "normalizedTo": "hover"
+    },
+    {
+      "id": "current",
+      "label": "Поточний",
+      "aliases": [
+        "активний пункт",
+        "current",
+        "поточний"
+      ],
+      "normalizedTo": "current"
+    },
+    {
+      "id": "open",
+      "label": "Відкритий",
+      "aliases": [
+        "відкритий",
+        "open",
+        "розкритий"
+      ],
+      "normalizedTo": "open"
+    },
+    {
+      "id": "active",
+      "label": "Active",
+      "aliases": [
+        "active",
+        "активний",
+        "на active",
+        "у active стані",
+        "активному стані"
+      ],
+      "normalizedTo": "active"
+    }
+  ],
+  "responsive": [
+    {
+      "id": "all",
+      "label": "Усі пристрої",
+      "aliases": [
+        "усюди",
+        "скрізь",
+        "для всіх пристроїв",
+        "all"
+      ],
+      "normalizedTo": "all"
+    },
+    {
+      "id": "desktop",
+      "label": "Тільки desktop",
+      "aliases": [
+        "тільки desktop",
+        "тільки десктоп",
+        "на комп'ютері",
+        "desktop",
+        "десктопна версія",
+        "на десктопі",
+        "на компютері",
+        "тільки на десктопі",
+        "лише на десктопі"
+      ],
+      "normalizedTo": "desktop"
+    },
+    {
+      "id": "mobile",
+      "label": "Тільки mobile",
+      "aliases": [
+        "тільки mobile",
+        "тільки мобільна",
+        "на телефоні",
+        "mobile",
+        "мобільна версія",
+        "на мобільній версії",
+        "тільки на мобільній версії",
+        "мобільній версії",
+        "на мобільному",
+        "на мобільній",
+        "тільки на мобільній",
+        "лише на мобільній",
+        "у мобільній версії"
+      ],
+      "normalizedTo": "mobile"
+    },
+    {
+      "id": "tablet",
+      "label": "Тільки tablet",
+      "aliases": [
+        "tablet",
+        "планшет",
+        "на планшеті",
+        "планшетна версія",
+        "на планшетній версії",
+        "тільки на планшеті"
+      ],
+      "normalizedTo": "tablet"
+    }
+  ]
+}

@@ -1,0 +1,6073 @@
+[
+  {
+    "name": "align-center-horizontal",
+    "file": "icons/text/align-center-horizontal.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "center",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "align-center-vertical",
+    "file": "icons/text/align-center-vertical.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "center",
+      "vertical"
+    ]
+  },
+  {
+    "name": "align-end-horizontal",
+    "file": "icons/text/align-end-horizontal.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "end",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "align-end-vertical",
+    "file": "icons/text/align-end-vertical.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "end",
+      "vertical"
+    ]
+  },
+  {
+    "name": "align-horizontal-distribute-center",
+    "file": "icons/text/align-horizontal-distribute-center.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "distribute",
+      "center"
+    ]
+  },
+  {
+    "name": "align-horizontal-distribute-end",
+    "file": "icons/text/align-horizontal-distribute-end.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "distribute",
+      "end"
+    ]
+  },
+  {
+    "name": "align-horizontal-distribute-start",
+    "file": "icons/text/align-horizontal-distribute-start.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "distribute",
+      "start"
+    ]
+  },
+  {
+    "name": "align-horizontal-justify-center",
+    "file": "icons/text/align-horizontal-justify-center.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "justify",
+      "center"
+    ]
+  },
+  {
+    "name": "align-horizontal-justify-end",
+    "file": "icons/text/align-horizontal-justify-end.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "justify",
+      "end"
+    ]
+  },
+  {
+    "name": "align-horizontal-justify-start",
+    "file": "icons/text/align-horizontal-justify-start.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "justify",
+      "start"
+    ]
+  },
+  {
+    "name": "align-horizontal-space-around",
+    "file": "icons/text/align-horizontal-space-around.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "space",
+      "around"
+    ]
+  },
+  {
+    "name": "align-horizontal-space-between",
+    "file": "icons/text/align-horizontal-space-between.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "horizontal",
+      "space",
+      "between"
+    ]
+  },
+  {
+    "name": "align-start-horizontal",
+    "file": "icons/text/align-start-horizontal.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "start",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "align-start-vertical",
+    "file": "icons/text/align-start-vertical.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "start",
+      "vertical"
+    ]
+  },
+  {
+    "name": "align-vertical-distribute-center",
+    "file": "icons/text/align-vertical-distribute-center.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "distribute",
+      "center"
+    ]
+  },
+  {
+    "name": "align-vertical-distribute-end",
+    "file": "icons/text/align-vertical-distribute-end.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "distribute",
+      "end"
+    ]
+  },
+  {
+    "name": "align-vertical-distribute-start",
+    "file": "icons/text/align-vertical-distribute-start.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "distribute",
+      "start"
+    ]
+  },
+  {
+    "name": "align-vertical-justify-center",
+    "file": "icons/text/align-vertical-justify-center.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "justify",
+      "center"
+    ]
+  },
+  {
+    "name": "align-vertical-justify-end",
+    "file": "icons/text/align-vertical-justify-end.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "justify",
+      "end"
+    ]
+  },
+  {
+    "name": "align-vertical-justify-start",
+    "file": "icons/text/align-vertical-justify-start.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "justify",
+      "start"
+    ]
+  },
+  {
+    "name": "align-vertical-space-around",
+    "file": "icons/text/align-vertical-space-around.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "space",
+      "around"
+    ]
+  },
+  {
+    "name": "align-vertical-space-between",
+    "file": "icons/text/align-vertical-space-between.svg",
+    "category": "text",
+    "tags": [
+      "align",
+      "vertical",
+      "space",
+      "between"
+    ]
+  },
+  {
+    "name": "archive-restore",
+    "file": "icons/files/archive-restore.svg",
+    "category": "files",
+    "tags": [
+      "archive",
+      "restore"
+    ]
+  },
+  {
+    "name": "archive-x",
+    "file": "icons/files/archive-x.svg",
+    "category": "files",
+    "tags": [
+      "archive",
+      "x"
+    ]
+  },
+  {
+    "name": "archive",
+    "file": "icons/files/archive.svg",
+    "category": "files",
+    "tags": [
+      "archive"
+    ]
+  },
+  {
+    "name": "arrow-big-down-dash",
+    "file": "icons/arrows/arrow-big-down-dash.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "down",
+      "dash"
+    ]
+  },
+  {
+    "name": "arrow-big-down",
+    "file": "icons/arrows/arrow-big-down.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "down"
+    ]
+  },
+  {
+    "name": "arrow-big-left-dash",
+    "file": "icons/arrows/arrow-big-left-dash.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "left",
+      "dash"
+    ]
+  },
+  {
+    "name": "arrow-big-left",
+    "file": "icons/arrows/arrow-big-left.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "left"
+    ]
+  },
+  {
+    "name": "arrow-big-right-dash",
+    "file": "icons/arrows/arrow-big-right-dash.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "right",
+      "dash"
+    ]
+  },
+  {
+    "name": "arrow-big-right",
+    "file": "icons/arrows/arrow-big-right.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "right"
+    ]
+  },
+  {
+    "name": "arrow-big-up-dash",
+    "file": "icons/arrows/arrow-big-up-dash.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "up",
+      "dash"
+    ]
+  },
+  {
+    "name": "arrow-big-up",
+    "file": "icons/arrows/arrow-big-up.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "big",
+      "up"
+    ]
+  },
+  {
+    "name": "arrow-down-0-1",
+    "file": "icons/arrows/arrow-down-0-1.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "0",
+      "1"
+    ]
+  },
+  {
+    "name": "arrow-down-1-0",
+    "file": "icons/arrows/arrow-down-1-0.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "name": "arrow-down-a-z",
+    "file": "icons/arrows/arrow-down-a-z.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "a",
+      "z"
+    ]
+  },
+  {
+    "name": "arrow-down-from-line",
+    "file": "icons/arrows/arrow-down-from-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "from",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-down-left",
+    "file": "icons/arrows/arrow-down-left.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "left"
+    ]
+  },
+  {
+    "name": "arrow-down-narrow-wide",
+    "file": "icons/arrows/arrow-down-narrow-wide.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "narrow",
+      "wide"
+    ]
+  },
+  {
+    "name": "arrow-down-right",
+    "file": "icons/arrows/arrow-down-right.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "right"
+    ]
+  },
+  {
+    "name": "arrow-down-to-dot",
+    "file": "icons/arrows/arrow-down-to-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "to",
+      "dot"
+    ]
+  },
+  {
+    "name": "arrow-down-to-line",
+    "file": "icons/arrows/arrow-down-to-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "to",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-down-up",
+    "file": "icons/arrows/arrow-down-up.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "up"
+    ]
+  },
+  {
+    "name": "arrow-down-wide-narrow",
+    "file": "icons/arrows/arrow-down-wide-narrow.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "wide",
+      "narrow"
+    ]
+  },
+  {
+    "name": "arrow-down-z-a",
+    "file": "icons/arrows/arrow-down-z-a.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down",
+      "z",
+      "a"
+    ]
+  },
+  {
+    "name": "arrow-down",
+    "file": "icons/arrows/arrow-down.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "down"
+    ]
+  },
+  {
+    "name": "arrow-left-from-line",
+    "file": "icons/arrows/arrow-left-from-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "left",
+      "from",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-left-right",
+    "file": "icons/arrows/arrow-left-right.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "left",
+      "right"
+    ]
+  },
+  {
+    "name": "arrow-left-to-line",
+    "file": "icons/arrows/arrow-left-to-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "left",
+      "to",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-left",
+    "file": "icons/arrows/arrow-left.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "left"
+    ]
+  },
+  {
+    "name": "arrow-right-from-line",
+    "file": "icons/arrows/arrow-right-from-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "right",
+      "from",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-right-left",
+    "file": "icons/arrows/arrow-right-left.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "right",
+      "left"
+    ]
+  },
+  {
+    "name": "arrow-right-to-line",
+    "file": "icons/arrows/arrow-right-to-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "right",
+      "to",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-right",
+    "file": "icons/arrows/arrow-right.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "right"
+    ]
+  },
+  {
+    "name": "arrow-up-0-1",
+    "file": "icons/arrows/arrow-up-0-1.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "0",
+      "1"
+    ]
+  },
+  {
+    "name": "arrow-up-1-0",
+    "file": "icons/arrows/arrow-up-1-0.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "1",
+      "0"
+    ]
+  },
+  {
+    "name": "arrow-up-a-z",
+    "file": "icons/arrows/arrow-up-a-z.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "a",
+      "z"
+    ]
+  },
+  {
+    "name": "arrow-up-down",
+    "file": "icons/arrows/arrow-up-down.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "down"
+    ]
+  },
+  {
+    "name": "arrow-up-from-dot",
+    "file": "icons/arrows/arrow-up-from-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "from",
+      "dot"
+    ]
+  },
+  {
+    "name": "arrow-up-from-line",
+    "file": "icons/arrows/arrow-up-from-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "from",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-up-left",
+    "file": "icons/arrows/arrow-up-left.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "left"
+    ]
+  },
+  {
+    "name": "arrow-up-narrow-wide",
+    "file": "icons/arrows/arrow-up-narrow-wide.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "narrow",
+      "wide"
+    ]
+  },
+  {
+    "name": "arrow-up-right",
+    "file": "icons/arrows/arrow-up-right.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "right"
+    ]
+  },
+  {
+    "name": "arrow-up-to-line",
+    "file": "icons/arrows/arrow-up-to-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "to",
+      "line"
+    ]
+  },
+  {
+    "name": "arrow-up-wide-narrow",
+    "file": "icons/arrows/arrow-up-wide-narrow.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "wide",
+      "narrow"
+    ]
+  },
+  {
+    "name": "arrow-up-z-a",
+    "file": "icons/arrows/arrow-up-z-a.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up",
+      "z",
+      "a"
+    ]
+  },
+  {
+    "name": "arrow-up",
+    "file": "icons/arrows/arrow-up.svg",
+    "category": "arrows",
+    "tags": [
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "arrows-up-from-line",
+    "file": "icons/arrows/arrows-up-from-line.svg",
+    "category": "arrows",
+    "tags": [
+      "arrows",
+      "up",
+      "from",
+      "line"
+    ]
+  },
+  {
+    "name": "at-sign",
+    "file": "icons/comms/at-sign.svg",
+    "category": "comms",
+    "tags": [
+      "at",
+      "sign"
+    ]
+  },
+  {
+    "name": "badge-check",
+    "file": "icons/status/badge-check.svg",
+    "category": "status",
+    "tags": [
+      "badge",
+      "check"
+    ]
+  },
+  {
+    "name": "ban",
+    "file": "icons/status/ban.svg",
+    "category": "status",
+    "tags": [
+      "ban"
+    ]
+  },
+  {
+    "name": "banana",
+    "file": "icons/status/banana.svg",
+    "category": "status",
+    "tags": [
+      "banana"
+    ]
+  },
+  {
+    "name": "bandage",
+    "file": "icons/status/bandage.svg",
+    "category": "status",
+    "tags": [
+      "bandage"
+    ]
+  },
+  {
+    "name": "banknote-arrow-down",
+    "file": "icons/status/banknote-arrow-down.svg",
+    "category": "status",
+    "tags": [
+      "banknote",
+      "arrow",
+      "down"
+    ]
+  },
+  {
+    "name": "banknote-arrow-up",
+    "file": "icons/status/banknote-arrow-up.svg",
+    "category": "status",
+    "tags": [
+      "banknote",
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "banknote-x",
+    "file": "icons/status/banknote-x.svg",
+    "category": "status",
+    "tags": [
+      "banknote",
+      "x"
+    ]
+  },
+  {
+    "name": "banknote",
+    "file": "icons/status/banknote.svg",
+    "category": "status",
+    "tags": [
+      "banknote"
+    ]
+  },
+  {
+    "name": "bell-dot",
+    "file": "icons/comms/bell-dot.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "dot"
+    ]
+  },
+  {
+    "name": "bell-electric",
+    "file": "icons/comms/bell-electric.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "electric"
+    ]
+  },
+  {
+    "name": "bell-minus",
+    "file": "icons/comms/bell-minus.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "minus"
+    ]
+  },
+  {
+    "name": "bell-off",
+    "file": "icons/comms/bell-off.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "off"
+    ]
+  },
+  {
+    "name": "bell-plus",
+    "file": "icons/comms/bell-plus.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "plus"
+    ]
+  },
+  {
+    "name": "bell-ring",
+    "file": "icons/comms/bell-ring.svg",
+    "category": "comms",
+    "tags": [
+      "bell",
+      "ring"
+    ]
+  },
+  {
+    "name": "bell",
+    "file": "icons/comms/bell.svg",
+    "category": "comms",
+    "tags": [
+      "bell"
+    ]
+  },
+  {
+    "name": "bluetooth-connected",
+    "file": "icons/comms/bluetooth-connected.svg",
+    "category": "comms",
+    "tags": [
+      "bluetooth",
+      "connected"
+    ]
+  },
+  {
+    "name": "bluetooth-off",
+    "file": "icons/comms/bluetooth-off.svg",
+    "category": "comms",
+    "tags": [
+      "bluetooth",
+      "off"
+    ]
+  },
+  {
+    "name": "bluetooth-searching",
+    "file": "icons/comms/bluetooth-searching.svg",
+    "category": "comms",
+    "tags": [
+      "bluetooth",
+      "searching"
+    ]
+  },
+  {
+    "name": "bluetooth",
+    "file": "icons/comms/bluetooth.svg",
+    "category": "comms",
+    "tags": [
+      "bluetooth"
+    ]
+  },
+  {
+    "name": "bold",
+    "file": "icons/text/bold.svg",
+    "category": "text",
+    "tags": [
+      "bold"
+    ]
+  },
+  {
+    "name": "calendar-1",
+    "file": "icons/time/calendar-1.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "1"
+    ]
+  },
+  {
+    "name": "calendar-arrow-down",
+    "file": "icons/time/calendar-arrow-down.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "arrow",
+      "down"
+    ]
+  },
+  {
+    "name": "calendar-arrow-up",
+    "file": "icons/time/calendar-arrow-up.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "calendar-check-2",
+    "file": "icons/time/calendar-check-2.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "check",
+      "2"
+    ]
+  },
+  {
+    "name": "calendar-check",
+    "file": "icons/time/calendar-check.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "check"
+    ]
+  },
+  {
+    "name": "calendar-clock",
+    "file": "icons/time/calendar-clock.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "clock"
+    ]
+  },
+  {
+    "name": "calendar-cog",
+    "file": "icons/time/calendar-cog.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "cog"
+    ]
+  },
+  {
+    "name": "calendar-days",
+    "file": "icons/time/calendar-days.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "days"
+    ]
+  },
+  {
+    "name": "calendar-fold",
+    "file": "icons/time/calendar-fold.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "fold"
+    ]
+  },
+  {
+    "name": "calendar-heart",
+    "file": "icons/time/calendar-heart.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "heart"
+    ]
+  },
+  {
+    "name": "calendar-minus-2",
+    "file": "icons/time/calendar-minus-2.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "minus",
+      "2"
+    ]
+  },
+  {
+    "name": "calendar-minus",
+    "file": "icons/time/calendar-minus.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "minus"
+    ]
+  },
+  {
+    "name": "calendar-off",
+    "file": "icons/time/calendar-off.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "off"
+    ]
+  },
+  {
+    "name": "calendar-plus-2",
+    "file": "icons/time/calendar-plus-2.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "plus",
+      "2"
+    ]
+  },
+  {
+    "name": "calendar-plus",
+    "file": "icons/time/calendar-plus.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "plus"
+    ]
+  },
+  {
+    "name": "calendar-range",
+    "file": "icons/time/calendar-range.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "range"
+    ]
+  },
+  {
+    "name": "calendar-search",
+    "file": "icons/time/calendar-search.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "search"
+    ]
+  },
+  {
+    "name": "calendar-sync",
+    "file": "icons/time/calendar-sync.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "sync"
+    ]
+  },
+  {
+    "name": "calendar-x-2",
+    "file": "icons/time/calendar-x-2.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "x",
+      "2"
+    ]
+  },
+  {
+    "name": "calendar-x",
+    "file": "icons/time/calendar-x.svg",
+    "category": "time",
+    "tags": [
+      "calendar",
+      "x"
+    ]
+  },
+  {
+    "name": "calendar",
+    "file": "icons/time/calendar.svg",
+    "category": "time",
+    "tags": [
+      "calendar"
+    ]
+  },
+  {
+    "name": "calendars",
+    "file": "icons/time/calendars.svg",
+    "category": "time",
+    "tags": [
+      "calendars"
+    ]
+  },
+  {
+    "name": "camera-off",
+    "file": "icons/media/camera-off.svg",
+    "category": "media",
+    "tags": [
+      "camera",
+      "off"
+    ]
+  },
+  {
+    "name": "camera",
+    "file": "icons/media/camera.svg",
+    "category": "media",
+    "tags": [
+      "camera"
+    ]
+  },
+  {
+    "name": "check-check",
+    "file": "icons/status/check-check.svg",
+    "category": "status",
+    "tags": [
+      "check",
+      "check"
+    ]
+  },
+  {
+    "name": "check-line",
+    "file": "icons/status/check-line.svg",
+    "category": "status",
+    "tags": [
+      "check",
+      "line"
+    ]
+  },
+  {
+    "name": "check",
+    "file": "icons/status/check.svg",
+    "category": "status",
+    "tags": [
+      "check"
+    ]
+  },
+  {
+    "name": "chevron-down",
+    "file": "icons/arrows/chevron-down.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "down"
+    ]
+  },
+  {
+    "name": "chevron-first",
+    "file": "icons/arrows/chevron-first.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "first"
+    ]
+  },
+  {
+    "name": "chevron-last",
+    "file": "icons/arrows/chevron-last.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "last"
+    ]
+  },
+  {
+    "name": "chevron-left",
+    "file": "icons/arrows/chevron-left.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "left"
+    ]
+  },
+  {
+    "name": "chevron-right",
+    "file": "icons/arrows/chevron-right.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "right"
+    ]
+  },
+  {
+    "name": "chevron-up",
+    "file": "icons/arrows/chevron-up.svg",
+    "category": "arrows",
+    "tags": [
+      "chevron",
+      "up"
+    ]
+  },
+  {
+    "name": "chevrons-down-up",
+    "file": "icons/arrows/chevrons-down-up.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "down",
+      "up"
+    ]
+  },
+  {
+    "name": "chevrons-down",
+    "file": "icons/arrows/chevrons-down.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "down"
+    ]
+  },
+  {
+    "name": "chevrons-left-right-ellipsis",
+    "file": "icons/arrows/chevrons-left-right-ellipsis.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "left",
+      "right",
+      "ellipsis"
+    ]
+  },
+  {
+    "name": "chevrons-left-right",
+    "file": "icons/arrows/chevrons-left-right.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "left",
+      "right"
+    ]
+  },
+  {
+    "name": "chevrons-left",
+    "file": "icons/arrows/chevrons-left.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "left"
+    ]
+  },
+  {
+    "name": "chevrons-right-left",
+    "file": "icons/arrows/chevrons-right-left.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "right",
+      "left"
+    ]
+  },
+  {
+    "name": "chevrons-right",
+    "file": "icons/arrows/chevrons-right.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "right"
+    ]
+  },
+  {
+    "name": "chevrons-up-down",
+    "file": "icons/arrows/chevrons-up-down.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "up",
+      "down"
+    ]
+  },
+  {
+    "name": "chevrons-up",
+    "file": "icons/arrows/chevrons-up.svg",
+    "category": "arrows",
+    "tags": [
+      "chevrons",
+      "up"
+    ]
+  },
+  {
+    "name": "circle-alert",
+    "file": "icons/status/circle-alert.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "alert"
+    ]
+  },
+  {
+    "name": "circle-arrow-down",
+    "file": "icons/status/circle-arrow-down.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "down"
+    ]
+  },
+  {
+    "name": "circle-arrow-left",
+    "file": "icons/status/circle-arrow-left.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "left"
+    ]
+  },
+  {
+    "name": "circle-arrow-out-down-left",
+    "file": "icons/status/circle-arrow-out-down-left.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "out",
+      "down",
+      "left"
+    ]
+  },
+  {
+    "name": "circle-arrow-out-down-right",
+    "file": "icons/status/circle-arrow-out-down-right.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "out",
+      "down",
+      "right"
+    ]
+  },
+  {
+    "name": "circle-arrow-out-up-left",
+    "file": "icons/status/circle-arrow-out-up-left.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "out",
+      "up",
+      "left"
+    ]
+  },
+  {
+    "name": "circle-arrow-out-up-right",
+    "file": "icons/status/circle-arrow-out-up-right.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "out",
+      "up",
+      "right"
+    ]
+  },
+  {
+    "name": "circle-arrow-right",
+    "file": "icons/status/circle-arrow-right.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "right"
+    ]
+  },
+  {
+    "name": "circle-arrow-up",
+    "file": "icons/status/circle-arrow-up.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "circle-check-big",
+    "file": "icons/status/circle-check-big.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "check",
+      "big"
+    ]
+  },
+  {
+    "name": "circle-check",
+    "file": "icons/status/circle-check.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "check"
+    ]
+  },
+  {
+    "name": "circle-chevron-down",
+    "file": "icons/status/circle-chevron-down.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "chevron",
+      "down"
+    ]
+  },
+  {
+    "name": "circle-chevron-left",
+    "file": "icons/status/circle-chevron-left.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "chevron",
+      "left"
+    ]
+  },
+  {
+    "name": "circle-chevron-right",
+    "file": "icons/status/circle-chevron-right.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "chevron",
+      "right"
+    ]
+  },
+  {
+    "name": "circle-chevron-up",
+    "file": "icons/status/circle-chevron-up.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "chevron",
+      "up"
+    ]
+  },
+  {
+    "name": "circle-dashed",
+    "file": "icons/status/circle-dashed.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "dashed"
+    ]
+  },
+  {
+    "name": "circle-divide",
+    "file": "icons/status/circle-divide.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "divide"
+    ]
+  },
+  {
+    "name": "circle-dollar-sign",
+    "file": "icons/status/circle-dollar-sign.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "dollar",
+      "sign"
+    ]
+  },
+  {
+    "name": "circle-dot-dashed",
+    "file": "icons/status/circle-dot-dashed.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "dot",
+      "dashed"
+    ]
+  },
+  {
+    "name": "circle-dot",
+    "file": "icons/status/circle-dot.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "dot"
+    ]
+  },
+  {
+    "name": "circle-ellipsis",
+    "file": "icons/status/circle-ellipsis.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "ellipsis"
+    ]
+  },
+  {
+    "name": "circle-equal",
+    "file": "icons/status/circle-equal.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "equal"
+    ]
+  },
+  {
+    "name": "circle-fading-arrow-up",
+    "file": "icons/status/circle-fading-arrow-up.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "fading",
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "circle-fading-plus",
+    "file": "icons/status/circle-fading-plus.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "fading",
+      "plus"
+    ]
+  },
+  {
+    "name": "circle-gauge",
+    "file": "icons/status/circle-gauge.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "gauge"
+    ]
+  },
+  {
+    "name": "circle-minus",
+    "file": "icons/status/circle-minus.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "minus"
+    ]
+  },
+  {
+    "name": "circle-off",
+    "file": "icons/status/circle-off.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "off"
+    ]
+  },
+  {
+    "name": "circle-parking-off",
+    "file": "icons/status/circle-parking-off.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "parking",
+      "off"
+    ]
+  },
+  {
+    "name": "circle-parking",
+    "file": "icons/status/circle-parking.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "parking"
+    ]
+  },
+  {
+    "name": "circle-pause",
+    "file": "icons/status/circle-pause.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "pause"
+    ]
+  },
+  {
+    "name": "circle-percent",
+    "file": "icons/status/circle-percent.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "percent"
+    ]
+  },
+  {
+    "name": "circle-pile",
+    "file": "icons/status/circle-pile.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "pile"
+    ]
+  },
+  {
+    "name": "circle-play",
+    "file": "icons/status/circle-play.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "play"
+    ]
+  },
+  {
+    "name": "circle-plus",
+    "file": "icons/status/circle-plus.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "plus"
+    ]
+  },
+  {
+    "name": "circle-pound-sterling",
+    "file": "icons/status/circle-pound-sterling.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "pound",
+      "sterling"
+    ]
+  },
+  {
+    "name": "circle-power",
+    "file": "icons/status/circle-power.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "power"
+    ]
+  },
+  {
+    "name": "circle-question-mark",
+    "file": "icons/status/circle-question-mark.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "question",
+      "mark"
+    ]
+  },
+  {
+    "name": "circle-slash-2",
+    "file": "icons/status/circle-slash-2.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "slash",
+      "2"
+    ]
+  },
+  {
+    "name": "circle-slash",
+    "file": "icons/status/circle-slash.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "slash"
+    ]
+  },
+  {
+    "name": "circle-small",
+    "file": "icons/status/circle-small.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "small"
+    ]
+  },
+  {
+    "name": "circle-star",
+    "file": "icons/status/circle-star.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "star"
+    ]
+  },
+  {
+    "name": "circle-stop",
+    "file": "icons/status/circle-stop.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "stop"
+    ]
+  },
+  {
+    "name": "circle-user-round",
+    "file": "icons/status/circle-user-round.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "user",
+      "round"
+    ]
+  },
+  {
+    "name": "circle-user",
+    "file": "icons/status/circle-user.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "user"
+    ]
+  },
+  {
+    "name": "circle-x",
+    "file": "icons/status/circle-x.svg",
+    "category": "status",
+    "tags": [
+      "circle",
+      "x"
+    ]
+  },
+  {
+    "name": "circle",
+    "file": "icons/status/circle.svg",
+    "category": "status",
+    "tags": [
+      "circle"
+    ]
+  },
+  {
+    "name": "clapperboard",
+    "file": "icons/media/clapperboard.svg",
+    "category": "media",
+    "tags": [
+      "clapperboard"
+    ]
+  },
+  {
+    "name": "clipboard",
+    "file": "icons/misc/clipboard.svg",
+    "category": "misc",
+    "tags": [
+      "clipboard"
+    ]
+  },
+  {
+    "name": "clock-1",
+    "file": "icons/time/clock-1.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "1"
+    ]
+  },
+  {
+    "name": "clock-10",
+    "file": "icons/time/clock-10.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "10"
+    ]
+  },
+  {
+    "name": "clock-11",
+    "file": "icons/time/clock-11.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "11"
+    ]
+  },
+  {
+    "name": "clock-12",
+    "file": "icons/time/clock-12.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "12"
+    ]
+  },
+  {
+    "name": "clock-2",
+    "file": "icons/time/clock-2.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "2"
+    ]
+  },
+  {
+    "name": "clock-3",
+    "file": "icons/time/clock-3.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "3"
+    ]
+  },
+  {
+    "name": "clock-4",
+    "file": "icons/time/clock-4.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "4"
+    ]
+  },
+  {
+    "name": "clock-5",
+    "file": "icons/time/clock-5.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "5"
+    ]
+  },
+  {
+    "name": "clock-6",
+    "file": "icons/time/clock-6.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "6"
+    ]
+  },
+  {
+    "name": "clock-7",
+    "file": "icons/time/clock-7.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "7"
+    ]
+  },
+  {
+    "name": "clock-8",
+    "file": "icons/time/clock-8.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "8"
+    ]
+  },
+  {
+    "name": "clock-9",
+    "file": "icons/time/clock-9.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "9"
+    ]
+  },
+  {
+    "name": "clock-alert",
+    "file": "icons/time/clock-alert.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "alert"
+    ]
+  },
+  {
+    "name": "clock-arrow-down",
+    "file": "icons/time/clock-arrow-down.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "arrow",
+      "down"
+    ]
+  },
+  {
+    "name": "clock-arrow-up",
+    "file": "icons/time/clock-arrow-up.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "arrow",
+      "up"
+    ]
+  },
+  {
+    "name": "clock-check",
+    "file": "icons/time/clock-check.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "check"
+    ]
+  },
+  {
+    "name": "clock-fading",
+    "file": "icons/time/clock-fading.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "fading"
+    ]
+  },
+  {
+    "name": "clock-plus",
+    "file": "icons/time/clock-plus.svg",
+    "category": "time",
+    "tags": [
+      "clock",
+      "plus"
+    ]
+  },
+  {
+    "name": "clock",
+    "file": "icons/time/clock.svg",
+    "category": "time",
+    "tags": [
+      "clock"
+    ]
+  },
+  {
+    "name": "cloud-alert",
+    "file": "icons/files/cloud-alert.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "alert"
+    ]
+  },
+  {
+    "name": "cloud-backup",
+    "file": "icons/files/cloud-backup.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "backup"
+    ]
+  },
+  {
+    "name": "cloud-check",
+    "file": "icons/files/cloud-check.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "check"
+    ]
+  },
+  {
+    "name": "cloud-cog",
+    "file": "icons/files/cloud-cog.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "cog"
+    ]
+  },
+  {
+    "name": "cloud-download",
+    "file": "icons/files/cloud-download.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "download"
+    ]
+  },
+  {
+    "name": "cloud-drizzle",
+    "file": "icons/files/cloud-drizzle.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "drizzle"
+    ]
+  },
+  {
+    "name": "cloud-fog",
+    "file": "icons/files/cloud-fog.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "fog"
+    ]
+  },
+  {
+    "name": "cloud-hail",
+    "file": "icons/files/cloud-hail.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "hail"
+    ]
+  },
+  {
+    "name": "cloud-lightning",
+    "file": "icons/files/cloud-lightning.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "lightning"
+    ]
+  },
+  {
+    "name": "cloud-moon-rain",
+    "file": "icons/files/cloud-moon-rain.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "moon",
+      "rain"
+    ]
+  },
+  {
+    "name": "cloud-moon",
+    "file": "icons/files/cloud-moon.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "moon"
+    ]
+  },
+  {
+    "name": "cloud-off",
+    "file": "icons/files/cloud-off.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "off"
+    ]
+  },
+  {
+    "name": "cloud-rain-wind",
+    "file": "icons/files/cloud-rain-wind.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "rain",
+      "wind"
+    ]
+  },
+  {
+    "name": "cloud-rain",
+    "file": "icons/files/cloud-rain.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "rain"
+    ]
+  },
+  {
+    "name": "cloud-snow",
+    "file": "icons/files/cloud-snow.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "snow"
+    ]
+  },
+  {
+    "name": "cloud-sun-rain",
+    "file": "icons/files/cloud-sun-rain.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "sun",
+      "rain"
+    ]
+  },
+  {
+    "name": "cloud-sun",
+    "file": "icons/files/cloud-sun.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "sun"
+    ]
+  },
+  {
+    "name": "cloud-sync",
+    "file": "icons/files/cloud-sync.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "sync"
+    ]
+  },
+  {
+    "name": "cloud-upload",
+    "file": "icons/files/cloud-upload.svg",
+    "category": "files",
+    "tags": [
+      "cloud",
+      "upload"
+    ]
+  },
+  {
+    "name": "cloud",
+    "file": "icons/files/cloud.svg",
+    "category": "files",
+    "tags": [
+      "cloud"
+    ]
+  },
+  {
+    "name": "cloudy",
+    "file": "icons/files/cloudy.svg",
+    "category": "files",
+    "tags": [
+      "cloudy"
+    ]
+  },
+  {
+    "name": "code-xml",
+    "file": "icons/text/code-xml.svg",
+    "category": "text",
+    "tags": [
+      "code",
+      "xml"
+    ]
+  },
+  {
+    "name": "code",
+    "file": "icons/text/code.svg",
+    "category": "text",
+    "tags": [
+      "code"
+    ]
+  },
+  {
+    "name": "codepen",
+    "file": "icons/text/codepen.svg",
+    "category": "text",
+    "tags": [
+      "codepen"
+    ]
+  },
+  {
+    "name": "codesandbox",
+    "file": "icons/text/codesandbox.svg",
+    "category": "text",
+    "tags": [
+      "codesandbox"
+    ]
+  },
+  {
+    "name": "columns-2",
+    "file": "icons/layout/columns-2.svg",
+    "category": "layout",
+    "tags": [
+      "columns",
+      "2"
+    ]
+  },
+  {
+    "name": "compass",
+    "file": "icons/location/compass.svg",
+    "category": "location",
+    "tags": [
+      "compass"
+    ]
+  },
+  {
+    "name": "contact-round",
+    "file": "icons/misc/contact-round.svg",
+    "category": "misc",
+    "tags": [
+      "contact",
+      "round"
+    ]
+  },
+  {
+    "name": "contact",
+    "file": "icons/misc/contact.svg",
+    "category": "misc",
+    "tags": [
+      "contact"
+    ]
+  },
+  {
+    "name": "copy",
+    "file": "icons/misc/copy.svg",
+    "category": "misc",
+    "tags": [
+      "copy"
+    ]
+  },
+  {
+    "name": "corner-down-left",
+    "file": "icons/arrows/corner-down-left.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "down",
+      "left"
+    ]
+  },
+  {
+    "name": "corner-down-right",
+    "file": "icons/arrows/corner-down-right.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "down",
+      "right"
+    ]
+  },
+  {
+    "name": "corner-left-down",
+    "file": "icons/arrows/corner-left-down.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "left",
+      "down"
+    ]
+  },
+  {
+    "name": "corner-left-up",
+    "file": "icons/arrows/corner-left-up.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "left",
+      "up"
+    ]
+  },
+  {
+    "name": "corner-right-down",
+    "file": "icons/arrows/corner-right-down.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "right",
+      "down"
+    ]
+  },
+  {
+    "name": "corner-right-up",
+    "file": "icons/arrows/corner-right-up.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "right",
+      "up"
+    ]
+  },
+  {
+    "name": "corner-up-left",
+    "file": "icons/arrows/corner-up-left.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "up",
+      "left"
+    ]
+  },
+  {
+    "name": "corner-up-right",
+    "file": "icons/arrows/corner-up-right.svg",
+    "category": "arrows",
+    "tags": [
+      "corner",
+      "up",
+      "right"
+    ]
+  },
+  {
+    "name": "credit-card",
+    "file": "icons/commerce/credit-card.svg",
+    "category": "commerce",
+    "tags": [
+      "credit",
+      "card"
+    ]
+  },
+  {
+    "name": "database-backup",
+    "file": "icons/files/database-backup.svg",
+    "category": "files",
+    "tags": [
+      "database",
+      "backup"
+    ]
+  },
+  {
+    "name": "database-zap",
+    "file": "icons/files/database-zap.svg",
+    "category": "files",
+    "tags": [
+      "database",
+      "zap"
+    ]
+  },
+  {
+    "name": "database",
+    "file": "icons/files/database.svg",
+    "category": "files",
+    "tags": [
+      "database"
+    ]
+  },
+  {
+    "name": "dollar-sign",
+    "file": "icons/commerce/dollar-sign.svg",
+    "category": "commerce",
+    "tags": [
+      "dollar",
+      "sign"
+    ]
+  },
+  {
+    "name": "dot",
+    "file": "icons/status/dot.svg",
+    "category": "status",
+    "tags": [
+      "dot"
+    ]
+  },
+  {
+    "name": "download",
+    "file": "icons/files/download.svg",
+    "category": "files",
+    "tags": [
+      "download"
+    ]
+  },
+  {
+    "name": "expand",
+    "file": "icons/arrows/expand.svg",
+    "category": "arrows",
+    "tags": [
+      "expand"
+    ]
+  },
+  {
+    "name": "fast-forward",
+    "file": "icons/media/fast-forward.svg",
+    "category": "media",
+    "tags": [
+      "fast",
+      "forward"
+    ]
+  },
+  {
+    "name": "file-archive",
+    "file": "icons/files/file-archive.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "archive"
+    ]
+  },
+  {
+    "name": "file-axis-3d",
+    "file": "icons/files/file-axis-3d.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "axis",
+      "3d"
+    ]
+  },
+  {
+    "name": "file-badge",
+    "file": "icons/files/file-badge.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "badge"
+    ]
+  },
+  {
+    "name": "file-box",
+    "file": "icons/files/file-box.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "box"
+    ]
+  },
+  {
+    "name": "file-braces-corner",
+    "file": "icons/files/file-braces-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "braces",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-braces",
+    "file": "icons/files/file-braces.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "braces"
+    ]
+  },
+  {
+    "name": "file-chart-column-increasing",
+    "file": "icons/files/file-chart-column-increasing.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "chart",
+      "column",
+      "increasing"
+    ]
+  },
+  {
+    "name": "file-chart-column",
+    "file": "icons/files/file-chart-column.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "chart",
+      "column"
+    ]
+  },
+  {
+    "name": "file-chart-line",
+    "file": "icons/files/file-chart-line.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "chart",
+      "line"
+    ]
+  },
+  {
+    "name": "file-chart-pie",
+    "file": "icons/files/file-chart-pie.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "chart",
+      "pie"
+    ]
+  },
+  {
+    "name": "file-check-corner",
+    "file": "icons/files/file-check-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "check",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-check",
+    "file": "icons/files/file-check.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "check"
+    ]
+  },
+  {
+    "name": "file-clock",
+    "file": "icons/files/file-clock.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "clock"
+    ]
+  },
+  {
+    "name": "file-code-corner",
+    "file": "icons/files/file-code-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "code",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-code",
+    "file": "icons/files/file-code.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "code"
+    ]
+  },
+  {
+    "name": "file-cog",
+    "file": "icons/files/file-cog.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "cog"
+    ]
+  },
+  {
+    "name": "file-diff",
+    "file": "icons/files/file-diff.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "diff"
+    ]
+  },
+  {
+    "name": "file-digit",
+    "file": "icons/files/file-digit.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "digit"
+    ]
+  },
+  {
+    "name": "file-down",
+    "file": "icons/files/file-down.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "down"
+    ]
+  },
+  {
+    "name": "file-exclamation-point",
+    "file": "icons/files/file-exclamation-point.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "exclamation",
+      "point"
+    ]
+  },
+  {
+    "name": "file-headphone",
+    "file": "icons/files/file-headphone.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "headphone"
+    ]
+  },
+  {
+    "name": "file-heart",
+    "file": "icons/files/file-heart.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "heart"
+    ]
+  },
+  {
+    "name": "file-image",
+    "file": "icons/files/file-image.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "image"
+    ]
+  },
+  {
+    "name": "file-input",
+    "file": "icons/files/file-input.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "input"
+    ]
+  },
+  {
+    "name": "file-key",
+    "file": "icons/files/file-key.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "key"
+    ]
+  },
+  {
+    "name": "file-lock",
+    "file": "icons/files/file-lock.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "lock"
+    ]
+  },
+  {
+    "name": "file-minus-corner",
+    "file": "icons/files/file-minus-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "minus",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-minus",
+    "file": "icons/files/file-minus.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "minus"
+    ]
+  },
+  {
+    "name": "file-music",
+    "file": "icons/files/file-music.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "music"
+    ]
+  },
+  {
+    "name": "file-output",
+    "file": "icons/files/file-output.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "output"
+    ]
+  },
+  {
+    "name": "file-pen-line",
+    "file": "icons/files/file-pen-line.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "pen",
+      "line"
+    ]
+  },
+  {
+    "name": "file-pen",
+    "file": "icons/files/file-pen.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "pen"
+    ]
+  },
+  {
+    "name": "file-play",
+    "file": "icons/files/file-play.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "play"
+    ]
+  },
+  {
+    "name": "file-plus-corner",
+    "file": "icons/files/file-plus-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "plus",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-plus",
+    "file": "icons/files/file-plus.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "plus"
+    ]
+  },
+  {
+    "name": "file-question-mark",
+    "file": "icons/files/file-question-mark.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "question",
+      "mark"
+    ]
+  },
+  {
+    "name": "file-scan",
+    "file": "icons/files/file-scan.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "scan"
+    ]
+  },
+  {
+    "name": "file-search-corner",
+    "file": "icons/files/file-search-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "search",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-search",
+    "file": "icons/files/file-search.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "search"
+    ]
+  },
+  {
+    "name": "file-signal",
+    "file": "icons/files/file-signal.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "signal"
+    ]
+  },
+  {
+    "name": "file-sliders",
+    "file": "icons/files/file-sliders.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "sliders"
+    ]
+  },
+  {
+    "name": "file-spreadsheet",
+    "file": "icons/files/file-spreadsheet.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "spreadsheet"
+    ]
+  },
+  {
+    "name": "file-stack",
+    "file": "icons/files/file-stack.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "stack"
+    ]
+  },
+  {
+    "name": "file-symlink",
+    "file": "icons/files/file-symlink.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "symlink"
+    ]
+  },
+  {
+    "name": "file-terminal",
+    "file": "icons/files/file-terminal.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "terminal"
+    ]
+  },
+  {
+    "name": "file-text",
+    "file": "icons/files/file-text.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "text"
+    ]
+  },
+  {
+    "name": "file-type-corner",
+    "file": "icons/files/file-type-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "type",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-type",
+    "file": "icons/files/file-type.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "type"
+    ]
+  },
+  {
+    "name": "file-up",
+    "file": "icons/files/file-up.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "up"
+    ]
+  },
+  {
+    "name": "file-user",
+    "file": "icons/files/file-user.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "user"
+    ]
+  },
+  {
+    "name": "file-video-camera",
+    "file": "icons/files/file-video-camera.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "video",
+      "camera"
+    ]
+  },
+  {
+    "name": "file-volume",
+    "file": "icons/files/file-volume.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "volume"
+    ]
+  },
+  {
+    "name": "file-x-corner",
+    "file": "icons/files/file-x-corner.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "x",
+      "corner"
+    ]
+  },
+  {
+    "name": "file-x",
+    "file": "icons/files/file-x.svg",
+    "category": "files",
+    "tags": [
+      "file",
+      "x"
+    ]
+  },
+  {
+    "name": "file",
+    "file": "icons/files/file.svg",
+    "category": "files",
+    "tags": [
+      "file"
+    ]
+  },
+  {
+    "name": "files",
+    "file": "icons/files/files.svg",
+    "category": "files",
+    "tags": [
+      "files"
+    ]
+  },
+  {
+    "name": "film",
+    "file": "icons/media/film.svg",
+    "category": "media",
+    "tags": [
+      "film"
+    ]
+  },
+  {
+    "name": "fold-horizontal",
+    "file": "icons/arrows/fold-horizontal.svg",
+    "category": "arrows",
+    "tags": [
+      "fold",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "fold-vertical",
+    "file": "icons/arrows/fold-vertical.svg",
+    "category": "arrows",
+    "tags": [
+      "fold",
+      "vertical"
+    ]
+  },
+  {
+    "name": "folder-archive",
+    "file": "icons/arrows/folder-archive.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "archive"
+    ]
+  },
+  {
+    "name": "folder-check",
+    "file": "icons/arrows/folder-check.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "check"
+    ]
+  },
+  {
+    "name": "folder-clock",
+    "file": "icons/arrows/folder-clock.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "clock"
+    ]
+  },
+  {
+    "name": "folder-closed",
+    "file": "icons/arrows/folder-closed.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "closed"
+    ]
+  },
+  {
+    "name": "folder-code",
+    "file": "icons/arrows/folder-code.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "code"
+    ]
+  },
+  {
+    "name": "folder-cog",
+    "file": "icons/arrows/folder-cog.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "cog"
+    ]
+  },
+  {
+    "name": "folder-dot",
+    "file": "icons/arrows/folder-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "dot"
+    ]
+  },
+  {
+    "name": "folder-down",
+    "file": "icons/arrows/folder-down.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "down"
+    ]
+  },
+  {
+    "name": "folder-git-2",
+    "file": "icons/arrows/folder-git-2.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "git",
+      "2"
+    ]
+  },
+  {
+    "name": "folder-git",
+    "file": "icons/arrows/folder-git.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "git"
+    ]
+  },
+  {
+    "name": "folder-heart",
+    "file": "icons/arrows/folder-heart.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "heart"
+    ]
+  },
+  {
+    "name": "folder-input",
+    "file": "icons/arrows/folder-input.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "input"
+    ]
+  },
+  {
+    "name": "folder-kanban",
+    "file": "icons/arrows/folder-kanban.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "kanban"
+    ]
+  },
+  {
+    "name": "folder-key",
+    "file": "icons/arrows/folder-key.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "key"
+    ]
+  },
+  {
+    "name": "folder-lock",
+    "file": "icons/arrows/folder-lock.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "lock"
+    ]
+  },
+  {
+    "name": "folder-minus",
+    "file": "icons/arrows/folder-minus.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "minus"
+    ]
+  },
+  {
+    "name": "folder-open-dot",
+    "file": "icons/arrows/folder-open-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "open",
+      "dot"
+    ]
+  },
+  {
+    "name": "folder-open",
+    "file": "icons/arrows/folder-open.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "open"
+    ]
+  },
+  {
+    "name": "folder-output",
+    "file": "icons/arrows/folder-output.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "output"
+    ]
+  },
+  {
+    "name": "folder-pen",
+    "file": "icons/arrows/folder-pen.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "pen"
+    ]
+  },
+  {
+    "name": "folder-plus",
+    "file": "icons/arrows/folder-plus.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "plus"
+    ]
+  },
+  {
+    "name": "folder-root",
+    "file": "icons/arrows/folder-root.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "root"
+    ]
+  },
+  {
+    "name": "folder-search-2",
+    "file": "icons/arrows/folder-search-2.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "search",
+      "2"
+    ]
+  },
+  {
+    "name": "folder-search",
+    "file": "icons/arrows/folder-search.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "search"
+    ]
+  },
+  {
+    "name": "folder-symlink",
+    "file": "icons/arrows/folder-symlink.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "symlink"
+    ]
+  },
+  {
+    "name": "folder-sync",
+    "file": "icons/arrows/folder-sync.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "sync"
+    ]
+  },
+  {
+    "name": "folder-tree",
+    "file": "icons/arrows/folder-tree.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "tree"
+    ]
+  },
+  {
+    "name": "folder-up",
+    "file": "icons/arrows/folder-up.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "up"
+    ]
+  },
+  {
+    "name": "folder-x",
+    "file": "icons/arrows/folder-x.svg",
+    "category": "arrows",
+    "tags": [
+      "folder",
+      "x"
+    ]
+  },
+  {
+    "name": "folder",
+    "file": "icons/arrows/folder.svg",
+    "category": "arrows",
+    "tags": [
+      "folder"
+    ]
+  },
+  {
+    "name": "folders",
+    "file": "icons/arrows/folders.svg",
+    "category": "arrows",
+    "tags": [
+      "folders"
+    ]
+  },
+  {
+    "name": "globe",
+    "file": "icons/misc/globe.svg",
+    "category": "misc",
+    "tags": [
+      "globe"
+    ]
+  },
+  {
+    "name": "hammer",
+    "file": "icons/settings/hammer.svg",
+    "category": "settings",
+    "tags": [
+      "hammer"
+    ]
+  },
+  {
+    "name": "hand",
+    "file": "icons/misc/hand.svg",
+    "category": "misc",
+    "tags": [
+      "hand"
+    ]
+  },
+  {
+    "name": "hard-drive-download",
+    "file": "icons/files/hard-drive-download.svg",
+    "category": "files",
+    "tags": [
+      "hard",
+      "drive",
+      "download"
+    ]
+  },
+  {
+    "name": "hard-drive-upload",
+    "file": "icons/files/hard-drive-upload.svg",
+    "category": "files",
+    "tags": [
+      "hard",
+      "drive",
+      "upload"
+    ]
+  },
+  {
+    "name": "hard-drive",
+    "file": "icons/files/hard-drive.svg",
+    "category": "files",
+    "tags": [
+      "hard",
+      "drive"
+    ]
+  },
+  {
+    "name": "heading-1",
+    "file": "icons/text/heading-1.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "1"
+    ]
+  },
+  {
+    "name": "heading-2",
+    "file": "icons/text/heading-2.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "2"
+    ]
+  },
+  {
+    "name": "heading-3",
+    "file": "icons/text/heading-3.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "3"
+    ]
+  },
+  {
+    "name": "heading-4",
+    "file": "icons/text/heading-4.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "4"
+    ]
+  },
+  {
+    "name": "heading-5",
+    "file": "icons/text/heading-5.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "5"
+    ]
+  },
+  {
+    "name": "heading-6",
+    "file": "icons/text/heading-6.svg",
+    "category": "text",
+    "tags": [
+      "heading",
+      "6"
+    ]
+  },
+  {
+    "name": "heading",
+    "file": "icons/text/heading.svg",
+    "category": "text",
+    "tags": [
+      "heading"
+    ]
+  },
+  {
+    "name": "hourglass",
+    "file": "icons/time/hourglass.svg",
+    "category": "time",
+    "tags": [
+      "hourglass"
+    ]
+  },
+  {
+    "name": "image-down",
+    "file": "icons/media/image-down.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "down"
+    ]
+  },
+  {
+    "name": "image-minus",
+    "file": "icons/media/image-minus.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "minus"
+    ]
+  },
+  {
+    "name": "image-off",
+    "file": "icons/media/image-off.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "off"
+    ]
+  },
+  {
+    "name": "image-play",
+    "file": "icons/media/image-play.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "play"
+    ]
+  },
+  {
+    "name": "image-plus",
+    "file": "icons/media/image-plus.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "plus"
+    ]
+  },
+  {
+    "name": "image-up",
+    "file": "icons/media/image-up.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "up"
+    ]
+  },
+  {
+    "name": "image-upscale",
+    "file": "icons/media/image-upscale.svg",
+    "category": "media",
+    "tags": [
+      "image",
+      "upscale"
+    ]
+  },
+  {
+    "name": "image",
+    "file": "icons/media/image.svg",
+    "category": "media",
+    "tags": [
+      "image"
+    ]
+  },
+  {
+    "name": "images",
+    "file": "icons/media/images.svg",
+    "category": "media",
+    "tags": [
+      "images"
+    ]
+  },
+  {
+    "name": "info",
+    "file": "icons/status/info.svg",
+    "category": "status",
+    "tags": [
+      "info"
+    ]
+  },
+  {
+    "name": "italic",
+    "file": "icons/text/italic.svg",
+    "category": "text",
+    "tags": [
+      "italic"
+    ]
+  },
+  {
+    "name": "layout-grid",
+    "file": "icons/layout/layout-grid.svg",
+    "category": "layout",
+    "tags": [
+      "layout",
+      "grid"
+    ]
+  },
+  {
+    "name": "layout-template",
+    "file": "icons/layout/layout-template.svg",
+    "category": "layout",
+    "tags": [
+      "layout",
+      "template"
+    ]
+  },
+  {
+    "name": "link-2-off",
+    "file": "icons/comms/link-2-off.svg",
+    "category": "comms",
+    "tags": [
+      "link",
+      "2",
+      "off"
+    ]
+  },
+  {
+    "name": "link-2",
+    "file": "icons/comms/link-2.svg",
+    "category": "comms",
+    "tags": [
+      "link",
+      "2"
+    ]
+  },
+  {
+    "name": "link",
+    "file": "icons/comms/link.svg",
+    "category": "comms",
+    "tags": [
+      "link"
+    ]
+  },
+  {
+    "name": "linkedin",
+    "file": "icons/comms/linkedin.svg",
+    "category": "comms",
+    "tags": [
+      "linkedin"
+    ]
+  },
+  {
+    "name": "list-check",
+    "file": "icons/text/list-check.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "check"
+    ]
+  },
+  {
+    "name": "list-checks",
+    "file": "icons/text/list-checks.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "checks"
+    ]
+  },
+  {
+    "name": "list-chevrons-down-up",
+    "file": "icons/text/list-chevrons-down-up.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "chevrons",
+      "down",
+      "up"
+    ]
+  },
+  {
+    "name": "list-chevrons-up-down",
+    "file": "icons/text/list-chevrons-up-down.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "chevrons",
+      "up",
+      "down"
+    ]
+  },
+  {
+    "name": "list-collapse",
+    "file": "icons/text/list-collapse.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "collapse"
+    ]
+  },
+  {
+    "name": "list-end",
+    "file": "icons/text/list-end.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "end"
+    ]
+  },
+  {
+    "name": "list-filter-plus",
+    "file": "icons/text/list-filter-plus.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "filter",
+      "plus"
+    ]
+  },
+  {
+    "name": "list-filter",
+    "file": "icons/text/list-filter.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "filter"
+    ]
+  },
+  {
+    "name": "list-indent-decrease",
+    "file": "icons/text/list-indent-decrease.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "indent",
+      "decrease"
+    ]
+  },
+  {
+    "name": "list-indent-increase",
+    "file": "icons/text/list-indent-increase.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "indent",
+      "increase"
+    ]
+  },
+  {
+    "name": "list-minus",
+    "file": "icons/text/list-minus.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "minus"
+    ]
+  },
+  {
+    "name": "list-music",
+    "file": "icons/text/list-music.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "music"
+    ]
+  },
+  {
+    "name": "list-ordered",
+    "file": "icons/text/list-ordered.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "ordered"
+    ]
+  },
+  {
+    "name": "list-plus",
+    "file": "icons/text/list-plus.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "plus"
+    ]
+  },
+  {
+    "name": "list-restart",
+    "file": "icons/text/list-restart.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "restart"
+    ]
+  },
+  {
+    "name": "list-start",
+    "file": "icons/text/list-start.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "start"
+    ]
+  },
+  {
+    "name": "list-todo",
+    "file": "icons/text/list-todo.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "todo"
+    ]
+  },
+  {
+    "name": "list-tree",
+    "file": "icons/text/list-tree.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "tree"
+    ]
+  },
+  {
+    "name": "list-video",
+    "file": "icons/text/list-video.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "video"
+    ]
+  },
+  {
+    "name": "list-x",
+    "file": "icons/text/list-x.svg",
+    "category": "text",
+    "tags": [
+      "list",
+      "x"
+    ]
+  },
+  {
+    "name": "list",
+    "file": "icons/text/list.svg",
+    "category": "text",
+    "tags": [
+      "list"
+    ]
+  },
+  {
+    "name": "loader-circle",
+    "file": "icons/status/loader-circle.svg",
+    "category": "status",
+    "tags": [
+      "loader",
+      "circle"
+    ]
+  },
+  {
+    "name": "loader-pinwheel",
+    "file": "icons/status/loader-pinwheel.svg",
+    "category": "status",
+    "tags": [
+      "loader",
+      "pinwheel"
+    ]
+  },
+  {
+    "name": "loader",
+    "file": "icons/status/loader.svg",
+    "category": "status",
+    "tags": [
+      "loader"
+    ]
+  },
+  {
+    "name": "locate-fixed",
+    "file": "icons/location/locate-fixed.svg",
+    "category": "location",
+    "tags": [
+      "locate",
+      "fixed"
+    ]
+  },
+  {
+    "name": "locate-off",
+    "file": "icons/location/locate-off.svg",
+    "category": "location",
+    "tags": [
+      "locate",
+      "off"
+    ]
+  },
+  {
+    "name": "locate",
+    "file": "icons/location/locate.svg",
+    "category": "location",
+    "tags": [
+      "locate"
+    ]
+  },
+  {
+    "name": "lock-keyhole-open",
+    "file": "icons/status/lock-keyhole-open.svg",
+    "category": "status",
+    "tags": [
+      "lock",
+      "keyhole",
+      "open"
+    ]
+  },
+  {
+    "name": "lock-keyhole",
+    "file": "icons/status/lock-keyhole.svg",
+    "category": "status",
+    "tags": [
+      "lock",
+      "keyhole"
+    ]
+  },
+  {
+    "name": "lock-open",
+    "file": "icons/status/lock-open.svg",
+    "category": "status",
+    "tags": [
+      "lock",
+      "open"
+    ]
+  },
+  {
+    "name": "lock",
+    "file": "icons/status/lock.svg",
+    "category": "status",
+    "tags": [
+      "lock"
+    ]
+  },
+  {
+    "name": "mail-check",
+    "file": "icons/comms/mail-check.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "check"
+    ]
+  },
+  {
+    "name": "mail-minus",
+    "file": "icons/comms/mail-minus.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "minus"
+    ]
+  },
+  {
+    "name": "mail-open",
+    "file": "icons/comms/mail-open.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "open"
+    ]
+  },
+  {
+    "name": "mail-plus",
+    "file": "icons/comms/mail-plus.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "plus"
+    ]
+  },
+  {
+    "name": "mail-question-mark",
+    "file": "icons/comms/mail-question-mark.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "question",
+      "mark"
+    ]
+  },
+  {
+    "name": "mail-search",
+    "file": "icons/comms/mail-search.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "search"
+    ]
+  },
+  {
+    "name": "mail-warning",
+    "file": "icons/comms/mail-warning.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "warning"
+    ]
+  },
+  {
+    "name": "mail-x",
+    "file": "icons/comms/mail-x.svg",
+    "category": "comms",
+    "tags": [
+      "mail",
+      "x"
+    ]
+  },
+  {
+    "name": "mail",
+    "file": "icons/comms/mail.svg",
+    "category": "comms",
+    "tags": [
+      "mail"
+    ]
+  },
+  {
+    "name": "mailbox",
+    "file": "icons/comms/mailbox.svg",
+    "category": "comms",
+    "tags": [
+      "mailbox"
+    ]
+  },
+  {
+    "name": "mails",
+    "file": "icons/comms/mails.svg",
+    "category": "comms",
+    "tags": [
+      "mails"
+    ]
+  },
+  {
+    "name": "map-minus",
+    "file": "icons/location/map-minus.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "minus"
+    ]
+  },
+  {
+    "name": "map-pin-check-inside",
+    "file": "icons/location/map-pin-check-inside.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "check",
+      "inside"
+    ]
+  },
+  {
+    "name": "map-pin-check",
+    "file": "icons/location/map-pin-check.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "check"
+    ]
+  },
+  {
+    "name": "map-pin-house",
+    "file": "icons/location/map-pin-house.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "house"
+    ]
+  },
+  {
+    "name": "map-pin-minus-inside",
+    "file": "icons/location/map-pin-minus-inside.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "minus",
+      "inside"
+    ]
+  },
+  {
+    "name": "map-pin-minus",
+    "file": "icons/location/map-pin-minus.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "minus"
+    ]
+  },
+  {
+    "name": "map-pin-off",
+    "file": "icons/location/map-pin-off.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "off"
+    ]
+  },
+  {
+    "name": "map-pin-pen",
+    "file": "icons/location/map-pin-pen.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "pen"
+    ]
+  },
+  {
+    "name": "map-pin-plus-inside",
+    "file": "icons/location/map-pin-plus-inside.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "plus",
+      "inside"
+    ]
+  },
+  {
+    "name": "map-pin-plus",
+    "file": "icons/location/map-pin-plus.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "plus"
+    ]
+  },
+  {
+    "name": "map-pin-x-inside",
+    "file": "icons/location/map-pin-x-inside.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "x",
+      "inside"
+    ]
+  },
+  {
+    "name": "map-pin-x",
+    "file": "icons/location/map-pin-x.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin",
+      "x"
+    ]
+  },
+  {
+    "name": "map-pin",
+    "file": "icons/location/map-pin.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pin"
+    ]
+  },
+  {
+    "name": "map-pinned",
+    "file": "icons/location/map-pinned.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "pinned"
+    ]
+  },
+  {
+    "name": "map-plus",
+    "file": "icons/location/map-plus.svg",
+    "category": "location",
+    "tags": [
+      "map",
+      "plus"
+    ]
+  },
+  {
+    "name": "map",
+    "file": "icons/location/map.svg",
+    "category": "location",
+    "tags": [
+      "map"
+    ]
+  },
+  {
+    "name": "maximize-2",
+    "file": "icons/arrows/maximize-2.svg",
+    "category": "arrows",
+    "tags": [
+      "maximize",
+      "2"
+    ]
+  },
+  {
+    "name": "maximize",
+    "file": "icons/arrows/maximize.svg",
+    "category": "arrows",
+    "tags": [
+      "maximize"
+    ]
+  },
+  {
+    "name": "menu",
+    "file": "icons/misc/menu.svg",
+    "category": "misc",
+    "tags": [
+      "menu"
+    ]
+  },
+  {
+    "name": "message-circle-code",
+    "file": "icons/comms/message-circle-code.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "code"
+    ]
+  },
+  {
+    "name": "message-circle-dashed",
+    "file": "icons/comms/message-circle-dashed.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "dashed"
+    ]
+  },
+  {
+    "name": "message-circle-heart",
+    "file": "icons/comms/message-circle-heart.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "heart"
+    ]
+  },
+  {
+    "name": "message-circle-more",
+    "file": "icons/comms/message-circle-more.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "more"
+    ]
+  },
+  {
+    "name": "message-circle-off",
+    "file": "icons/comms/message-circle-off.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "off"
+    ]
+  },
+  {
+    "name": "message-circle-plus",
+    "file": "icons/comms/message-circle-plus.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "plus"
+    ]
+  },
+  {
+    "name": "message-circle-question-mark",
+    "file": "icons/comms/message-circle-question-mark.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "question",
+      "mark"
+    ]
+  },
+  {
+    "name": "message-circle-reply",
+    "file": "icons/comms/message-circle-reply.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "reply"
+    ]
+  },
+  {
+    "name": "message-circle-warning",
+    "file": "icons/comms/message-circle-warning.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "warning"
+    ]
+  },
+  {
+    "name": "message-circle-x",
+    "file": "icons/comms/message-circle-x.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle",
+      "x"
+    ]
+  },
+  {
+    "name": "message-circle",
+    "file": "icons/comms/message-circle.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "circle"
+    ]
+  },
+  {
+    "name": "message-square-code",
+    "file": "icons/comms/message-square-code.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "code"
+    ]
+  },
+  {
+    "name": "message-square-dashed",
+    "file": "icons/comms/message-square-dashed.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "dashed"
+    ]
+  },
+  {
+    "name": "message-square-diff",
+    "file": "icons/comms/message-square-diff.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "diff"
+    ]
+  },
+  {
+    "name": "message-square-dot",
+    "file": "icons/comms/message-square-dot.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "dot"
+    ]
+  },
+  {
+    "name": "message-square-heart",
+    "file": "icons/comms/message-square-heart.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "heart"
+    ]
+  },
+  {
+    "name": "message-square-lock",
+    "file": "icons/comms/message-square-lock.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "lock"
+    ]
+  },
+  {
+    "name": "message-square-more",
+    "file": "icons/comms/message-square-more.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "more"
+    ]
+  },
+  {
+    "name": "message-square-off",
+    "file": "icons/comms/message-square-off.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "off"
+    ]
+  },
+  {
+    "name": "message-square-plus",
+    "file": "icons/comms/message-square-plus.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "plus"
+    ]
+  },
+  {
+    "name": "message-square-quote",
+    "file": "icons/comms/message-square-quote.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "quote"
+    ]
+  },
+  {
+    "name": "message-square-reply",
+    "file": "icons/comms/message-square-reply.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "reply"
+    ]
+  },
+  {
+    "name": "message-square-share",
+    "file": "icons/comms/message-square-share.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "share"
+    ]
+  },
+  {
+    "name": "message-square-text",
+    "file": "icons/comms/message-square-text.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "text"
+    ]
+  },
+  {
+    "name": "message-square-warning",
+    "file": "icons/comms/message-square-warning.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "warning"
+    ]
+  },
+  {
+    "name": "message-square-x",
+    "file": "icons/comms/message-square-x.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square",
+      "x"
+    ]
+  },
+  {
+    "name": "message-square",
+    "file": "icons/comms/message-square.svg",
+    "category": "comms",
+    "tags": [
+      "message",
+      "square"
+    ]
+  },
+  {
+    "name": "messages-square",
+    "file": "icons/comms/messages-square.svg",
+    "category": "comms",
+    "tags": [
+      "messages",
+      "square"
+    ]
+  },
+  {
+    "name": "mic-off",
+    "file": "icons/media/mic-off.svg",
+    "category": "media",
+    "tags": [
+      "mic",
+      "off"
+    ]
+  },
+  {
+    "name": "mic-vocal",
+    "file": "icons/media/mic-vocal.svg",
+    "category": "media",
+    "tags": [
+      "mic",
+      "vocal"
+    ]
+  },
+  {
+    "name": "mic",
+    "file": "icons/media/mic.svg",
+    "category": "media",
+    "tags": [
+      "mic"
+    ]
+  },
+  {
+    "name": "microchip",
+    "file": "icons/media/microchip.svg",
+    "category": "media",
+    "tags": [
+      "microchip"
+    ]
+  },
+  {
+    "name": "microscope",
+    "file": "icons/media/microscope.svg",
+    "category": "media",
+    "tags": [
+      "microscope"
+    ]
+  },
+  {
+    "name": "microwave",
+    "file": "icons/media/microwave.svg",
+    "category": "media",
+    "tags": [
+      "microwave"
+    ]
+  },
+  {
+    "name": "minimize-2",
+    "file": "icons/arrows/minimize-2.svg",
+    "category": "arrows",
+    "tags": [
+      "minimize",
+      "2"
+    ]
+  },
+  {
+    "name": "minimize",
+    "file": "icons/arrows/minimize.svg",
+    "category": "arrows",
+    "tags": [
+      "minimize"
+    ]
+  },
+  {
+    "name": "minus",
+    "file": "icons/misc/minus.svg",
+    "category": "misc",
+    "tags": [
+      "minus"
+    ]
+  },
+  {
+    "name": "moon-star",
+    "file": "icons/time/moon-star.svg",
+    "category": "time",
+    "tags": [
+      "moon",
+      "star"
+    ]
+  },
+  {
+    "name": "moon",
+    "file": "icons/time/moon.svg",
+    "category": "time",
+    "tags": [
+      "moon"
+    ]
+  },
+  {
+    "name": "move-3d",
+    "file": "icons/arrows/move-3d.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "3d"
+    ]
+  },
+  {
+    "name": "move-diagonal-2",
+    "file": "icons/arrows/move-diagonal-2.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "diagonal",
+      "2"
+    ]
+  },
+  {
+    "name": "move-diagonal",
+    "file": "icons/arrows/move-diagonal.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "diagonal"
+    ]
+  },
+  {
+    "name": "move-down-left",
+    "file": "icons/arrows/move-down-left.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "down",
+      "left"
+    ]
+  },
+  {
+    "name": "move-down-right",
+    "file": "icons/arrows/move-down-right.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "down",
+      "right"
+    ]
+  },
+  {
+    "name": "move-down",
+    "file": "icons/arrows/move-down.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "down"
+    ]
+  },
+  {
+    "name": "move-horizontal",
+    "file": "icons/arrows/move-horizontal.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "move-left",
+    "file": "icons/arrows/move-left.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "left"
+    ]
+  },
+  {
+    "name": "move-right",
+    "file": "icons/arrows/move-right.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "right"
+    ]
+  },
+  {
+    "name": "move-up-left",
+    "file": "icons/arrows/move-up-left.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "up",
+      "left"
+    ]
+  },
+  {
+    "name": "move-up-right",
+    "file": "icons/arrows/move-up-right.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "up",
+      "right"
+    ]
+  },
+  {
+    "name": "move-up",
+    "file": "icons/arrows/move-up.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "up"
+    ]
+  },
+  {
+    "name": "move-vertical",
+    "file": "icons/arrows/move-vertical.svg",
+    "category": "arrows",
+    "tags": [
+      "move",
+      "vertical"
+    ]
+  },
+  {
+    "name": "move",
+    "file": "icons/arrows/move.svg",
+    "category": "arrows",
+    "tags": [
+      "move"
+    ]
+  },
+  {
+    "name": "music-2",
+    "file": "icons/media/music-2.svg",
+    "category": "media",
+    "tags": [
+      "music",
+      "2"
+    ]
+  },
+  {
+    "name": "music-3",
+    "file": "icons/media/music-3.svg",
+    "category": "media",
+    "tags": [
+      "music",
+      "3"
+    ]
+  },
+  {
+    "name": "music-4",
+    "file": "icons/media/music-4.svg",
+    "category": "media",
+    "tags": [
+      "music",
+      "4"
+    ]
+  },
+  {
+    "name": "music",
+    "file": "icons/media/music.svg",
+    "category": "media",
+    "tags": [
+      "music"
+    ]
+  },
+  {
+    "name": "navigation-2-off",
+    "file": "icons/location/navigation-2-off.svg",
+    "category": "location",
+    "tags": [
+      "navigation",
+      "2",
+      "off"
+    ]
+  },
+  {
+    "name": "navigation-2",
+    "file": "icons/location/navigation-2.svg",
+    "category": "location",
+    "tags": [
+      "navigation",
+      "2"
+    ]
+  },
+  {
+    "name": "navigation-off",
+    "file": "icons/location/navigation-off.svg",
+    "category": "location",
+    "tags": [
+      "navigation",
+      "off"
+    ]
+  },
+  {
+    "name": "navigation",
+    "file": "icons/location/navigation.svg",
+    "category": "location",
+    "tags": [
+      "navigation"
+    ]
+  },
+  {
+    "name": "package-2",
+    "file": "icons/files/package-2.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "2"
+    ]
+  },
+  {
+    "name": "package-check",
+    "file": "icons/files/package-check.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "check"
+    ]
+  },
+  {
+    "name": "package-minus",
+    "file": "icons/files/package-minus.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "minus"
+    ]
+  },
+  {
+    "name": "package-open",
+    "file": "icons/files/package-open.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "open"
+    ]
+  },
+  {
+    "name": "package-plus",
+    "file": "icons/files/package-plus.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "plus"
+    ]
+  },
+  {
+    "name": "package-search",
+    "file": "icons/files/package-search.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "search"
+    ]
+  },
+  {
+    "name": "package-x",
+    "file": "icons/files/package-x.svg",
+    "category": "files",
+    "tags": [
+      "package",
+      "x"
+    ]
+  },
+  {
+    "name": "package",
+    "file": "icons/files/package.svg",
+    "category": "files",
+    "tags": [
+      "package"
+    ]
+  },
+  {
+    "name": "paintbrush-vertical",
+    "file": "icons/settings/paintbrush-vertical.svg",
+    "category": "settings",
+    "tags": [
+      "paintbrush",
+      "vertical"
+    ]
+  },
+  {
+    "name": "paintbrush",
+    "file": "icons/settings/paintbrush.svg",
+    "category": "settings",
+    "tags": [
+      "paintbrush"
+    ]
+  },
+  {
+    "name": "palette",
+    "file": "icons/settings/palette.svg",
+    "category": "settings",
+    "tags": [
+      "palette"
+    ]
+  },
+  {
+    "name": "pause",
+    "file": "icons/media/pause.svg",
+    "category": "media",
+    "tags": [
+      "pause"
+    ]
+  },
+  {
+    "name": "phone-call",
+    "file": "icons/comms/phone-call.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "call"
+    ]
+  },
+  {
+    "name": "phone-forwarded",
+    "file": "icons/comms/phone-forwarded.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "forwarded"
+    ]
+  },
+  {
+    "name": "phone-incoming",
+    "file": "icons/comms/phone-incoming.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "incoming"
+    ]
+  },
+  {
+    "name": "phone-missed",
+    "file": "icons/comms/phone-missed.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "missed"
+    ]
+  },
+  {
+    "name": "phone-off",
+    "file": "icons/comms/phone-off.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "off"
+    ]
+  },
+  {
+    "name": "phone-outgoing",
+    "file": "icons/comms/phone-outgoing.svg",
+    "category": "comms",
+    "tags": [
+      "phone",
+      "outgoing"
+    ]
+  },
+  {
+    "name": "phone",
+    "file": "icons/comms/phone.svg",
+    "category": "comms",
+    "tags": [
+      "phone"
+    ]
+  },
+  {
+    "name": "pilcrow-left",
+    "file": "icons/text/pilcrow-left.svg",
+    "category": "text",
+    "tags": [
+      "pilcrow",
+      "left"
+    ]
+  },
+  {
+    "name": "pilcrow-right",
+    "file": "icons/text/pilcrow-right.svg",
+    "category": "text",
+    "tags": [
+      "pilcrow",
+      "right"
+    ]
+  },
+  {
+    "name": "pilcrow",
+    "file": "icons/text/pilcrow.svg",
+    "category": "text",
+    "tags": [
+      "pilcrow"
+    ]
+  },
+  {
+    "name": "pipette",
+    "file": "icons/settings/pipette.svg",
+    "category": "settings",
+    "tags": [
+      "pipette"
+    ]
+  },
+  {
+    "name": "play",
+    "file": "icons/media/play.svg",
+    "category": "media",
+    "tags": [
+      "play"
+    ]
+  },
+  {
+    "name": "plus",
+    "file": "icons/misc/plus.svg",
+    "category": "misc",
+    "tags": [
+      "plus"
+    ]
+  },
+  {
+    "name": "quote",
+    "file": "icons/text/quote.svg",
+    "category": "text",
+    "tags": [
+      "quote"
+    ]
+  },
+  {
+    "name": "receipt-cent",
+    "file": "icons/commerce/receipt-cent.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "cent"
+    ]
+  },
+  {
+    "name": "receipt-euro",
+    "file": "icons/commerce/receipt-euro.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "euro"
+    ]
+  },
+  {
+    "name": "receipt-indian-rupee",
+    "file": "icons/commerce/receipt-indian-rupee.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "indian",
+      "rupee"
+    ]
+  },
+  {
+    "name": "receipt-japanese-yen",
+    "file": "icons/commerce/receipt-japanese-yen.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "japanese",
+      "yen"
+    ]
+  },
+  {
+    "name": "receipt-pound-sterling",
+    "file": "icons/commerce/receipt-pound-sterling.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "pound",
+      "sterling"
+    ]
+  },
+  {
+    "name": "receipt-russian-ruble",
+    "file": "icons/commerce/receipt-russian-ruble.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "russian",
+      "ruble"
+    ]
+  },
+  {
+    "name": "receipt-swiss-franc",
+    "file": "icons/commerce/receipt-swiss-franc.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "swiss",
+      "franc"
+    ]
+  },
+  {
+    "name": "receipt-text",
+    "file": "icons/commerce/receipt-text.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "text"
+    ]
+  },
+  {
+    "name": "receipt-turkish-lira",
+    "file": "icons/commerce/receipt-turkish-lira.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt",
+      "turkish",
+      "lira"
+    ]
+  },
+  {
+    "name": "receipt",
+    "file": "icons/commerce/receipt.svg",
+    "category": "commerce",
+    "tags": [
+      "receipt"
+    ]
+  },
+  {
+    "name": "redo-2",
+    "file": "icons/arrows/redo-2.svg",
+    "category": "arrows",
+    "tags": [
+      "redo",
+      "2"
+    ]
+  },
+  {
+    "name": "redo-dot",
+    "file": "icons/arrows/redo-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "redo",
+      "dot"
+    ]
+  },
+  {
+    "name": "redo",
+    "file": "icons/arrows/redo.svg",
+    "category": "arrows",
+    "tags": [
+      "redo"
+    ]
+  },
+  {
+    "name": "refresh-ccw-dot",
+    "file": "icons/arrows/refresh-ccw-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "refresh",
+      "ccw",
+      "dot"
+    ]
+  },
+  {
+    "name": "refresh-ccw",
+    "file": "icons/arrows/refresh-ccw.svg",
+    "category": "arrows",
+    "tags": [
+      "refresh",
+      "ccw"
+    ]
+  },
+  {
+    "name": "refresh-cw-off",
+    "file": "icons/arrows/refresh-cw-off.svg",
+    "category": "arrows",
+    "tags": [
+      "refresh",
+      "cw",
+      "off"
+    ]
+  },
+  {
+    "name": "refresh-cw",
+    "file": "icons/arrows/refresh-cw.svg",
+    "category": "arrows",
+    "tags": [
+      "refresh",
+      "cw"
+    ]
+  },
+  {
+    "name": "remove-formatting",
+    "file": "icons/text/remove-formatting.svg",
+    "category": "text",
+    "tags": [
+      "remove",
+      "formatting"
+    ]
+  },
+  {
+    "name": "repeat-1",
+    "file": "icons/arrows/repeat-1.svg",
+    "category": "arrows",
+    "tags": [
+      "repeat",
+      "1"
+    ]
+  },
+  {
+    "name": "repeat-2",
+    "file": "icons/arrows/repeat-2.svg",
+    "category": "arrows",
+    "tags": [
+      "repeat",
+      "2"
+    ]
+  },
+  {
+    "name": "repeat",
+    "file": "icons/arrows/repeat.svg",
+    "category": "arrows",
+    "tags": [
+      "repeat"
+    ]
+  },
+  {
+    "name": "rewind",
+    "file": "icons/media/rewind.svg",
+    "category": "media",
+    "tags": [
+      "rewind"
+    ]
+  },
+  {
+    "name": "rotate-3d",
+    "file": "icons/arrows/rotate-3d.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "3d"
+    ]
+  },
+  {
+    "name": "rotate-ccw-key",
+    "file": "icons/arrows/rotate-ccw-key.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "ccw",
+      "key"
+    ]
+  },
+  {
+    "name": "rotate-ccw-square",
+    "file": "icons/arrows/rotate-ccw-square.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "ccw",
+      "square"
+    ]
+  },
+  {
+    "name": "rotate-ccw",
+    "file": "icons/arrows/rotate-ccw.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "ccw"
+    ]
+  },
+  {
+    "name": "rotate-cw-square",
+    "file": "icons/arrows/rotate-cw-square.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "cw",
+      "square"
+    ]
+  },
+  {
+    "name": "rotate-cw",
+    "file": "icons/arrows/rotate-cw.svg",
+    "category": "arrows",
+    "tags": [
+      "rotate",
+      "cw"
+    ]
+  },
+  {
+    "name": "rows-2",
+    "file": "icons/layout/rows-2.svg",
+    "category": "layout",
+    "tags": [
+      "rows",
+      "2"
+    ]
+  },
+  {
+    "name": "ruler-dimension-line",
+    "file": "icons/settings/ruler-dimension-line.svg",
+    "category": "settings",
+    "tags": [
+      "ruler",
+      "dimension",
+      "line"
+    ]
+  },
+  {
+    "name": "ruler",
+    "file": "icons/settings/ruler.svg",
+    "category": "settings",
+    "tags": [
+      "ruler"
+    ]
+  },
+  {
+    "name": "save-all",
+    "file": "icons/files/save-all.svg",
+    "category": "files",
+    "tags": [
+      "save",
+      "all"
+    ]
+  },
+  {
+    "name": "save-off",
+    "file": "icons/files/save-off.svg",
+    "category": "files",
+    "tags": [
+      "save",
+      "off"
+    ]
+  },
+  {
+    "name": "save",
+    "file": "icons/files/save.svg",
+    "category": "files",
+    "tags": [
+      "save"
+    ]
+  },
+  {
+    "name": "scissors-line-dashed",
+    "file": "icons/settings/scissors-line-dashed.svg",
+    "category": "settings",
+    "tags": [
+      "scissors",
+      "line",
+      "dashed"
+    ]
+  },
+  {
+    "name": "scissors",
+    "file": "icons/settings/scissors.svg",
+    "category": "settings",
+    "tags": [
+      "scissors"
+    ]
+  },
+  {
+    "name": "search",
+    "file": "icons/misc/search.svg",
+    "category": "misc",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "name": "send-horizontal",
+    "file": "icons/comms/send-horizontal.svg",
+    "category": "comms",
+    "tags": [
+      "send",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "send-to-back",
+    "file": "icons/comms/send-to-back.svg",
+    "category": "comms",
+    "tags": [
+      "send",
+      "to",
+      "back"
+    ]
+  },
+  {
+    "name": "send",
+    "file": "icons/comms/send.svg",
+    "category": "comms",
+    "tags": [
+      "send"
+    ]
+  },
+  {
+    "name": "settings-2",
+    "file": "icons/settings/settings-2.svg",
+    "category": "settings",
+    "tags": [
+      "settings",
+      "2"
+    ]
+  },
+  {
+    "name": "settings",
+    "file": "icons/settings/settings.svg",
+    "category": "settings",
+    "tags": [
+      "settings"
+    ]
+  },
+  {
+    "name": "share-2",
+    "file": "icons/comms/share-2.svg",
+    "category": "comms",
+    "tags": [
+      "share",
+      "2"
+    ]
+  },
+  {
+    "name": "share",
+    "file": "icons/comms/share.svg",
+    "category": "comms",
+    "tags": [
+      "share"
+    ]
+  },
+  {
+    "name": "shield-alert",
+    "file": "icons/status/shield-alert.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "alert"
+    ]
+  },
+  {
+    "name": "shield-ban",
+    "file": "icons/status/shield-ban.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "ban"
+    ]
+  },
+  {
+    "name": "shield-check",
+    "file": "icons/status/shield-check.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "check"
+    ]
+  },
+  {
+    "name": "shield-ellipsis",
+    "file": "icons/status/shield-ellipsis.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "ellipsis"
+    ]
+  },
+  {
+    "name": "shield-half",
+    "file": "icons/status/shield-half.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "half"
+    ]
+  },
+  {
+    "name": "shield-minus",
+    "file": "icons/status/shield-minus.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "minus"
+    ]
+  },
+  {
+    "name": "shield-off",
+    "file": "icons/status/shield-off.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "off"
+    ]
+  },
+  {
+    "name": "shield-plus",
+    "file": "icons/status/shield-plus.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "plus"
+    ]
+  },
+  {
+    "name": "shield-question-mark",
+    "file": "icons/status/shield-question-mark.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "question",
+      "mark"
+    ]
+  },
+  {
+    "name": "shield-user",
+    "file": "icons/status/shield-user.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "user"
+    ]
+  },
+  {
+    "name": "shield-x",
+    "file": "icons/status/shield-x.svg",
+    "category": "status",
+    "tags": [
+      "shield",
+      "x"
+    ]
+  },
+  {
+    "name": "shield",
+    "file": "icons/status/shield.svg",
+    "category": "status",
+    "tags": [
+      "shield"
+    ]
+  },
+  {
+    "name": "shopping-bag",
+    "file": "icons/commerce/shopping-bag.svg",
+    "category": "commerce",
+    "tags": [
+      "shopping",
+      "bag"
+    ]
+  },
+  {
+    "name": "shopping-basket",
+    "file": "icons/commerce/shopping-basket.svg",
+    "category": "commerce",
+    "tags": [
+      "shopping",
+      "basket"
+    ]
+  },
+  {
+    "name": "shopping-cart",
+    "file": "icons/commerce/shopping-cart.svg",
+    "category": "commerce",
+    "tags": [
+      "shopping",
+      "cart"
+    ]
+  },
+  {
+    "name": "shrink",
+    "file": "icons/arrows/shrink.svg",
+    "category": "arrows",
+    "tags": [
+      "shrink"
+    ]
+  },
+  {
+    "name": "shuffle",
+    "file": "icons/arrows/shuffle.svg",
+    "category": "arrows",
+    "tags": [
+      "shuffle"
+    ]
+  },
+  {
+    "name": "sliders-horizontal",
+    "file": "icons/settings/sliders-horizontal.svg",
+    "category": "settings",
+    "tags": [
+      "sliders",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "sliders-vertical",
+    "file": "icons/settings/sliders-vertical.svg",
+    "category": "settings",
+    "tags": [
+      "sliders",
+      "vertical"
+    ]
+  },
+  {
+    "name": "sparkles",
+    "file": "icons/settings/sparkles.svg",
+    "category": "settings",
+    "tags": [
+      "sparkles"
+    ]
+  },
+  {
+    "name": "strikethrough",
+    "file": "icons/text/strikethrough.svg",
+    "category": "text",
+    "tags": [
+      "strikethrough"
+    ]
+  },
+  {
+    "name": "sun-dim",
+    "file": "icons/time/sun-dim.svg",
+    "category": "time",
+    "tags": [
+      "sun",
+      "dim"
+    ]
+  },
+  {
+    "name": "sun-medium",
+    "file": "icons/time/sun-medium.svg",
+    "category": "time",
+    "tags": [
+      "sun",
+      "medium"
+    ]
+  },
+  {
+    "name": "sun-moon",
+    "file": "icons/time/sun-moon.svg",
+    "category": "time",
+    "tags": [
+      "sun",
+      "moon"
+    ]
+  },
+  {
+    "name": "sun-snow",
+    "file": "icons/time/sun-snow.svg",
+    "category": "time",
+    "tags": [
+      "sun",
+      "snow"
+    ]
+  },
+  {
+    "name": "sun",
+    "file": "icons/time/sun.svg",
+    "category": "time",
+    "tags": [
+      "sun"
+    ]
+  },
+  {
+    "name": "sunrise",
+    "file": "icons/time/sunrise.svg",
+    "category": "time",
+    "tags": [
+      "sunrise"
+    ]
+  },
+  {
+    "name": "sunset",
+    "file": "icons/time/sunset.svg",
+    "category": "time",
+    "tags": [
+      "sunset"
+    ]
+  },
+  {
+    "name": "tag",
+    "file": "icons/commerce/tag.svg",
+    "category": "commerce",
+    "tags": [
+      "tag"
+    ]
+  },
+  {
+    "name": "tags",
+    "file": "icons/commerce/tags.svg",
+    "category": "commerce",
+    "tags": [
+      "tags"
+    ]
+  },
+  {
+    "name": "ticket-check",
+    "file": "icons/commerce/ticket-check.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "check"
+    ]
+  },
+  {
+    "name": "ticket-minus",
+    "file": "icons/commerce/ticket-minus.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "minus"
+    ]
+  },
+  {
+    "name": "ticket-percent",
+    "file": "icons/commerce/ticket-percent.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "percent"
+    ]
+  },
+  {
+    "name": "ticket-plus",
+    "file": "icons/commerce/ticket-plus.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "plus"
+    ]
+  },
+  {
+    "name": "ticket-slash",
+    "file": "icons/commerce/ticket-slash.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "slash"
+    ]
+  },
+  {
+    "name": "ticket-x",
+    "file": "icons/commerce/ticket-x.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket",
+      "x"
+    ]
+  },
+  {
+    "name": "ticket",
+    "file": "icons/commerce/ticket.svg",
+    "category": "commerce",
+    "tags": [
+      "ticket"
+    ]
+  },
+  {
+    "name": "tickets-plane",
+    "file": "icons/commerce/tickets-plane.svg",
+    "category": "commerce",
+    "tags": [
+      "tickets",
+      "plane"
+    ]
+  },
+  {
+    "name": "tickets",
+    "file": "icons/commerce/tickets.svg",
+    "category": "commerce",
+    "tags": [
+      "tickets"
+    ]
+  },
+  {
+    "name": "timer-off",
+    "file": "icons/time/timer-off.svg",
+    "category": "time",
+    "tags": [
+      "timer",
+      "off"
+    ]
+  },
+  {
+    "name": "timer-reset",
+    "file": "icons/time/timer-reset.svg",
+    "category": "time",
+    "tags": [
+      "timer",
+      "reset"
+    ]
+  },
+  {
+    "name": "timer",
+    "file": "icons/time/timer.svg",
+    "category": "time",
+    "tags": [
+      "timer"
+    ]
+  },
+  {
+    "name": "trash-2",
+    "file": "icons/misc/trash-2.svg",
+    "category": "misc",
+    "tags": [
+      "trash",
+      "2"
+    ]
+  },
+  {
+    "name": "type-outline",
+    "file": "icons/text/type-outline.svg",
+    "category": "text",
+    "tags": [
+      "type",
+      "outline"
+    ]
+  },
+  {
+    "name": "type",
+    "file": "icons/text/type.svg",
+    "category": "text",
+    "tags": [
+      "type"
+    ]
+  },
+  {
+    "name": "underline",
+    "file": "icons/text/underline.svg",
+    "category": "text",
+    "tags": [
+      "underline"
+    ]
+  },
+  {
+    "name": "undo-2",
+    "file": "icons/arrows/undo-2.svg",
+    "category": "arrows",
+    "tags": [
+      "undo",
+      "2"
+    ]
+  },
+  {
+    "name": "undo-dot",
+    "file": "icons/arrows/undo-dot.svg",
+    "category": "arrows",
+    "tags": [
+      "undo",
+      "dot"
+    ]
+  },
+  {
+    "name": "undo",
+    "file": "icons/arrows/undo.svg",
+    "category": "arrows",
+    "tags": [
+      "undo"
+    ]
+  },
+  {
+    "name": "unfold-horizontal",
+    "file": "icons/arrows/unfold-horizontal.svg",
+    "category": "arrows",
+    "tags": [
+      "unfold",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "unfold-vertical",
+    "file": "icons/arrows/unfold-vertical.svg",
+    "category": "arrows",
+    "tags": [
+      "unfold",
+      "vertical"
+    ]
+  },
+  {
+    "name": "unlink",
+    "file": "icons/misc/unlink.svg",
+    "category": "misc",
+    "tags": [
+      "unlink"
+    ]
+  },
+  {
+    "name": "upload",
+    "file": "icons/files/upload.svg",
+    "category": "files",
+    "tags": [
+      "upload"
+    ]
+  },
+  {
+    "name": "user-check",
+    "file": "icons/comms/user-check.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "check"
+    ]
+  },
+  {
+    "name": "user-cog",
+    "file": "icons/comms/user-cog.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "cog"
+    ]
+  },
+  {
+    "name": "user-lock",
+    "file": "icons/comms/user-lock.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "lock"
+    ]
+  },
+  {
+    "name": "user-minus",
+    "file": "icons/comms/user-minus.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "minus"
+    ]
+  },
+  {
+    "name": "user-pen",
+    "file": "icons/comms/user-pen.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "pen"
+    ]
+  },
+  {
+    "name": "user-plus",
+    "file": "icons/comms/user-plus.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "plus"
+    ]
+  },
+  {
+    "name": "user-round-check",
+    "file": "icons/comms/user-round-check.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "check"
+    ]
+  },
+  {
+    "name": "user-round-cog",
+    "file": "icons/comms/user-round-cog.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "cog"
+    ]
+  },
+  {
+    "name": "user-round-minus",
+    "file": "icons/comms/user-round-minus.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "minus"
+    ]
+  },
+  {
+    "name": "user-round-pen",
+    "file": "icons/comms/user-round-pen.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "pen"
+    ]
+  },
+  {
+    "name": "user-round-plus",
+    "file": "icons/comms/user-round-plus.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "plus"
+    ]
+  },
+  {
+    "name": "user-round-search",
+    "file": "icons/comms/user-round-search.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "search"
+    ]
+  },
+  {
+    "name": "user-round-x",
+    "file": "icons/comms/user-round-x.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round",
+      "x"
+    ]
+  },
+  {
+    "name": "user-round",
+    "file": "icons/comms/user-round.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "round"
+    ]
+  },
+  {
+    "name": "user-search",
+    "file": "icons/comms/user-search.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "search"
+    ]
+  },
+  {
+    "name": "user-star",
+    "file": "icons/comms/user-star.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "star"
+    ]
+  },
+  {
+    "name": "user-x",
+    "file": "icons/comms/user-x.svg",
+    "category": "comms",
+    "tags": [
+      "user",
+      "x"
+    ]
+  },
+  {
+    "name": "user",
+    "file": "icons/comms/user.svg",
+    "category": "comms",
+    "tags": [
+      "user"
+    ]
+  },
+  {
+    "name": "users-round",
+    "file": "icons/comms/users-round.svg",
+    "category": "comms",
+    "tags": [
+      "users",
+      "round"
+    ]
+  },
+  {
+    "name": "users",
+    "file": "icons/comms/users.svg",
+    "category": "comms",
+    "tags": [
+      "users"
+    ]
+  },
+  {
+    "name": "video-off",
+    "file": "icons/media/video-off.svg",
+    "category": "media",
+    "tags": [
+      "video",
+      "off"
+    ]
+  },
+  {
+    "name": "video",
+    "file": "icons/media/video.svg",
+    "category": "media",
+    "tags": [
+      "video"
+    ]
+  },
+  {
+    "name": "videotape",
+    "file": "icons/media/videotape.svg",
+    "category": "media",
+    "tags": [
+      "videotape"
+    ]
+  },
+  {
+    "name": "volume-1",
+    "file": "icons/media/volume-1.svg",
+    "category": "media",
+    "tags": [
+      "volume",
+      "1"
+    ]
+  },
+  {
+    "name": "volume-2",
+    "file": "icons/media/volume-2.svg",
+    "category": "media",
+    "tags": [
+      "volume",
+      "2"
+    ]
+  },
+  {
+    "name": "volume-off",
+    "file": "icons/media/volume-off.svg",
+    "category": "media",
+    "tags": [
+      "volume",
+      "off"
+    ]
+  },
+  {
+    "name": "volume-x",
+    "file": "icons/media/volume-x.svg",
+    "category": "media",
+    "tags": [
+      "volume",
+      "x"
+    ]
+  },
+  {
+    "name": "volume",
+    "file": "icons/media/volume.svg",
+    "category": "media",
+    "tags": [
+      "volume"
+    ]
+  },
+  {
+    "name": "wifi-cog",
+    "file": "icons/comms/wifi-cog.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "cog"
+    ]
+  },
+  {
+    "name": "wifi-high",
+    "file": "icons/comms/wifi-high.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "high"
+    ]
+  },
+  {
+    "name": "wifi-low",
+    "file": "icons/comms/wifi-low.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "low"
+    ]
+  },
+  {
+    "name": "wifi-off",
+    "file": "icons/comms/wifi-off.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "off"
+    ]
+  },
+  {
+    "name": "wifi-pen",
+    "file": "icons/comms/wifi-pen.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "pen"
+    ]
+  },
+  {
+    "name": "wifi-sync",
+    "file": "icons/comms/wifi-sync.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "sync"
+    ]
+  },
+  {
+    "name": "wifi-zero",
+    "file": "icons/comms/wifi-zero.svg",
+    "category": "comms",
+    "tags": [
+      "wifi",
+      "zero"
+    ]
+  },
+  {
+    "name": "wifi",
+    "file": "icons/comms/wifi.svg",
+    "category": "comms",
+    "tags": [
+      "wifi"
+    ]
+  },
+  {
+    "name": "wrench",
+    "file": "icons/settings/wrench.svg",
+    "category": "settings",
+    "tags": [
+      "wrench"
+    ]
+  },
+  {
+    "name": "x",
+    "file": "icons/status/x.svg",
+    "category": "status",
+    "tags": [
+      "x"
+    ]
+  },
+  {
+    "name": "viber",
+    "file": "icons/social/viber.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "messenger",
+      "viber"
+    ]
+  },
+  {
+    "name": "telegram",
+    "file": "icons/social/telegram.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "messenger",
+      "telegram"
+    ]
+  },
+  {
+    "name": "instagram",
+    "file": "icons/social/instagram.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "network",
+      "instagram"
+    ]
+  },
+  {
+    "name": "facebook",
+    "file": "icons/social/facebook.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "network",
+      "facebook"
+    ]
+  },
+  {
+    "name": "messenger",
+    "file": "icons/social/messenger.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "messenger",
+      "messenger"
+    ]
+  },
+  {
+    "name": "whatsapp",
+    "file": "icons/social/whatsapp.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "messenger",
+      "whatsapp"
+    ]
+  },
+  {
+    "name": "tiktok",
+    "file": "icons/social/tiktok.svg",
+    "category": "social",
+    "tags": [
+      "social",
+      "brand",
+      "network",
+      "tiktok"
+    ]
+  }
+]

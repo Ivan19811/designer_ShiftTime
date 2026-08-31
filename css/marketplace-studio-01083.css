@@ -1,0 +1,24 @@
+/* 01083 · Respond to the actual Marketplace workspace width, not only the browser viewport. */
+.mp-shell{container-type:inline-size;container-name:mp-studio-shell}
+.mp-content{container-type:inline-size;container-name:mp-studio-content}
+.mp-stat,.mp-card,.mp-card__head>div,.mp-page-head>div{min-width:0}
+.mp-stat__value,.mp-stat__label,.mp-stat__trend{word-break:normal;overflow-wrap:break-word;hyphens:none}
+.mp-stat-grid{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
+@container mp-studio-shell (max-width:1100px){
+  .mp-workarea{grid-template-columns:minmax(0,1fr)}
+  .mp-context{display:none}
+  .mp-content{padding:14px}
+  .mp-topbar{flex-wrap:wrap}
+  .mp-topnav{order:3;width:100%}
+}
+@container mp-studio-content (max-width:820px){
+  .mp-grid-2,.mp-grid-equal{grid-template-columns:minmax(0,1fr)}
+  .mp-page-head{gap:10px}
+}
+@container mp-studio-content (max-width:540px){
+  .mp-stat-grid,.mp-form-grid,.mp-data-entity-grid{grid-template-columns:minmax(0,1fr)}
+  .mp-page-head{flex-direction:column}
+  .mp-page-actions{width:100%;justify-content:flex-start}
+  .mp-page-actions .mp-btn{flex:1 1 150px}
+  .mp-field.is-wide{grid-column:auto}
+}

@@ -1,0 +1,522 @@
+/* 00959-SCHOOL-01-MAIN-TEMPLATE
+ * Scoped visual, interaction and container-responsive layer.
+ * Authored geometry/content remains inside the SiteFrameStore template model.
+ */
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) {
+  --school01-navy-950: #071a2b;
+  --school01-navy-900: #102a43;
+  --school01-navy-700: #1f4b6e;
+  --school01-amber-600: #b45309;
+  --school01-amber-300: #fcd34d;
+  --school01-ivory: #fffdf5;
+  --school01-line: #d7dee8;
+  --school01-copy: #52616b;
+  color: var(--school01-navy-900);
+  font-family: Manrope, Inter, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) *,
+:where(.school01-main-template, [data-template-id="school-01-main"]) *::before,
+:where(.school01-main-template, [data-template-id="school-01-main"]) *::after {
+  box-sizing: border-box;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .st-text-edit {
+  width: 100%;
+  min-width: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-icon__glyph,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-icon__glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button {
+  isolation: isolate;
+  position: relative;
+  gap: 10px;
+  overflow: visible;
+  transition: color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button > .st-text-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: auto;
+  min-width: 0;
+  color: inherit !important;
+  white-space: nowrap;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button > .st-text-edit::after {
+  content: "→";
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 1.05em;
+  font-weight: 900;
+  transition: transform .2s ease;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(16, 42, 67, .2) !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button:hover > .st-text-edit::after {
+  transform: translateX(4px);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button:active,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button:is([data-active="true"], [aria-pressed="true"]) {
+  transform: translateY(0);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--primary:active,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--primary:is([data-active="true"], [aria-pressed="true"]) {
+  background: #78350f !important;
+  border-color: #78350f !important;
+  color: #fff !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--secondary:active,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--secondary:is([data-active="true"], [aria-pressed="true"]),
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--light:active,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--light:is([data-active="true"], [aria-pressed="true"]) {
+  background: #fef3c7 !important;
+  border-color: #b45309 !important;
+  color: #102a43 !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--glass:active,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button--glass:is([data-active="true"], [aria-pressed="true"]) {
+  background: #fff !important;
+  border-color: #fff !important;
+  color: #102a43 !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-button:focus-visible,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quick-card:focus-visible,
+:where(.school01-main-template, [data-template-id="school-01-main"]) [contenteditable="true"]:focus-visible {
+  outline: 3px solid var(--school01-amber-600) !important;
+  outline-offset: 3px;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-text-link {
+  justify-content: flex-start !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quick-card,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-advantage,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-event-card,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-news-card,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quote-card,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-contact-item {
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quick-card:hover,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-advantage:hover,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program:hover,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-news-card:hover,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quote-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(180, 83, 9, .48) !important;
+  box-shadow: 0 24px 56px rgba(16, 42, 67, .15) !important;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program--featured {
+  background: linear-gradient(155deg, #fffdf5 0%, #fef3c7 135%) !important;
+  border-color: #f2bd38 !important;
+  transform: translateY(-10px);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program__list ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program__list li {
+  position: relative;
+  padding-left: 22px;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-program__list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--school01-amber-600);
+  font-weight: 900;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card--large {
+  grid-row: 1 / span 2;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s cubic-bezier(.2, .7, .2, 1);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 26, 43, 0) 38%, rgba(7, 26, 43, .88) 100%);
+  pointer-events: none;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card > span {
+  position: absolute;
+  z-index: 1;
+  left: 24px;
+  right: 24px;
+  bottom: 23px;
+  display: grid;
+  gap: 5px;
+  color: #fff;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card > span b {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card > span small {
+  color: #dbeafe;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-life-card:hover img,
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-news-card:hover img {
+  transform: scale(1.045);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-quote-card::before {
+  content: "“";
+  display: block;
+  height: 34px;
+  color: var(--school01-amber-600);
+  font-family: Georgia, serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: .85;
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-eyebrow--glass {
+  background: rgba(255, 255, 255, .11) !important;
+  border-color: rgba(255, 255, 255, .32) !important;
+  color: #fde68a !important;
+  backdrop-filter: blur(12px);
+}
+
+:where(.school01-main-template, [data-template-id="school-01-main"]) .school01-main-eyebrow--dark {
+  background: rgba(252, 211, 77, .12) !important;
+  border-color: rgba(252, 211, 77, .35) !important;
+  color: #fde68a !important;
+}
+
+@container school01-main (max-width: 1180px) {
+  [data-template-id="school-01-main"].school01-main-metrics {
+    grid-template-columns: minmax(260px, 1.2fr) repeat(2, minmax(160px, 1fr)) !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-metrics__intro {
+    grid-row: 1 / span 2;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-advantages__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-testimonials__grid {
+    grid-template-columns: 1.35fr 1fr !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-director {
+    grid-column: 1 / -1;
+  }
+}
+
+@container school01-main (max-width: 980px) {
+  [data-template-id="school-01-main"].school01-main-hero {
+    grid-template-columns: 1fr !important;
+    align-items: end !important;
+    min-height: 760px !important;
+    background: linear-gradient(90deg, rgba(5,20,35,.94), rgba(16,42,67,.55)), linear-gradient(0deg,rgba(5,20,35,.62),transparent 55%), url("../assets/collections/school-01/school-facade-hero.webp") 62% center/cover no-repeat !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__content {
+    padding: 20px 0 0 !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__aside {
+    max-width: 560px !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-about,
+  [data-template-id="school-01-main"].school01-main-events,
+  [data-template-id="school-01-main"].school01-main-contacts {
+    grid-template-columns: 1fr !important;
+    gap: 38px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-about__content {
+    padding: 0 !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-programs__grid,
+  [data-template-id="school-01-main"] .school01-main-news__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-program:last-child,
+  [data-template-id="school-01-main"] .school01-main-news-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-admission__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@container school01-main (max-width: 760px) {
+  [data-template-id="school-01-main"].school01-main-hero {
+    min-height: 720px !important;
+    padding: 54px 24px 72px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__title {
+    font-size: clamp(42px, 8vw, 54px) !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-section-title {
+    font-size: 34px !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    padding: 54px 24px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-metrics__intro {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    margin-bottom: 8px;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-news__head,
+  [data-template-id="school-01-main"] .school01-main-admission__head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-life__bento {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-life-card--large {
+    grid-row: auto;
+    min-height: 360px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-testimonials__grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-director {
+    grid-column: auto;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-contact-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-contacts__image {
+    min-height: 430px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-final__title {
+    font-size: 40px !important;
+  }
+}
+
+@container school01-main (max-width: 560px) {
+  [data-template-id="school-01-main"].school01-main-hero {
+    min-height: 690px !important;
+    padding: 44px 18px 66px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__title {
+    font-size: 36px !important;
+    letter-spacing: -.035em !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__lead {
+    font-size: 16px !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-quick,
+  [data-template-id="school-01-main"] .school01-main-advantages__grid,
+  [data-template-id="school-01-main"] .school01-main-programs__grid,
+  [data-template-id="school-01-main"] .school01-main-news__grid,
+  [data-template-id="school-01-main"] .school01-main-admission__steps,
+  [data-template-id="school-01-main"].school01-main-metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-quick {
+    width: calc(100% - 28px) !important;
+    margin-top: -46px !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-about,
+  [data-template-id="school-01-main"].school01-main-advantages,
+  [data-template-id="school-01-main"].school01-main-events,
+  [data-template-id="school-01-main"].school01-main-life,
+  [data-template-id="school-01-main"].school01-main-contacts {
+    width: calc(100% - 32px) !important;
+    padding-top: 68px !important;
+    padding-bottom: 68px !important;
+  }
+
+  [data-template-id="school-01-main"].school01-main-programs,
+  [data-template-id="school-01-main"].school01-main-news,
+  [data-template-id="school-01-main"].school01-main-admission,
+  [data-template-id="school-01-main"].school01-main-testimonials {
+    padding: 68px 16px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-about__image,
+  [data-template-id="school-01-main"] .school01-main-events__feature {
+    min-height: 420px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-about__badge {
+    right: 14px !important;
+    bottom: 14px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-section-title,
+  [data-template-id="school-01-main"] .school01-main-events__feature-title {
+    font-size: 30px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-program:last-child,
+  [data-template-id="school-01-main"] .school01-main-news-card:last-child {
+    grid-column: auto;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-program--featured {
+    transform: none;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-director {
+    flex-direction: column !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-director__portrait {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 280px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-actions,
+  [data-template-id="school-01-main"] .school01-main-actions .school01-main-button {
+    width: 100% !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-contact-item {
+    align-items: flex-start !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-map-chip {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: auto !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-final__title {
+    font-size: 34px !important;
+  }
+}
+
+@container school01-main (max-width: 390px) {
+  [data-template-id="school-01-main"].school01-main-hero {
+    padding-inline: 14px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__aside,
+  [data-template-id="school-01-main"] .school01-main-program,
+  [data-template-id="school-01-main"] .school01-main-quote-card {
+    padding: 20px !important;
+  }
+
+  [data-template-id="school-01-main"] .school01-main-hero__title,
+  [data-template-id="school-01-main"] .school01-main-final__title {
+    font-size: 31px !important;
+  }
+}
+
+
+/* [00961] Media-frame parity: these authored image blocks are frames, not natural-height images.
+   Absolute fill removes percentage-height ambiguity without changing the designed crop. */
+:where(.school01-main-template, [data-template-id="school-01-main"]) :is(
+  .school01-main-about__image,
+  .school01-main-news-card__image,
+  .school01-main-director__portrait,
+  .school01-main-contacts__image
+) {
+  position: relative;
+}
+:where(.school01-main-template, [data-template-id="school-01-main"]) :is(
+  .school01-main-about__image,
+  .school01-main-news-card__image,
+  .school01-main-director__portrait,
+  .school01-main-contacts__image
+) > img {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.school01-main-template, [data-template-id="school-01-main"]) *,
+  :where(.school01-main-template, [data-template-id="school-01-main"]) *::before,
+  :where(.school01-main-template, [data-template-id="school-01-main"]) *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

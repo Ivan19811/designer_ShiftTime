@@ -1,0 +1,198 @@
+[
+  {
+    "id": "selected_element",
+    "label": "Активний елемент",
+    "aliases": [
+      "цей елемент",
+      "активний елемент",
+      "вибраний елемент"
+    ],
+    "description": "Застосувати до активного або вибраного елемента",
+    "selectorMode": "current_selection",
+    "priority": 100,
+    "requiresExplicitMention": false
+  },
+  {
+    "id": "selected_header",
+    "label": "Шапка",
+    "aliases": [
+      "шапка",
+      "header"
+    ],
+    "description": "Застосувати до шапки",
+    "selectorMode": "target:site_header",
+    "priority": 90,
+    "requiresExplicitMention": false
+  },
+  {
+    "id": "selected_footer",
+    "label": "Футер",
+    "aliases": [
+      "футер",
+      "footer"
+    ],
+    "description": "Застосувати до футера",
+    "selectorMode": "target:site_footer",
+    "priority": 90,
+    "requiresExplicitMention": false
+  },
+  {
+    "id": "inner_text_only",
+    "label": "Тільки внутрішній текст",
+    "aliases": [
+      "тільки текст",
+      "лише текст",
+      "внутрішній текст",
+      "text only"
+    ],
+    "description": "Застосовує зміну лише до текстового шару вибраного елемента",
+    "selectorMode": "child_layer:text_layer",
+    "priority": 85,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "inner_icon_only",
+    "label": "Тільки іконка",
+    "aliases": [
+      "тільки іконка",
+      "лише іконка",
+      "icon only"
+    ],
+    "description": "Застосовує зміну лише до іконкового шару вибраного елемента",
+    "selectorMode": "child_layer:icon_layer",
+    "priority": 85,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "background_only",
+    "label": "Тільки фон",
+    "aliases": [
+      "тільки фон",
+      "лише фон",
+      "background only"
+    ],
+    "description": "Застосовує зміну лише до фону вибраного елемента",
+    "selectorMode": "child_layer:background_layer",
+    "priority": 85,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "hover_only",
+    "label": "Тільки hover",
+    "aliases": [
+      "тільки hover",
+      "тільки при наведенні",
+      "hover only"
+    ],
+    "description": "Застосовує зміну лише до hover-стану",
+    "selectorMode": "state:hover",
+    "priority": 88,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "mobile_only",
+    "label": "Тільки mobile",
+    "aliases": [
+      "тільки mobile",
+      "тільки мобільна версія",
+      "mobile only"
+    ],
+    "description": "Застосовує зміну лише до mobile-версії",
+    "selectorMode": "responsive:mobile",
+    "priority": 88,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "desktop_only",
+    "label": "Тільки desktop",
+    "aliases": [
+      "тільки desktop",
+      "лише desktop"
+    ],
+    "description": "Застосовує зміну лише до desktop-версії",
+    "selectorMode": "responsive:desktop",
+    "priority": 88,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "all_similar",
+    "label": "Усі схожі елементи",
+    "aliases": [
+      "усі такі",
+      "всі такі елементи",
+      "all similar"
+    ],
+    "description": "Застосовує зміну до всіх елементів такого ж типу в поточному контексті",
+    "selectorMode": "same_target_type_in_context",
+    "priority": 70,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "children_buttons",
+    "label": "Усі дочірні кнопки",
+    "aliases": [
+      "усі кнопки всередині",
+      "всі дочірні кнопки"
+    ],
+    "description": "Застосовує зміну до всіх кнопок усередині поточного контейнера або секції",
+    "selectorMode": "descendants:button_block",
+    "priority": 72,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "menu_items_only",
+    "label": "Тільки пункти меню",
+    "aliases": [
+      "тільки пункти меню",
+      "усі пункти меню",
+      "menu items only"
+    ],
+    "description": "Застосовує зміну до всіх menu_item у вибраному меню",
+    "selectorMode": "descendants:menu_item",
+    "priority": 80,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "second_one",
+    "label": "Другий елемент",
+    "aliases": [
+      "друга",
+      "другий",
+      "другу",
+      "другої",
+      "другій",
+      "у другій"
+    ],
+    "description": "Застосовує зміну до другого елемента в поточному контексті",
+    "selectorMode": "ordinal:2",
+    "priority": 86,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "third_one",
+    "label": "Третій елемент",
+    "aliases": [
+      "третя",
+      "третій",
+      "третю",
+      "третьої",
+      "у третій"
+    ],
+    "description": "Застосовує зміну до третього елемента в поточному контексті",
+    "selectorMode": "ordinal:3",
+    "priority": 86,
+    "requiresExplicitMention": true
+  },
+  {
+    "id": "all_headings",
+    "label": "Усі заголовки",
+    "aliases": [
+      "усі заголовки",
+      "всі заголовки"
+    ],
+    "description": "Застосовує зміну до всіх заголовків у поточному контексті",
+    "selectorMode": "descendants:heading_block",
+    "priority": 82,
+    "requiresExplicitMention": true
+  }
+]

@@ -1,0 +1,429 @@
+[
+  {
+    "id": "color_value",
+    "label": "Колір",
+    "type": "color",
+    "aliases": [
+      "колір",
+      "color",
+      "hex"
+    ],
+    "format": "named color | #hex | rgb(a)",
+    "examples": [
+      "зелений",
+      "#22c55e",
+      "rgba(0,0,0,.5)"
+    ],
+    "normalizationRules": [
+      "trim_spaces",
+      "normalize_hex_case",
+      "resolve_color_alias"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "gradient_value",
+    "label": "Градієнт",
+    "type": "gradient",
+    "aliases": [
+      "градієнт",
+      "gradient"
+    ],
+    "format": "direction + stops",
+    "examples": [
+      "синьо жовтий горизонтальний градієнт",
+      "#0057b7 0%, #ffd700 100%"
+    ],
+    "normalizationRules": [
+      "normalize_gradient_direction",
+      "normalize_gradient_stops"
+    ],
+    "defaultUnit": "deg",
+    "defaultDelta": 10
+  },
+  {
+    "id": "number_percent",
+    "label": "Відсоток",
+    "type": "number_percent",
+    "aliases": [
+      "%",
+      "відсотків",
+      "процентів"
+    ],
+    "format": "number + %",
+    "examples": [
+      "10%",
+      "30%",
+      "50%"
+    ],
+    "normalizationRules": [
+      "trim_spaces",
+      "normalize_percent_sign"
+    ],
+    "defaultUnit": "%",
+    "defaultDelta": 10
+  },
+  {
+    "id": "length_value",
+    "label": "Довжина",
+    "type": "length",
+    "aliases": [
+      "px",
+      "rem",
+      "em",
+      "довжина"
+    ],
+    "format": "number + unit",
+    "examples": [
+      "12px",
+      "1.5rem",
+      "24"
+    ],
+    "normalizationRules": [
+      "trim_spaces",
+      "assume_px_when_unit_missing"
+    ],
+    "defaultUnit": "px",
+    "defaultDelta": 4
+  },
+  {
+    "id": "size_mode_value",
+    "label": "Режим розміру",
+    "type": "size_mode",
+    "aliases": [
+      "auto",
+      "fill",
+      "hug"
+    ],
+    "format": "keyword",
+    "examples": [
+      "auto",
+      "fill",
+      "hug"
+    ],
+    "normalizationRules": [
+      "normalize_keyword"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "position_value",
+    "label": "Позиція",
+    "type": "position",
+    "aliases": [
+      "зліва",
+      "справа",
+      "зверху",
+      "знизу",
+      "по центру"
+    ],
+    "format": "keyword or pair",
+    "examples": [
+      "center",
+      "left top",
+      "x:50 y:20"
+    ],
+    "normalizationRules": [
+      "normalize_position_aliases"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "direction_value",
+    "label": "Напрямок",
+    "type": "direction",
+    "aliases": [
+      "горизонтальний",
+      "вертикальний",
+      "діагональний",
+      "зліва направо"
+    ],
+    "format": "keyword or angle",
+    "examples": [
+      "vertical",
+      "horizontal",
+      "50deg"
+    ],
+    "normalizationRules": [
+      "resolve_direction_to_angle"
+    ],
+    "defaultUnit": "deg",
+    "defaultDelta": 10
+  },
+  {
+    "id": "text_align_value",
+    "label": "Вирівнювання тексту",
+    "type": "text_align",
+    "aliases": [
+      "зліва",
+      "по центру",
+      "справа",
+      "justify"
+    ],
+    "format": "keyword",
+    "examples": [
+      "left",
+      "center",
+      "right"
+    ],
+    "normalizationRules": [
+      "normalize_align_keyword"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "vertical_align_value",
+    "label": "Вертикальне вирівнювання",
+    "type": "vertical_align",
+    "aliases": [
+      "зверху",
+      "по центру",
+      "знизу"
+    ],
+    "format": "keyword",
+    "examples": [
+      "top",
+      "center",
+      "bottom"
+    ],
+    "normalizationRules": [
+      "normalize_vertical_align_keyword"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "font_weight_value",
+    "label": "Вага шрифту",
+    "type": "font_weight",
+    "aliases": [
+      "жирний",
+      "тонкий",
+      "bold",
+      "light"
+    ],
+    "format": "keyword or number",
+    "examples": [
+      "400",
+      "700",
+      "bold"
+    ],
+    "normalizationRules": [
+      "normalize_font_weight"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": 100
+  },
+  {
+    "id": "font_style_value",
+    "label": "Стиль шрифту",
+    "type": "font_style",
+    "aliases": [
+      "курсив",
+      "italic",
+      "normal"
+    ],
+    "format": "keyword",
+    "examples": [
+      "italic",
+      "normal"
+    ],
+    "normalizationRules": [
+      "normalize_font_style"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "border_style_value",
+    "label": "Стиль рамки",
+    "type": "border_style",
+    "aliases": [
+      "solid",
+      "dashed",
+      "dotted",
+      "пунктир"
+    ],
+    "format": "keyword",
+    "examples": [
+      "solid",
+      "dashed",
+      "dotted"
+    ],
+    "normalizationRules": [
+      "normalize_border_style"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "shadow_value",
+    "label": "Тінь",
+    "type": "shadow",
+    "aliases": [
+      "тінь",
+      "shadow"
+    ],
+    "format": "compound object",
+    "examples": [
+      "black 20% blur 12 offset 0 4",
+      "outer shadow"
+    ],
+    "normalizationRules": [
+      "split_shadow_parts",
+      "normalize_shadow_units"
+    ],
+    "defaultUnit": "px",
+    "defaultDelta": 2
+  },
+  {
+    "id": "stroke_value",
+    "label": "Stroke",
+    "type": "stroke",
+    "aliases": [
+      "stroke",
+      "контур"
+    ],
+    "format": "compound object",
+    "examples": [
+      "1px #000",
+      "2px white"
+    ],
+    "normalizationRules": [
+      "normalize_stroke_parts"
+    ],
+    "defaultUnit": "px",
+    "defaultDelta": 1
+  },
+  {
+    "id": "boolean_value",
+    "label": "Boolean",
+    "type": "boolean",
+    "aliases": [
+      "так",
+      "ні",
+      "увімкни",
+      "вимкни",
+      "show",
+      "hide"
+    ],
+    "format": "boolean",
+    "examples": [
+      "true",
+      "false",
+      "увімкни"
+    ],
+    "normalizationRules": [
+      "normalize_boolean_words"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "url_or_ref_value",
+    "label": "Посилання або ref",
+    "type": "url_or_ref",
+    "aliases": [
+      "посилання",
+      "href",
+      "anchor",
+      "url"
+    ],
+    "format": "url | anchor | page ref",
+    "examples": [
+      "/about",
+      "#contact",
+      "https://example.com"
+    ],
+    "normalizationRules": [
+      "trim_spaces",
+      "normalize_url_protocol"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "icon_name_value",
+    "label": "Назва іконки",
+    "type": "icon_name",
+    "aliases": [
+      "іконка",
+      "icon name"
+    ],
+    "format": "icon id",
+    "examples": [
+      "mail",
+      "book-open",
+      "school"
+    ],
+    "normalizationRules": [
+      "resolve_icon_aliases",
+      "fallback_to_manifest"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  },
+  {
+    "id": "integer_value",
+    "label": "Ціле число",
+    "type": "integer",
+    "aliases": [
+      "число",
+      "integer"
+    ],
+    "format": "integer",
+    "examples": [
+      "1",
+      "3",
+      "12"
+    ],
+    "normalizationRules": [
+      "parse_int"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": 1
+  },
+  {
+    "id": "number_value",
+    "label": "Число",
+    "type": "number",
+    "aliases": [
+      "number",
+      "число"
+    ],
+    "format": "float or int",
+    "examples": [
+      "1.5",
+      "2",
+      "0.75"
+    ],
+    "normalizationRules": [
+      "parse_float"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": 1
+  },
+  {
+    "id": "template_ref_value",
+    "label": "Посилання на шаблон",
+    "type": "template_ref",
+    "aliases": [
+      "шаблон",
+      "template"
+    ],
+    "format": "template id or name",
+    "examples": [
+      "header-clean-01",
+      "dark-footer"
+    ],
+    "normalizationRules": [
+      "trim_spaces"
+    ],
+    "defaultUnit": null,
+    "defaultDelta": null
+  }
+]

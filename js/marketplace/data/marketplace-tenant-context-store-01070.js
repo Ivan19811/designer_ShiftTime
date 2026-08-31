@@ -1,0 +1,31 @@
+// 01070 · Client platform context authority for local development.
+import {assertPlatformContextRepository01070} from '../repositories/platform-context-repository-contract-01070.js?v=01070';
+import {
+  createPlatformWorkspace01070,createPlatformStore01070,createPlatformMembership01070,
+  normalizePlatformSnapshot01070,getActivePlatformContext01070,getPlatformSummary01070
+} from './marketplace-platform-schema-01070.js?v=01070';
+import {getEffectivePermissions01070,getEffectiveRoles01070,canMarketplace01070} from '../services/marketplace-permissions-01070.js?v=01070';
+function clone(v){try{return structuredClone(v);}catch{return JSON.parse(JSON.stringify(v));}}
+function slugify(v){return String(v??'').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9а-яіїєґ]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,64);}
+export class MarketplaceTenantContextStore01070{
+  constructor({repository}={}){this.repository=assertPlatformContextRepository01070(repository);this.state=normalizePlatformSnapshot01070({});this.ready=false;this.listeners=new Set();this._write=Promise.resolve();}
+  async init(){await this._write;this.state=normalizePlatformSnapshot01070(await this.repository.loadSnapshot());this.ready=true;this._emit('init');return this;}
+  getState(){return clone(this.state);} getActiveContext(){return clone(getActivePlatformContext01070(this.state));} getSummary(){return getPlatformSummary01070(this.state);}
+  getPermissions(){return [...getEffectivePermissions01070(this.state)];} getRoles(){return getEffectiveRoles01070(this.state);} can(permission){return canMarketplace01070(this.state,permission);}
+  subscribe(fn){if(typeof fn!=='function')return()=>{};this.listeners.add(fn);return()=>this.listeners.delete(fn);}
+  _emit(reason){const detail={reason,state:this.getState(),context:this.getActiveContext(),summary:this.getSummary(),roles:this.getRoles(),permissions:this.getPermissions()};this.listeners.forEach(fn=>{try{fn(detail);}catch(e){console.warn('[MarketplaceTenantContextStore01070] subscriber failed',e);}});try{window.dispatchEvent(new CustomEvent('st:marketplace-tenant-context-changed',{detail}));}catch{}}
+  async _commit(mutator,reason){const run=this._write.then(async()=>{const current=this.getState();const next=normalizePlatformSnapshot01070(await mutator(current));this.state=normalizePlatformSnapshot01070(await this.repository.replaceSnapshot(next));this.ready=true;this._emit(reason);return this.getState();});this._write=run.then(()=>undefined,()=>undefined);return run;}
+  async replaceSnapshot(snapshot,reason='replace'){return this._commit(()=>snapshot,reason);}
+  async setActiveContext(patch={}){return this._commit(s=>{
+    const current=s.activeContext||{};let accountId=String((patch.accountId??current.accountId)||'');let workspaceId=String((patch.workspaceId??current.workspaceId)||'');let storeId=String((patch.storeId??current.storeId)||'');const userId=String((patch.userId??current.userId)||'');
+    if(patch.accountId&&patch.accountId!==current.accountId){const ws=s.workspaces.find(x=>x.accountId===accountId&&x.status==='active');workspaceId=ws?.id||'';const st=s.stores.find(x=>x.workspaceId===workspaceId&&x.status!=='archived');storeId=st?.id||'';}
+    if(patch.workspaceId&&patch.workspaceId!==current.workspaceId){const ws=s.workspaces.find(x=>x.id===workspaceId);accountId=ws?.accountId||accountId;const st=s.stores.find(x=>x.workspaceId===workspaceId&&x.status!=='archived');storeId=st?.id||'';}
+    if(patch.storeId){const st=s.stores.find(x=>x.id===storeId);const ws=s.workspaces.find(x=>x.id===st?.workspaceId);workspaceId=st?.workspaceId||workspaceId;accountId=ws?.accountId||accountId;}
+    return {...s,activeContext:{userId,accountId,workspaceId,storeId}};
+  },'active-context');}
+  async createWorkspace(input={}){let created=null;let defaultStore=null;await this._commit(s=>{const ctx=getActivePlatformContext01070(s);created=createPlatformWorkspace01070({...input,accountId:input.accountId||ctx.accountId,slug:input.slug||slugify(input.name)});defaultStore=createPlatformStore01070({workspaceId:created.id,name:`${created.name} · Магазин`,slug:'store'});const owner=createPlatformMembership01070({userId:ctx.userId,accountId:created.accountId,workspaceId:created.id,role:'owner'});const storeOwner=createPlatformMembership01070({userId:ctx.userId,accountId:created.accountId,workspaceId:created.id,storeId:defaultStore.id,role:'owner'});return {...s,workspaces:[...s.workspaces,created],stores:[...s.stores,defaultStore],memberships:[...s.memberships,owner,storeOwner],activeContext:{...s.activeContext,accountId:created.accountId,workspaceId:created.id,storeId:defaultStore.id}};},'workspace-created');return clone({...created,defaultStoreId:defaultStore?.id||''});}
+  async createStore(input={}){let created=null;await this._commit(s=>{const ctx=getActivePlatformContext01070(s);const workspaceId=input.workspaceId||ctx.workspaceId;created=createPlatformStore01070({...input,workspaceId,slug:input.slug||slugify(input.name)});const ws=s.workspaces.find(x=>x.id===workspaceId);const owner=createPlatformMembership01070({userId:ctx.userId,accountId:ws?.accountId||ctx.accountId,workspaceId,storeId:created.id,role:'owner'});return {...s,stores:[...s.stores,created],memberships:[...s.memberships,owner],activeContext:{...s.activeContext,accountId:ws?.accountId||ctx.accountId,workspaceId,storeId:created.id}};},'store-created');return clone(created);}
+  async updateStore(id,patch={}){return this._commit(s=>({...s,stores:s.stores.map(x=>x.id===id?createPlatformStore01070({...x,...patch,id:x.id,workspaceId:x.workspaceId,createdAt:x.createdAt,updatedAt:new Date().toISOString()}):x)}),'store-updated');}
+  async createMembership(input={}){let created=null;await this._commit(s=>{const ctx=getActivePlatformContext01070(s);created=createPlatformMembership01070({...input,accountId:input.accountId||ctx.accountId,workspaceId:input.workspaceId??ctx.workspaceId,storeId:input.storeId??ctx.storeId});return {...s,memberships:[...s.memberships,created]};},'membership-created');return clone(created);}
+  async markMigration(name,value=true){return this._commit(s=>({...s,migrations:{...(s.migrations||{}),[name]:value}}),`migration:${name}`);}
+}

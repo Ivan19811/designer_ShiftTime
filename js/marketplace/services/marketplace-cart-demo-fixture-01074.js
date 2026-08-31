@@ -1,0 +1,6 @@
+// 01074 · Extends 01073 DEMO with a second seller on two products for true multi-seller cart testing.
+import {seedMarketplaceDemoFixture01073} from './marketplace-demo-fixture-01073.js?v=01082';
+import {LocalMarketplaceNetworkFixtureRepository01074} from '../repositories/local-marketplace-network-fixture-repository-01074.js?v=01074';
+import {getMarketplaceBackendConfig01071} from '../data/marketplace-backend-config-01071.js?v=01071';
+import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01082';
+export async function seedMarketplaceCartDemoFixture01074({force=false}={}){const base=await seedMarketplaceDemoFixture01073({force,publish:true});const cfg=getMarketplaceBackendConfig01071(),st=getMarketplaceBackendStatus01071();if(cfg.mode==='api'&&st.state==='api')return {stage:'01074',base,partnerSeeded:false,reason:'api-mode'};const partner=await new LocalMarketplaceNetworkFixtureRepository01074().ensurePartnerOffers();try{window.dispatchEvent(new CustomEvent('st:marketplace-network-changed',{detail:{reason:'demo-01074-partner-offers'}}));}catch{}const result={stage:'01074',base,partnerSeeded:true,partner};try{window.__ST_ALL_LOG__?.push?.('marketplace-cart:demo-fixture-ready-01074',result);}catch{}return result;}

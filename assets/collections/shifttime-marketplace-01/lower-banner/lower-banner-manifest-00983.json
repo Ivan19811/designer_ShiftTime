@@ -1,0 +1,20 @@
+{
+  "version": "00983",
+  "collectionId": "shifttime-marketplace-01",
+  "role": "homepage-lower-promotional-banner",
+  "standardSize": "1920x768",
+  "title": "Гравіювання та друк на чохлі",
+  "fileName": "lower-banner-engraving-print-covers.webp",
+  "path": "assets/collections/shifttime-marketplace-01/lower-banner/lower-banner-engraving-print-covers.webp",
+  "width": 1920,
+  "height": 768,
+  "textZone": "left",
+  "subjectZone": "right",
+  "htmlTextRequired": true,
+  "embeddedHeadline": false,
+  "status": "approved-for-home-lower-banner",
+  "usageNote": "Окремий нижній банер головної сторінки ShiftTime. Не додавати до верхнього фонового слайдера. HTML-заголовок і CTA розміщувати зліва.",
+  "brief": "Гравійована чорна кришка, чорний та оливковий друковані чохли і металева кришка з гравіюванням на природному фоні біля гірського озера; написи на самих виробах збережені та не перекриті.",
+  "sha256": "19e4fdf68db006d35ed4b8973db804d19ef26d3adce270e059797a31dce9c32b",
+  "sizeBytes": 270678
+}

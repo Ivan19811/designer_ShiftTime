@@ -1,0 +1,86 @@
+/* 01054 · Builder / Marketplace UI appearance controls */
+
+/* Inspector gear: sits immediately before the existing expand dot. */
+.builder__settings-gear-01054{
+  width:28px;height:28px;display:grid;place-items:center;flex:0 0 auto;margin-left:auto;padding:0;
+  border:1px solid rgba(148,163,184,.22);border-radius:9px;background:rgba(255,255,255,.045);color:var(--clr-text-soft,#cbd5e1);
+  font:700 15px/1 system-ui,sans-serif;cursor:pointer;transition:background .14s ease,border-color .14s ease,transform .14s ease;
+}
+.builder__settings-gear-01054:hover{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.45);color:#e0f2fe;transform:rotate(20deg)}
+.builder__settings-gear-01054 + .builder__settings-expand{margin-left:0}
+#builder-settings-sidebar .builder__settings-gear-01054{font-size:15px!important;line-height:1!important}
+
+/* Readability scale for the entire inspector. Existing tiny 8–10px labels become readable. */
+#builder-settings-sidebar{--st-inspector-font-9:9px;--st-inspector-font-10:10.5px;--st-inspector-font-13:13px;--st-inspector-font-14:14px;--st-inspector-font-16:16px;--st-inspector-font-18:18px;--st-inspector-font-20:20px;--st-inspector-dot-size:12px}
+#builder-settings-sidebar :is(button,input,select,textarea,label,small,p,span){font-size:var(--st-inspector-font-10)!important;line-height:1.28}
+#builder-settings-sidebar :is(h1,h2,h3,h4){line-height:1.18}
+#builder-settings-sidebar h1{font-size:var(--st-inspector-font-20)!important}
+#builder-settings-sidebar h2{font-size:var(--st-inspector-font-16)!important}
+#builder-settings-sidebar h3{font-size:var(--st-inspector-font-14)!important}
+#builder-settings-sidebar .builder__settings-title{font-size:var(--st-inspector-font-13)!important}
+#builder-settings-sidebar .mp-inspector__title{font-size:var(--st-inspector-font-18)!important}
+#builder-settings-sidebar .mp-inspector__eyebrow,#builder-settings-sidebar .mp-side-group{font-size:var(--st-inspector-font-9)!important}
+#builder-settings-sidebar .builder__settings-expand{width:var(--st-inspector-dot-size);height:var(--st-inspector-dot-size)}
+
+.st-inspector-font-popover-01054{
+  position:fixed;z-index:2147481200;width:280px;padding:12px;border:1px solid rgba(56,189,248,.28);border-radius:15px;
+  background:linear-gradient(160deg,rgba(7,18,31,.99),rgba(10,29,41,.99));box-shadow:0 24px 60px rgba(0,0,0,.42),0 0 0 1px rgba(2,132,199,.09);
+  color:#e5f3ff;font:12px/1.4 Inter,system-ui,sans-serif;
+}
+.st-inspector-font-popover-01054[hidden]{display:none!important}
+.st-mini-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.st-mini-settings-head b{display:block;font-size:13px}.st-mini-settings-head span{display:block;margin-top:3px;color:#8fa7b9;font-size:10px}
+.st-mini-settings-head button{width:26px;height:26px;border:0;border-radius:8px;background:rgba(255,255,255,.06);color:#dbeafe;cursor:pointer;font-size:17px}
+.st-mini-settings-row{display:grid;grid-template-columns:1fr 54px;align-items:center;gap:10px}
+.st-mini-settings-row input{width:100%;accent-color:#38bdf8}.st-mini-settings-row output{padding:5px 7px;border-radius:8px;background:rgba(56,189,248,.10);color:#7dd3fc;text-align:center;font-weight:900}
+.st-mini-settings-actions{display:flex;justify-content:flex-end;margin-top:9px}.st-mini-settings-actions button{border:1px solid rgba(148,163,184,.2);border-radius:8px;background:rgba(255,255,255,.04);color:#b7c9d8;padding:6px 9px;cursor:pointer}
+
+/* Gear in Marketplace main-window topbar, exactly before ← Конструктор. */
+.mp-main-ui-settings-01054{font-size:15px!important;padding:0!important;width:33px!important;min-width:33px!important;display:grid!important;place-items:center!important}
+
+/* Floating appearance window: draggable by title bar and browser-resizable from lower-right. */
+.st-ui-settings-window-01054{
+  position:fixed;z-index:2147481100;min-width:420px;min-height:360px;max-width:calc(100vw - 8px);max-height:calc(100vh - 8px);
+  width:min(860px,calc(100vw - 36px));height:min(690px,calc(100vh - 36px));resize:both;overflow:hidden;
+  border:1px solid rgba(125,211,252,.28);border-radius:20px;background:#07111d;color:#e7f3fb;
+  box-shadow:0 34px 90px rgba(0,0,0,.48),0 0 0 1px rgba(14,165,233,.08);font:12px/1.45 Inter,Manrope,system-ui,sans-serif;
+}
+.st-ui-settings-window-01054[hidden]{display:none!important}
+.st-ui-settings-titlebar{height:62px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px 10px 16px;border-bottom:1px solid rgba(125,211,252,.14);background:linear-gradient(135deg,#0a2130,#0b1725);cursor:move;user-select:none;touch-action:none}
+.st-ui-settings-titlebar b{display:block;font-size:16px;letter-spacing:-.015em}.st-ui-settings-titlebar span{display:block;margin-top:2px;color:#7f9caf;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.st-ui-settings-title-actions{display:flex;align-items:center;gap:7px}.st-ui-settings-title-actions button{height:34px;border:1px solid rgba(148,163,184,.18);border-radius:9px;background:rgba(255,255,255,.045);color:#dcecf6;padding:0 10px;cursor:pointer;font-weight:850;font-size:10px}.st-ui-settings-title-actions button:hover{border-color:rgba(56,189,248,.42);background:rgba(56,189,248,.09)}
+.st-ui-settings-title-actions [data-st-ui-close]{width:34px;padding:0;font-size:18px}
+.st-ui-settings-scroll{height:calc(100% - 62px);overflow:auto;padding:14px;background:radial-gradient(circle at 100% 0%,rgba(14,165,233,.08),transparent 35%),#07111d}
+.st-ui-settings-group{margin:0 0 12px;padding:14px;border:1px solid rgba(148,163,184,.13);border-radius:15px;background:rgba(15,31,45,.76)}
+.st-ui-settings-group-title{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}.st-ui-settings-group-title b{font-size:13px}.st-ui-settings-group-title span{color:#829aaa;font-size:10px}
+.st-ui-control-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}.st-ui-slider-control{display:grid;gap:7px;padding:10px;border:1px solid rgba(148,163,184,.10);border-radius:11px;background:rgba(2,10,17,.36)}.st-ui-slider-control.is-wide{grid-column:1/-1}.st-ui-slider-control>span{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#cfe0eb;font-size:10px;font-weight:800}.st-ui-slider-control output{color:#67e8f9;font-weight:950}.st-ui-slider-control input{width:100%;accent-color:#22c55e;cursor:pointer}
+.st-ui-color-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.st-ui-color-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(150px,1fr);align-items:center;gap:10px;padding:8px 9px;border:1px solid rgba(148,163,184,.10);border-radius:11px;background:rgba(2,10,17,.34)}.st-ui-color-row>span{color:#c7dae6;font-size:10px;font-weight:800}.st-ui-color-row>div{display:grid;grid-template-columns:38px 1fr;gap:7px}.st-ui-color-row input[type=color]{width:38px;height:32px;padding:2px;border:1px solid rgba(148,163,184,.22);border-radius:8px;background:#07111d;cursor:pointer}.st-ui-color-row input[type=text]{width:100%;min-width:0;height:32px;padding:0 8px;border:1px solid rgba(148,163,184,.18);border-radius:8px;background:#05101a;color:#d8e8f2;font:700 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;outline:0}.st-ui-color-row input[type=text]:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.08)}
+.st-ui-settings-note{margin-bottom:4px}.st-ui-settings-note b{font-size:11px}.st-ui-settings-note p{margin:5px 0 0;color:#879dad;font-size:10px;line-height:1.55}
+.st-ui-resize-hint{position:absolute;right:5px;bottom:2px;color:#5ba8c6;font-size:15px;pointer-events:none}
+
+/* Custom appearance is applied only after the user changes a main-window setting. */
+#builder-root[data-st-ui-custom="1"] .mp-studio-01051{
+  --mp-bg:var(--st-ui-bg,#f4f7f5);--mp-card:var(--st-ui-surface,#fff);--mp-text:var(--st-ui-text,#15231b);--mp-sub:var(--st-ui-muted,#6d7f75);--mp-border:var(--st-ui-border,#e0e9e4);--mp-green:var(--st-ui-accent,#138a50);--mp-green2:var(--st-ui-accent,#19a963);
+  padding:var(--st-ui-workspace-padding,18px)!important;background:var(--st-ui-bg,#f4f7f5)!important;color:var(--st-ui-text,#15231b)!important;
+}
+#builder-root[data-st-ui-custom="1"] .mp-shell{border-width:var(--st-ui-border-width,1px)!important;border-color:var(--st-ui-border,#e0e9e4)!important;border-radius:var(--st-ui-radius,24px)!important;background:var(--st-ui-surface-alt,#f8fbf9)!important;box-shadow:0 24px 64px rgba(0,0,0,var(--st-ui-shadow-alpha,.14))!important}
+#builder-root[data-st-ui-custom="1"] .mp-topbar{background:var(--st-ui-header,#fff)!important;border-color:var(--st-ui-border,#e0e9e4)!important;color:var(--st-ui-text,#15231b)!important}
+#builder-root[data-st-ui-custom="1"] .mp-content,#builder-root[data-st-ui-custom="1"] .mp-context{background:transparent;color:var(--st-ui-text,#15231b)}
+#builder-root[data-st-ui-custom="1"] :is(.mp-card,.mp-toolbar,.mp-table-wrap,.mp-tree-row,.mp-stat,.mp-health__score::after){background:var(--st-ui-surface,#fff)!important;border-color:var(--st-ui-border,#e0e9e4)!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-card,.mp-toolbar,.mp-table-wrap,.mp-tree-row,.mp-stat){border-width:var(--st-ui-border-width,1px)!important;border-radius:var(--st-ui-radius,16px)!important;box-shadow:0 8px 22px rgba(0,0,0,var(--st-ui-shadow-soft-alpha,.06))!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-search,.mp-select,.mp-input,.mp-field input,.mp-field select,.mp-field textarea,.mp-icon-btn,.mp-btn){background:var(--st-ui-surface-alt,#f8fbf9)!important;border-color:var(--st-ui-border,#e0e9e4)!important;color:var(--st-ui-text,#15231b)!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-page-head h1,.mp-card__title,.mp-product-name,.mp-tree-name,.mp-stat__value,.mp-brand__title,.mp-table td,.mp-field input,.mp-field select,.mp-field textarea){color:var(--st-ui-text,#15231b)!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-page-head p,.mp-card__hint,.mp-product-sub,.mp-tree-meta,.mp-stat__label,.mp-brand__sub,.mp-table th,.mp-field label){color:var(--st-ui-muted,#6d7f75)!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-card__head,.mp-table th,.mp-table td,.mp-context,.mp-topbar){border-color:var(--st-ui-border,#e0e9e4)!important}
+#builder-root[data-st-ui-custom="1"] :is(.mp-btn--primary,.mp-progress>i){background:var(--st-ui-accent,#138a50)!important}
+#builder-root[data-st-ui-custom="1"] .mp-topnav button.is-active{color:var(--st-ui-accent,#138a50)!important;box-shadow:inset 0 0 0 1px var(--st-ui-border,#e0e9e4)!important}
+
+/* Main-window font scale: explicit bases avoid compounded em scaling. */
+#builder-root{--st-main-font-9:9px;--st-main-font-10:10px;--st-main-font-11:11px;--st-main-font-14:14px;--st-main-font-23:23px;--st-main-font-25:25px}
+#builder-root .mp-brand__title{font-size:var(--st-main-font-14)!important}#builder-root .mp-brand__sub{font-size:var(--st-main-font-9)!important}
+#builder-root .mp-topnav button,#builder-root .mp-btn,#builder-root .mp-search input,#builder-root .mp-select,#builder-root .mp-input{font-size:var(--st-main-font-10)!important}
+#builder-root .mp-btn--small{font-size:var(--st-main-font-9)!important}#builder-root .mp-page-head h1{font-size:var(--st-main-font-25)!important}#builder-root .mp-page-head p{font-size:var(--st-main-font-11)!important}
+#builder-root .mp-stat__value{font-size:var(--st-main-font-23)!important}#builder-root :is(.mp-stat__label,.mp-card__title,.mp-field input,.mp-field select,.mp-field textarea,.mp-table td,.mp-product-name,.mp-tree-name){font-size:var(--st-main-font-10)!important}
+#builder-root :is(.mp-card__hint,.mp-table th,.mp-product-sub,.mp-tree-meta,.mp-field label){font-size:var(--st-main-font-9)!important}
+
+@media (max-width:760px){.st-ui-settings-window-01054{min-width:320px}.st-ui-control-grid,.st-ui-color-grid{grid-template-columns:1fr}.st-ui-color-row{grid-template-columns:1fr}.st-ui-settings-group-title{align-items:flex-start;flex-direction:column}}

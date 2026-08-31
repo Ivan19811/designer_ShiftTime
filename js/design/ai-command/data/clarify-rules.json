@@ -1,0 +1,166 @@
+[
+  {
+    "id": "clarify_color_target",
+    "trigger": "color_command_without_property",
+    "condition": "action sets color but property missing and target supports multiple colorable layers",
+    "question": "Що саме зробити кольоровим: фон, текст чи іконку?",
+    "options": [
+      "фон",
+      "текст",
+      "іконку",
+      "усе"
+    ],
+    "severity": "high",
+    "autofallback": null
+  },
+  {
+    "id": "clarify_gradient_target",
+    "trigger": "gradient_without_target_layer",
+    "condition": "gradient requested but target supports both background and text gradient semantics",
+    "question": "Куди застосувати градієнт: на фон чи на текст?",
+    "options": [
+      "фон",
+      "текст"
+    ],
+    "severity": "high",
+    "autofallback": "background_layer"
+  },
+  {
+    "id": "clarify_adjust_target",
+    "trigger": "adjust_without_property",
+    "condition": "increase or decrease requested but property missing",
+    "question": "Що саме потрібно збільшити або зменшити?",
+    "options": [
+      "текст",
+      "іконку",
+      "відступ",
+      "скруглення",
+      "прозорість"
+    ],
+    "severity": "high",
+    "autofallback": null
+  },
+  {
+    "id": "clarify_scope",
+    "trigger": "missing_scope",
+    "condition": "target phrase points to multiple possible objects in current context",
+    "question": "До чого застосувати зміну?",
+    "options": [
+      "активний елемент",
+      "тільки текст",
+      "тільки іконку",
+      "усі схожі елементи"
+    ],
+    "severity": "medium",
+    "autofallback": "selected_element"
+  },
+  {
+    "id": "clarify_menu_level",
+    "trigger": "menu_style_without_level",
+    "condition": "menu style requested but no menu level or state given and menu has multi-level styles",
+    "question": "До якого рівня меню застосувати зміну?",
+    "options": [
+      "верхній рівень",
+      "підменю",
+      "mega menu",
+      "усі рівні"
+    ],
+    "severity": "medium",
+    "autofallback": "top_level"
+  },
+  {
+    "id": "clarify_hover_vs_default",
+    "trigger": "hover_ambiguous",
+    "condition": "style change requested for interactive element without state mention",
+    "question": "Змінити звичайний стан чи hover?",
+    "options": [
+      "звичайний",
+      "hover",
+      "обидва"
+    ],
+    "severity": "medium",
+    "autofallback": "default"
+  },
+  {
+    "id": "clarify_responsive_mode",
+    "trigger": "mobile_desktop_ambiguous",
+    "condition": "element supports mobile variant and request implies responsive change without mode",
+    "question": "Застосувати зміну до desktop, mobile чи обох?",
+    "options": [
+      "desktop",
+      "mobile",
+      "обидва"
+    ],
+    "severity": "medium",
+    "autofallback": "desktop"
+  },
+  {
+    "id": "clarify_create_location",
+    "trigger": "create_without_parent",
+    "condition": "create requested but insertion parent is unknown",
+    "question": "Куди додати новий елемент?",
+    "options": [
+      "у шапку",
+      "у футер",
+      "у секцію",
+      "в активний контейнер"
+    ],
+    "severity": "high",
+    "autofallback": null
+  },
+  {
+    "id": "clarify_link_target",
+    "trigger": "link_target_missing",
+    "condition": "link set requested but no url/page/anchor provided",
+    "question": "Яке посилання потрібно поставити?",
+    "options": [
+      "URL",
+      "якір сторінки",
+      "сторінка сайту"
+    ],
+    "severity": "high",
+    "autofallback": null
+  },
+  {
+    "id": "clarify_icon_choice",
+    "trigger": "icon_resolver_low_confidence",
+    "condition": "icon resolver found several similar icons with close score",
+    "question": "Яку іконку вибрати точніше?",
+    "options": [
+      "конверт",
+      "книга",
+      "телефон",
+      "глобус",
+      "іншу"
+    ],
+    "severity": "medium",
+    "autofallback": "best_scored"
+  },
+  {
+    "id": "clarify_menu_structure",
+    "trigger": "menu_structure_ambiguous",
+    "condition": "submenu or mega menu mentioned without explicit structure change",
+    "question": "Що саме змінити в меню?",
+    "options": [
+      "структуру",
+      "фон",
+      "текст",
+      "іконки",
+      "mega panel"
+    ],
+    "severity": "medium",
+    "autofallback": null
+  },
+  {
+    "id": "clarify_forbidden_action",
+    "trigger": "unsupported_action_for_target",
+    "condition": "action is not allowed for target according to capabilities",
+    "question": "Цю дію не можна застосувати до цього елемента. Вибрати інший елемент?",
+    "options": [
+      "так",
+      "ні"
+    ],
+    "severity": "high",
+    "autofallback": null
+  }
+]

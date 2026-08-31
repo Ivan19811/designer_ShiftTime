@@ -1,0 +1,4331 @@
+{
+  "version": "00434-asset-library-v1",
+  "description": "ShiftTime Builder local asset library: 50 global backgrounds, education visuals and reusable shared visuals. Small SVG placeholders now, replaceable with optimized WebP/AVIF later without changing IDs.",
+  "assets": [
+    {
+      "id": "global-bg-001",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-001.svg",
+      "title": "Універсальний фон 01 · premium light",
+      "description": "Глобальний SVG-фон для hero/section/CTA, premium light.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-002",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-002.svg",
+      "title": "Універсальний фон 02 · clean blue",
+      "description": "Глобальний SVG-фон для hero/section/CTA, clean blue.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-003",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-003.svg",
+      "title": "Універсальний фон 03 · navy gold",
+      "description": "Глобальний SVG-фон для hero/section/CTA, navy gold.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-004",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-004.svg",
+      "title": "Універсальний фон 04 · rose cream",
+      "description": "Глобальний SVG-фон для hero/section/CTA, rose cream.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-005",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-005.svg",
+      "title": "Універсальний фон 05 · cyan soft",
+      "description": "Глобальний SVG-фон для hero/section/CTA, cyan soft.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-006",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-006.svg",
+      "title": "Універсальний фон 06 · eco mint",
+      "description": "Глобальний SVG-фон для hero/section/CTA, eco mint.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "nature",
+        "eco"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-007",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-007.svg",
+      "title": "Універсальний фон 07 · purple academy",
+      "description": "Глобальний SVG-фон для hero/section/CTA, purple academy.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-008",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-008.svg",
+      "title": "Універсальний фон 08 · warm paper",
+      "description": "Глобальний SVG-фон для hero/section/CTA, warm paper.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-009",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-009.svg",
+      "title": "Універсальний фон 09 · dark tech",
+      "description": "Глобальний SVG-фон для hero/section/CTA, dark tech.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "tech",
+        "dark",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 8
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 8,
+        "darkText": 4,
+        "needsOverlay": false,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-010",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-010.svg",
+      "title": "Універсальний фон 10 · neutral studio",
+      "description": "Глобальний SVG-фон для hero/section/CTA, neutral studio.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-011",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-011.svg",
+      "title": "Універсальний фон 11 · premium light",
+      "description": "Глобальний SVG-фон для hero/section/CTA, premium light.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-012",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-012.svg",
+      "title": "Універсальний фон 12 · clean blue",
+      "description": "Глобальний SVG-фон для hero/section/CTA, clean blue.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-013",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-013.svg",
+      "title": "Універсальний фон 13 · navy gold",
+      "description": "Глобальний SVG-фон для hero/section/CTA, navy gold.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-014",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-014.svg",
+      "title": "Універсальний фон 14 · rose cream",
+      "description": "Глобальний SVG-фон для hero/section/CTA, rose cream.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-015",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-015.svg",
+      "title": "Універсальний фон 15 · cyan soft",
+      "description": "Глобальний SVG-фон для hero/section/CTA, cyan soft.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-016",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-016.svg",
+      "title": "Універсальний фон 16 · eco mint",
+      "description": "Глобальний SVG-фон для hero/section/CTA, eco mint.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "nature",
+        "eco"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-017",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-017.svg",
+      "title": "Універсальний фон 17 · purple academy",
+      "description": "Глобальний SVG-фон для hero/section/CTA, purple academy.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-018",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-018.svg",
+      "title": "Універсальний фон 18 · warm paper",
+      "description": "Глобальний SVG-фон для hero/section/CTA, warm paper.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-019",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-019.svg",
+      "title": "Універсальний фон 19 · dark tech",
+      "description": "Глобальний SVG-фон для hero/section/CTA, dark tech.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "tech",
+        "dark",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 8
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 8,
+        "darkText": 4,
+        "needsOverlay": false,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-020",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-020.svg",
+      "title": "Універсальний фон 20 · neutral studio",
+      "description": "Глобальний SVG-фон для hero/section/CTA, neutral studio.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-021",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-021.svg",
+      "title": "Універсальний фон 21 · premium light",
+      "description": "Глобальний SVG-фон для hero/section/CTA, premium light.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-022",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-022.svg",
+      "title": "Універсальний фон 22 · clean blue",
+      "description": "Глобальний SVG-фон для hero/section/CTA, clean blue.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-023",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-023.svg",
+      "title": "Універсальний фон 23 · navy gold",
+      "description": "Глобальний SVG-фон для hero/section/CTA, navy gold.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-024",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-024.svg",
+      "title": "Універсальний фон 24 · rose cream",
+      "description": "Глобальний SVG-фон для hero/section/CTA, rose cream.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-025",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-025.svg",
+      "title": "Універсальний фон 25 · cyan soft",
+      "description": "Глобальний SVG-фон для hero/section/CTA, cyan soft.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-026",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-026.svg",
+      "title": "Універсальний фон 26 · eco mint",
+      "description": "Глобальний SVG-фон для hero/section/CTA, eco mint.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "nature",
+        "eco"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-027",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-027.svg",
+      "title": "Універсальний фон 27 · purple academy",
+      "description": "Глобальний SVG-фон для hero/section/CTA, purple academy.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-028",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-028.svg",
+      "title": "Універсальний фон 28 · warm paper",
+      "description": "Глобальний SVG-фон для hero/section/CTA, warm paper.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-029",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-029.svg",
+      "title": "Універсальний фон 29 · dark tech",
+      "description": "Глобальний SVG-фон для hero/section/CTA, dark tech.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "tech",
+        "dark",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 8
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 8,
+        "darkText": 4,
+        "needsOverlay": false,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-030",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-030.svg",
+      "title": "Універсальний фон 30 · neutral studio",
+      "description": "Глобальний SVG-фон для hero/section/CTA, neutral studio.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-031",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-031.svg",
+      "title": "Універсальний фон 31 · premium light",
+      "description": "Глобальний SVG-фон для hero/section/CTA, premium light.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-032",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-032.svg",
+      "title": "Універсальний фон 32 · clean blue",
+      "description": "Глобальний SVG-фон для hero/section/CTA, clean blue.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-033",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-033.svg",
+      "title": "Універсальний фон 33 · navy gold",
+      "description": "Глобальний SVG-фон для hero/section/CTA, navy gold.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-034",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-034.svg",
+      "title": "Універсальний фон 34 · rose cream",
+      "description": "Глобальний SVG-фон для hero/section/CTA, rose cream.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-035",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-035.svg",
+      "title": "Універсальний фон 35 · cyan soft",
+      "description": "Глобальний SVG-фон для hero/section/CTA, cyan soft.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-036",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-036.svg",
+      "title": "Універсальний фон 36 · eco mint",
+      "description": "Глобальний SVG-фон для hero/section/CTA, eco mint.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "nature",
+        "eco"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-037",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-037.svg",
+      "title": "Універсальний фон 37 · purple academy",
+      "description": "Глобальний SVG-фон для hero/section/CTA, purple academy.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-038",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-038.svg",
+      "title": "Універсальний фон 38 · warm paper",
+      "description": "Глобальний SVG-фон для hero/section/CTA, warm paper.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-039",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-039.svg",
+      "title": "Універсальний фон 39 · dark tech",
+      "description": "Глобальний SVG-фон для hero/section/CTA, dark tech.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "tech",
+        "dark",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 8
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 8,
+        "darkText": 4,
+        "needsOverlay": false,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-040",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-040.svg",
+      "title": "Універсальний фон 40 · neutral studio",
+      "description": "Глобальний SVG-фон для hero/section/CTA, neutral studio.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-041",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-041.svg",
+      "title": "Універсальний фон 41 · premium light",
+      "description": "Глобальний SVG-фон для hero/section/CTA, premium light.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-042",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-042.svg",
+      "title": "Універсальний фон 42 · clean blue",
+      "description": "Глобальний SVG-фон для hero/section/CTA, clean blue.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-043",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-043.svg",
+      "title": "Універсальний фон 43 · navy gold",
+      "description": "Глобальний SVG-фон для hero/section/CTA, navy gold.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-044",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-044.svg",
+      "title": "Універсальний фон 44 · rose cream",
+      "description": "Глобальний SVG-фон для hero/section/CTA, rose cream.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-045",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-045.svg",
+      "title": "Універсальний фон 45 · cyan soft",
+      "description": "Глобальний SVG-фон для hero/section/CTA, cyan soft.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "global-bg-046",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-046.svg",
+      "title": "Універсальний фон 46 · eco mint",
+      "description": "Глобальний SVG-фон для hero/section/CTA, eco mint.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "nature",
+        "eco"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 4
+    },
+    {
+      "id": "global-bg-047",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-047.svg",
+      "title": "Універсальний фон 47 · purple academy",
+      "description": "Глобальний SVG-фон для hero/section/CTA, purple academy.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "education",
+        "school",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 5
+    },
+    {
+      "id": "global-bg-048",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-048.svg",
+      "title": "Універсальний фон 48 · warm paper",
+      "description": "Глобальний SVG-фон для hero/section/CTA, warm paper.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 6
+    },
+    {
+      "id": "global-bg-049",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-049.svg",
+      "title": "Універсальний фон 49 · dark tech",
+      "description": "Глобальний SVG-фон для hero/section/CTA, dark tech.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract",
+        "tech",
+        "dark",
+        "premium"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 8
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 8,
+        "darkText": 4,
+        "needsOverlay": false,
+        "bestTextZone": "left"
+      },
+      "priority": 7
+    },
+    {
+      "id": "global-bg-050",
+      "type": "background",
+      "path": "assets/library/backgrounds/global/global-bg-050.svg",
+      "title": "Універсальний фон 50 · neutral studio",
+      "description": "Глобальний SVG-фон для hero/section/CTA, neutral studio.",
+      "primaryTheme": "global",
+      "themes": [
+        "global",
+        "abstract",
+        "business",
+        "education"
+      ],
+      "tags": [
+        "background",
+        "section-bg",
+        "hero-bg",
+        "global",
+        "abstract"
+      ],
+      "roles": [
+        "section-bg",
+        "hero-bg",
+        "cta-bg",
+        "card-bg"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "science",
+        "culture",
+        "medicine",
+        "marketplace"
+      ],
+      "styleScores": {
+        "premium": 8,
+        "modern": 8,
+        "warm": 5,
+        "clean": 8,
+        "tech": 4
+      },
+      "moodScores": {
+        "professional": 8,
+        "trustworthy": 7,
+        "friendly": 7,
+        "premium": 8
+      },
+      "usageScores": {
+        "section-background": 10,
+        "hero": 8,
+        "content-image": 2,
+        "card-background": 7
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 8
+    },
+    {
+      "id": "education-pro-hero-campus",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-hero-campus.svg",
+      "title": "Навчальний кампус / hero",
+      "description": "Освітній reusable visual: Навчальний кампус / hero.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "hero-image",
+        "section-background",
+        "education-hero"
+      ],
+      "roles": [
+        "hero-image",
+        "section-background",
+        "education-hero"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 10,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 24
+    },
+    {
+      "id": "education-pro-classroom",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-classroom.svg",
+      "title": "Сучасний клас",
+      "description": "Освітній reusable visual: Сучасний клас.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "classroom",
+        "program-card",
+        "content-image"
+      ],
+      "roles": [
+        "classroom",
+        "program-card",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 23
+    },
+    {
+      "id": "education-pro-online",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-online.svg",
+      "title": "Онлайн навчання",
+      "description": "Освітній reusable visual: Онлайн навчання.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "online-learning",
+        "program-card",
+        "content-image"
+      ],
+      "roles": [
+        "online-learning",
+        "program-card",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 22
+    },
+    {
+      "id": "education-pro-teacher",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-teacher.svg",
+      "title": "Викладач / ментор",
+      "description": "Освітній reusable visual: Викладач / ментор.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "teacher-photo",
+        "mentor-card",
+        "content-image"
+      ],
+      "roles": [
+        "teacher-photo",
+        "mentor-card",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 21
+    },
+    {
+      "id": "education-pro-students",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-students.svg",
+      "title": "Студенти в роботі",
+      "description": "Освітній reusable visual: Студенти в роботі.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "student-life",
+        "gallery-image",
+        "content-image"
+      ],
+      "roles": [
+        "student-life",
+        "gallery-image",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 9,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 20
+    },
+    {
+      "id": "education-pro-admissions",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-admissions.svg",
+      "title": "Запис / консультація",
+      "description": "Освітній reusable visual: Запис / консультація.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "admissions",
+        "cta-image",
+        "contacts-image"
+      ],
+      "roles": [
+        "admissions",
+        "cta-image",
+        "contacts-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 9
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 19
+    },
+    {
+      "id": "education-pro-library",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-library.svg",
+      "title": "Бібліотека / знання",
+      "description": "Освітній reusable visual: Бібліотека / знання.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "library",
+        "gallery-image",
+        "content-image"
+      ],
+      "roles": [
+        "library",
+        "gallery-image",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 9,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 18
+    },
+    {
+      "id": "education-pro-lab",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-lab.svg",
+      "title": "Лабораторія / STEM",
+      "description": "Освітній reusable visual: Лабораторія / STEM.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "science-class",
+        "program-card",
+        "content-image"
+      ],
+      "roles": [
+        "science-class",
+        "program-card",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 17
+    },
+    {
+      "id": "education-pro-event",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-event.svg",
+      "title": "Події / open day",
+      "description": "Освітній reusable visual: Події / open day.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "events",
+        "gallery-image",
+        "section-background"
+      ],
+      "roles": [
+        "events",
+        "gallery-image",
+        "section-background"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 9,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 16
+    },
+    {
+      "id": "education-pro-certificate",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-certificate.svg",
+      "title": "Результат / сертифікат",
+      "description": "Освітній reusable visual: Результат / сертифікат.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "certificate",
+        "proof",
+        "content-image"
+      ],
+      "roles": [
+        "certificate",
+        "proof",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 15
+    },
+    {
+      "id": "education-pro-parents",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-parents.svg",
+      "title": "Консультація з батьками",
+      "description": "Освітній reusable visual: Консультація з батьками.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "parents-consultation",
+        "contacts-image",
+        "cta-image"
+      ],
+      "roles": [
+        "parents-consultation",
+        "contacts-image",
+        "cta-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 9
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 14
+    },
+    {
+      "id": "education-pro-team",
+      "type": "image",
+      "path": "assets/library/topics/education/education-pro-team.svg",
+      "title": "Команда освіти",
+      "description": "Освітній reusable visual: Команда освіти.",
+      "primaryTheme": "education",
+      "themes": [
+        "education",
+        "school",
+        "courses",
+        "university",
+        "admissions",
+        "business"
+      ],
+      "tags": [
+        "освіта",
+        "навчання",
+        "школа",
+        "курси",
+        "студенти",
+        "викладачі",
+        "вступ",
+        "education",
+        "school",
+        "courses",
+        "team",
+        "teacher-photo",
+        "content-image"
+      ],
+      "roles": [
+        "team",
+        "teacher-photo",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "courses",
+        "online-learning",
+        "science",
+        "business-education"
+      ],
+      "styleScores": {
+        "premium": 9,
+        "modern": 9,
+        "warm": 8,
+        "clean": 9,
+        "professional": 9
+      },
+      "moodScores": {
+        "trustworthy": 9,
+        "friendly": 8,
+        "inspiring": 9,
+        "professional": 9
+      },
+      "usageScores": {
+        "content-image": 10,
+        "section-background": 8,
+        "hero": 7,
+        "gallery": 6,
+        "contacts": 3
+      },
+      "textReadability": {
+        "lightText": 6,
+        "darkText": 9,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 13
+    },
+    {
+      "id": "shared-consultation-001",
+      "type": "image",
+      "path": "assets/library/shared/people/shared-consultation-001.svg",
+      "title": "Консультація за ноутбуком",
+      "description": "Shared visual: Консультація за ноутбуком.",
+      "primaryTheme": "shared",
+      "themes": [
+        "shared",
+        "education",
+        "business",
+        "medicine",
+        "legal",
+        "government"
+      ],
+      "tags": [
+        "shared",
+        "універсальне",
+        "reuse",
+        "consultation",
+        "cta-image",
+        "contacts-image",
+        "education",
+        "business",
+        "medicine",
+        "legal",
+        "government"
+      ],
+      "roles": [
+        "consultation",
+        "cta-image",
+        "contacts-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "medicine",
+        "legal",
+        "government"
+      ],
+      "styleScores": {
+        "premium": 7,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "professional": 8
+      },
+      "moodScores": {
+        "trustworthy": 8,
+        "professional": 8,
+        "friendly": 7
+      },
+      "usageScores": {
+        "content-image": 9,
+        "section-background": 7,
+        "hero": 7,
+        "gallery": 5
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 12
+    },
+    {
+      "id": "shared-office-team-001",
+      "type": "image",
+      "path": "assets/library/shared/business/shared-office-team-001.svg",
+      "title": "Команда в офісі",
+      "description": "Shared visual: Команда в офісі.",
+      "primaryTheme": "shared",
+      "themes": [
+        "shared",
+        "education",
+        "business",
+        "government",
+        "finance"
+      ],
+      "tags": [
+        "shared",
+        "універсальне",
+        "reuse",
+        "team",
+        "about-image",
+        "content-image",
+        "education",
+        "business",
+        "government",
+        "finance"
+      ],
+      "roles": [
+        "team",
+        "about-image",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government",
+        "finance"
+      ],
+      "styleScores": {
+        "premium": 7,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "professional": 8
+      },
+      "moodScores": {
+        "trustworthy": 8,
+        "professional": 8,
+        "friendly": 7
+      },
+      "usageScores": {
+        "content-image": 9,
+        "section-background": 7,
+        "hero": 7,
+        "gallery": 5
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 12
+    },
+    {
+      "id": "shared-city-building-001",
+      "type": "image",
+      "path": "assets/library/shared/city/shared-city-building-001.svg",
+      "title": "Міська будівля",
+      "description": "Shared visual: Міська будівля.",
+      "primaryTheme": "shared",
+      "themes": [
+        "shared",
+        "government",
+        "education",
+        "business",
+        "culture"
+      ],
+      "tags": [
+        "shared",
+        "універсальне",
+        "reuse",
+        "city",
+        "government",
+        "hero-image",
+        "government",
+        "education",
+        "business",
+        "culture"
+      ],
+      "roles": [
+        "city",
+        "government",
+        "hero-image"
+      ],
+      "reusableTopics": [
+        "government",
+        "education",
+        "business",
+        "culture"
+      ],
+      "styleScores": {
+        "premium": 7,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "professional": 8
+      },
+      "moodScores": {
+        "trustworthy": 8,
+        "professional": 8,
+        "friendly": 7
+      },
+      "usageScores": {
+        "content-image": 9,
+        "section-background": 7,
+        "hero": 7,
+        "gallery": 5
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 12
+    },
+    {
+      "id": "shared-abstract-data-001",
+      "type": "image",
+      "path": "assets/library/shared/abstract/shared-abstract-data-001.svg",
+      "title": "Абстрактні дані",
+      "description": "Shared visual: Абстрактні дані.",
+      "primaryTheme": "shared",
+      "themes": [
+        "shared",
+        "tech",
+        "science",
+        "education",
+        "business"
+      ],
+      "tags": [
+        "shared",
+        "універсальне",
+        "reuse",
+        "abstract",
+        "technology",
+        "section-bg",
+        "tech",
+        "science",
+        "education",
+        "business"
+      ],
+      "roles": [
+        "abstract",
+        "technology",
+        "section-bg"
+      ],
+      "reusableTopics": [
+        "tech",
+        "science",
+        "education",
+        "business"
+      ],
+      "styleScores": {
+        "premium": 7,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "professional": 8
+      },
+      "moodScores": {
+        "trustworthy": 8,
+        "professional": 8,
+        "friendly": 7
+      },
+      "usageScores": {
+        "content-image": 9,
+        "section-background": 7,
+        "hero": 7,
+        "gallery": 5
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 12
+    },
+    {
+      "id": "shared-paper-notes-001",
+      "type": "image",
+      "path": "assets/library/shared/business/shared-paper-notes-001.svg",
+      "title": "Нотатки і планування",
+      "description": "Shared visual: Нотатки і планування.",
+      "primaryTheme": "shared",
+      "themes": [
+        "shared",
+        "education",
+        "business",
+        "government"
+      ],
+      "tags": [
+        "shared",
+        "універсальне",
+        "reuse",
+        "planning",
+        "program-card",
+        "content-image",
+        "education",
+        "business",
+        "government"
+      ],
+      "roles": [
+        "planning",
+        "program-card",
+        "content-image"
+      ],
+      "reusableTopics": [
+        "education",
+        "business",
+        "government"
+      ],
+      "styleScores": {
+        "premium": 7,
+        "modern": 8,
+        "warm": 7,
+        "clean": 8,
+        "professional": 8
+      },
+      "moodScores": {
+        "trustworthy": 8,
+        "professional": 8,
+        "friendly": 7
+      },
+      "usageScores": {
+        "content-image": 9,
+        "section-background": 7,
+        "hero": 7,
+        "gallery": 5
+      },
+      "textReadability": {
+        "lightText": 5,
+        "darkText": 8,
+        "needsOverlay": true,
+        "bestTextZone": "left"
+      },
+      "priority": 12
+    }
+  ]
+}

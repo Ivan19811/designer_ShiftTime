@@ -1,0 +1,258 @@
+/* Animator Dock (Preview Orion) — isolated styles */
+
+.st-animator-dock{
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  width: min(560px, calc(100vw - 28px));
+  height: min(380px, calc(100vh - 140px));
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+  background: rgba(15, 23, 42, 0.76);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+
+  /* локальні токени для таймлайна/ресайзера */
+  --stA-border: rgba(255,255,255,.12);
+  --stA-line: rgba(255,255,255,.10);
+  --stA-text: rgba(226,232,240,.92);
+  --stA-chip: rgba(255,255,255,.08);
+  --stA-chip2: rgba(255,255,255,.06);
+  --stA-accent: #38bdf8;
+  --stA-timeline-h: 180px;
+}
+
+.st-animator-dock__bar{
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  color: #e2e8f0;
+  font: 600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  user-select: none;
+}
+
+.st-animator-dock__title{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: .95;
+}
+
+.st-animator-dock__dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34,197,94,.16);
+}
+
+.st-animator-dock__actions{
+  display: flex;
+  gap: 6px;
+}
+
+.st-animator-dock__btn{
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(148,163,184,.25);
+  background: rgba(2,6,23,.35);
+  color: #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.st-animator-dock__btn:hover{ background: rgba(2,6,23,.55); }
+
+.st-animator-dock__body{
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Preview area */
+.st-animator-dock__preview{
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Mount must have a real box so PreviewOrion (absolute) can fill it */
+#st-animator-mount{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Timeline block (bottom) */
+.st-animator__timeline{
+  height: var(--st-animator-timeline-h, 220px);
+  min-height: 140px;
+  background: var(--stA-panel2);
+  border-top: 1px solid var(--stA-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.st-animator__timelineHeader{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--stA-border);
+}
+
+.st-animator__timelineHeader .st-animator__chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--stA-chip);
+  border: 1px solid var(--stA-border);
+  color: var(--stA-text);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.st-animator__timelineBody{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+  color: rgba(226,232,240,.75);
+  font-size: 12px;
+}
+
+/* Timeline stub UI (ruler + placeholder tracks) */
+.st-animator__ruler{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  height: 26px;
+  padding: 0 6px;
+  margin: -6px -6px 10px;
+  background: rgba(15,23,42,.55);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.st-animator__tick{
+  position: relative;
+  width: 60px;
+  height: 100%;
+  border-left: 1px solid rgba(255,255,255,.07);
+}
+
+.st-animator__tick::after{
+  content: attr(data-label);
+  position: absolute;
+  left: 6px;
+  bottom: 4px;
+  font-size: 11px;
+  color: rgba(226,232,240,.7);
+}
+
+.st-animator__tracks{
+  border: 1px dashed rgba(255,255,255,.10);
+  border-radius: 12px;
+  min-height: 180px;
+  padding: 10px;
+}
+
+.st-animator__trackRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.st-animator__trackRow:last-child{ border-bottom: none; }
+
+.st-animator__trackName{
+  width: 160px;
+  color: rgba(226,232,240,.75);
+}
+
+.st-animator__trackLane{
+  flex: 1;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+/* Resizer between Preview and Timeline */
+.st-animator-timelineResizer{
+  height: 7px;
+  cursor: ns-resize;
+  background: rgba(255,255,255,.03);
+  border-top: 1px solid var(--stA-border);
+  border-bottom: 1px solid var(--stA-border);
+}
+
+.st-animator-timelineResizer:hover{
+  background: rgba(255,255,255,.06);
+}
+
+.st-animator-dock.is-collapsed{
+  height: 42px;
+}
+
+.st-animator-dock.is-collapsed .st-animator-dock__body{
+  display: none;
+}
+
+/* =========================
+   Full Animator Mode
+   ========================= */
+
+/* Hide Builder UI (leave only main top header) */
+body.st-animator-mode #builder-main-sidebar,
+body.st-animator-mode #builder-settings-sidebar,
+body.st-animator-mode #builder-settings-resizer,
+body.st-animator-mode .builder__canvas,
+body.st-animator-mode .builder__footer{
+  display: none !important;
+}
+
+/* Make dock occupy full workspace under header */
+body.st-animator-mode .st-animator-dock{
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--st-builder-header-h, 56px);
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
+  background: rgba(2, 6, 23, 0.92);
+  backdrop-filter: blur(14px);
+}
+
+/* Ensure dock content can scroll internally if needed */
+body.st-animator-mode .st-animator-dock__body{
+  overflow: hidden;
+}
+
+/* Keep bar visible as Animator "sub-header" */
+body.st-animator-mode .st-animator-dock__bar{
+  border-bottom: 1px solid rgba(148,163,184,.16);
+}

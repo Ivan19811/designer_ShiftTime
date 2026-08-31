@@ -1,0 +1,78 @@
+<button class="design-section__header" type="button">
+  <div class="design-section__header-title">
+    <span>Розміри</span>
+  </div>
+  <span class="design-section__chevron">▶</span>
+</button>
+
+<div class="design-section__body" data-size-widget>
+  <div class="design-field">
+    <div class="design-field__label">Поточні розміри (px)</div>
+    <div class="st-size-readout">
+      <div class="st-size-readout__row"><span class="st-size-readout__k">Ширина:</span> <span class="st-size-readout__v" data-cur-w>—</span></div>
+      <div class="st-size-readout__row"><span class="st-size-readout__k">Висота:</span> <span class="st-size-readout__v" data-cur-h>—</span></div>
+    </div>
+  </div>
+
+  <div class="design-field">
+    <div class="design-field__label">Режим розміру</div>
+    <div class="design-field__row" data-size-mode>
+      <label class="design-radio"><input type="radio" name="stSizeMode" value="auto" checked> Auto</label>
+      <label class="design-radio"><input type="radio" name="stSizeMode" value="fill"> Fill</label>
+      <label class="design-radio"><input type="radio" name="stSizeMode" value="hug"> Hug</label>
+      <label class="design-radio"><input type="radio" name="stSizeMode" value="custom"> Custom</label>
+    </div>
+    <div class="design-field__hint">Auto — керує розкладка. Fill — заповнює доступний простір. Hug — під контент. Custom — ручний ввід.</div>
+  </div>
+
+  <div class="design-field" data-custom-wrap>
+    <div class="design-field__label">Ручний розмір</div>
+    <div class="st-size-custom-grid">
+      <div class="st-size-custom-row">
+        <div class="st-size-custom-k">Ширина</div>
+        <input type="number" class="design-number" placeholder="Незадано" data-custom-w>
+        <select class="design-select" data-unit-w>
+          <option value="px" selected>px</option>
+          <option value="%">%</option>
+        </select>
+      </div>
+      <div class="st-size-custom-row">
+        <div class="st-size-custom-k">Висота</div>
+        <input type="number" class="design-number" placeholder="Незадано" data-custom-h>
+        <select class="design-select" data-unit-h>
+          <option value="px" selected>px</option>
+          <option value="%">%</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="st-adv-toggle" type="button" data-adv-toggle>Advanced ▾</button>
+
+  <div class="st-adv" data-adv>
+    <div class="design-field">
+      <div class="design-field__label">Min / Max (px)</div>
+      <div class="st-size-minmax-grid">
+        <div class="st-size-minmax-row">
+          <div class="st-size-minmax-k">Min W</div>
+          <input type="number" class="design-number" placeholder="Незадано" data-min-w>
+        </div>
+        <div class="st-size-minmax-row">
+          <div class="st-size-minmax-k">Max W</div>
+          <input type="number" class="design-number" placeholder="Незадано" data-max-w>
+        </div>
+        <div class="st-size-minmax-row">
+          <div class="st-size-minmax-k">Min H</div>
+          <input type="number" class="design-number" placeholder="Незадано" data-min-h>
+        </div>
+        <div class="st-size-minmax-row">
+          <div class="st-size-minmax-k">Max H</div>
+          <input type="number" class="design-number" placeholder="Незадано" data-max-h>
+        </div>
+      </div>
+      <div class="design-field__hint">Min/Max — тільки обмеження. Якщо значення не влазить — елемент стискається в межах padding батька.</div>
+    </div>
+  </div>
+
+  <div class="st-size-warning" data-warning hidden>⚠️ Обмежено батьківським елементом (розмір або padding).</div>
+</div>

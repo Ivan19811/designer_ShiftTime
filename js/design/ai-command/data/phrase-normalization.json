@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "version": 1,
+    "description": "Phrase-level normalization before token parsing"
+  },
+  "rules": [
+    {
+      "from": "з верху",
+      "to": "зверху",
+      "type": "exact_phrase"
+    },
+    {
+      "from": "з низу",
+      "to": "знизу",
+      "type": "exact_phrase"
+    },
+    {
+      "from": "по середині",
+      "to": "посередині",
+      "type": "exact_phrase"
+    },
+    {
+      "from": "в середині",
+      "to": "всередині",
+      "type": "exact_phrase"
+    },
+    {
+      "from": "синьо жовтий",
+      "to": "синьо-жовтий",
+      "type": "color_phrase"
+    },
+    {
+      "from": "жовто синій",
+      "to": "жовто-синій",
+      "type": "color_phrase"
+    },
+    {
+      "from": "червоно синьо зелений",
+      "to": "червоно-синьо-зелений",
+      "type": "color_phrase"
+    },
+    {
+      "from": "на ховер",
+      "to": "hover",
+      "type": "state_phrase"
+    },
+    {
+      "from": "при наведенні",
+      "to": "hover",
+      "type": "state_phrase"
+    },
+    {
+      "from": "по вертикалі",
+      "to": "вертикальний",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "по горизонталі",
+      "to": "горизонтальний",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "зліва направо",
+      "to": "горизонтальний",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "справа наліво",
+      "to": "справа наліво",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "зверху вниз",
+      "to": "вертикальний",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "знизу вгору",
+      "to": "знизу вгору",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "перші 2",
+      "to": "перші дві",
+      "type": "scope_phrase"
+    },
+    {
+      "from": "2 і 3",
+      "to": "друга і третя",
+      "type": "scope_phrase"
+    },
+    {
+      "from": "тіки",
+      "to": "тільки",
+      "type": "spelling_phrase"
+    },
+    {
+      "from": "градиент",
+      "to": "градієнт",
+      "type": "spelling_phrase"
+    },
+    {
+      "from": "вертекальний",
+      "to": "вертикальний",
+      "type": "spelling_phrase"
+    },
+    {
+      "from": "догори дригом",
+      "to": "догори ногами",
+      "type": "rotation_phrase"
+    },
+    {
+      "from": "у центр",
+      "to": "по центру",
+      "type": "align_phrase"
+    },
+    {
+      "from": "в центр",
+      "to": "по центру",
+      "type": "align_phrase"
+    },
+    {
+      "from": "в право",
+      "to": "вправо",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "в ліво",
+      "to": "вліво",
+      "type": "direction_phrase"
+    },
+    {
+      "from": "а також",
+      "to": "також",
+      "type": "chain_phrase"
+    },
+    {
+      "from": "чуть чуть",
+      "to": "трохи",
+      "type": "soft_phrase"
+    },
+    {
+      "from": "м яку",
+      "to": "мяку",
+      "type": "spelling_phrase"
+    },
+    {
+      "from": "синьо жовто зелений",
+      "to": "синій жовтий зелений",
+      "type": "color_phrase"
+    },
+    {
+      "from": "синьо жовтий",
+      "to": "синій жовтий",
+      "type": "color_phrase"
+    }
+  ]
+}

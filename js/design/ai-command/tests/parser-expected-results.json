@@ -1,0 +1,1699 @@
+{
+  "meta": {
+    "version": 1,
+    "description": "Expected parser-only targets for core regression set",
+    "notes": "These are target expectations for parser validation, not DOM execution results."
+  },
+  "cases": [
+    {
+      "id": "bg_001",
+      "text": "зроби кнопку синьою",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "value_hint": "blue",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "gr_004",
+      "text": "зроби вертикальний градієнт для кнопки",
+      "expect": {
+        "action": "set_gradient",
+        "target": "button_block",
+        "property": "background_gradient",
+        "value_hint": "vertical",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "gr_011",
+      "text": "зроби кнопку градієнт з червоним кольором по середині жовтий з верху синій з низу",
+      "expect": {
+        "action": "set_gradient",
+        "target": "button_block",
+        "property": "background_gradient",
+        "value_hint": "positional_gradient",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "gc_001",
+      "text": "додай більше жовтого",
+      "expect": {
+        "action": "increase",
+        "target": "selected_element",
+        "property": "background_gradient",
+        "value_hint": "yellow +10% default",
+        "needsClarify": true
+      }
+    },
+    {
+      "id": "tx_001",
+      "text": "зафарбуй текст зеленим",
+      "expect": {
+        "action": "set_text_color",
+        "target": "text_block",
+        "property": "text_color",
+        "value_hint": "green",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ic_002",
+      "text": "додай іконку конвертика",
+      "expect": {
+        "action": "set_icon",
+        "target": "icon_block",
+        "property": "icon_name",
+        "value_hint": "mail/envelope",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "bs_004",
+      "text": "скругли кнопку",
+      "expect": {
+        "action": "set_radius",
+        "target": "button_block",
+        "property": "radius",
+        "value_hint": "increase radius",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sz_005",
+      "text": "додай padding 20 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "padding",
+        "value_hint": "20px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sc_001",
+      "text": "тільки текст у кнопці зроби білим",
+      "expect": {
+        "action": "set_text_color",
+        "target": "button_block",
+        "property": "text_color",
+        "scope": "text_only",
+        "value_hint": "white",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sc_006",
+      "text": "другу і третю кнопку зроби жовтими",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "scope": "second_third",
+        "value_hint": "yellow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "st_001",
+      "text": "на ховер зроби фон темнішим",
+      "expect": {
+        "action": "set_background",
+        "target": "selected_element",
+        "property": "background",
+        "state": "hover",
+        "value_hint": "darker current bg",
+        "needsClarify": true
+      }
+    },
+    {
+      "id": "st_005",
+      "text": "тільки на мобільній версії зменш текст",
+      "expect": {
+        "action": "decrease",
+        "target": "text_block",
+        "property": "font_size",
+        "responsive": "mobile",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "mn_004",
+      "text": "mega menu зроби напівпрозорим",
+      "expect": {
+        "action": "set_opacity",
+        "target": "mega_panel",
+        "property": "opacity",
+        "value_hint": "semi-transparent",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "am_001",
+      "text": "зроби злелену кнопку",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "value_hint": "green (typo corrected)",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "am_003",
+      "text": "зроби вертекальний градієнт",
+      "expect": {
+        "action": "set_gradient",
+        "target": "selected_element",
+        "property": "background_gradient",
+        "value_hint": "vertical (typo corrected)",
+        "needsClarify": true
+      }
+    },
+    {
+      "id": "cl_001",
+      "text": "зроби зеленим",
+      "expect": {
+        "needsClarify": true,
+        "clarify_type": "missing_target_or_property"
+      }
+    },
+    {
+      "id": "cl_003",
+      "text": "додай градієнт",
+      "expect": {
+        "needsClarify": true,
+        "clarify_type": "missing_target"
+      }
+    },
+    {
+      "id": "uk_001",
+      "text": "поверни блок на два чебуреки вправо",
+      "expect": {
+        "needsClarify": true,
+        "clarify_rule": "unknown_terms",
+        "warning_hint": "два чебуреки"
+      }
+    },
+    {
+      "id": "uk_002",
+      "text": "посунь чуть цю голову",
+      "expect": {
+        "needsClarify": true,
+        "clarify_rule": "unknown_terms",
+        "warning_hint": "цю голову"
+      }
+    },
+    {
+      "id": "tf_001",
+      "text": "поверни блок на 90 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "90deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_002",
+      "text": "розверни блок вліво на 45 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "-45deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_003",
+      "text": "переверни блок догори ногами",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "180deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_004",
+      "text": "віддзеркаль блок по горизонталі",
+      "expect": {
+        "action": "flip_horizontal",
+        "target": "container",
+        "property": "flip_x",
+        "value_hint": "horizontal",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_005",
+      "text": "відобрази блок зверху вниз",
+      "expect": {
+        "action": "flip_vertical",
+        "target": "container",
+        "property": "flip_y",
+        "value_hint": "vertical",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_006",
+      "text": "посунь блок правіше",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_x",
+        "value_hint": "right",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_007",
+      "text": "підсунь блок трохи вліво",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_x",
+        "value_hint": "left",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_008",
+      "text": "посунь блок трохи вище",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_y",
+        "value_hint": "up",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_009",
+      "text": "пересунь блок вниз",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_y",
+        "value_hint": "down",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_010",
+      "text": "вирівняй блок по центру",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_011",
+      "text": "притисни блок до правого краю",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "right",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_012",
+      "text": "вирівняй текст по центру",
+      "expect": {
+        "action": "set_text_align",
+        "target": "text_block",
+        "property": "text_align",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_013",
+      "text": "відцентруй блок",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_014",
+      "text": "сунь блок вправо на 20 px",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_x",
+        "value_hint": "right",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf_015",
+      "text": "крути блок вправо на 30 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "30deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_001",
+      "text": "крутань блок вправо на 15 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "15deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_002",
+      "text": "перекрути блок на 180 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "180deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_003",
+      "text": "перекинь блок догори дригом",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "180deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_004",
+      "text": "дзеркально переверни блок по горизонталі",
+      "expect": {
+        "action": "flip_horizontal",
+        "target": "container",
+        "property": "flip_x",
+        "value_hint": "horizontal",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_005",
+      "text": "фліпни блок по вертикалі",
+      "expect": {
+        "action": "flip_vertical",
+        "target": "container",
+        "property": "flip_y",
+        "value_hint": "vertical",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_006",
+      "text": "зсунь блок трішки вправо",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_x",
+        "value_hint": "right",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_007",
+      "text": "підвинь блок нижче",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_y",
+        "value_hint": "down",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_008",
+      "text": "кинь блок вниз",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_y",
+        "value_hint": "down",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_009",
+      "text": "прижми блок до лівого краю",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "left",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_010",
+      "text": "постав блок по центру",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_011",
+      "text": "вирівняй блок посередині",
+      "expect": {
+        "action": "set_align_x",
+        "target": "container",
+        "property": "align_x",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_012",
+      "text": "постав текст по центру",
+      "expect": {
+        "action": "set_text_align",
+        "target": "text_block",
+        "property": "text_align",
+        "value_hint": "center",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "tf2_013",
+      "text": "завали блок вправо на 20 градусів",
+      "expect": {
+        "action": "set_rotation",
+        "target": "container",
+        "property": "rotation",
+        "value_hint": "20deg",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_001",
+      "text": "поверни блок на 45 градусів і посунь вправо на 20 px",
+      "expect": {
+        "commands": [
+          {
+            "action": "set_rotation",
+            "target": "container",
+            "property": "rotation",
+            "value_hint": "45deg",
+            "needsClarify": false
+          },
+          {
+            "action": "move",
+            "target": "container",
+            "property": "offset_x",
+            "value_hint": "right",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_002",
+      "text": "вирівняй блок по центру і посунь трохи нижче",
+      "expect": {
+        "commands": [
+          {
+            "action": "set_align_x",
+            "target": "container",
+            "property": "align_x",
+            "value_hint": "center",
+            "needsClarify": false
+          },
+          {
+            "action": "move",
+            "target": "container",
+            "property": "offset_y",
+            "value_hint": "down",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_003",
+      "text": "зроби блоку ширину 300 px і висоту 200 px",
+      "expect": {
+        "commands": [
+          {
+            "action": "set_width",
+            "target": "container",
+            "property": "width",
+            "value_hint": "300px",
+            "needsClarify": false
+          },
+          {
+            "action": "set_height",
+            "target": "container",
+            "property": "height",
+            "value_hint": "200px",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_004",
+      "text": "збільш ширину блока і зменш висоту блока",
+      "expect": {
+        "commands": [
+          {
+            "action": "increase",
+            "target": "container",
+            "property": "width",
+            "needsClarify": false
+          },
+          {
+            "action": "decrease",
+            "target": "container",
+            "property": "height",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_005",
+      "text": "розтягни блок на всю ширину і вирівняй по центру",
+      "expect": {
+        "commands": [
+          {
+            "action": "set_width",
+            "target": "container",
+            "property": "width",
+            "value_hint": "full width",
+            "needsClarify": false
+          },
+          {
+            "action": "set_align_x",
+            "target": "container",
+            "property": "align_x",
+            "value_hint": "center",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_006",
+      "text": "зроби ширину 50% і висоту auto",
+      "expect": {
+        "commands": [
+          {
+            "action": "set_width",
+            "target": "selected_element",
+            "property": "width",
+            "value_hint": "50%",
+            "needsClarify": false
+          },
+          {
+            "action": "set_height",
+            "target": "selected_element",
+            "property": "height",
+            "value_hint": "auto",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cp_007",
+      "text": "зменш ширину блока",
+      "expect": {
+        "action": "decrease",
+        "target": "container",
+        "property": "width",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_008",
+      "text": "збільш висоту блока",
+      "expect": {
+        "action": "increase",
+        "target": "container",
+        "property": "height",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_009",
+      "text": "розшир блок на 40 px",
+      "expect": {
+        "action": "increase",
+        "target": "container",
+        "property": "width",
+        "value_hint": "40px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_010",
+      "text": "стисни блок по ширині",
+      "expect": {
+        "action": "decrease",
+        "target": "container",
+        "property": "width",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_011",
+      "text": "зроби блок вищим на 30 px",
+      "expect": {
+        "action": "increase",
+        "target": "container",
+        "property": "height",
+        "value_hint": "30px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cp_012",
+      "text": "зроби блок нижчим",
+      "expect": {
+        "action": "decrease",
+        "target": "container",
+        "property": "height",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cv_001",
+      "text": "посунь блок трохи в право і зафарбуй його у синьо жовто зелений градієнт який розверни на 45 градусів додай м'яку неонову тінь і зроби прозорість 80 відсотків. А також зменш його чуть чуть по висоті.",
+      "expect": {
+        "commands": [
+          {
+            "action": "move",
+            "target": "container",
+            "property": "offset_x",
+            "value_hint": "right",
+            "needsClarify": false
+          },
+          {
+            "action": "set_gradient",
+            "target": "container",
+            "property": "background_gradient",
+            "value_hint": "blue",
+            "needsClarify": false
+          },
+          {
+            "action": "set_gradient",
+            "target": "container",
+            "property": "background_gradient",
+            "value_hint": "45deg",
+            "needsClarify": false
+          },
+          {
+            "action": "set_shadow",
+            "target": "container",
+            "property": "shadow_blur",
+            "value_hint": "soft neon shadow",
+            "needsClarify": false
+          },
+          {
+            "action": "set_opacity",
+            "target": "container",
+            "property": "opacity",
+            "value_hint": "80%",
+            "needsClarify": false
+          },
+          {
+            "action": "decrease",
+            "target": "container",
+            "property": "height",
+            "needsClarify": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cv_002",
+      "text": "додай м'яку неонову тінь",
+      "expect": {
+        "action": "set_shadow",
+        "target": "selected_element",
+        "property": "shadow_blur",
+        "value_hint": "soft neon shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "cv_003",
+      "text": "зроби прозорість 80 відсотків",
+      "expect": {
+        "action": "set_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "80%",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_001",
+      "text": "додай внутрішній відступ 20 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "padding",
+        "value_hint": "20px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_002",
+      "text": "додай зовнішній відступ 24 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "margin",
+        "value_hint": "24px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_003",
+      "text": "зроби внутрішній відступ зверху 12 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "padding",
+        "value_hint": "top 12px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_004",
+      "text": "зроби зовнішній відступ зліва 18 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "margin",
+        "value_hint": "left 18px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_005",
+      "text": "зроби рамку пунктирною",
+      "expect": {
+        "action": "set_border_style",
+        "target": "selected_element",
+        "property": "border_style",
+        "value_hint": "dashed",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_006",
+      "text": "зроби рамку суцільною",
+      "expect": {
+        "action": "set_border_style",
+        "target": "selected_element",
+        "property": "border_style",
+        "value_hint": "solid",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_007",
+      "text": "зроби рамку крапковою",
+      "expect": {
+        "action": "set_border_style",
+        "target": "selected_element",
+        "property": "border_style",
+        "value_hint": "dotted",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_008",
+      "text": "зроби тінь м'якшою",
+      "expect": {
+        "action": "set_shadow",
+        "target": "selected_element",
+        "property": "shadow_blur",
+        "value_hint": "softer shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_009",
+      "text": "зроби тінь сильнішою",
+      "expect": {
+        "action": "set_shadow",
+        "target": "selected_element",
+        "property": "shadow_opacity",
+        "value_hint": "stronger shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_010",
+      "text": "додай blur 10 px",
+      "expect": {
+        "action": "set_blur",
+        "target": "selected_element",
+        "property": "blur",
+        "value_hint": "element 10px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "sbx_011",
+      "text": "додай backdrop blur 20 px",
+      "expect": {
+        "action": "set_blur",
+        "target": "selected_element",
+        "property": "blur",
+        "value_hint": "backdrop 20px",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_001",
+      "text": "зроби другу кнопку синьою",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "scope": "second_one",
+        "value_hint": "blue",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_002",
+      "text": "тільки третій блок зроби жовтим",
+      "expect": {
+        "action": "set_background",
+        "target": "container",
+        "property": "background",
+        "scope": "third_one",
+        "value_hint": "yellow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_003",
+      "text": "тільки іконку в кнопці зроби білою",
+      "expect": {
+        "action": "set_icon_color",
+        "target": "button_block",
+        "property": "icon_color",
+        "scope": "icon_only",
+        "value_hint": "white",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_004",
+      "text": "усі заголовки в цій секції зроби чорними",
+      "expect": {
+        "action": "set_text_color",
+        "target": "heading_block",
+        "property": "text_color",
+        "scope": "all_headings",
+        "value_hint": "black",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_005",
+      "text": "на active додай тінь",
+      "expect": {
+        "action": "set_shadow",
+        "target": "selected_element",
+        "property": "shadow_blur",
+        "state": "active",
+        "value_hint": "shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_006",
+      "text": "на hover тільки текст зроби білим",
+      "expect": {
+        "action": "set_text_color",
+        "target": "text_block",
+        "property": "text_color",
+        "scope": "text_only",
+        "state": "hover",
+        "value_hint": "white",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_007",
+      "text": "тільки на мобільній зменш текст",
+      "expect": {
+        "action": "decrease",
+        "target": "text_block",
+        "property": "font_size",
+        "responsive": "mobile",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_008",
+      "text": "на планшеті зроби 2 колонки",
+      "expect": {
+        "action": "set_columns",
+        "target": "selected_element",
+        "property": "mega_columns",
+        "responsive": "tablet",
+        "value_hint": "2",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_009",
+      "text": "на мобільній сховай іконку",
+      "expect": {
+        "action": "set_visibility",
+        "target": "icon_block",
+        "property": "visibility",
+        "responsive": "mobile",
+        "value_hint": "hidden",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_010",
+      "text": "другу кнопку на hover зроби жовтою",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "scope": "second_one",
+        "state": "hover",
+        "value_hint": "yellow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ssr_011",
+      "text": "тільки на мобільній третій блок посунь нижче",
+      "expect": {
+        "action": "move",
+        "target": "container",
+        "property": "offset_y",
+        "scope": "third_one",
+        "responsive": "mobile",
+        "value_hint": "down",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_001",
+      "text": "збільш line height тексту",
+      "expect": {
+        "action": "increase",
+        "target": "text_block",
+        "property": "line_height",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_002",
+      "text": "зменш letter spacing тексту",
+      "expect": {
+        "action": "decrease",
+        "target": "text_block",
+        "property": "letter_spacing",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_003",
+      "text": "вирівняй текст по ширині",
+      "expect": {
+        "action": "set_text_align",
+        "target": "text_block",
+        "property": "text_align",
+        "value_hint": "justify",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_004",
+      "text": "зроби текст великими літерами",
+      "expect": {
+        "action": "set_text_case",
+        "target": "text_block",
+        "property": "text_case",
+        "value_hint": "uppercase",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_005",
+      "text": "зроби текст маленькими літерами",
+      "expect": {
+        "action": "set_text_case",
+        "target": "text_block",
+        "property": "text_case",
+        "value_hint": "lowercase",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_006",
+      "text": "додай тінь до тексту",
+      "expect": {
+        "action": "set_text_shadow",
+        "target": "text_block",
+        "property": "text_shadow",
+        "value_hint": "shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_007",
+      "text": "додай обводку тексту",
+      "expect": {
+        "action": "set_text_stroke",
+        "target": "text_block",
+        "property": "text_stroke",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_008",
+      "text": "зроби заголовок жирнішим",
+      "expect": {
+        "action": "set_font_weight",
+        "target": "heading_block",
+        "property": "font_weight",
+        "value_hint": "bold",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_009",
+      "text": "зменш міжрядковий інтервал у заголовку",
+      "expect": {
+        "action": "decrease",
+        "target": "heading_block",
+        "property": "line_height",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_010",
+      "text": "збільш відстань між буквами в абзаці",
+      "expect": {
+        "action": "increase",
+        "target": "article_block",
+        "property": "letter_spacing",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_011",
+      "text": "вирівняй абзац по правому краю",
+      "expect": {
+        "action": "set_text_align",
+        "target": "article_block",
+        "property": "text_align",
+        "value_hint": "right",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_012",
+      "text": "зроби текст капсом",
+      "expect": {
+        "action": "set_text_case",
+        "target": "text_block",
+        "property": "text_case",
+        "value_hint": "uppercase",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "ty_013",
+      "text": "прибери тінь у тексту",
+      "expect": {
+        "action": "remove_text_shadow",
+        "target": "text_block",
+        "property": "text_shadow",
+        "value_hint": "shadow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "dc_001",
+      "text": "зроби це меню красивіше і акуратніше",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_beautify_neaten",
+        "executor_kind": "design_executor_prep",
+        "executor_preset": "clean_modern",
+        "executor_axis": "colors",
+        "property": "design_policy",
+        "executor_atomic_action": "set_palette_policy",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyPalettePolicy"
+      }
+    },
+    {
+      "id": "dc_002",
+      "text": "зроби меню красивий дизайн",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_beautify",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_003",
+      "text": "зроби меню сучаснішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_modern",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_004",
+      "text": "зроби меню стильнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_stylish",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_005",
+      "text": "зроби меню оригінальнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_original",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_006",
+      "text": "зроби меню преміальнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_premium",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_007",
+      "text": "спробуй ще раз",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false,
+        "executor_kind": "retry_variant_executor_prep",
+        "executor_preset": "minimal",
+        "executor_axis": "radius"
+      }
+    },
+    {
+      "id": "dc_008",
+      "text": "попробуй ще раз красивіше",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "dc_009",
+      "text": "згенеруй ще раз сучасніше",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "dc_010",
+      "text": "спробуй стильніше",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "dc_011",
+      "text": "зроби меню дорожчим на вигляд",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_premium",
+        "executor_kind": "design_executor_prep",
+        "executor_preset": "premium",
+        "executor_axis": "shadow",
+        "property": "design_policy",
+        "executor_atomic_action": "set_shadow_preset"
+      }
+    },
+    {
+      "id": "dc_012",
+      "text": "зроби меню мінімалістичнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_minimal",
+        "property": "design_policy",
+        "executor_kind": "design_executor_prep",
+        "executor_preset": "minimal",
+        "executor_axis": "spacing",
+        "executor_atomic_action": "set_spacing_scale",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applySpacingScale"
+      }
+    },
+    {
+      "id": "dc_013",
+      "text": "зроби меню елегантнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_elegant",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_014",
+      "text": "зроби меню чистішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_clean",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_015",
+      "text": "зроби меню м'якшим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_soft",
+        "property": "design_policy"
+      }
+    },
+    {
+      "id": "dc_016",
+      "text": "зроби меню контрастнішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "needsClarify": true,
+        "clarify_rule": "clarify_design_contrast",
+        "executor_kind": "design_executor_prep",
+        "executor_preset": "clean_modern",
+        "executor_axis": "contrast",
+        "property": "design_policy",
+        "executor_atomic_action": "set_contrast_policy",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyContrastPolicy"
+      }
+    },
+    {
+      "id": "dc_017",
+      "text": "спробуй ще раз преміальніше",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false,
+        "value_hint": "premium",
+        "executor_kind": "retry_variant_executor_prep",
+        "executor_preset": "premium",
+        "executor_axis": "shadow_strength",
+        "executor_atomic_action": "select_next_preset",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "selectNextPreset"
+      }
+    },
+    {
+      "id": "dc_018",
+      "text": "попробуй ще раз мінімалістичніше",
+      "expect": {
+        "action": "retry_variant",
+        "target": "selected_element",
+        "needsClarify": false,
+        "value_hint": "minimal",
+        "executor_kind": "retry_variant_executor_prep",
+        "executor_preset": "minimal",
+        "executor_axis": "spacing_density",
+        "executor_atomic_action": "vary_style_axis",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "varyStyleAxis"
+      }
+    },
+    {
+      "id": "as_001",
+      "text": "активний блок зроби синім",
+      "expect": {
+        "action": "set_background",
+        "target": "container",
+        "property": "background",
+        "scope": "selected_element",
+        "state": "default",
+        "selection_mode": "current_selection",
+        "selection_apply": "all_selected_if_multiple",
+        "value_hint": "blue",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "as_002",
+      "text": "активний пункт меню зроби білим",
+      "expect": {
+        "action": "set_background",
+        "target": "menu_block",
+        "property": "background",
+        "scope": "selected_element",
+        "state": "default",
+        "selection_mode": "current_selection",
+        "selection_apply": "all_selected_if_multiple",
+        "value_hint": "white",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "as_003",
+      "text": "для active зроби кнопку жовтою",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "scope": "selected_element",
+        "state": "active",
+        "selection_mode": "current_selection",
+        "selection_apply": "all_selected_if_multiple",
+        "value_hint": "yellow",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "as_004",
+      "text": "активне меню зроби красивішим",
+      "expect": {
+        "action": "set_design_policy",
+        "target": "menu_block",
+        "property": "design_policy",
+        "scope": "selected_element",
+        "state": "default",
+        "selection_mode": "current_selection",
+        "selection_apply": "all_selected_if_multiple",
+        "clarify_rule": "clarify_design_beautify",
+        "needsClarify": true,
+        "executor_kind": "design_executor_prep",
+        "executor_preset": "clean_modern",
+        "executor_atomic_action": "set_palette_policy",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyPalettePolicy"
+      }
+    },
+    {
+      "id": "as_005",
+      "text": "тільки активний елемент зроби зеленим",
+      "expect": {
+        "action": "set_background",
+        "target": "selected_element",
+        "property": "background",
+        "scope": "selected_element",
+        "state": "default",
+        "selection_mode": "current_selection",
+        "selection_apply": "all_selected_if_multiple",
+        "value_hint": "green",
+        "clarify_rule": "clarify_color_target",
+        "needsClarify": true
+      }
+    },
+    {
+      "id": "dra_001",
+      "text": "зроби кнопку синьою",
+      "expect": {
+        "action": "set_background",
+        "target": "button_block",
+        "property": "background",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applybackgroundvalue"
+      }
+    },
+    {
+      "id": "dra_002",
+      "text": "зафарбуй текст зеленим",
+      "expect": {
+        "action": "set_text_color",
+        "target": "text_block",
+        "property": "text_color",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applytextcolorvalue"
+      }
+    },
+    {
+      "id": "dra_003",
+      "text": "додай внутрішній відступ 20 px",
+      "expect": {
+        "action": "set_spacing",
+        "target": "selected_element",
+        "property": "padding",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyspacingvalue"
+      }
+    },
+    {
+      "id": "dra_004",
+      "text": "зроби рамку пунктирною",
+      "expect": {
+        "action": "set_border_style",
+        "target": "selected_element",
+        "property": "border_style",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyborderstylevalue"
+      }
+    },
+    {
+      "id": "dra_005",
+      "text": "скругли кнопку",
+      "expect": {
+        "action": "set_radius",
+        "target": "button_block",
+        "property": "radius",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyradiusvalue"
+      }
+    },
+    {
+      "id": "dra_006",
+      "text": "додай м'яку неонову тінь",
+      "expect": {
+        "action": "set_shadow",
+        "target": "selected_element",
+        "property": "shadow_blur",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyshadowvalue"
+      }
+    },
+    {
+      "id": "dra_007",
+      "text": "зроби прозорість 80 відсотків",
+      "expect": {
+        "action": "set_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyopacityvalue"
+      }
+    },
+    {
+      "id": "dra_008",
+      "text": "зроби текст капсом",
+      "expect": {
+        "action": "set_text_case",
+        "target": "text_block",
+        "property": "text_case",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applytextcasevalue"
+      }
+    },
+    {
+      "id": "dra_009",
+      "text": "на мобільній сховай іконку",
+      "expect": {
+        "action": "set_visibility",
+        "target": "icon_block",
+        "property": "visibility",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "applyvisibilityvalue"
+      }
+    },
+    {
+      "id": "dra_010",
+      "text": "зменш ширину блока",
+      "expect": {
+        "action": "decrease",
+        "target": "container",
+        "property": "width",
+        "needsClarify": false,
+        "executor_kind": "direct_atomic_executor_prep",
+        "apply_contract_kind": "atomic_apply_contract",
+        "apply_runtime": "adjustnumericstyle"
+      }
+    },
+    {
+      "id": "op_001",
+      "text": "зроби прозорим",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "more transparent -10% default",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_002",
+      "text": "додай прозорість 10%",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "more transparent -10%",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_003",
+      "text": "зроби прозорішим",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "more transparent -10% default",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_004",
+      "text": "зроби менш прозорим",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "less transparent +10% default",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_005",
+      "text": "зменш прозорість на 15%",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "less transparent +15%",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_006",
+      "text": "зроби напівпрозорим",
+      "expect": {
+        "action": "set_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "semi-transparent 50%",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_007",
+      "text": "зроби непрозорим",
+      "expect": {
+        "action": "set_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "opaque 100%",
+        "needsClarify": false
+      }
+    },
+    {
+      "id": "op_008",
+      "text": "make more transparent by 20%",
+      "expect": {
+        "action": "adjust_opacity",
+        "target": "selected_element",
+        "property": "opacity",
+        "value_hint": "more transparent -20%",
+        "needsClarify": false
+      }
+    }
+  ]
+}

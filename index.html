@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="uk" class="st-boot-lock">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShiftTime — Конструктор сайтів (Каркас v1)</title>
+  <!-- [00341][BOOT LOADER EARLY PAINT] Critical inline style so loader appears before heavy CSS finishes -->
+  <style id="st-boot-critical-style">
+    html.st-boot-lock, html.st-boot-lock body { overflow: hidden !important; }
+    html.st-boot-lock #builder-root { visibility: hidden; opacity: 0; }
+    #st-boot-loader {
+      position: fixed; inset: 0; z-index: 2147483000; display: block;
+      min-height: 100dvh; background: radial-gradient(circle at 18% 18%, rgba(34,211,238,.20), transparent 30%), radial-gradient(circle at 80% 12%, rgba(139,92,246,.18), transparent 32%), linear-gradient(135deg,#020617,#06162a 48%,#030712);
+      color: #e0f2fe; font-family: Inter, Manrope, Arial, sans-serif; opacity: 1; visibility: visible; overflow:hidden;
+    }
+    #st-boot-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .45s ease, visibility .45s ease; }
+    #st-boot-loader .st-boot-shell { position:absolute; left:50%; top:50%; width: var(--st-boot-design-w, 2140px); height: var(--st-boot-design-h, 900px); display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; gap: 14px; padding: 22px; border: 1px solid rgba(125,211,252,.24); border-radius: 28px; background: rgba(2,6,23,.74); box-shadow: 0 32px 90px rgba(0,0,0,.44); transform: translate3d(-50%,-50%,0) scale(var(--st-boot-fit-scale,.8)); transform-origin:center center; box-sizing:border-box; max-width:none; max-height:none; overflow:hidden; }
+    #st-boot-loader .st-boot-top-caption { min-height: 34px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(34,211,238,.16); border-radius:16px; color:#cffafe; font-size:12px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; background:rgba(15,23,42,.38); }
+    #st-boot-loader .st-boot-main { display: grid; grid-template-columns: 1.05fr 1.65fr 1.25fr; gap: 14px; min-height:0; overflow:hidden; }
+    #st-boot-loader .st-boot-card { border: 1px solid rgba(125,211,252,.16); border-radius: 24px; background: rgba(2,6,23,.34); }
+  </style>
+  <script id="st-boot-viewport-seed">
+    (function(){
+      try {
+        var vv = window.visualViewport || null;
+        var w = Math.max(320, Math.round((vv && vv.width) || window.innerWidth || document.documentElement.clientWidth || 1366));
+        var h = Math.max(320, Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight || 768));
+        var gap = (w < 900 || h < 720) ? 8 : 14;
+        var designW = 2140;
+        var designH = 900;
+        var s = Math.min(1, Math.max(0.40, Math.min((w - gap * 2) / designW, (h - gap * 2) / designH)));
+        var r = document.documentElement;
+        r.style.setProperty('--st-boot-fit-scale', String(s.toFixed(5)));
+        r.style.setProperty('--st-boot-scale', '1');
+        r.style.setProperty('--st-boot-design-w', designW + 'px');
+        r.style.setProperty('--st-boot-design-h', designH + 'px');
+        r.style.setProperty('--st-boot-vw', String(w));
+        r.style.setProperty('--st-boot-vh', String(h));
+        r.style.setProperty('--st-boot-diagonal', String(Math.round(Math.sqrt(w*w + h*h))));
+      } catch(e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/boot-loader.css" />
+
+
+      <!-- Динамічні стилі для скролбарів -->
+  <style id="dyn-scrollbars"></style>
+  <link rel="stylesheet" href="css/builder-themes.css" />
+  <link rel="stylesheet" href="css/builder-shell.css"  />
+  <link rel="stylesheet" href="css/site-canvas-01020.css?v=01039" />
+  <link rel="stylesheet" href="css/builder-widget.css" />
+  <link rel="stylesheet" href="css/design-panel.css?v=01014"> <!-- ⬅ ДОДАТИ -->
+  <link rel="stylesheet" href="js/design/widgets/page-tree/page-tree-widget-01021.css?v=01021">
+  <link rel="stylesheet" href="js/design/widgets/page-background/css/design-panel.css">
+  <link rel="stylesheet" href="js/design/widgets/border-widget/css/border-widget.css">
+  <link rel="stylesheet" href="css/gallery-widget.css">
+  <link rel="stylesheet" href="css/animator-dock.css" />
+  <link rel="stylesheet" href="css/responsive-viewport.css?v=01014" />
+  <link rel="stylesheet" href="css/marketplace-studio-01052.css?v=01052" />
+  <link rel="stylesheet" href="css/marketplace-studio-01053.css?v=01053" />
+  <link rel="stylesheet" href="css/marketplace-studio-01057.css?v=01057" />
+  <link rel="stylesheet" href="css/marketplace-studio-01058.css?v=01058" />
+  <link rel="stylesheet" href="css/marketplace-studio-01059.css?v=01059" />
+  <link rel="stylesheet" href="css/marketplace-studio-01060.css?v=01060" />
+  <link rel="stylesheet" href="css/marketplace-studio-01061.css?v=01061" />
+  <link rel="stylesheet" href="css/marketplace-studio-01062.css?v=01062" />
+  <link rel="stylesheet" href="css/marketplace-studio-01063.css?v=01063" />
+  <link rel="stylesheet" href="css/marketplace-workspace-canvas-isolation-01065.css?v=01065" />
+  <link rel="stylesheet" href="css/marketplace-studio-01066.css?v=01066" />
+  <link rel="stylesheet" href="css/marketplace-studio-01070.css?v=01070" />
+  <link rel="stylesheet" href="css/marketplace-studio-01071.css?v=01071" />
+  <link rel="stylesheet" href="css/marketplace-studio-01072.css?v=01072" />
+  <link rel="stylesheet" href="css/marketplace-studio-01073.css?v=01073" />
+  <link rel="stylesheet" href="css/marketplace-studio-01074.css?v=01074" />
+  <link rel="stylesheet" href="css/marketplace-studio-01075.css?v=01075" />
+  <link rel="stylesheet" href="css/marketplace-studio-01078.css?v=01078" />
+  <link rel="stylesheet" href="css/marketplace-studio-01080.css?v=01080" />
+  <link rel="stylesheet" href="css/marketplace-studio-01081.css?v=01081" />
+  <link rel="stylesheet" href="css/marketplace-studio-01083.css?v=01083" />
+  <link rel="stylesheet" href="css/page-assembly-01028.css?v=01039" />
+  <link rel="stylesheet" href="css/school-01-main-00959.css?v=00961" />
+  <link rel="stylesheet" href="css/school-01-footer-00962.css?v=00965" />
+  <link rel="stylesheet" href="css/paired-footer-universal-00973.css?v=00976" />
+  <link rel="stylesheet" href="css/paired-header-premium-00980.css?v=00980" />
+  <link rel="stylesheet" href="css/standalone-header-premium-00980.css?v=00980" />
+  <link rel="stylesheet" href="css/shifttime-marketplace-01-00981.css?v=00981" />
+  <link rel="stylesheet" href="css/shifttime-marketplace-02-01026.css?v=01026" />
+  <link rel="stylesheet" href="js/design/widgets/fill/css/design-fill-01011.css?v=01011" />
+  <link rel="stylesheet" href="widgets/preview-orion/preview-orion.css" />
+
+  <!-- Шаблони (галерея) — стилі віджета -->
+  <link rel="stylesheet" href="js/design/widgets/templates/templates-widget.css" />
+
+
+  <!-- Стилі віджета "Сайт" -->
+  <link rel="stylesheet" href="widgets/site-manager/css/site-manager.css" />
+   <!-- Стилі віджета "Сторінки" -->
+  <link rel="stylesheet" href="widgets/page-manager/css/page-manager.css" />
+
+
+  <link rel="stylesheet" href="./widgets/animator-orion/ui/animator-theme.css">
+  <link rel="stylesheet" href="./widgets/animator-orion/ui/animator.css">
+  <link rel="stylesheet" href="css/standalone-footer-universal-00974.css?v=00976">
+  <link rel="stylesheet" href="js/design/widgets/element-info/element-info-widget-01009.css?v=01009">
+  <link rel="stylesheet" href="css/builder-ui-appearance-01056.css?v=01056" />
+</head>
+<body>
+
+  <!-- [00344][BOOT LOADER FULLSCREEN PREMIUM WIDE] Full-width holographic startup screen with logo, live clock, calendar and diagnostics -->
+  <div id="st-boot-loader" role="status" aria-live="polite" aria-label="Завантаження ShiftTime Builder">
+    <div class="st-boot-shell">
+      <div class="st-boot-top-caption st-boot-gridline">Футуристичний голографічний центр запуску Конструктора</div>
+      <div class="st-boot-head st-boot-gridline">
+        <div class="st-boot-brand st-boot-brand--full">
+          <img class="st-boot-logo-image" src="assets/system/branding/shifttime-logo.jpg" alt="ShiftTime Конструктор" />
+          <div class="st-boot-donut-panel" aria-label="Кругові системні діаграми">
+            <div class="st-boot-donut" data-boot-donut="core" style="--p:46;--accent:#22d3ee">
+              <div class="st-boot-donut__ring"></div>
+              <div class="st-boot-donut__value"><strong>46%</strong><span>Core</span></div>
+            </div>
+            <div class="st-boot-donut" data-boot-donut="ui" style="--p:38;--accent:#8b5cf6">
+              <div class="st-boot-donut__ring"></div>
+              <div class="st-boot-donut__value"><strong>38%</strong><span>UI</span></div>
+            </div>
+            <div class="st-boot-donut" data-boot-donut="assets" style="--p:22;--accent:#34d399">
+              <div class="st-boot-donut__ring"></div>
+              <div class="st-boot-donut__value"><strong>22%</strong><span>Assets</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="st-boot-head-panels">
+          <div class="st-boot-time st-boot-time--wide">
+            <span>Час ініціалізації</span><strong id="st-boot-timer">0.0s</strong>
+            <small id="st-boot-init-time">Ініціалізація: 0.0s</small>
+          </div>
+          <div class="st-boot-time st-boot-time--wide">
+            <span>Поточний час</span><strong id="st-boot-clock">00:00:00</strong>
+            <small id="st-boot-date">—</small>
+          </div>
+          <div class="st-boot-time st-boot-time--wide st-boot-warning-panel" id="st-boot-warning-panel">
+            <span>Статус завантаження</span>
+            <strong class="st-boot-long-line"><i id="st-boot-long-indicator" class="st-boot-long-indicator"></i><em id="st-boot-long-status">Нормальний запуск</em></strong>
+            <small id="st-boot-minremain">Мінімальний показ: 5.0s</small>
+          </div>
+          <div class="st-boot-time st-boot-time--wide st-boot-top-progress-panel" aria-label="Головний прогрес завантаження">
+            <span>Готовність системи</span>
+            <div id="st-boot-ring" class="st-boot-ring" style="--p:0">
+            <div class="st-boot-ring__orbit st-boot-ring__orbit--a" aria-hidden="true"></div>
+            <div class="st-boot-ring__orbit st-boot-ring__orbit--b" aria-hidden="true"></div>
+            <div class="st-boot-percent">
+              <strong id="st-boot-percent">00</strong>
+              <small>готовність системи</small>
+            </div>
+          </div>
+            <small>Загальний прогрес запуску</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="st-boot-main">
+        <section class="st-boot-card st-boot-radar" aria-label="Прогрес завантаження">
+          <div class="st-boot-card__head"><span>Системний прогрес</span><i class="st-boot-dot"></i></div>
+          <div class="st-boot-radar-map" aria-hidden="true">
+            <i class="st-radar-drift-dot st-radar-drift-dot--a" style="--x:18%;--y:24%;--d:.10s"></i>
+            <i class="st-radar-drift-dot st-radar-drift-dot--b" style="--x:76%;--y:20%;--d:.35s"></i>
+            <i style="--x:84%;--y:72%;--d:.60s"></i>
+            <i style="--x:24%;--y:80%;--d:.85s"></i>
+            <i style="--x:52%;--y:46%;--d:1.05s"></i>
+          </div>
+          <div class="st-boot-module-radar" aria-label="Радар модулів">
+            <div class="st-boot-radar-core"></div>
+            <span class="st-radar-node" data-radar-module="core" style="--x:50%;--y:12%">CORE</span>
+            <span class="st-radar-node" data-radar-module="canvas" style="--x:83%;--y:34%">CANVAS</span>
+            <span class="st-radar-node" data-radar-module="widgets" style="--x:74%;--y:76%">WIDGETS</span>
+            <span class="st-radar-node" data-radar-module="templates" style="--x:25%;--y:77%">TPL</span>
+            <span class="st-radar-node" data-radar-module="workspace" style="--x:16%;--y:36%">SPACE</span>
+            <span class="st-radar-node" data-radar-module="ready" style="--x:50%;--y:50%">READY</span>
+          </div>
+          <div class="st-boot-mini-metrics" aria-label="Системні індикатори">
+            <div><span>Signal</span><b data-boot-metric="signal">0.72</b></div>
+            <div><span>Pulse</span><b data-boot-metric="pulse">00</b></div>
+            <div><span>Memory</span><b data-boot-metric="memory">--</b></div>
+          </div>
+          <div class="st-boot-total-boxes">
+            <div class="st-boot-total-box"><span>Повне завантаження</span><strong id="st-boot-total-time">В процесі…</strong></div>
+            <div class="st-boot-total-box"><span>Реальний етап</span><strong id="st-boot-stage-mini">Boot</strong></div>
+          </div>
+        </section>
+
+        <section class="st-boot-card st-boot-centerdeck" aria-label="Центральний командний блок">
+          <div class="st-boot-card__head"><span>Командний центр</span><i class="st-boot-dot"></i></div>
+          <div class="st-boot-hero-grid">
+            <div class="st-boot-hero-panel">
+              <div class="st-boot-hero-screen">
+                <div class="st-boot-hero-screen__glow"></div>
+                <div class="st-boot-hero-screen__title">ShiftTime / Constructor Systems</div>
+                <div class="st-boot-hero-screen__subtitle">Ініціалізація модулів, стилів, шаблонів та робочого простору</div>
+                <div class="st-boot-blueprint-screen" aria-label="Blueprint макет конструктора">
+                  <div class="st-boot-blueprint-title">
+                    <span>Blueprint · Builder Interface</span>
+                    <b id="st-boot-blueprint-status">Складання інтерфейсу</b>
+                  </div>
+                  <div class="st-boot-blueprint">
+                    <div class="st-boot-bp-part st-boot-bp-header" data-blueprint-part="header"><span>Header</span></div>
+                    <div class="st-boot-bp-part st-boot-bp-sidebar" data-blueprint-part="sidebar"><span>Sidebar</span></div>
+                    <div class="st-boot-bp-part st-boot-bp-canvas" data-blueprint-part="canvas">
+                      <i></i><i></i><i></i><i></i>
+                      <span>Canvas</span>
+                    </div>
+                    <div class="st-boot-bp-part st-boot-bp-inspector" data-blueprint-part="inspector"><span>Inspector</span></div>
+                    <div class="st-boot-bp-part st-boot-bp-footer" data-blueprint-part="footer"><span>Footer</span></div>
+                  </div>
+                  <div class="st-boot-system-map" aria-hidden="true">
+                    <span style="--x:12%;--y:28%">CORE</span>
+                    <span style="--x:42%;--y:12%">UI</span>
+                    <span style="--x:72%;--y:30%">SHOP</span>
+                    <span style="--x:24%;--y:70%">AI</span>
+                    <span style="--x:60%;--y:76%">STATE</span>
+                  </div>
+                </div>
+                <div class="st-boot-priority-wrap">
+                  <div class="st-boot-priority-label">Пріоритети конструктора</div>
+                  <div class="st-boot-priority-marquee" aria-label="Пріоритети конструктора">
+                    <div class="st-boot-priority-track">
+                      <span>Стабільність редактора</span>
+                      <span>Швидкість рендера</span>
+                      <span>Гнучкість шаблонів</span>
+                      <span>Надійність збереження</span>
+                      <span>Легка кастомізація</span>
+                      <span>Магазин / CRM інтеграції</span>
+                      <span>Плавність інтерфейсу</span>
+                      <span>Шапка / Футер</span>
+                      <span>Система сторінок</span>
+                      <span>AI / Голосові команди</span>
+                      <span>Стабільність редактора</span>
+                      <span>Швидкість рендера</span>
+                      <span>Гнучкість шаблонів</span>
+                      <span>Надійність збереження</span>
+                      <span>Легка кастомізація</span>
+                      <span>Магазин / CRM інтеграції</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="st-boot-wave-grid" aria-hidden="true">
+                  <span style="--h:28%"></span><span style="--h:54%"></span><span style="--h:36%"></span><span style="--h:72%"></span><span style="--h:46%"></span><span style="--h:80%"></span><span style="--h:58%"></span><span style="--h:40%"></span><span style="--h:68%"></span><span style="--h:52%"></span><span style="--h:84%"></span><span style="--h:44%"></span>
+                </div>
+              </div>
+            </div>
+            <div class="st-boot-status-panel">
+              <div class="st-boot-stage">
+                <div id="st-boot-stage-label">System shell</div>
+                <div id="st-boot-stage-desc">Запускаємо оболонку конструктора та готуємо робочу область.</div>
+                <div class="st-boot-command-strip" aria-label="Ключові етапи завантаження">
+                  <span data-boot-chip="core">CORE</span>
+                  <span data-boot-chip="widgets">WIDGETS</span>
+                  <span data-boot-chip="templates">TEMPLATES</span>
+                  <span data-boot-chip="ready">READY</span>
+                </div>
+              </div>
+              <div id="st-boot-mission-log" class="st-boot-mission-log" aria-label="Журнал місії">
+                <div><span>00.00</span><b>Очікуємо старт системи</b></div>
+              </div>
+              <div class="st-boot-bars">
+                <div class="st-boot-bar">
+                  <div class="st-boot-bar__label"><span>Core</span><span data-boot-val>0%</span></div>
+                  <div class="st-boot-track"><div class="st-boot-fill" data-boot-fill></div></div>
+                </div>
+                <div class="st-boot-bar">
+                  <div class="st-boot-bar__label"><span>UI / Widgets</span><span data-boot-val>0%</span></div>
+                  <div class="st-boot-track"><div class="st-boot-fill" data-boot-fill></div></div>
+                </div>
+                <div class="st-boot-bar">
+                  <div class="st-boot-bar__label"><span>Templates</span><span data-boot-val>0%</span></div>
+                  <div class="st-boot-track"><div class="st-boot-fill" data-boot-fill></div></div>
+                </div>
+                <div class="st-boot-bar">
+                  <div class="st-boot-bar__label"><span>Workspace</span><span data-boot-val>0%</span></div>
+                  <div class="st-boot-track"><div class="st-boot-fill" data-boot-fill></div></div>
+                </div>
+              </div>
+              <div class="st-boot-dual-graphs">
+                <div class="st-boot-line-grid" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                  <svg viewBox="0 0 300 90" preserveAspectRatio="none"><polyline points="0,64 28,56 56,62 84,44 112,48 140,32 168,40 196,28 224,38 252,18 300,24" /></svg>
+                </div>
+                <div class="st-boot-line-grid st-boot-line-grid--alt" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                  <svg viewBox="0 0 300 90" preserveAspectRatio="none"><polyline points="0,54 28,46 56,58 84,36 112,42 140,24 168,30 196,18 224,26 252,14 300,18" /></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="st-boot-card st-boot-sidepanel" aria-label="Діагностика та календар">
+          <div class="st-boot-card__head"><span>Діагностика</span><i class="st-boot-dot"></i></div>
+          <div class="st-boot-modules">
+            <div class="st-boot-module" data-boot-module="shell"><i></i><span>Shell</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="styles"><i></i><span>Styles</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="canvas"><i></i><span>Canvas</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="widgets"><i></i><span>Widgets</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="templates"><i></i><span>Templates</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="assets"><i></i><span>Assets</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="workspace"><i></i><span>Workspace</span><b>WAIT</b></div>
+            <div class="st-boot-module" data-boot-module="state"><i></i><span>State</span><b>WAIT</b></div>
+          </div>
+          <div class="st-boot-calendar-box">
+            <div class="st-boot-calendar-head">
+              <strong id="st-boot-calendar-title">—</strong>
+              <span>Календар системи</span>
+            </div>
+            <div class="st-boot-calendar-weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Нд</span></div>
+            <div id="st-boot-calendar-grid" class="st-boot-calendar-grid"></div>
+          </div>
+          <div class="st-boot-data-streams" aria-label="Потоки системних даних">
+            <div class="st-boot-stream"><div class="st-boot-stream-track">
+              <span>HEADER_ENGINE_SYNC</span><span>TEMPLATE_LIBRARY_READY</span><span>SHOP_WIDGETS_STANDBY</span><span>CANVAS_STATE_RESTORE</span><span>AI_RUNTIME_SLEEP_MODE</span><span>STYLE_ENGINE_WARMUP</span>
+            </div></div>
+            <div class="st-boot-stream st-boot-stream--reverse"><div class="st-boot-stream-track">
+              <span>FOOTER_BRIDGE_READY</span><span>PAGE_CONTEXT_BOOT</span><span>LOCAL_STORAGE_SCAN</span><span>GALLERY_LAZY_LOAD</span><span>VOICE_COMMANDS_STANDBY</span>
+            </div></div>
+          </div>
+          <div class="st-boot-telemetry-grid" aria-hidden="true">
+            <span>01</span><span>SYS</span><span>ACTIVE</span>
+            <span>02</span><span>HUD</span><span>SYNC</span>
+            <span>03</span><span>DOM</span><span>SCAN</span>
+            <span>04</span><span>UX</span><span>FLOW</span>
+          </div>
+          <div class="st-boot-chart" aria-hidden="true">
+            <span style="--h:42%;--d:.02s"></span><span style="--h:72%;--d:.10s"></span><span style="--h:54%;--d:.18s"></span><span style="--h:88%;--d:.26s"></span><span style="--h:64%;--d:.34s"></span><span style="--h:76%;--d:.42s"></span><span style="--h:48%;--d:.50s"></span><span style="--h:92%;--d:.58s"></span>
+          </div>
+        </section>
+      </div>
+
+      <div class="st-boot-foot st-boot-gridline">
+        <div id="st-boot-log" class="st-boot-log">[0.00s] SYSTEM SHELL · Підготовка запуску...</div>
+        <div class="st-boot-ready">Premium HUD telemetry · Stage 5 · Cinematic Blueprint</div>
+      </div>
+    </div>
+  </div>
+  <script src="js/boot-loader.js"></script>
+
+
+
+  <div id="builder-root"
+       class="builder builder--theme-light builder--side-left builder--header-visible builder--sidebar-expanded">
+
+    <!-- ============= HEADER ============= -->
+    <header class="builder__header">
+      <div class="builder__header-left">
+        <div class="builder__logo">
+          <span class="builder__logo-mark">S</span>
+          <span class="builder__logo-text">ShiftTime Builder</span>
+        </div>
+      </div>
+
+      <div class="builder__header-center">
+	<div id="builder-page-title" class="builder-page-title">
+      <span class="builder-page-title__label">Сторінка:</span>
+      <span class="builder-page-title__name">—</span>
+    </div>
+
+
+
+        <!-- Тема -->
+        <label class="builder__header-field">
+          Тема:
+          <select id="builder-theme-select">
+            <option value="light">Світла</option>
+            <option value="dark">Темна</option>
+            <option value="custom">Користувацька</option>
+          </select>
+        </label>
+
+        <!-- Вигляд конструктора -->
+        <label class="builder__header-field">
+          Вигляд:
+          <select id="builder-view-select">
+            <option value="rounded">Сучасний</option>
+            <option value="table">Табличний</option>
+          </select>
+        </label>
+
+        <!-- Preview -->
+        <button id="builder-preview-btn" class="builder__header-btn">
+          Попередній перегляд
+        </button>
+
+        <!-- Publish -->
+        <button id="builder-publish-btn" class="builder__header-btn" disabled>
+          Публікація
+        </button>
+      
+
+        <!-- Поточний сайт (індикатор) -->
+        <div id="builder-site-title" class="builder-site-title">
+          <span class="builder-site-title__label">Сайт:</span>
+          <span class="builder-site-title__name">САЙТ НЕ ВИБРАНИЙ</span>
+        </div>
+</div>
+
+      <div class="builder__header-right">
+        <!-- Збережені теми конструктора -->
+        <label class="builder__header-field">
+          Мої теми:
+          <select id="builder-saved-themes">
+            <option value="">—</option>
+          </select>
+        </label>
+
+        <!-- Налаштування конструктора -->
+       <button id="builder-settings-btn" class="builder__header-btn" type="button" data-open-panel="constructor">Налаштування конструктора</button>
+
+        <!-- Показати/сховати шапку -->
+        
+
+        <!-- Роль: Адмін / Користувач (тимчасово для етапу розробки; далі замінимо на авторизацію) -->
+        
+
+        <button id="builder-hide-header-btn" class="builder__header-btn" type="button">Приховати шапку</button>
+
+        <div class="builder__role-switch" id="builderRoleSwitch" title="Роль доступу: Адмін або Користувач">
+          <label class="st-role-toggle" aria-label="Перемикач ролі">
+            <input type="checkbox" id="stRoleToggle" />
+            <span class="st-role-toggle__slider"></span>
+          </label>
+          <span class="builder__role-label" id="stRoleLabel">Користувач</span>
+        </div>
+
+      </div>
+    </header>
+
+    <div class="builder__main">
+
+      <!-- ГОЛОВНИЙ САЙТБАР -->
+     <aside id="builder-main-sidebar" class="builder__sidebar">
+  <div class="builder__sidebar-inner">
+    <button
+      class="builder__sidebar-collapse"
+      data-action="toggle-sidebar-collapse"
+      title="Згорнути / розгорнути"
+      type="button"
+    >
+      ☰
+    </button>
+
+    <nav class="builder__sidebar-menu">
+      <!-- Сайт -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="site"
+        id="navSite"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🌐</span>
+        <span class="builder__sidebar-label">Сайт</span>
+      </button>
+
+      <!-- Сторінки -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="pages"
+        id="navPages"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">📄</span>
+        <span class="builder__sidebar-label">Сторінки</span>
+      </button>
+
+      <!-- MARKETPLACE STUDIO 01051 -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="marketplace"
+        id="navMarketplace"
+        type="button"
+        title="Marketplace Studio — товари, категорії, XML, фільтри, SEO"
+      >
+        <span class="builder__sidebar-icon">🛒</span>
+        <span class="builder__sidebar-label">МАРКЕТПЛЕЙС</span>
+      </button>
+
+      <!-- Дизайн -->
+      <button
+        class="builder__sidebar-item"
+        id="navDesign"
+        data-open-panel="design"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🎨</span>
+        <span class="builder__sidebar-label">Дизайн</span>
+      </button>
+
+      <!-- AI Дизайн -->
+      <button
+        class="builder__sidebar-item"
+        id="navAiDesign"
+        data-open-panel="ai-design"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🤖</span>
+        <span class="builder__sidebar-label">AI Дизайн</span>
+      </button>
+
+      <!-- Глобальний дизайн -->
+      <button
+        class="builder__sidebar-item"
+        id="navGlobalDesign"
+        data-open-panel="global-design"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🌈</span>
+        <span class="builder__sidebar-label">Глобальний дизайн</span>
+      </button>
+
+      <!-- Фон сайту -->
+      <button
+        class="builder__sidebar-item is-active"
+        data-open-panel="background"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🖼</span>
+        <span class="builder__sidebar-label">Фон сайту</span>
+      </button>
+
+      <!-- Блоки -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="blocks"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🧱</span>
+        <span class="builder__sidebar-label">Блоки</span>
+      </button>
+
+      <!-- Глобальні -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="global"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">⚙</span>
+        <span class="builder__sidebar-label">Налаштування</span>
+      </button>
+
+
+      <!-- AI Тест -->
+      <button
+        class="builder__sidebar-item"
+        id="navAiTest"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🧪</span>
+        <span class="builder__sidebar-label">AI Тест</span>
+      </button>
+
+      <button
+        class="builder__sidebar-item"
+        id="navAiRuntime"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">⚡</span>
+        <span class="builder__sidebar-label">AI Runtime</span>
+      </button>
+
+      <button
+        class="builder__sidebar-item"
+        id="navAiAudit"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">📋</span>
+        <span class="builder__sidebar-label">Аудит AI</span>
+      </button>
+
+      <button
+        class="builder__sidebar-item"
+        id="navAiDebug"
+        type="button"
+      >
+        <span class="builder__sidebar-icon">🐞</span>
+        <span class="builder__sidebar-label">AI Debug</span>
+      </button>
+    </nav>
+
+
+
+    <!-- 🚀 Кнопка Ліво / Право -->
+    <!-- 🧷 КНОПКА ЛІВО / ПРАВО — ВНИЗУ САЙДБАРУ -->
+<div class="builder__sidebar-footer">
+  <div id="st-responsive-viewport-widget"></div>
+  <button class="builder__sidebar-item" data-action="toggle-side" type="button">
+    <span class="builder__sidebar-icon">⇆</span>
+    <span class="builder__sidebar-label">Ліво / Право</span>
+  </button>
+</div>
+  </div>
+</aside>
+
+
+      <!-- ДОДАТКОВИЙ САЙТБАР -->
+      <aside id="builder-settings-sidebar" class="builder__settings">
+        <header class="builder__settings-header">
+          <div class="builder__settings-title">Налаштування</div>
+          <!-- Expand inspector: collapses main sidebar + allows wider inspector (up to 50% screen) -->
+          <button id="st-inspector-font-settings-btn" class="builder__settings-gear-01054" type="button" title="Розмір шрифту Інспектора" aria-label="Розмір шрифту Інспектора">⚙</button>
+          <button
+            class="builder__settings-expand"
+            data-action="toggle-inspector-expand"
+            title="Розширити"
+            aria-label="Розширити"
+            type="button"
+          ></button>
+          <button class="builder__settings-close" data-action="close-settings" title="Закрити">✕</button>
+        </header>
+
+        <div class="design-mode-tabs" data-design-mode-bar>
+          <button class="design-pill is-active" data-design-mode="none" aria-pressed="true">
+            Нічого
+          </button>
+          <button class="design-pill" data-design-mode="sections" aria-pressed="false">
+            Секції
+          </button>
+          <button class="design-pill" data-design-mode="levels" aria-pressed="false">
+            Рівні
+          </button>
+          <button class="design-pill" data-design-mode="containers" aria-pressed="false">
+            Контейнери
+          </button>
+          <button class="design-pill" data-design-mode="blocks" aria-pressed="false">
+            Блоки
+          </button>
+          <button class="design-pill" data-design-mode="headings" aria-pressed="false">
+            Заголовок
+          </button>
+          <button class="design-pill" data-design-mode="texts" aria-pressed="false">
+            Текст
+          </button>
+          <button class="design-pill" data-design-mode="icons" aria-pressed="false">
+            Іконка
+          </button>
+        </div>
+
+        <div class="builder__settings-panels">
+          <!-- ФОН САЙТУ -->
+         <!-- ФОН САЙТУ + НАЛАШТУВАННЯ СКРОЛБАРІВ -->
+<section class="builder__settings-panel is-active" data-panel-id="background" id="settings-panel-root">
+
+  <h2 class="builder__panel-title">Фон сайту &amp; прокрутка</h2>
+
+  <!-- (Тут можеш додати свої налаштування фону: колір, картинка, градієнт і т.д.) -->
+
+  <!-- ================= ГОЛОВНИЙ БЛОК (canvas__scroll) ================= -->
+  <div class="builder__field-group" data-scrollbars-group="main">
+    <span class="builder__field-group-label">Прокрутка робочого полотна</span>
+
+    <!-- Режим відображення -->
+    <label class="builder__field">
+      <span class="builder__field-label">Режим відображення</span>
+      <select name="mode">
+        <option value="always">Показувати завжди</option>
+        <option value="hover">Показувати при наведенні</option>
+        <option value="hidden">Приховати</option>
+      </select>
+    </label>
+
+    <!-- Ширина повзунка -->
+    <label class="builder__field">
+      <span class="builder__field-label">Ширина повзунка, px (0–48)</span>
+      <input type="range" name="width" min="0" max="48" value="8" />
+    </label>
+
+    <!-- Радіус повзунка -->
+    <label class="builder__field">
+      <span class="builder__field-label">Радіус повзунка, px (0–999)</span>
+      <input type="range" name="radius" min="0" max="999" value="999" />
+    </label>
+
+    <!-- Кольори -->
+    <div class="builder__field builder__field--inline">
+      <label>
+        <span class="builder__field-label">Колір фону треку</span>
+        <input type="color" name="trackColor" value="#020617" />
+      </label>
+      <label>
+        <span class="builder__field-label">Колір повзунка</span>
+        <input type="color" name="thumbColor" value="#38bdf8" />
+      </label>
+      <label>
+        <span class="builder__field-label">Ховер-колір повзунка</span>
+        <input type="color" name="thumbHoverColor" value="#7ed4fa" />
+      </label>
+    </div>
+  </div>
+
+  <!-- ============== ПРАВИЙ САЙТБАР (builder__settings-panels) ============== -->
+  <div class="builder__field-group" data-scrollbars-group="side">
+    <span class="builder__field-group-label">Правий сайтбар з налаштуваннями</span>
+
+    <!-- Режим відображення -->
+    <label class="builder__field">
+      <span class="builder__field-label">Режим відображення</span>
+      <select name="mode">
+        <option value="always">Показувати завжди</option>
+        <option value="hover">Показувати при наведенні</option>
+        <option value="hidden">Приховати</option>
+      </select>
+    </label>
+
+    <!-- Ширина повзунка -->
+    <label class="builder__field">
+      <span class="builder__field-label">Ширина повзунка, px (0–48)</span>
+      <input type="range" name="width" min="0" max="48" value="8" />
+    </label>
+
+    <!-- Радіус повзунка -->
+    <label class="builder__field">
+      <span class="builder__field-label">Радіус повзунка, px (0–999)</span>
+      <input type="range" name="radius" min="0" max="999" value="999" />
+    </label>
+
+    <!-- Кольори -->
+    <div class="builder__field builder__field--inline">
+      <label>
+        <span class="builder__field-label">Колір фону треку</span>
+        <input type="color" name="trackColor" value="#020617" />
+      </label>
+      <label>
+        <span class="builder__field-label">Колір повзунка</span>
+        <input type="color" name="thumbColor" value="#38bdf8" />
+      </label>
+      <label>
+        <span class="builder__field-label">Ховер-колір повзунка</span>
+        <input type="color" name="thumbHoverColor" value="#7ed4fa" />
+      </label>
+    </div>
+  </div>
+
+</section>
+
+
+          <!-- ДИЗАЙН -->
+          <section class="builder__settings-panel" data-panel-id="design" id="design-panel-root">
+            <h2 class="builder__panel-title">Дизайн</h2>
+            <div class="design-panel" id="design-panel">
+              <!-- Сюди JS вставить блоки налаштувань (Розмітка, Заливка, Кути тощо) -->
+            </div>
+          </section>
+
+          <!-- AI ДИЗАЙН -->
+          <section class="builder__settings-panel" data-panel-id="ai-design" id="ai-design-panel-root">
+            <h2 class="builder__panel-title">AI Дизайн</h2>
+            <div class="design-panel" id="ai-design-panel">
+              <!-- Сюди JS вставить окремі AI-віджети генерації сайтів, сторінок і секцій -->
+            </div>
+          </section>
+
+          <!-- ГЛОБАЛЬНИЙ ДИЗАЙН -->
+          <section class="builder__settings-panel" data-panel-id="global-design" id="global-design-panel-root">
+            <h2 class="builder__panel-title">Глобальний дизайн</h2>
+            <div class="design-panel" id="global-design-panel">
+              <!-- [00684] Єдиний StyleStore: Global / AI / Design + готові теми -->
+            </div>
+          </section>
+
+          <!-- БЛОКИ / ІНСПЕКТОР -->
+          <!-- БЛОКИ / ІНСПЕКТОР -->
+      <section class="builder__settings-panel" data-panel-id="blocks" id="blocks-panel-root">
+        <h2 class="builder__panel-title">Блоки</h2>
+        <p class="builder__panel-note">
+          Тут буде інспектор блоків, а також дерево поточної сторінки для швидкої навігації.
+        </p>
+
+        <!-- Група керування режимом -->
+        <div class="builder__field-group">
+          <span class="builder__field-group-label">Режим перегляду</span>
+
+          <div class="design-pill-group">
+            <!-- Поки що це просто заглушка під майбутній інспектор -->
+            <button
+              type="button"
+              class="design-pill is-active"
+              id="blocks-mode-inspector"
+              disabled
+            >
+              Інспектор (скоро)
+            </button>
+
+            <!-- Реальна кнопка для дерева сторінки -->
+            <button
+              type="button"
+              class="design-pill"
+              id="toggle-page-tree"
+            >
+              Дерево сторінки 2
+            </button>
+          </div>
+
+          <p class="builder__panel-note" style="margin-top: 6px;">
+            Клік по елементу в дереві виділяє його на полотні. Затисни <b>Ctrl</b>, щоб обирати кілька
+            секцій або блоків.
+          </p>
+        </div>
+
+        <!-- Область для самого дерева сторінки -->
+        <div class="builder__field-group" id="page-tree-wrap">
+          <span class="builder__field-group-label">Структура сторінки</span>
+          <div id="page-tree-root"></div>
+        </div>
+      </section>
+
+          <!-- MARKETPLACE STUDIO 01052: shell + storage-agnostic MarketplaceStore Data Core -->
+          <section class="builder__settings-panel" data-panel-id="marketplace" id="marketplace-panel-root" aria-label="Marketplace Studio"></section>
+
+          <!-- САЙТ: кнопки віджета "Сайт" -->
+          <section class="builder__settings-panel" data-panel-id="site" id="site-panel-root">
+            <div class="sm-sidebar__header">
+              <div class="sm-sidebar__badge">ВІДЖЕТ</div>
+              <h1 class="sm-sidebar__title">Сайт</h1>
+              <p class="sm-sidebar__subtitle">
+                Керування сайтами: створення, вибір і збереження даних для публікації на Netlify.
+              </p>
+            </div>
+
+            <div class="sm-sidebar__section">
+              <button class="sm-btn sm-btn--primary" id="smCreateBtn" type="button">
+                + Створити сайт
+              </button>
+              <button class="sm-btn sm-btn--ghost" id="smOpenBtn" type="button">
+                Відкрити сайт
+              </button>
+
+              <!-- Видалення активного сайту (після вибору в списку) -->
+              <button class="sm-btn sm-btn--ghost sm-btn--danger" id="smDeleteBtn" type="button">
+                Видалити сайт
+              </button>
+            </div>
+
+            <div class="sm-sidebar__section">
+              <div class="sm-sidebar__section-title">Список сайтів</div>
+              <ul class="sm-site-list" id="smSiteList">
+                <!-- JS намалює елементи тут -->
+              </ul>
+            </div>
+          </section>
+
+          <!-- ЗАГАЛЬНІ -->
+          <section class="builder__settings-panel" data-panel-id="global">
+            ...
+          </section>
+
+          <!-- КОНСТРУКТОР -->
+          <section class="builder__settings-panel" data-panel-id="constructor" id="constructor-panel-root">
+            ...
+          </section>
+        
+
+
+
+
+                  <!-- СТОРІНКИ: налаштування віджета "Сторінки" -->
+          <section class="builder__settings-panel" data-panel-id="pages" id="pages-panel-root">
+            <div class="pm-side pm-side--embedded" id="pmSidePanel">
+              <!-- Шапка сайтбару -->
+              <header class="pm-side__header">
+                <div class="pm-side__title-wrap">
+                  <p class="pm-side__eyebrow">Налаштування</p>
+                  <h2 class="pm-side__title">Віджет «Сторінки»</h2>
+                </div>
+                <p class="pm-side__hint">
+                  Глобальні налаштування відображення сторінок. Цей блок потім
+                  перенесемо в основний додатковий сайтбар конструктора.
+                </p>
+              </header>
+
+              <div class="pm-side__sections">
+                <!-- СЕКЦІЯ: Режим перегляду -->
+                <section class="pm-side__section">
+                  <h3 class="pm-side__section-title">Режим перегляду</h3>
+                  <p class="pm-side__section-subtitle">
+                    Обери, які сторінки показувати та як їх сортувати.
+                  </p>
+
+                  <div class="pm-side__group">
+                    <div class="pm-field">
+                      <div class="pm-field__label">Фільтр статусу</div>
+                      <div class="pm-pill-group" data-role="pmFilterStatus">
+                        <button type="button" class="pm-pill pm-pill--active" data-filter="all">
+                          Усі
+                        </button>
+                        <button type="button" class="pm-pill" data-filter="published">
+                          Опубліковані
+                        </button>
+                        <button type="button" class="pm-pill" data-filter="draft">
+                          Чернетки
+                        </button>
+                        <button type="button" class="pm-pill" data-filter="private">
+                          Тільки за посиланням
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="pm-field">
+                      <div class="pm-field__label">Сортування</div>
+                      <select class="pm-select" id="pmSortSelect">
+                        <option value="order">За порядком у списку</option>
+                        <option value="name">За назвою (A–Я)</option>
+                        <option value="status">За статусом</option>
+                        <option value="path">За URL (slug)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="pm-side__switch-row">
+                    <label class="pm-switch">
+                      <input type="checkbox" id="pmShowSlugSwitch" checked />
+                      <div>
+                        <div class="pm-switch__label">Показувати URL (slug)</div>
+                        <div class="pm-switch__hint">
+                          Якщо вимкнути — у списку сторінок буде тільки назва без шляху.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="pm-side__switch-row">
+                    <label class="pm-switch">
+                      <input type="checkbox" id="pmHighlightHomeSwitch" checked />
+                      <div>
+                        <div class="pm-switch__label">Виділяти домашню сторінку</div>
+                        <div class="pm-switch__hint">
+                          Підсвічувати сторінку, яка позначена як «Домашня».
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </section>
+
+                <!-- ==========================СЕКЦІЯ: Стандартні блоки сторінки================================ -->
+                <section class="pm-side__section">
+                  <h3 class="pm-side__section-title">Стандартні блоки сторінки</h3>
+                  <p class="pm-side__section-subtitle">
+                    За замовчуванням для нових сторінок. Їх можна перевизначити у самій сторінці.
+                  </p>
+
+                  <div class="pm-side__group pm-side__group--stack">
+                    <div class="pm-field">
+                      <div class="pm-field__label">Шапка (Header)</div>
+                      <select class="pm-select" id="pmDefaultHeader">
+                        <option value="default">Стандартна шапка сайту</option>
+                        <option value="custom">Власна для сторінки</option>
+                        <option value="none">Без шапки за замовчуванням</option>
+                      </select>
+                    </div>
+
+                    <div class="pm-field">
+                      <div class="pm-field__label">Футер (Footer)</div>
+                      <select class="pm-select" id="pmDefaultFooter">
+                        <option value="default">Стандартний футер сайту</option>
+                        <option value="custom">Власний для сторінки</option>
+                        <option value="none">Без футера за замовчуванням</option>
+                      </select>
+                    </div>
+
+                    <div class="pm-field">
+                      <div class="pm-field__label">Сайдбар</div>
+                      <select class="pm-select" id="pmDefaultSidebar">
+                        <option value="default">Стандартний сайдбар</option>
+                        <option value="custom">Окремий для сторінки</option>
+                        <option value="none">Без сайдбара</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="pm-side__switch-row">
+                    <label class="pm-switch">
+                      <input type="checkbox" id="pmInheritLayoutSwitch" checked />
+                      <div>
+                        <div class="pm-switch__label">Наслідувати макет від сайту</div>
+                        <div class="pm-switch__hint">
+                          Нові сторінки використовують базові відступи/сітку теми сайту.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </section>
+
+                <!-- СЕКЦІЯ: Шаблони сторінок -->
+                <section class="pm-side__section">
+                  <h3 class="pm-side__section-title">Шаблони сторінок</h3>
+                  <p class="pm-side__section-subtitle">
+                    Швидкий старт: створити нову сторінку на основі готової структури.
+                  </p>
+
+                  <div class="pm-pill-group pm-pill-group--wrap">
+                    <button type="button" class="pm-pill" data-template="landing">
+                      Лендінг
+                    </button>
+                    <button type="button" class="pm-pill" data-template="services">
+                      Послуги
+                    </button>
+                    <button type="button" class="pm-pill" data-template="contacts">
+                      Контакти
+                    </button>
+                    <button type="button" class="pm-pill" data-template="blog">
+                      Блог / Статті
+                    </button>
+                    <button type="button" class="pm-pill" data-template="blank">
+                      Порожня сторінка
+                    </button>
+                  </div>
+
+                  <button type="button" class="pm-btn pm-btn--ghost" id="pmTemplateCreateBtn">
+                    Створити сторінку з шаблону
+                  </button>
+                </section>
+
+                <!-- СЕКЦІЯ: Публікація & SEO -->
+                <section class="pm-side__section">
+                  <h3 class="pm-side__section-title">Публікація &amp; SEO</h3>
+                  <p class="pm-side__section-subtitle">
+                    Базові налаштування для публікації усіх сторінок сайту.
+                  </p>
+
+                  <div class="pm-side__group pm-side__group--stack">
+                    <div class="pm-field">
+                      <div class="pm-field__label">Базовий домен сайту</div>
+                      <div class="pm-field__description">
+                        Використовується для формування повних URL (Netlify / кастомний домен).
+                      </div>
+                      <input
+                        class="pm-input"
+                        type="text"
+                        id="pmBaseDomain"
+                        placeholder="https://my-site.netlify.app"
+                      />
+                    </div>
+
+                    <div class="pm-field">
+                      <div class="pm-field__label">Префікс для сторінок</div>
+                      <div class="pm-field__description">
+                        Наприклад: <code>/app</code>, <code>/store</code> або порожньо.
+                      </div>
+                      <input class="pm-input" type="text" id="pmBasePrefix" placeholder="/" />
+                    </div>
+                  </div>
+
+                  <div class="pm-side__switch-row">
+                    <label class="pm-switch">
+                      <input type="checkbox" id="pmAutoNoindexDrafts" checked />
+                      <div>
+                        <div class="pm-switch__label">Автоматично noindex для чернеток</div>
+                        <div class="pm-switch__hint">
+                          Усі сторінки зі статусом «Чернетка» будуть позначені як <code>noindex</code>.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
+</div>
+
+
+
+
+
+      </aside>
+
+      <!-- RESIZER -->
+      <div id="builder-settings-resizer" class="builder__settings-resizer"></div>
+
+      <!-- CANVAS -->
+      <section class="builder__canvas">
+        <header class="canvas__header">
+          <div class="canvas__title"></div>
+
+          <button id="add-section-btn" class="builder__header-btn" type="button">
+            + Додати секцію
+          </button>
+
+          <button id="add-block-btn" class="builder__header-btn" type="button">
+            + Додати блок
+          </button>
+
+          <button id="add-line-btn" class="builder__header-btn" type="button">
+            + Додати лінію
+          </button>
+
+          
+          <button id="add-text-btn" class="builder__header-btn" type="button">
+            + Додати текст
+          </button>
+
+          <button id="add-article-btn" class="builder__header-btn" type="button">
+            + Додати статтю
+          </button>
+<!-- 🆕 Undo / Redo -->
+          <button id="undo-btn" class="builder__header-btn builder__header-btn--icon" type="button" title="Назад (Ctrl+Z)">
+            ←
+          </button>
+
+          <button id="redo-btn" class="builder__header-btn builder__header-btn--icon" type="button" title="Вперед (Ctrl+Y)">
+            →
+          </button>
+
+          <!-- 🆕 Delete -->
+          <button id="delete-btn" class="builder__header-btn builder__header-btn--danger" type="button" title="Видалити (Del)">
+            Видалити
+          </button>
+        </header>
+
+        <div id="st-page-tabs-01028" class="st-page-tabs-01028" aria-label="Відкриті сторінки" hidden></div>
+
+        <div class="canvas__scroll canvas__scroll--full">
+          <!-- MARKETPLACE STUDIO 01051 (central workspace) -->
+          <div id="marketplaceStudioView" hidden></div>
+
+          <!-- Вбудований віджет "Сайт" (головне вікно) -->
+          <div id="siteManagerView" hidden>
+            <div id="siteWidgetRoot" class="sm-root sm-root--embedded">
+              <main class="sm-main">
+                <div class="site-panel" id="sitePanel">
+                  <div class="site-panel__header">
+                    <div>
+                      <h2 class="site-panel__title">Налаштування сайту</h2>
+                      <p class="site-panel__subtitle">
+                        Заповни назву, slug та дані для Netlify. Ці параметри будуть використовуватись
+                        при публікації сайту.
+                      </p>
+                    </div>
+                    <button class="site-panel__save-btn" id="siteSaveBtn" type="button">
+                      Зберегти
+                    </button>
+                  </div>
+
+                  <div class="site-panel__body">
+                    <!-- Основна інформація -->
+                    <section class="site-card">
+                      <h3 class="site-card__title">Основна інформація</h3>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Назва сайту</span>
+                        <input
+                          type="text"
+                          id="siteName"
+                          class="site-field__input"
+                          placeholder="Наприклад, ShiftTime Store"
+                        />
+                      </label>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Slug / Код сайту</span>
+                        <input
+                          type="text"
+                          id="siteSlug"
+                          class="site-field__input"
+                          placeholder="shifttime-store"
+                        />
+                        <small class="site-field__hint">
+                          Лише латинські літери, цифри та дефіси. Використовується як код / папка сайту.
+                        </small>
+                      </label>
+
+                      <!-- Вибір шаблону сайту -->
+                      <div class="site-field">
+                        <span class="site-field__label">Шаблон сайту</span>
+                        <select
+                          id="siteTemplateSelect"
+                          class="site-field__input site-field__select"
+                        >
+                          <!-- JS заповнить -->
+                        </select>
+
+                        <div style="margin-top:10px; display:flex; gap:10px;">
+                          <button
+                            id="siteApplyTemplateBtn"
+                            type="button"
+                            class="site-btn site-btn--primary"
+                            title="Сторінки створюються ТІЛЬКИ після застосування"
+                          >
+                            Застосувати шаблон
+                          </button>
+                        </div>
+                        <small class="site-field__hint" id="siteTemplateInfo">
+                          Обери базовий шаблон (шапка, сайтбар, футер, основний блок). Пізніше
+                          конструктор сторінок буде будувати структуру сайту за цим шаблоном.
+                        </small>
+                      </div>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Короткий опис</span>
+                        <textarea
+                          id="siteDescription"
+                          class="site-field__textarea"
+                          rows="3"
+                          placeholder="Короткий опис сайту для SEO та списку сайтів"
+                        ></textarea>
+                      </label>
+                    </section>
+
+                    <!-- Netlify -->
+                    <section class="site-card">
+                      <h3 class="site-card__title">Публікація на Netlify</h3>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Netlify Site Name</span>
+                        <input
+                          type="text"
+                          id="netlifySiteName"
+                          class="site-field__input"
+                          placeholder="shifttime-store"
+                        />
+                      </label>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Netlify URL</span>
+                        <input
+                          type="text"
+                          id="netlifyUrl"
+                          class="site-field__input"
+                          placeholder="https://shifttime-store.netlify.app"
+                        />
+                      </label>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Папка публікації (publish directory)</span>
+                        <input
+                          type="text"
+                          id="netlifyPublishDir"
+                          class="site-field__input"
+                          placeholder="frontend"
+                        />
+                        <small class="site-field__hint">
+                          Яку папку ти завантажуєш на Netlify. Зараз це вміст папки <code>frontend</code>.
+                        </small>
+                      </label>
+
+                      <label class="site-field">
+                        <span class="site-field__label">Deploy Hook URL (на майбутнє)</span>
+                        <input
+                          type="text"
+                          id="netlifyDeployHook"
+                          class="site-field__input"
+                          placeholder="https://api.netlify.com/build_hooks/..."
+                        />
+                        <small class="site-field__hint">
+                          Можна залишити порожнім. Пізніше використаємо для автодеплою.
+                        </small>
+                      </label>
+                    </section>
+
+                    <!-- Службова інформація -->
+                    <section class="site-card">
+                      <h3 class="site-card__title">Службова інформація</h3>
+
+                      <div class="site-meta">
+                        <div class="site-meta__item">
+                          <span class="site-meta__label">ID сайту</span>
+                          <span class="site-meta__value" id="siteIdView">—</span>
+                        </div>
+                        <div class="site-meta__item">
+                          <span class="site-meta__label">Створено</span>
+                          <span class="site-meta__value" id="siteCreatedAtView">—</span>
+                        </div>
+                        <div class="site-meta__item">
+                          <span class="site-meta__label">Оновлено</span>
+                          <span class="site-meta__value" id="siteUpdatedAtView">—</span>
+                        </div>
+                      </div>
+                    </section>
+
+                    <!-- Сторінки сайту (MVP) -->
+                    <section class="site-card">
+                      <h3 class="site-card__title">Сторінки сайту (MVP)</h3>
+
+                      <p class="site-field__hint" style="margin-bottom: 8px;">
+                        Для кожного сайту можна мати кілька сторінок. Пізніше саме тут будемо
+                        відкривати сторінку в головному конструкторі.
+                      </p>
+
+                      <button
+                        class="sm-btn sm-btn--ghost site-pages__add-btn"
+                        id="siteAddPageBtn"
+                        type="button"
+                      >
+                        + Додати сторінку
+                      </button>
+
+                      <ul class="site-pages__list" id="sitePagesList">
+                        <!-- Список сторінок малює JS -->
+                      </ul>
+
+                      <!-- DEBUG-панель поточного вибору -->
+                      <div class="site-debug" id="siteDebug">
+                        <div class="site-debug__label">Поточний сайт / сторінка:</div>
+                        <div class="site-debug__value">—</div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+
+                    <!-- Вбудований віджет "Сторінки" (головне вікно) -->
+          <div id="pageManagerView" hidden>
+            <div id="pageWidgetRoot" class="pm-root pm-root--embedded">
+	              <main class="pm-main">
+	                <!-- TOPBAR ВІДЖЕТА "СТОРІНКИ" (винесено наверх) -->
+	                <header class="pm-topbar">
+                    <div class="pm-panel__title-block">
+                      <p class="pm-panel__eyebrow">Віджет</p>
+                      <h1 class="pm-panel__title">Сторінки сайту</h1>
+                      <p class="pm-panel__subtitle">
+                        Керуй сторінками поточного сайту: назви, порядок, статус, дизайн.
+                      </p>
+                    </div>
+
+                    <div class="pm-panel__site-block">
+                      <div class="pm-panel__site-label-row">
+                        <span class="pm-panel__site-label">Сайт:</span>
+                        <span class="pm-panel__site-name" id="pmSiteName">—</span>
+                      </div>
+                      <button class="pm-btn pm-btn--primary" id="pmCreatePageBtn" type="button">
+                        + Створити сторінку
+                      </button>
+                    </div>
+	                </header>
+
+                <section class="pm-panel" id="pagePanel">
+                  <!-- ТІЛО ВІДЖЕТА -->
+                  <div class="pm-panel__body">
+                    <!-- Порожній стан -->
+                    <div class="pm-empty" id="pmEmptyState" hidden>
+                      <h2 class="pm-empty__title">Немає сторінок</h2>
+                      <p class="pm-empty__text">
+                        Створи першу сторінку для вибраного сайту або імпортуй із шаблону.
+                      </p>
+                    </div>
+
+                    <!-- Список сторінок -->
+                    <div class="pm-pages-list" id="pmPageList">
+                      <!-- JS віджета "Сторінки" намалює картки -->
+                    </div>
+                  </div>
+                </section>
+              </main>
+            </div>
+          </div>
+
+
+
+          
+
+          <!-- Конструктор шаблонів сайту -->
+          <div id="siteTemplateBuilderView" style="display:none">
+            <div class="templates-gallery-manager" style="height: calc(100vh - 110px); margin: 12px; border-radius: 18px;">
+              <div class="tgm__topbar">
+                <div class="tgm__title">Конструктор шаблону сайту</div>
+                <div class="tgm__actions">
+                  <button class="tgm__btn" type="button" id="siteTplBuilderBackBtn">Назад</button>
+                </div>
+              </div>
+              <div class="tgm__body">
+                <div id="siteTplBuilderMount"></div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Конструктор меню -->
+          <div id="menuBuilderView" class="st-mb-view" style="display:none">
+            <div id="st-menu-builder-toolbar" class="st-hb__toolbar st-mb__toolbar">
+              <button type="button" class="st-hb__btn" id="menuBuilderBackBtn">← Назад</button>
+              <div class="st-hb__title">Конструктор меню</div>
+              <div class="st-hb__hint" id="menuBuilderHint">Режим: редагування меню</div>
+
+              <div class="st-mb__modes" role="tablist" aria-label="Режими перегляду">
+                <button type="button" class="st-hb__btn st-mb__mode" data-mb-mode="menu">Меню</button>
+                <button type="button" class="st-hb__btn st-mb__mode" data-mb-mode="level">Рівень</button>
+                <button type="button" class="st-hb__btn st-mb__mode is-active" data-mb-mode="section">Секція</button>
+                <button type="button" class="st-hb__btn st-mb__mode" data-mb-mode="header">Шапка</button>
+              </div>
+              <div class="st-hb__spacer"></div>
+            </div>
+
+            <div class="st-mb__content">
+              <div id="menuBuilderMount"></div>
+            </div>
+          </div>
+
+
+
+<!-- Звичайний режим конструктора (canvas) -->
+          <div id="canvasView">
+            <div id="site-canvas" class="builder__canvas-site">
+              <div id="site-root" class="site-root" data-site-frame-root="00914">
+                <div id="st-site-header-slot" class="st-site-header-slot" data-site-frame-area="header"></div>
+                <main id="st-site-main-slot" class="st-site-main-slot" data-site-frame-area="main" data-site-frame-main-stage="00914-main-shadow-preset-inner-parity"></main>
+                <div id="st-site-footer-slot" class="st-site-footer-slot" data-site-frame-area="footer"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+
+    <!-- Animator Dock (Preview Orion) -->
+    <div id="st-animator-dock" class="st-animator-dock" aria-label="Animator Dock">
+      <div class="st-animator-dock__bar">
+        <div class="st-animator-dock__title"><span class="st-animator-dock__dot"></span><span>Animator Preview</span></div>
+        <div class="st-animator-dock__actions">
+          <button id="st-animator-dock-toggle" class="st-animator-dock__btn" type="button">Згорнути</button>
+        </div>
+      </div>
+      <div class="st-animator-dock__body">
+        <div class="st-animator-dock__preview" id="st-animator-preview">
+          <div id="st-animator-mount"></div>
+        </div>
+
+    <!-- TIMELINE (BOTTOM) -->
+    <!-- TIMELINE (BOTTOM) -->
+    <div class="timelineResizer" id="st-animator-timeline-resizer" data-in8-title="Drag up/down to resize timeline" title="Drag up/down to resize timeline"></div>
+    <footer class="st-animator__timeline" id="st-animator-timeline">
+  <div class="timelineHeader">
+              <div class="panelTitle" data-i18n="timeline.title">Timeline</div>
+      
+              <div class="timelineHeaderMid" id="timelineHeaderTools" aria-label="Timeline tools">
+                <button class="iconBtn" type="button" data-track-jump="rotationY" title="Rotation Y" aria-label="Rotation Y">
+                  <span class="ico">⟳</span>
+                </button>
+                <button class="iconBtn" type="button" data-track-jump="cameraX" title="Camera X" aria-label="Camera X">
+                  <span class="ico">📷X</span>
+                </button>
+                <button class="iconBtn" type="button" data-track-jump="cameraY" title="Camera Y" aria-label="Camera Y">
+                  <span class="ico">📷Y</span>
+                </button>
+                <button class="iconBtn" type="button" data-track-jump="cameraZ" title="Camera Z" aria-label="Camera Z">
+                  <span class="ico">📷Z</span>
+                </button>
+                <button class="iconBtn" type="button" data-track-jump="scale" title="Scale" aria-label="Scale">
+                  <span class="ico">⤢</span>
+                </button>
+              </div>
+      
+              <div class="timelineControls">
+                <div class="kfHeader" id="timelineKfQuick">
+                  <div class="hint" id="timelineKfEmpty" data-i18n="timeline.keyframeSelectHint">Select a keyframe to edit.</div>
+      
+                  <div class="kv" id="timelineKfMeta" style="display:none;">
+                    <div class="k" data-i18n="inspector.keyframeSelected">Selected</div>
+                    <div class="v" id="timelineKfLabel">—</div>
+                  </div>
+      
+                  <label class="field kfInterpField" style="display:none;" id="timelineInterpField">
+                    <span data-i18n="inspector.keyframeInterp">Interpolation</span>
+                    <div class="selectWrap">
+                      <select id="timelineInterpSelect">
+                        <option value="linear" data-i18n="interp.linear">Linear</option>
+                        <option value="hold" data-i18n="interp.hold">Hold</option>
+                        <option value="easeInCubic" data-i18n="interp.easeIn">Ease In</option>
+                        <option value="easeOutCubic" data-i18n="interp.easeOut">Ease Out</option>
+                        <option value="easeInOutCubic" data-i18n="interp.easeInOut">Ease In/Out</option>
+                      </select>
+                      <span class="caret">▾</span>
+                    </div>
+                  </label>
+                </div>
+      
+                <div class="zoomGroup">
+                  <span id="btnZoomOut" style="display:none"></span>
+                  <span id="zoomLabel" style="display:none"></span>
+                  <span id="btnZoomIn" style="display:none"></span>
+                </div>
+      
+                <div class="zoomGroup" id="timelineTransport">
+                  <button class="btn" id="btnPlay"><span class="btnIcon play" aria-hidden="true">▶</span><span class="btnText" data-i18n="header.play">Play</span></button>
+                  <button class="btn" id="btnStop"><span class="btnIcon stop" aria-hidden="true">■</span><span class="btnText" data-i18n="header.stop">Stop</span></button>
+                  <div class="timeChip" id="timeLabel">00:00.000</div>
+                </div>
+      
+              </div>
+            </div>
+      
+
+      <div id="st-animator-timelineMount" class="st-animator__timelineMount"></div>
+    </footer>
+
+      </div>
+    </div>
+    <!-- FOOTER -->
+    <footer class="builder__footer">
+      <div>ShiftTime Builder v1</div>
+      <div>© 2025</div>
+    </footer>
+
+  </div>
+
+  <!-- JS віджета "Сайт" (глобальний, НЕ module) -->
+  <script src="widgets/site-manager/js/site-templates.js"></script>
+  <script src="widgets/site-manager/js/site-manager.js"></script>
+
+  <!-- JS віджета "Сторінки" (глобальний, НЕ module) -->
+  <script src="widgets/page-manager/js/page-manager.js"></script>
+
+  <!-- Головна ініціалізація конструктора + інтеграція віджета "Сайт" -->
+  <script type="module" src="./js/ai-design-debug-log.js?v=01004"></script>
+  <script type="module" src="./js/builder-init.js?v=01083"></script>
+  <script type="module" src="./js/responsive-viewport/responsive-viewport-controller-00991.js?v=01014"></script>
+  <script type="module" src="./js/site-delete.js"></script>
+  <!-- Простий перемикач центральних вікон "Сайт" / "Сторінки" / Canvas -->
+
+
+  <!-- Налаштування скролбарів (конструктор + додатковий сайтбар) -->
+  <script type="module" src="./js/settings/widgets/scrollbars-init.js"></script>
+
+
+
+</body>
+</html>

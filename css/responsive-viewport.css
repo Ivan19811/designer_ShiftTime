@@ -1,0 +1,499 @@
+/* =========================================================
+   01010 · RESPONSIVE VIEWPORT CANVAS-FIT PARITY
+   Based on 00958/00991 responsive viewport controls.
+   The simulated site viewport may request a larger desktop width, but the
+   builder shell always owns the visible bounds: widening the inspector must
+   shrink the rendered site viewport instead of making canvasView spill out.
+   ========================================================= */
+
+/* =========================================================
+   00958 · RESPONSIVE VIEWPORT CONTROLS
+   Builder-only viewport simulation. SiteFrame geometry remains untouched.
+   ========================================================= */
+
+#st-responsive-viewport-widget{
+  display:block;
+  min-width:0;
+  margin:0 0 9px;
+  color:#e5eefb;
+  font-family:Inter,Manrope,Arial,sans-serif;
+}
+
+/* Reserve a stable footer area for the widget; the long navigation remains
+   independently scrollable instead of disappearing below it. */
+#builder-main-sidebar .builder__sidebar-inner{ min-height:0; }
+#builder-main-sidebar .builder__sidebar-menu{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  scrollbar-width:thin;
+}
+#builder-main-sidebar .builder__sidebar-footer{
+  flex:0 0 auto;
+  padding:8px;
+  border-top:1px solid rgba(56,189,248,.13);
+  background:rgba(2,6,23,.18);
+}
+
+.st-rvp{
+  position:relative;
+  padding:9px;
+  border:1px solid rgba(56,189,248,.28);
+  border-radius:13px;
+  background:linear-gradient(155deg,rgba(15,23,42,.98),rgba(8,20,39,.98));
+  box-shadow:0 12px 30px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.st-rvp__head,
+.st-rvp__label,
+.st-rvp__quick,
+.st-rvp__readout,
+.st-rvp__panel-head,
+.st-rvp__panel-actions,
+.st-rvp__status-row,
+.st-rvp__manual-grid,
+.st-rvp__step-row,
+.st-rvp__matrix-row,
+.st-rvp__matrix-main,
+.st-rvp__tour-actions{
+  display:flex;
+  align-items:center;
+}
+
+.st-rvp__head{ justify-content:space-between; gap:6px; margin-bottom:8px; }
+.st-rvp__label{
+  min-width:0;
+  gap:7px;
+  padding:3px 2px;
+  border:0;
+  color:#f8fbff;
+  background:transparent;
+  font:800 11px/1.2 Inter,Manrope,Arial,sans-serif;
+  letter-spacing:.015em;
+  cursor:help;
+}
+.st-rvp__label svg{ width:16px; height:16px; color:#38bdf8; flex:0 0 auto; }
+.st-rvp__gear,
+.st-rvp__quick-btn,
+.st-rvp__panel-close,
+.st-rvp__secondary,
+.st-rvp__primary,
+.st-rvp__danger,
+.st-rvp__step,
+.st-rvp__matrix-apply{
+  border:1px solid rgba(148,163,184,.30);
+  color:#dbeafe;
+  background:#101c31;
+  cursor:pointer;
+  font-family:inherit;
+}
+.st-rvp__gear{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border-radius:9px;
+}
+.st-rvp__gear svg{ width:15px; height:15px; }
+.st-rvp__gear:hover,
+.st-rvp__gear[aria-expanded="true"]{
+  color:#fff;
+  border-color:#38bdf8;
+  background:#123253;
+}
+
+.st-rvp__quick{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:4px;
+}
+.st-rvp__quick-btn{
+  position:relative;
+  min-width:0;
+  height:31px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border-radius:8px;
+}
+.st-rvp__quick-btn svg{ width:16px; height:16px; }
+.st-rvp__quick-btn:hover{ color:#fff; border-color:#60a5fa; background:#16345b; }
+.st-rvp__quick-btn.is-active{
+  color:#031525;
+  border-color:#67e8f9;
+  background:linear-gradient(135deg,#67e8f9,#38bdf8);
+  box-shadow:0 0 0 2px rgba(56,189,248,.14);
+}
+.st-rvp__quick-btn:focus-visible,
+.st-rvp__gear:focus-visible,
+.st-rvp__panel button:focus-visible,
+.st-rvp__panel input:focus-visible,
+.st-rvp__panel select:focus-visible,
+.st-rvp__favorite-select:focus-visible{
+  outline:2px solid #fbbf24;
+  outline-offset:2px;
+}
+
+.st-rvp__favorite-select{
+  width:100%;
+  height:30px;
+  margin-top:6px;
+  padding:0 8px;
+  border:1px solid rgba(148,163,184,.25);
+  border-radius:8px;
+  color:#dbeafe;
+  background:#0b1729;
+  font:700 10px/1 Inter,Manrope,Arial,sans-serif;
+}
+.st-rvp__readout{
+  justify-content:space-between;
+  gap:8px;
+  min-height:26px;
+  margin-top:6px;
+  padding:5px 8px;
+  border-radius:8px;
+  color:#9fb3cd;
+  background:rgba(2,6,23,.48);
+  font-size:10px;
+}
+.st-rvp__readout strong{ color:#f8fafc; font-size:11px; }
+.st-rvp__live-dot{ width:7px; height:7px; border-radius:50%; background:#64748b; box-shadow:0 0 0 3px rgba(100,116,139,.14); }
+.st-rvp.is-enabled .st-rvp__live-dot{ background:#34d399; box-shadow:0 0 0 3px rgba(52,211,153,.15); }
+
+.st-rvp__panel{
+  position:fixed;
+  z-index:2147481600;
+  left:var(--st-rvp-panel-left,220px);
+  top:var(--st-rvp-panel-top,120px);
+  width:min(790px,calc(100vw - 28px));
+  max-height:min(760px,calc(100vh - 28px));
+  overflow:auto;
+  padding:18px;
+  border:1px solid rgba(56,189,248,.42);
+  border-radius:20px;
+  color:#e6f2ff;
+  background:
+    radial-gradient(circle at 96% 0,rgba(14,165,233,.17),transparent 32%),
+    linear-gradient(155deg,#0b1729,#07111f 70%);
+  box-shadow:0 32px 90px rgba(0,0,0,.56),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.st-rvp__panel[hidden],
+.st-rvp__help[hidden]{ display:none !important; }
+.st-rvp__panel-head{ justify-content:space-between; gap:18px; padding-bottom:14px; border-bottom:1px solid rgba(148,163,184,.18); }
+.st-rvp__panel-title{ margin:0; color:#fff; font-size:19px; line-height:1.2; }
+.st-rvp__panel-subtitle{ margin:5px 0 0; color:#9fb3cd; font-size:12px; line-height:1.45; }
+.st-rvp__panel-close{ flex:0 0 auto; width:34px; height:34px; border-radius:10px; font-size:20px; }
+.st-rvp__status-row{ justify-content:space-between; gap:14px; margin:14px 0; padding:11px 12px; border:1px solid rgba(148,163,184,.18); border-radius:13px; background:rgba(15,23,42,.66); }
+.st-rvp__status{ color:#a9bdd4; font-size:12px; }
+.st-rvp__status strong{ display:block; margin-top:3px; color:#fff; font-size:14px; }
+.st-rvp__panel-actions{ flex-wrap:wrap; gap:8px; }
+.st-rvp__primary,
+.st-rvp__secondary,
+.st-rvp__danger{ min-height:36px; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; }
+.st-rvp__primary{ color:#062035; border-color:#67e8f9; background:linear-gradient(135deg,#67e8f9,#38bdf8); }
+.st-rvp__danger{ color:#fecaca; border-color:rgba(248,113,113,.45); background:rgba(127,29,29,.28); }
+.st-rvp__danger:hover{ color:#fff; border-color:#f87171; background:#7f1d1d; }
+.st-rvp__section{ margin-top:16px; padding-top:2px; }
+.st-rvp__section h3{ margin:0 0 5px; color:#f8fafc; font-size:14px; }
+.st-rvp__section-note{ margin:0 0 11px; color:#91a7c2; font-size:11px; line-height:1.45; }
+
+.st-rvp__manual-grid{ align-items:flex-start; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.st-rvp__field{ display:block; padding:12px; border:1px solid rgba(148,163,184,.18); border-radius:13px; background:rgba(15,23,42,.58); }
+.st-rvp__field > span{ display:block; margin-bottom:7px; color:#bcd0e8; font-size:11px; font-weight:800; }
+.st-rvp__field input{
+  width:100%;
+  height:38px;
+  box-sizing:border-box;
+  padding:0 10px;
+  border:1px solid rgba(96,165,250,.38);
+  border-radius:9px;
+  color:#fff;
+  background:#07111f;
+  font:800 14px/1 Inter,Manrope,Arial,sans-serif;
+}
+.st-rvp__step-row{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; margin-top:7px; }
+.st-rvp__step{ min-height:29px; padding:4px 2px; border-radius:7px; font-size:10px; font-weight:800; }
+.st-rvp__manual-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+
+.st-rvp__matrix{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.st-rvp__matrix-row{
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  padding:8px;
+  border:1px solid rgba(148,163,184,.17);
+  border-radius:11px;
+  background:rgba(15,23,42,.56);
+}
+.st-rvp__matrix-row.is-current{ border-color:#38bdf8; background:rgba(14,116,144,.20); }
+.st-rvp__matrix-main{ min-width:0; gap:8px; }
+.st-rvp__matrix-main input{ width:15px; height:15px; accent-color:#38bdf8; }
+.st-rvp__matrix-copy{ min-width:0; }
+.st-rvp__matrix-copy strong,
+.st-rvp__matrix-copy span{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.st-rvp__matrix-copy strong{ color:#eef7ff; font-size:11px; }
+.st-rvp__matrix-copy span{ margin-top:2px; color:#839ab6; font-size:9px; }
+.st-rvp__matrix-apply{ flex:0 0 auto; min-height:28px; padding:5px 8px; border-radius:8px; font-size:10px; font-weight:800; }
+.st-rvp__matrix-apply:hover{ color:#061827; border-color:#67e8f9; background:#67e8f9; }
+.st-rvp__tour-actions{ justify-content:space-between; gap:8px; margin-top:10px; }
+.st-rvp__tour-actions span{ color:#8ea5c0; font-size:10px; }
+
+.st-rvp__help{
+  position:fixed;
+  z-index:2147481700;
+  left:var(--st-rvp-help-left,220px);
+  top:var(--st-rvp-help-top,120px);
+  width:min(390px,calc(100vw - 28px));
+  padding:16px;
+  border:1px solid rgba(251,191,36,.62);
+  border-radius:16px;
+  color:#f8fafc;
+  background:linear-gradient(150deg,#172033,#0b1322);
+  box-shadow:0 24px 64px rgba(0,0,0,.50);
+}
+.st-rvp__help strong{ display:block; color:#fde68a; font-size:14px; }
+.st-rvp__help p{ margin:8px 0 0; color:#d4e2f2; font-size:12px; line-height:1.55; }
+.st-rvp__help ol{ margin:9px 0 0; padding-left:20px; color:#bcd0e8; font-size:11px; line-height:1.55; }
+
+/* The simulator owns only this builder class and these CSS variables. Removing
+   the class restores the exact pre-00958 canvas geometry. */
+#builder-root.st-rvp-enabled .builder__canvas,
+#builder-root.st-rvp-enabled .canvas__inner,
+#builder-root.st-rvp-enabled .canvas__scroll{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+#builder-root.st-rvp-enabled .canvas__scroll{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  background:repeating-linear-gradient(45deg,rgba(148,163,184,.035) 0 10px,rgba(2,6,23,.025) 10px 20px);
+}
+#builder-root.st-rvp-enabled.builder--mainview-canvas #canvasView{
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  padding:20px 24px 32px;
+  box-sizing:border-box;
+  overflow:hidden !important;
+}
+#builder-root.st-rvp-enabled #site-canvas.builder__canvas-site{
+  position:relative !important;
+  flex:0 1 auto !important;
+  /* 01010: keep the selected responsive target as the preferred width, but
+     never allow it to be wider than the currently available builder canvas.
+     Therefore inspector/sidebar resizing behaves exactly like a narrower
+     responsive viewport instead of producing horizontal builder overflow. */
+  width:min(var(--st-rvp-width),100%) !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  height:var(--st-rvp-height) !important;
+  min-height:var(--st-rvp-height) !important;
+  max-height:var(--st-rvp-height) !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+  overflow:auto !important;
+  container-name:st-site-viewport;
+  container-type:inline-size;
+  outline:1px solid rgba(56,189,248,.72);
+  box-shadow:0 22px 64px rgba(2,6,23,.32),0 0 0 7px rgba(56,189,248,.07);
+  scrollbar-gutter:stable;
+}
+#builder-root.st-rvp-enabled #site-root.site-root{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  min-height:100% !important;
+  overflow:visible !important;
+}
+
+.st-rvp__drag-handle{
+  position:absolute;
+  z-index:2147481200;
+  top:0;
+  right:0;
+  width:18px;
+  height:100%;
+  min-height:90px;
+  display:none;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:ew-resize;
+  touch-action:none;
+}
+#builder-root.st-rvp-enabled .st-rvp__drag-handle{ display:block; }
+.st-rvp__drag-handle::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:5px;
+  width:7px;
+  height:72px;
+  border:1px solid rgba(255,255,255,.68);
+  border-radius:999px;
+  background:linear-gradient(#38bdf8,#2563eb);
+  box-shadow:0 8px 22px rgba(2,6,23,.55);
+  transform:translateY(-50%);
+}
+.st-rvp__drag-handle:hover::before,
+.st-rvp__drag-handle.is-dragging::before{ width:9px; left:4px; background:linear-gradient(#fbbf24,#f59e0b); }
+body.st-rvp-is-dragging,
+body.st-rvp-is-dragging *{ cursor:ew-resize !important; user-select:none !important; }
+
+#builder-root.builder--sidebar-collapsed #st-responsive-viewport-widget{ margin-inline:4px; }
+#builder-root.builder--sidebar-collapsed .st-rvp{ padding:6px 4px; }
+#builder-root.builder--sidebar-collapsed .st-rvp__head{ justify-content:center; margin-bottom:5px; }
+#builder-root.builder--sidebar-collapsed .st-rvp__label,
+#builder-root.builder--sidebar-collapsed .st-rvp__readout,
+#builder-root.builder--sidebar-collapsed .st-rvp__favorite-select{ display:none; }
+#builder-root.builder--sidebar-collapsed .st-rvp__quick{ grid-template-columns:1fr; }
+#builder-root.builder--sidebar-collapsed .st-rvp__quick-btn:not(.is-active):not([data-rvp-mode="manual"]){ display:none; }
+
+@media (max-width:880px){
+  .st-rvp__panel{ padding:14px; }
+  .st-rvp__manual-grid,
+  .st-rvp__matrix{ grid-template-columns:1fr; }
+}
+
+/* Existing site-wide responsive contracts mirrored as container rules. Media
+   queries still serve published pages; these rules make the same behavior
+   visible when only the builder canvas is narrowed. */
+@container st-site-viewport (max-width:1200px){
+  .st-block--menu[data-menu-submenu-view="mega"][data-menu-mega-position="auto"] .st-menu--big > .st-menu__list > .st-menu__item > .st-menu__sublist.st-menu__mega{
+    left:auto;
+    right:calc(-1 * var(--st-menu-mega-offset-right,0px));
+  }
+}
+@container st-site-viewport (max-width:920px){
+  .site-root #st-site-header-slot .st-section[data-sec-role="header"][data-st-template-family="narrow-menu"] > .st-row:is([data-st-header-row-kind="top-menu"],[data-st-header-row-kind="main"]),
+  .site-root .st-section[data-sec-role="header"][data-st-template-family="narrow-menu"] > .st-row:is([data-st-header-row-kind="top-menu"],[data-st-header-row-kind="main"]){
+    grid-template-columns:minmax(0,1fr) !important;
+    justify-items:center !important;
+  }
+  .site-root #st-site-header-slot .st-section[data-sec-role="header"][data-st-template-family="narrow-menu"] :is([data-st-header-narrow-side],[data-st-header-narrow-center="top"]),
+  .site-root .st-section[data-sec-role="header"][data-st-template-family="narrow-menu"] :is([data-st-header-narrow-side],[data-st-header-narrow-center="top"]){
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+}
+@container st-site-viewport (max-width:900px){
+  .site-root .st-row{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .site-root .st-photo-gallery-section .st-photo-gallery-grid-row,
+  .site-root .st-section[data-gallery-section="photo-gallery"] .st-row[data-gallery-row="grid"]{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+  .site-root .st-photo-gallery-section .st-photo-gallery-left-menu-layout,
+  .site-root .st-section[data-gallery-section="photo-gallery"] .st-row[data-gallery-row="layout"]{
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+}
+@container st-site-viewport (max-width:767px){
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--png[data-png-mobile-mode="hide"]{ display:none !important; }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--png > .st-png__media{
+    width:var(--st-png-mobile-width,100%);
+    height:var(--st-png-mobile-height,100%);
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--png > .st-png__media > .st-png__img{
+    background-image:var(--st-png-mobile-image-url,var(--st-png-image-url,none));
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo{ column-gap:var(--st-logo-mobile-gap,var(--st-logo-gap,12px)); }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo > .st-logo__mark{
+    width:var(--st-logo-mobile-mark-w,var(--st-logo-mark-w,var(--st-logo-mark-size)));
+    height:var(--st-logo-mobile-mark-w,var(--st-logo-mark-h,var(--st-logo-mark-size)));
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo > .st-logo__iconbtn{
+    min-width:var(--st-logo-mobile-mark-w,var(--st-logo-mark-w,auto));
+    min-height:var(--st-logo-mobile-mark-w,var(--st-logo-mark-h,auto));
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo > .st-logo__title{ font-size:var(--st-logo-mobile-title-size,18px); }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo > .st-logo__subtitle{ font-size:var(--st-logo-mobile-subtitle-size,11px); }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo[data-logo-mobile-mode="hide-subtitle"] > .st-logo__subtitle,
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--logo[data-logo-mobile-mode="icon-only"] > :is(.st-logo__title,.st-logo__subtitle){ display:none !important; }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button[data-button-mobile-mode="hide"]{ display:none !important; }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button{
+    gap:var(--st-button-mobile-gap,8px);
+    width:var(--st-button-mobile-width,auto);
+    min-width:var(--st-button-mobile-width,auto);
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button > .st-button__label{ font-size:var(--st-button-mobile-label-size,14px); }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button > .st-button__iconbtn :is(.st-icon-btn__glyph,.st-button__iconsvg){
+    width:var(--st-button-mobile-icon-size,var(--st-icon-size,18px));
+    height:var(--st-button-mobile-icon-size,var(--st-icon-size,18px));
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button[data-button-mobile-mode="icon-only"] > .st-button__label{ display:none !important; }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button[data-button-mobile-label]:not([data-button-mobile-label=""]) > .st-button__label:not([hidden]){
+    font-size:0 !important;
+    line-height:1;
+  }
+  :is(#st-site-header-slot,#st-site-footer-slot) .st-block--button[data-button-mobile-label]:not([data-button-mobile-label=""]) > .st-button__label:not([hidden])::after{
+    content:attr(data-button-mobile-label);
+    font-size:var(--st-button-mobile-label-size,14px);
+    line-height:1.1;
+    color:inherit;
+  }
+}
+@container st-site-viewport (max-width:560px){
+  .site-root .st-row{ grid-template-columns:1fr; }
+  .site-root .st-photo-gallery-section .st-photo-gallery-grid-row,
+  .site-root .st-section[data-gallery-section="photo-gallery"] .st-row[data-gallery-row="grid"]{
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+}
+
+/* Container-query parity for School 01 while its site is tested inside the
+   builder viewport. Normal published-page @media rules remain in site-canvas. */
+@container st-site-viewport (max-width:1100px){
+  [data-hf-template-id="school-01-header"] [data-school01-priority="optional"]{ display:none !important; }
+  [data-hf-template-id="school-01-header"] :is(.school01-utility-row,.school01-identity-row,.school01-nav-row){ padding-left:18px !important; padding-right:18px !important; }
+  [data-hf-template-id="school-01-header"] .school01-menu__link{ padding-left:10px !important; padding-right:10px !important; font-size:13px !important; }
+}
+@container st-site-viewport (max-width:900px){
+  [data-hf-template-id="school-01-header"] .school01-nav-row{ display:none !important; }
+  [data-hf-template-id="school-01-header"] [data-school01-mobile-burger="1"]{ display:flex !important; }
+  [data-hf-template-id="school-01-header"] .school01-account-button > .st-button__label{ display:none !important; }
+  [data-hf-template-id="school-01-header"] .school01-account-button{ width:46px !important; min-width:46px !important; padding-left:13px !important; padding-right:13px !important; }
+}
+@container st-site-viewport (max-width:767px){
+  [data-hf-template-id="school-01-header"] .school01-utility-row{ grid-template-columns:minmax(0,1fr) max-content !important; gap:8px !important; min-height:44px !important; padding-left:12px !important; padding-right:12px !important; }
+  [data-hf-template-id="school-01-header"] .school01-utility-group{ gap:8px !important; }
+  [data-hf-template-id="school-01-header"] .school01-identity-row{ grid-template-columns:minmax(0,1fr) max-content !important; gap:8px !important; min-height:70px !important; padding:8px 12px !important; }
+  [data-hf-template-id="school-01-header"] .school01-header-actions{ gap:6px !important; }
+  [data-hf-template-id="school-01-header"] .school01-primary-cta{ padding-left:13px !important; padding-right:13px !important; }
+  [data-hf-template-id="school-01-header"] .school01-primary-cta > .st-button__label{ font-size:0 !important; }
+  [data-hf-template-id="school-01-header"] .school01-primary-cta > .st-button__label::after{ content:"Вступ"; font-size:13px; line-height:1.2; }
+}
+@container st-site-viewport (max-width:560px){
+  [data-hf-template-id="school-01-header"] :is(.school01-top-link--secondary,.school01-account-button){ display:none !important; }
+  [data-hf-template-id="school-01-header"] .school01-contact__text{ font-size:12px !important; }
+  [data-hf-template-id="school-01-header"] .school01-logo{ min-width:0 !important; }
+  [data-hf-template-id="school-01-header"] .school01-logo .st-logo__title{ font-size:17px !important; white-space:nowrap !important; }
+  [data-hf-template-id="school-01-header"] .school01-header-actions{ gap:4px !important; }
+  [data-hf-template-id="school-01-header"] :is(.school01-icon-action,.school01-icon-action__button){ width:42px !important; min-width:42px !important; height:42px !important; min-height:42px !important; }
+}
+@container st-site-viewport (max-width:420px){
+  [data-hf-template-id="school-01-header"] .school01-primary-cta{ display:none !important; }
+  [data-hf-template-id="school-01-header"] .school01-logo .st-logo__iconbtn{ width:42px !important; height:42px !important; min-width:42px !important; min-height:42px !important; padding:10px !important; }
+  [data-hf-template-id="school-01-header"] .school01-logo .st-logo__title{ font-size:15px !important; }
+}
+
+/* =========================================================
+   01014 · DESKTOP CANVAS FILL-AVAILABLE PARITY
+   In desktop mode the editor viewport follows every sidebar width change.
+   Smaller device/manual presets remain centered at their requested width.
+   ========================================================= */
+#builder-root.st-rvp-enabled.builder--mainview-canvas[data-st-rvp-fill-available="1"] #canvasView{
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+#builder-root.st-rvp-enabled[data-st-rvp-fill-available="1"] #site-canvas.builder__canvas-site{
+  width:100% !important;
+  max-width:100% !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}

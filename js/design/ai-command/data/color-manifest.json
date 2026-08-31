@@ -1,0 +1,340 @@
+[
+  {
+    "id": "white",
+    "label": "Білий",
+    "aliases": [
+      "білий",
+      "white",
+      "білими"
+    ],
+    "hex": "#ffffff",
+    "group": "neutral",
+    "tone": "light",
+    "canUseInGradient": true
+  },
+  {
+    "id": "black",
+    "label": "Чорний",
+    "aliases": [
+      "чорний",
+      "black",
+      "чорними",
+      "чорне",
+      "чорну",
+      "чорною"
+    ],
+    "hex": "#000000",
+    "group": "neutral",
+    "tone": "dark",
+    "canUseInGradient": true
+  },
+  {
+    "id": "gray",
+    "label": "Сірий",
+    "aliases": [
+      "сірий",
+      "gray",
+      "grey"
+    ],
+    "hex": "#6b7280",
+    "group": "neutral",
+    "tone": "mid",
+    "canUseInGradient": true
+  },
+  {
+    "id": "slate",
+    "label": "Графітовий",
+    "aliases": [
+      "графітовий",
+      "slate",
+      "сланцевий"
+    ],
+    "hex": "#334155",
+    "group": "neutral",
+    "tone": "dark",
+    "canUseInGradient": true
+  },
+  {
+    "id": "silver",
+    "label": "Срібний",
+    "aliases": [
+      "срібний",
+      "silver"
+    ],
+    "hex": "#c0c0c0",
+    "group": "neutral",
+    "tone": "light",
+    "canUseInGradient": true
+  },
+  {
+    "id": "red",
+    "label": "Червоний",
+    "aliases": [
+      "червоний",
+      "red"
+    ],
+    "hex": "#ef4444",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "dark_red",
+    "label": "Темно-червоний",
+    "aliases": [
+      "темно червоний",
+      "dark red",
+      "бордовий",
+      "burgundy"
+    ],
+    "hex": "#991b1b",
+    "group": "warm",
+    "tone": "dark",
+    "canUseInGradient": true
+  },
+  {
+    "id": "orange",
+    "label": "Помаранчевий",
+    "aliases": [
+      "помаранчевий",
+      "orange"
+    ],
+    "hex": "#f97316",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "amber",
+    "label": "Бурштиновий",
+    "aliases": [
+      "бурштиновий",
+      "amber"
+    ],
+    "hex": "#f59e0b",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "yellow",
+    "label": "Жовтий",
+    "aliases": [
+      "жовтий",
+      "yellow",
+      "золотий",
+      "gold"
+    ],
+    "hex": "#facc15",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "lime",
+    "label": "Лаймовий",
+    "aliases": [
+      "лаймовий",
+      "lime"
+    ],
+    "hex": "#84cc16",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "green",
+    "label": "Зелений",
+    "aliases": [
+      "зелений",
+      "green"
+    ],
+    "hex": "#22c55e",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "dark_green",
+    "label": "Темно-зелений",
+    "aliases": [
+      "темно зелений",
+      "dark green"
+    ],
+    "hex": "#166534",
+    "group": "cool",
+    "tone": "dark",
+    "canUseInGradient": true
+  },
+  {
+    "id": "emerald",
+    "label": "Смарагдовий",
+    "aliases": [
+      "смарагдовий",
+      "emerald"
+    ],
+    "hex": "#10b981",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "teal",
+    "label": "Бірюзовий",
+    "aliases": [
+      "бірюзовий",
+      "teal"
+    ],
+    "hex": "#14b8a6",
+    "group": "cool",
+    "tone": "mid",
+    "canUseInGradient": true
+  },
+  {
+    "id": "cyan",
+    "label": "Ціан",
+    "aliases": [
+      "ціан",
+      "cyan",
+      "світло блакитний"
+    ],
+    "hex": "#06b6d4",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "sky",
+    "label": "Небесний",
+    "aliases": [
+      "небесний",
+      "sky blue"
+    ],
+    "hex": "#0ea5e9",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "blue",
+    "label": "Синій",
+    "aliases": [
+      "синій",
+      "blue",
+      "синіми"
+    ],
+    "hex": "#2563eb",
+    "group": "cool",
+    "tone": "mid",
+    "canUseInGradient": true
+  },
+  {
+    "id": "dark_blue",
+    "label": "Темно-синій",
+    "aliases": [
+      "темно синій",
+      "dark blue",
+      "navy"
+    ],
+    "hex": "#1e3a8a",
+    "group": "cool",
+    "tone": "dark",
+    "canUseInGradient": true
+  },
+  {
+    "id": "indigo",
+    "label": "Індиго",
+    "aliases": [
+      "індиго",
+      "indigo"
+    ],
+    "hex": "#4f46e5",
+    "group": "cool",
+    "tone": "mid",
+    "canUseInGradient": true
+  },
+  {
+    "id": "violet",
+    "label": "Фіолетовий",
+    "aliases": [
+      "фіолетовий",
+      "violet"
+    ],
+    "hex": "#8b5cf6",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "purple",
+    "label": "Пурпурний",
+    "aliases": [
+      "пурпурний",
+      "purple"
+    ],
+    "hex": "#a855f7",
+    "group": "cool",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "pink",
+    "label": "Рожевий",
+    "aliases": [
+      "рожевий",
+      "pink"
+    ],
+    "hex": "#ec4899",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "rose",
+    "label": "Трояндовий",
+    "aliases": [
+      "трояндовий",
+      "rose"
+    ],
+    "hex": "#f43f5e",
+    "group": "warm",
+    "tone": "bright",
+    "canUseInGradient": true
+  },
+  {
+    "id": "brown",
+    "label": "Коричневий",
+    "aliases": [
+      "коричневий",
+      "brown"
+    ],
+    "hex": "#8b5e3c",
+    "group": "warm",
+    "tone": "mid",
+    "canUseInGradient": true
+  },
+  {
+    "id": "beige",
+    "label": "Бежевий",
+    "aliases": [
+      "бежевий",
+      "beige"
+    ],
+    "hex": "#d6bfa7",
+    "group": "warm",
+    "tone": "light",
+    "canUseInGradient": true
+  },
+  {
+    "id": "transparent",
+    "label": "Прозорий",
+    "aliases": [
+      "прозорий",
+      "transparent"
+    ],
+    "hex": "transparent",
+    "group": "special",
+    "tone": "none",
+    "canUseInGradient": true
+  }
+]

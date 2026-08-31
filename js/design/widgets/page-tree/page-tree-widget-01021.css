@@ -1,0 +1,398 @@
+/* js/design/widgets/page-tree/page-tree-widget.css */
+/* Локальні стилі для віджета "Дерево сторінки" в панелі "Дизайн" */
+
+.design-section--page-tree .design-section__body {
+  padding-top: 8px;
+}
+
+.design-help-text {
+  font-size: 11px;
+  color: #9caad8;
+  margin: 0;
+}
+
+.design-page-tree__controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 6px;
+}
+
+.design-page-tree__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 255, 0.55);
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 11px;
+  line-height: 1.3;
+  color: #e5edff;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.08s ease;
+}
+
+.design-page-tree__toggle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+.design-page-tree__toggle:hover {
+  background: rgba(30, 64, 175, 0.9);
+  border-color: rgba(129, 140, 248, 0.9);
+  transform: translateY(-0.5px);
+}
+
+#page-tree-wrap {
+  margin-top: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 4px 6px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(30, 64, 175, 0.7);
+}
+
+/* Базова типографіка дерева */
+#page-tree-root {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Вузли дерева (контейнери для рядків/блоків) — самі класи навішує JS */
+#page-tree-root .page-tree-row,
+#page-tree-root .page-tree-block {
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Відступи між рівнями дерева */
+#page-tree-root ul {
+  list-style: none;
+  margin: 4px 0 0 10px;
+  padding: 0;
+}
+
+/* Активні елементи дерева (виділені секції / блоки) */
+#page-tree-root .page-tree-row--active,
+#page-tree-root .page-tree-block--active,
+#page-tree-root .page-tree-special--active {
+  background: rgba(56, 189, 248, 0.18); /* світла бірюзова підсвітка */
+  border: 1px solid rgba(56, 189, 248, 0.9);
+  color: #e5edff;
+  font-weight: 600;
+}
+
+/* Щоб при наведенні активний елемент не "губився" */
+#page-tree-root .page-tree-row--active:hover,
+#page-tree-root .page-tree-block--active:hover,
+#page-tree-root .page-tree-special--active:hover {
+  background: rgba(56, 189, 248, 0.32);
+}
+
+
+/* --- Layout: stretch tree list to bottom of inspector --- */
+.design-section--page-tree .design-section__body{
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Scroll only inside the tree list area */
+.design-section--page-tree #page-tree-wrap{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  max-height: none;
+  height: auto;
+}
+
+/* Resizable tree: body has fixed height, inner list scrolls */
+.design-section--page-tree .design-section__body{
+  height: 260px;
+  overflow: hidden;
+}
+
+.design-section--page-tree .design-section__body[hidden]{
+  height: 0 !important;
+}
+
+.design-section--page-tree .design-section__resizer{
+  height: 10px;
+  cursor: ns-resize;
+  margin-top: 6px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.design-section--page-tree .design-section__resizer::before{
+  content: "";
+  position: absolute;
+  left: 40%;
+  right: 40%;
+  top: 3px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(56,189,248,0.35);
+}
+
+.design-section--page-tree .design-section__body[hidden] + .design-section__resizer{
+  display: none;
+}
+
+body.is-resizing-tree{
+  cursor: ns-resize;
+  user-select: none;
+}
+/* 00281: Tree is always visible; help moved into delayed header popover. */
+.design-section--page-tree .design-section__header{
+  position: relative;
+}
+.design-section--page-tree .design-section__header-subtitle{
+  color: rgba(186,230,253,.88);
+  font-size: 11px;
+}
+.design-section--page-tree .design-field:first-child{
+  margin-top: 0;
+}
+.design-section--page-tree .design-page-tree__controls,
+.design-section--page-tree .design-help-text{
+  display: none !important;
+}
+.design-page-tree__help-popover{
+  position: absolute;
+  z-index: 40;
+  left: 8px;
+  right: 8px;
+  top: calc(100% + 8px);
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  pointer-events: none;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(125,211,252,.72);
+  background: linear-gradient(180deg, rgba(8,15,30,.98), rgba(15,23,42,.98));
+  box-shadow: 0 18px 48px rgba(0,0,0,.45), 0 0 0 1px rgba(56,189,248,.14) inset;
+  color: #f8fbff;
+  text-align: left;
+  transition: opacity .18s ease 3s, visibility .18s ease 3s, transform .18s ease 3s;
+}
+.design-section--page-tree .design-section__header:hover .design-page-tree__help-popover,
+.design-section--page-tree .design-section__header:focus-visible .design-page-tree__help-popover{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.design-page-tree__help-title{
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 900;
+  color: #e0f2fe;
+}
+.design-page-tree__help-text{
+  font-size: 13px;
+  line-height: 1.55;
+  color: #f8fbff;
+  font-weight: 600;
+}
+#page-tree-root .page-tree-row,
+#page-tree-root .page-tree-block{
+  border: 1px solid transparent;
+}
+#page-tree-root .page-tree-node--container.page-tree-special--active,
+#page-tree-root .page-tree-node--container.page-tree-block--active{
+  background: rgba(34,197,94,.18);
+  border-color: rgba(34,197,94,.90);
+  color: #dcfce7;
+}
+#page-tree-root .page-tree-node--block.page-tree-special--active,
+#page-tree-root .page-tree-node--block.page-tree-block--active,
+#page-tree-root .page-tree-node--menuitem.page-tree-special--active,
+#page-tree-root .page-tree-node--menuitem.page-tree-block--active{
+  background: rgba(56,189,248,.18);
+  border-color: rgba(56,189,248,.90);
+  color: #e0f2fe;
+}
+#page-tree-root .page-tree-node--icon.page-tree-special--active,
+#page-tree-root .page-tree-node--icon.page-tree-block--active{
+  background: rgba(125,211,252,.18);
+  border-color: rgba(125,211,252,.95);
+  color: #ecfeff;
+}
+#page-tree-root .page-tree-node--text.page-tree-special--active,
+#page-tree-root .page-tree-node--text.page-tree-block--active{
+  background: rgba(250,204,21,.14);
+  border: 1px dashed rgba(250,204,21,.95);
+  color: #fef9c3;
+}
+
+/* 00282: moved "Структура сайту" from header into delayed help popover. */
+.design-page-tree__help-kicker{
+  margin-bottom: 4px;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 950;
+  letter-spacing: .01em;
+  color: #ffffff;
+}
+#page-tree-root .page-tree-node--heading.page-tree-special--active,
+#page-tree-root .page-tree-node--heading.page-tree-block--active{
+  background: rgba(249,115,22,.15);
+  border: 1px dashed rgba(249,115,22,.95);
+  color: #ffedd5;
+}
+
+/* 00283: separate tree color for a real icon inside an icon-block/logo/button. */
+#page-tree-root .page-tree-node--icon-inner.page-tree-special--active,
+#page-tree-root .page-tree-node--icon-inner.page-tree-block--active{
+  background: rgba(30,64,175,.18);
+  border-color: rgba(30,64,175,.82);
+  color: #dbeafe;
+}
+#page-tree-root .page-tree-node--icon-block.page-tree-special--active,
+#page-tree-root .page-tree-node--icon-block.page-tree-block--active{
+  background: rgba(56,189,248,.14);
+  border-color: rgba(56,189,248,.62);
+}
+
+/* =========================================================
+   01020 TREE SELECTION / DESIGN-MODE / SCROLL PARITY
+   ========================================================= */
+.design-section--page-tree #page-tree-wrap{
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56,189,248,.72) rgba(8,15,30,.28);
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar{
+  width: 6px;
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-track{
+  background: rgba(8,15,30,.26);
+  border-radius: 999px;
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-thumb{
+  background: rgba(56,189,248,.66);
+  border-radius: 999px;
+  border: 1px solid rgba(8,15,30,.35);
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-thumb:hover{
+  background: rgba(125,211,252,.86);
+}
+
+/* Bulk highlights from the top Design selector. Exact single selection keeps priority. */
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="sections"]{
+  background: rgba(59,130,246,.15);
+  border: 1px solid rgba(59,130,246,.92);
+  color: #dbeafe;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="levels"]{
+  background: rgba(234,179,8,.14);
+  border: 1px solid rgba(234,179,8,.92);
+  color: #fef9c3;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="containers"]{
+  background: rgba(34,197,94,.16);
+  border: 1px solid rgba(34,197,94,.92);
+  color: #dcfce7;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="blocks"]{
+  background: rgba(56,189,248,.15);
+  border: 1px solid rgba(56,189,248,.92);
+  color: #e0f2fe;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="headings"]{
+  background: rgba(249,115,22,.13);
+  border: 1px dashed rgba(249,115,22,.95);
+  color: #ffedd5;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="texts"]{
+  background: rgba(250,204,21,.12);
+  border: 1px dashed rgba(250,204,21,.95);
+  color: #fef9c3;
+}
+#page-tree-root .page-tree-mode-match-01020:not(.page-tree-special--active):not(.page-tree-block--active):not(.page-tree-row--active)[data-tree-mode-kind="icons"]{
+  background: rgba(30,64,175,.16);
+  border: 1px dashed rgba(30,64,175,.96);
+  color: #dbeafe;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.38) inset;
+}
+
+/* Exact Tree selection uses the exact same type palette as the top inspector. */
+#page-tree-root [data-tree-mode-kind="sections"].page-tree-special--active,
+#page-tree-root [data-tree-mode-kind="sections"].page-tree-row--active{
+  background: rgba(59,130,246,.18);
+  border-color: rgba(59,130,246,.98);
+  color: #dbeafe;
+}
+#page-tree-root [data-tree-mode-kind="levels"].page-tree-special--active,
+#page-tree-root [data-tree-mode-kind="levels"].page-tree-row--active{
+  background: rgba(234,179,8,.18);
+  border-color: rgba(234,179,8,.98);
+  color: #fef9c3;
+}
+#page-tree-root [data-tree-mode-kind="containers"].page-tree-special--active,
+#page-tree-root [data-tree-mode-kind="containers"].page-tree-block--active{
+  background: rgba(34,197,94,.18);
+  border-color: rgba(34,197,94,.98);
+  color: #dcfce7;
+}
+#page-tree-root [data-tree-mode-kind="blocks"].page-tree-special--active,
+#page-tree-root [data-tree-mode-kind="blocks"].page-tree-block--active{
+  background: rgba(56,189,248,.18);
+  border-color: rgba(56,189,248,.98);
+  color: #e0f2fe;
+}
+
+/* =========================================================
+   01021 FULL MAIN TREE + REAL INNER SCROLLER + FOCUS GATE
+   ========================================================= */
+.design-section--page-tree .design-section__body{
+  min-height:160px !important;
+  overflow:hidden !important;
+}
+.design-section--page-tree #page-tree-wrap{
+  display:block !important;
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:100% !important;
+  max-height:100% !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-y:contain;
+  scrollbar-gutter:stable;
+}
+.design-section--page-tree #page-tree-root{
+  min-height:max-content;
+  padding-right:2px;
+}
+.design-section--page-tree.is-tree-focus-active-01021 #page-tree-wrap{
+  border-color:rgba(56,189,248,.82);
+}
+
+/* Chromium / Edge: very thin scrollbar matching the existing inspector palette. */
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar{ width:5px; }
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-track{
+  background:rgba(8,15,30,.18);
+  border-radius:999px;
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-thumb{
+  background:rgba(56,189,248,.68);
+  border-radius:999px;
+  border:0;
+}
+.design-section--page-tree #page-tree-wrap::-webkit-scrollbar-thumb:hover{
+  background:rgba(125,211,252,.88);
+}

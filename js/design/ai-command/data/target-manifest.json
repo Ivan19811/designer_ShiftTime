@@ -1,0 +1,965 @@
+[
+  {
+    "id": "site_canvas",
+    "label": "Полотно сайту",
+    "group": "global",
+    "aliases": [
+      "сайт",
+      "сторінка",
+      "фон сторінки",
+      "canvas",
+      "полотно"
+    ],
+    "description": "Кореневе полотно сторінки або сайту",
+    "kind": "element",
+    "parentTargets": [],
+    "childTargets": [
+      "site_header",
+      "site_footer",
+      "section"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "site_header",
+    "label": "Шапка",
+    "group": "global",
+    "aliases": [
+      "header",
+      "шапка",
+      "верх сайта"
+    ],
+    "description": "Коренева шапка сайту",
+    "kind": "element",
+    "parentTargets": [
+      "site_canvas"
+    ],
+    "childTargets": [
+      "section",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "heading_block",
+      "text_inline",
+      "icon_inline",
+      "image_block"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "site_footer",
+    "label": "Футер",
+    "group": "global",
+    "aliases": [
+      "footer",
+      "футер",
+      "підвал"
+    ],
+    "description": "Кореневий футер сайту",
+    "kind": "element",
+    "parentTargets": [
+      "site_canvas"
+    ],
+    "childTargets": [
+      "section",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "heading_block",
+      "text_inline",
+      "icon_inline",
+      "image_block"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "section",
+    "label": "Секція",
+    "group": "structure",
+    "aliases": [
+      "секція",
+      "розділ",
+      "section"
+    ],
+    "description": "Секція у canvas, header або footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_canvas",
+      "site_header",
+      "site_footer"
+    ],
+    "childTargets": [
+      "row",
+      "container",
+      "block_host"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "row",
+    "label": "Ряд",
+    "group": "structure",
+    "aliases": [
+      "row",
+      "ряд",
+      "рівень",
+      "line row"
+    ],
+    "description": "Рівень або ряд усередині секції",
+    "kind": "element",
+    "parentTargets": [
+      "section",
+      "container",
+      "block_host"
+    ],
+    "childTargets": [
+      "container",
+      "block_host"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "container",
+    "label": "Контейнер",
+    "group": "structure",
+    "aliases": [
+      "контейнер",
+      "блок",
+      "обгортка",
+      "wrapper",
+      "container"
+    ],
+    "description": "Контейнер або універсальний блок для інших елементів",
+    "kind": "element",
+    "parentTargets": [
+      "row",
+      "section",
+      "site_header",
+      "site_footer"
+    ],
+    "childTargets": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "button_block",
+      "logo_block",
+      "phone_block",
+      "menu_block",
+      "text_inline",
+      "icon_inline",
+      "block_host"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "block_host",
+    "label": "Універсальний блок",
+    "group": "structure",
+    "aliases": [
+      "універсальний блок",
+      "block host",
+      "block",
+      "елемент блока"
+    ],
+    "description": "Універсальний носій з внутрішнім row або children",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "row",
+      "section"
+    ],
+    "childTargets": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "button_block",
+      "logo_block",
+      "phone_block",
+      "menu_block",
+      "text_inline",
+      "icon_inline"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "text_block",
+    "label": "Текстовий блок",
+    "group": "content",
+    "aliases": [
+      "текст",
+      "текстовий блок",
+      "напис",
+      "text block"
+    ],
+    "description": "Простий текстовий блок на canvas",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section"
+    ],
+    "childTargets": [
+      "text_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "heading_block",
+    "label": "Заголовок",
+    "group": "content",
+    "aliases": [
+      "заголовок",
+      "title",
+      "heading",
+      "h1",
+      "h2",
+      "h3",
+      "заголовки",
+      "headings"
+    ],
+    "description": "Текстовий заголовок",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section",
+      "site_header",
+      "site_footer"
+    ],
+    "childTargets": [
+      "text_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "article_block",
+    "label": "Стаття",
+    "group": "content",
+    "aliases": [
+      "article",
+      "стаття",
+      "редактор",
+      "абзацний блок"
+    ],
+    "description": "Rich text або article-блок",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section"
+    ],
+    "childTargets": [
+      "text_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "icon_block",
+    "label": "Іконка",
+    "group": "content",
+    "aliases": [
+      "icon",
+      "іконка",
+      "значок",
+      "glyph"
+    ],
+    "description": "Іконковий блок на canvas",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section",
+      "site_header",
+      "site_footer"
+    ],
+    "childTargets": [
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "line_block",
+    "label": "Лінія",
+    "group": "content",
+    "aliases": [
+      "line",
+      "divider",
+      "лінія",
+      "розділювач"
+    ],
+    "description": "Лінія або divider",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section"
+    ],
+    "childTargets": [
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "image_block",
+    "label": "Зображення",
+    "group": "content",
+    "aliases": [
+      "image",
+      "png",
+      "картинка",
+      "зображення",
+      "фото"
+    ],
+    "description": "PNG/image блок або медіа-елемент",
+    "kind": "element",
+    "parentTargets": [
+      "container",
+      "block_host",
+      "section",
+      "site_header",
+      "site_footer"
+    ],
+    "childTargets": [
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "logo_block",
+    "label": "Логотип",
+    "group": "header_footer_content",
+    "aliases": [
+      "logo",
+      "логотип",
+      "лого"
+    ],
+    "description": "Logo-блок у header/footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section"
+    ],
+    "childTargets": [
+      "text_layer",
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "button_block",
+    "label": "Кнопка",
+    "group": "header_footer_content",
+    "aliases": [
+      "кнопка",
+      "button",
+      "cta",
+      "кнопка дії",
+      "кнопки"
+    ],
+    "description": "Кнопка в header/footer або контенті",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section",
+      "block_host"
+    ],
+    "childTargets": [
+      "text_layer",
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer",
+      "hover_state",
+      "mobile_variant"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "phone_block",
+    "label": "Телефон",
+    "group": "header_footer_content",
+    "aliases": [
+      "телефон",
+      "phone",
+      "номер",
+      "контактний номер"
+    ],
+    "description": "Телефонний блок у header/footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section"
+    ],
+    "childTargets": [
+      "text_layer",
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer",
+      "hover_state",
+      "mobile_variant"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "menu_block",
+    "label": "Меню",
+    "group": "header_footer_content",
+    "aliases": [
+      "меню",
+      "navigation",
+      "nav",
+      "menu"
+    ],
+    "description": "Блок навігації у header/footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section"
+    ],
+    "childTargets": [
+      "menu_root",
+      "menu_item",
+      "submenu",
+      "mega_panel",
+      "text_layer",
+      "icon_layer",
+      "background_layer",
+      "hover_state",
+      "mobile_variant"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "text_inline",
+    "label": "Текстовий елемент",
+    "group": "header_footer_content",
+    "aliases": [
+      "текст",
+      "підпис",
+      "inline text",
+      "простий текст"
+    ],
+    "description": "Простий текстовий елемент у header/footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section"
+    ],
+    "childTargets": [
+      "text_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "icon_inline",
+    "label": "Іконковий елемент",
+    "group": "header_footer_content",
+    "aliases": [
+      "іконка",
+      "icon",
+      "inline icon",
+      "значок"
+    ],
+    "description": "Простий іконковий елемент у header/footer",
+    "kind": "element",
+    "parentTargets": [
+      "site_header",
+      "site_footer",
+      "container",
+      "section"
+    ],
+    "childTargets": [
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "menu_root",
+    "label": "Корінь меню",
+    "group": "menu",
+    "aliases": [
+      "усе меню",
+      "корінь меню",
+      "menu root"
+    ],
+    "description": "Весь корінь меню як об'єкт структури і стилів",
+    "kind": "layer",
+    "parentTargets": [
+      "menu_block"
+    ],
+    "childTargets": [
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "menu_item",
+    "label": "Пункт меню",
+    "group": "menu",
+    "aliases": [
+      "пункт меню",
+      "menu item",
+      "item",
+      "елемент меню"
+    ],
+    "description": "Окремий пункт меню",
+    "kind": "element",
+    "parentTargets": [
+      "menu_root",
+      "submenu",
+      "mega_panel"
+    ],
+    "childTargets": [
+      "text_layer",
+      "icon_layer",
+      "background_layer",
+      "border_layer",
+      "shadow_layer",
+      "hover_state"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "submenu",
+    "label": "Підменю",
+    "group": "menu",
+    "aliases": [
+      "підменю",
+      "submenu",
+      "dropdown"
+    ],
+    "description": "Dropdown submenu branch",
+    "kind": "element",
+    "parentTargets": [
+      "menu_item",
+      "menu_root"
+    ],
+    "childTargets": [
+      "menu_item",
+      "background_layer",
+      "border_layer",
+      "shadow_layer",
+      "hover_state"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "mega_panel",
+    "label": "Mega panel",
+    "group": "menu",
+    "aliases": [
+      "mega panel",
+      "mega menu",
+      "мегаменю",
+      "mega"
+    ],
+    "description": "Панель mega menu",
+    "kind": "element",
+    "parentTargets": [
+      "submenu",
+      "menu_item",
+      "menu_root"
+    ],
+    "childTargets": [
+      "mega_column",
+      "mega_title",
+      "mega_link",
+      "background_layer",
+      "border_layer",
+      "shadow_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "mega_column",
+    "label": "Колонка mega menu",
+    "group": "menu",
+    "aliases": [
+      "колонка мегаменю",
+      "mega column",
+      "колонка mega"
+    ],
+    "description": "Окрема колонка всередині mega panel",
+    "kind": "element",
+    "parentTargets": [
+      "mega_panel"
+    ],
+    "childTargets": [
+      "mega_title",
+      "mega_link"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "mega_title",
+    "label": "Заголовок mega menu",
+    "group": "menu",
+    "aliases": [
+      "заголовок мегаменю",
+      "mega title",
+      "title column"
+    ],
+    "description": "Заголовок колонки mega menu",
+    "kind": "element",
+    "parentTargets": [
+      "mega_column",
+      "mega_panel"
+    ],
+    "childTargets": [
+      "text_layer",
+      "border_layer"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "mega_link",
+    "label": "Посилання mega menu",
+    "group": "menu",
+    "aliases": [
+      "посилання мегаменю",
+      "mega link",
+      "лінк мегаменю"
+    ],
+    "description": "Посилання або item усередині mega menu",
+    "kind": "element",
+    "parentTargets": [
+      "mega_column",
+      "mega_panel"
+    ],
+    "childTargets": [
+      "text_layer",
+      "icon_layer",
+      "hover_state"
+    ],
+    "defaultScope": "selected_element",
+    "isSelectable": true,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "background_layer",
+    "label": "Фон",
+    "group": "layers",
+    "aliases": [
+      "фон",
+      "background",
+      "заливка"
+    ],
+    "description": "Фонова частина елемента",
+    "kind": "layer",
+    "parentTargets": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "childTargets": [],
+    "defaultScope": "child_layer:background_layer",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "text_layer",
+    "label": "Текст",
+    "group": "layers",
+    "aliases": [
+      "текст",
+      "label",
+      "title text",
+      "text layer"
+    ],
+    "description": "Текстова частина елемента",
+    "kind": "layer",
+    "parentTargets": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "childTargets": [],
+    "defaultScope": "child_layer:text_layer",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": true
+  },
+  {
+    "id": "icon_layer",
+    "label": "Іконка",
+    "group": "layers",
+    "aliases": [
+      "іконка",
+      "icon",
+      "glyph",
+      "icon layer"
+    ],
+    "description": "Іконкова частина елемента",
+    "kind": "layer",
+    "parentTargets": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline",
+      "menu_item",
+      "mega_link"
+    ],
+    "childTargets": [],
+    "defaultScope": "child_layer:icon_layer",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "border_layer",
+    "label": "Рамка",
+    "group": "layers",
+    "aliases": [
+      "рамка",
+      "контур",
+      "border"
+    ],
+    "description": "Рамка або border частина елемента",
+    "kind": "layer",
+    "parentTargets": [
+      "section",
+      "row",
+      "container",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "childTargets": [],
+    "defaultScope": "child_layer:border_layer",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "shadow_layer",
+    "label": "Тінь",
+    "group": "layers",
+    "aliases": [
+      "тінь",
+      "shadow",
+      "glow"
+    ],
+    "description": "Тінь або glow частина елемента",
+    "kind": "layer",
+    "parentTargets": [
+      "section",
+      "row",
+      "container",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "childTargets": [],
+    "defaultScope": "child_layer:shadow_layer",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "hover_state",
+    "label": "Hover-стан",
+    "group": "states",
+    "aliases": [
+      "hover",
+      "наведення",
+      "hover state"
+    ],
+    "description": "Hover-стан елемента",
+    "kind": "state",
+    "parentTargets": [
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "mega_link",
+      "icon_block",
+      "image_block"
+    ],
+    "childTargets": [],
+    "defaultScope": "state:hover",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  },
+  {
+    "id": "mobile_variant",
+    "label": "Mobile-варіант",
+    "group": "states",
+    "aliases": [
+      "mobile",
+      "мобільна версія",
+      "mobile variant"
+    ],
+    "description": "Мобільний варіант елемента",
+    "kind": "state",
+    "parentTargets": [
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "image_block"
+    ],
+    "childTargets": [],
+    "defaultScope": "responsive:mobile",
+    "isSelectable": false,
+    "isStyleable": true,
+    "isContentEditable": false
+  }
+]

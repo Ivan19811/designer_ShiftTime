@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Command Test Widget Demo</title>
+  <style>
+    html,body{margin:0;padding:0;background:#020617;color:#e2e8f0;font:14px/1.4 Inter,system-ui,sans-serif}
+    .page{max-width:1400px;margin:0 auto;padding:24px}
+    .title{font-size:24px;font-weight:800;margin-bottom:6px}
+    .sub{opacity:.75;margin-bottom:18px}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="title">AI Command Test Widget Demo</div>
+    <div class="sub">Parser-only test surface: manual parse + expected cases runner.</div>
+    <div id="app"></div>
+  </div>
+  <script type="module">
+    import { initAiCommandTestWidget } from '../index.js';
+    initAiCommandTestWidget('#app', { logToConsole: false, debugOptions: { initialText: 'зафарбуй текст кнопки зеленим' } });
+  </script>
+</body>
+</html>

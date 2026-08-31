@@ -1,0 +1,72 @@
+{
+  "generated_from_zip": "menu-stage8a22m-ai-templates-widget-v1-7-gradient-positional-language.zip",
+  "created_on": "2026-04-21",
+  "counts": {
+    "targets": 33,
+    "actions": 90,
+    "properties": 99,
+    "value_types": 20,
+    "scope_rules": 12,
+    "clarify_rules": 12,
+    "colors": 27,
+    "gradient_rules": 12,
+    "object_capabilities": 33
+  },
+  "status": "foundation_only_no_runtime_wiring",
+  "language_layer": {
+    "status": "starter_pack_added",
+    "files": [
+      "term-synonyms.json",
+      "phrase-normalization.json",
+      "term-wordforms.json",
+      "common-typos.json",
+      "noise-words.json"
+    ],
+    "counts": {
+      "action_synonyms": 17,
+      "target_synonyms": 18,
+      "property_synonyms": 23,
+      "color_values": 7,
+      "direction_values": 5,
+      "position_values": 5,
+      "scope_values": 9,
+      "state_values": 4,
+      "responsive_values": 3,
+      "phrase_rules": 20,
+      "wordform_groups": 15,
+      "common_typos": 18,
+      "noise_words": 24
+    }
+  },
+  "parser_tests": {
+    "status": "starter_pack_added",
+    "files": [
+      "parser-test-commands.json",
+      "parser-expected-results.json",
+      "manual-test-checklist.md"
+    ],
+    "counts": {
+      "command_groups": 12,
+      "total_commands": 100,
+      "expected_cases": 17
+    }
+  },
+  "modules": {
+    "tests": [
+      "parser-test-commands.json",
+      "parser-expected-results.json",
+      "manual-test-checklist.md",
+      "parser-test-runner.js",
+      "ai-command-test-demo.html"
+    ],
+    "ui": [
+      "ai-command-debug-panel.js",
+      "ai-command-test-widget.js"
+    ]
+  },
+  "entryPoints": {
+    "rootTestPage": "ai-command-test.html",
+    "widgetTestPage": "widgets/ai-command-test/index.html",
+    "rawDemoPage": "js/design/ai-command/tests/ai-command-test-demo.html"
+  }
+}

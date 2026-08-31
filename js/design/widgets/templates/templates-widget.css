@@ -1,0 +1,165 @@
+/* =========================================================
+   ГАЛЕРЕЯ ШАБЛОНІВ — ВИДІЛЕННЯ ВИБРАНОЇ КАРТОЧКИ
+   (щоб було одразу видно вибір)
+   ========================================================= */
+
+/* Якщо карточка зроблена button'ом — прибираємо дефолтні стилі кнопки */
+.sttpl-card {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Ховер — легке підсвічування */
+.sttpl-card:hover {
+  border-color: var(--sttpl-border, rgba(123,155,255,0.22));
+  background: rgba(255,255,255,0.03);
+  transform: translateY(-1px);
+}
+
+/* ✅ Активна (вибрана) карточка */
+.sttpl-card.is-selected {
+  border-color: rgba(123,155,255,0.65);
+  box-shadow:
+    0 0 0 2px rgba(123,155,255,0.18),
+    0 12px 28px rgba(0,0,0,0.35);
+  background: rgba(26,86,170,0.10);
+  transform: translateY(-1px);
+}
+
+/* Додатково: невеличкий “індикатор” зверху (акуратно) */
+.sttpl-card.is-selected .sttpl-card__preview {
+  outline: 1px solid rgba(123,155,255,0.35);
+  outline-offset: -1px;
+}
+
+/* Фокус клавіатурою */
+.sttpl-card:focus-visible {
+  outline: 2px solid rgba(123,155,255,0.45);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   Сайт → Конструктор "Шаблон Сайта" (MVP)
+   ========================================================= */
+
+.st-site-tpl-builder {
+  margin-top: 6px;
+}
+
+.st-site-tpl-builder__top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-site-tpl-builder__hint {
+  font-size: 12px;
+  opacity: 0.86;
+  line-height: 1.35;
+}
+
+.st-site-tpl-builder__panel {
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.st-site-tpl-builder__row {
+  display: grid;
+  grid-template-columns: 160px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.st-site-tpl-builder__label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.st-site-tpl-builder__input {
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.22);
+  color: inherit;
+  padding: 0 10px;
+}
+
+.st-site-tpl-builder__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-site-tpl-builder__item {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.16);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.st-site-tpl-builder__itemTitle {
+  font-weight: 800;
+  font-size: 12px;
+  opacity: 0.92;
+}
+
+.st-site-tpl-builder__itemVal {
+  font-size: 12px;
+  opacity: 0.88;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-site-tpl-builder__itemBtns {
+  display: flex;
+  gap: 8px;
+}
+
+/* [00467][TEMPLATE PREVIEW ISOLATION]
+   Runtime builder selections/resize handles must never float over template
+   previews. Preview HTML is clipped and isolated inside each card. */
+.sttpl-card__preview,
+.sttpl-card__preview-inner,
+.sttpl-card__preview-inner--html,
+.sttpl-templateThumb,
+.sttpl-templateThumb__frame{
+  position:relative;
+  overflow:hidden !important;
+  contain:layout paint;
+  isolation:isolate;
+}
+.sttpl-card__preview .st-resize,
+.sttpl-card__preview .hb-resize,
+.sttpl-card__preview .hb-handle,
+.sttpl-card__preview .st-insert-hint,
+.sttpl-card__preview .st-drop-hint{
+  display:none !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+.sttpl-card__preview .is-active,
+.sttpl-card__preview .is-selected,
+.sttpl-card__preview .hb-dom-active,
+.sttpl-card__preview .hb-dom-selected{
+  outline:none !important;
+  box-shadow:none !important;
+}
+.sttpl-card__preview .st-section,
+.sttpl-card__preview .st-row,
+.sttpl-card__preview .st-block{
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}

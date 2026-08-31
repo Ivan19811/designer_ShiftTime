@@ -1,0 +1,206 @@
+{
+  "meta": {
+    "version": 1,
+    "description": "Common typo map for forgiving AI command parsing"
+  },
+  "entries": [
+    {
+      "wrong": "злелену",
+      "correct": "зелену",
+      "normalizedTo": "green",
+      "confidence": 0.92
+    },
+    {
+      "wrong": "злеленуу",
+      "correct": "зелену",
+      "normalizedTo": "green",
+      "confidence": 0.88
+    },
+    {
+      "wrong": "злелений",
+      "correct": "зелений",
+      "normalizedTo": "green",
+      "confidence": 0.92
+    },
+    {
+      "wrong": "зеленй",
+      "correct": "зелений",
+      "normalizedTo": "green",
+      "confidence": 0.9
+    },
+    {
+      "wrong": "кнпка",
+      "correct": "кнопка",
+      "normalizedTo": "button_block",
+      "confidence": 0.94
+    },
+    {
+      "wrong": "кнпку",
+      "correct": "кнопку",
+      "normalizedTo": "button_block",
+      "confidence": 0.93
+    },
+    {
+      "wrong": "кнопкка",
+      "correct": "кнопка",
+      "normalizedTo": "button_block",
+      "confidence": 0.95
+    },
+    {
+      "wrong": "тектс",
+      "correct": "текст",
+      "normalizedTo": "text_block",
+      "confidence": 0.94
+    },
+    {
+      "wrong": "иконкa",
+      "correct": "іконка",
+      "normalizedTo": "icon_block",
+      "confidence": 0.8
+    },
+    {
+      "wrong": "градиент",
+      "correct": "градієнт",
+      "normalizedTo": "background_gradient",
+      "confidence": 0.94
+    },
+    {
+      "wrong": "градіет",
+      "correct": "градієнт",
+      "normalizedTo": "background_gradient",
+      "confidence": 0.9
+    },
+    {
+      "wrong": "вертекальний",
+      "correct": "вертикальний",
+      "normalizedTo": "vertical",
+      "confidence": 0.91
+    },
+    {
+      "wrong": "верткиальний",
+      "correct": "вертикальний",
+      "normalizedTo": "vertical",
+      "confidence": 0.84
+    },
+    {
+      "wrong": "горизонтальнй",
+      "correct": "горизонтальний",
+      "normalizedTo": "horizontal",
+      "confidence": 0.88
+    },
+    {
+      "wrong": "посеридині",
+      "correct": "посередині",
+      "normalizedTo": "center",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прозрість",
+      "correct": "прозорість",
+      "normalizedTo": "opacity",
+      "confidence": 0.89
+    },
+    {
+      "wrong": "скругленя",
+      "correct": "скруглення",
+      "normalizedTo": "radius",
+      "confidence": 0.89
+    },
+    {
+      "wrong": "тинь",
+      "correct": "тінь",
+      "normalizedTo": "shadow",
+      "confidence": 0.83
+    },
+    {
+      "wrong": "флипни",
+      "correct": "фліпни",
+      "normalizedTo": "flip",
+      "confidence": 0.88
+    },
+    {
+      "wrong": "крутан",
+      "correct": "крутань",
+      "normalizedTo": "set_rotation",
+      "confidence": 0.82
+    },
+    {
+      "wrong": "підвин",
+      "correct": "підвинь",
+      "normalizedTo": "move",
+      "confidence": 0.8
+    },
+    {
+      "wrong": "прзорість",
+      "correct": "прозорість",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзорості",
+      "correct": "прозорості",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзорістю",
+      "correct": "прозорістю",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзорий",
+      "correct": "прозорий",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзорим",
+      "correct": "прозорим",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзорою",
+      "correct": "прозорою",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзоре",
+      "correct": "прозоре",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прзоро",
+      "correct": "прозоро",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прозрості",
+      "correct": "прозорості",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прозорстість",
+      "correct": "прозорість",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прозоросі",
+      "correct": "прозорість",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    },
+    {
+      "wrong": "прозоростіі",
+      "correct": "прозорості",
+      "normalizedTo": "opacity",
+      "confidence": 0.86
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+/* js/design/widgets/fill/css/design-fill.css */
+/* Віджет "Заливка" для панелі "Дизайн" */
+
+.design-fill-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-fill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* -------- Custom size sliders (image background) -------- */
+/* У деяких темах повзунок виглядав як "радіо" через нульову ширину треку.
+   Тут примусово даємо ширину і контраст треку саме для Заливки. */
+[data-fill-customsize] .design-slider,
+[data-fill-custompos] .design-slider {
+  min-width: 140px;
+  height: 6px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.14);
+}
+
+[data-fill-customsize] .design-slider::-webkit-slider-thumb,
+[data-fill-custompos] .design-slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.design-fill-row .design-input {
+  flex: 1 1 auto;
+}
+
+.design-fill-label {
+  min-width: 82px;
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.design-fill-extra-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.design-fill-extra-label {
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.design-fill-apply-row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-target {
+  font-size: 11px;
+  color: #8b9ad8;
+}
+
+/* Кнопка "Застосувати" в стилі пігулки */
+.design-button {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #0b1220;
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.8), 0 8px 18px rgba(0,0,0,0.45);
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.design-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.55);
+}
+
+.design-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+
+/* Значення повзунка (як у віджеті 'Фон сторінки') */
+.design-range-val{
+  font-size:11px;
+  color:#c4d3ff;
+  min-width:44px;
+  text-align:right;
+}
+
+
+/* ============================================================
+   01001 · SINGLE-AUTHORITY REAL-TIME VISUAL LAYERS
+
+   Non-surface BGFX:
+     ::before = explicit Fill
+     ::after  = Filter
+
+   Block-surface BGFX:
+     ::before = authored/template Surface
+     ::after  = explicit Fill
+     direct .st-fill-filter-layer = Filter
+
+   Continuous authorities:
+     background opacity  -> --st-bgfx-bg-opacity
+     block transparency  -> --st-block-surface-alpha
+     block blur          -> --st-block-surface-blur
+     element opacity     -> --st-element-fx-opacity
+     element blur        -> --st-element-fx-blur
+     background grayscale-> --st-bgfx-gray
+     filter opacity      -> --st-bgfx-filter-opacity
+
+   No opacity is baked into filter rgba colors in 00999.
+   ============================================================ */
+
+.st-bgfx::before{
+  /* 01001: --st-bgfx-bg is the only visual source for explicit Fill.
+     Do not override a solid-color shorthand with legacy transparent bg-color. */
+  background-repeat:var(--st-bgfx-bg-repeat,no-repeat);
+}
+
+/* Plain BGFX + optional whole-element visual FX. */
+.st-element-visualfx.st-bgfx:not(.st-block-surfacefx)::before{
+  opacity:calc(var(--st-bgfx-bg-opacity,1) * var(--st-element-fx-opacity,1));
+  filter:grayscale(var(--st-bgfx-gray,0)) blur(var(--st-element-fx-blur,0px));
+}
+.st-element-visualfx.st-bgfx:not(.st-block-surfacefx)::after{
+  opacity:calc(var(--st-bgfx-filter-opacity,0) * var(--st-element-fx-opacity,1));
+  filter:blur(var(--st-element-fx-blur,0px));
+}
+
+/* True block surface. Surface opacity is completely independent from Fill opacity. */
+.st-block-surfacefx.st-bgfx::before{
+  background:var(--st-block-surface-bg,none)!important;
+  background-color:var(--st-block-surface-bg-color,transparent)!important;
+  background-position:var(--st-block-surface-bg-pos,0% 0%)!important;
+  background-size:var(--st-block-surface-bg-size,auto)!important;
+  background-repeat:var(--st-block-surface-bg-repeat,repeat)!important;
+  opacity:calc(var(--st-block-surface-alpha,1) * var(--st-element-fx-opacity,1))!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+  z-index:0!important;
+}
+
+/* Fill only. Filter no longer shares this pseudo-element. */
+.st-block-surfacefx.st-bgfx::after{
+  /* One truth for Fill source: color / gradient / image all live in --st-bgfx-bg. */
+  background:var(--st-bgfx-bg,none)!important;
+  background-position:var(--st-bgfx-bg-pos,center center)!important;
+  background-size:var(--st-bgfx-bg-size,cover)!important;
+  background-repeat:var(--st-bgfx-bg-repeat,no-repeat)!important;
+  opacity:calc(var(--st-bgfx-bg-opacity,1) * var(--st-element-fx-opacity,1))!important;
+  filter:grayscale(var(--st-bgfx-gray,0)) blur(var(--st-element-fx-blur,0px))!important;
+  z-index:0!important;
+}
+
+/* Third physical layer: Filter only. */
+.st-block-surfacefx.st-bgfx > .st-fill-filter-layer[data-st-fill-visual-layer="filter"]{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  margin:0!important;
+  padding:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+  background:var(--st-bgfx-filter,none)!important;
+  background-color:transparent!important;
+  background-position:center center!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+  opacity:calc(var(--st-bgfx-filter-opacity,0) * var(--st-element-fx-opacity,1))!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+  pointer-events:none!important;
+  z-index:1!important;
+}
+
+/* Keep actual content above all three visual layers. */
+.st-block-surfacefx.st-bgfx > :not(.st-fill-filter-layer):not(.st-resize):not(.st-resize-handle):not([data-resize-handle]):not(.hb-resizer):not(.fb-resizer):not([data-st-selection-overlay]){
+  z-index:2!important;
+}
+
+/* Element FX affects content, not the outer border. */
+.st-element-visualfx > :not(.st-fill-filter-layer):not(.st-resize):not(.st-resize-handle):not([data-resize-handle]):not(.hb-resizer):not(.fb-resizer):not([data-st-selection-overlay]){
+  opacity:var(--st-element-fx-opacity,1)!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+}
+
+/* Backdrop blur consumes one canonical variable. Inline !important is also
+   installed by JS when necessary to defeat authored template !important rules. */
+.st-block-surfacefx{
+  -webkit-backdrop-filter:blur(var(--st-block-surface-blur,0px))!important;
+  backdrop-filter:blur(var(--st-block-surface-blur,0px))!important;
+}
+
+.design-fill-element-fx-group,
+.design-fill-block-surface-fx-group{
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.design-fill-block-surface-fx-note{
+  margin-top:-2px;
+  padding:6px 8px;
+  border-radius:8px;
+  background:rgba(255,255,255,.035);
+  line-height:1.35;
+}

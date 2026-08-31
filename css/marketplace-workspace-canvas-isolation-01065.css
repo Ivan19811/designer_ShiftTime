@@ -1,0 +1,26 @@
+/* 01065 · Marketplace workspace / site canvas isolation
+   Workspace ownership is exclusive: Marketplace Studio occupies the central viewport;
+   the authored site canvas remains mounted in memory but outside layout/scroll/focus. */
+
+#builder-root.builder--mainview-marketplace #marketplaceStudioView {
+  display:block !important;
+  width:100%;
+  min-width:0;
+  min-height:100%;
+}
+
+#builder-root.builder--mainview-marketplace #canvasView,
+#builder-root.builder--mainview-marketplace #siteManagerView,
+#builder-root.builder--mainview-marketplace #pageManagerView {
+  display:none !important;
+}
+
+/* Defensive contract: Responsive Viewport owns canvas geometry only in canvas mode. */
+#builder-root.st-rvp-enabled:not(.builder--mainview-canvas) #canvasView {
+  display:none !important;
+}
+
+#builder-root.builder--mainview-marketplace .canvas__scroll--full {
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}

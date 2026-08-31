@@ -1,0 +1,148 @@
+/* js/design/widgets/fill/css/design-fill.css */
+/* Віджет "Заливка" для панелі "Дизайн" */
+
+.design-fill-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-fill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* -------- Custom size sliders (image background) -------- */
+/* У деяких темах повзунок виглядав як "радіо" через нульову ширину треку.
+   Тут примусово даємо ширину і контраст треку саме для Заливки. */
+[data-fill-customsize] .design-slider,
+[data-fill-custompos] .design-slider {
+  min-width: 140px;
+  height: 6px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.14);
+}
+
+[data-fill-customsize] .design-slider::-webkit-slider-thumb,
+[data-fill-custompos] .design-slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.design-fill-row .design-input {
+  flex: 1 1 auto;
+}
+
+.design-fill-label {
+  min-width: 82px;
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.design-fill-extra-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.design-fill-extra-label {
+  font-size: 11px;
+  color: #c4d3ff;
+}
+
+.design-fill-extra-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.design-fill-apply-row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-fill-target {
+  font-size: 11px;
+  color: #8b9ad8;
+}
+
+/* Кнопка "Застосувати" в стилі пігулки */
+.design-button {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #0b1220;
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.8), 0 8px 18px rgba(0,0,0,0.45);
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.design-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.55);
+}
+
+.design-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+
+/* Значення повзунка (як у віджеті 'Фон сторінки') */
+.design-range-val{
+  font-size:11px;
+  color:#c4d3ff;
+  min-width:44px;
+  text-align:right;
+}
+
+/* ============================================================
+   00994 · Element visual opacity + blur
+   - background opacity stays independent via --st-bgfx-bg-opacity
+   - element opacity affects background + content + shadow
+   - outer border remains untouched and visible at element opacity 0%
+   - blur 0..100% maps in JS to 0..20px (5% = 1px)
+   ============================================================ */
+.st-bgfx::before{
+  background-color:var(--st-bgfx-bg-color,transparent);
+  background-repeat:var(--st-bgfx-bg-repeat,no-repeat);
+}
+
+.st-element-visualfx.st-bgfx::before{
+  opacity:calc(var(--st-bgfx-bg-opacity,1) * var(--st-element-fx-opacity,1));
+  filter:grayscale(var(--st-bgfx-gray,0)) blur(var(--st-element-fx-blur,0px));
+}
+
+.st-element-visualfx.st-bgfx::after{
+  opacity:calc(var(--st-bgfx-filter-opacity,0) * var(--st-element-fx-opacity,1));
+  filter:blur(var(--st-element-fx-blur,0px));
+}
+
+.st-element-visualfx > :not(.st-resize):not(.st-resize-handle):not([data-resize-handle]):not(.hb-resizer):not(.fb-resizer):not([data-st-selection-overlay]){
+  opacity:var(--st-element-fx-opacity,1)!important;
+  filter:blur(var(--st-element-fx-blur,0px))!important;
+}
+
+.design-fill-element-fx-group{
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.07);
+}

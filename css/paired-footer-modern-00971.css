@@ -1,0 +1,163 @@
+/* 00971 · paired Footer authored responsive/interaction contract.
+   00971 keeps the paired composition and keeps legal/contact ownership inside the Contact card; no per-template patching.
+   Geometry remains authored in the canonical JSON model. */
+.hf00966-footer-section{
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+}
+.hf00966-footer-section::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 28%,rgba(0,0,0,.025));
+}
+.hf00966-footer-section .hf00966-cta-row,
+.hf00966-footer-section .hf00966-container,
+.hf00966-footer-section .hf00966-button,
+.hf00966-footer-section .hf00966-social,
+.hf00966-footer-section .hf00966-mini-icon,
+.hf00966-footer-section .hf00966-icon-shell{
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background-color .22s ease,opacity .22s ease;
+}
+.hf00966-footer-section .hf00966-cta-row:hover{
+  transform:translateY(-1px);
+}
+.hf00966-footer-section .hf00966-button:hover{
+  transform:translateY(-2px);
+}
+.hf00966-footer-section .hf00966-button:active{
+  transform:translateY(0);
+}
+.hf00966-footer-section .hf00966-menu__link,
+.hf00966-footer-section .hf00966-info-link__a{
+  transition:transform .18s ease,opacity .18s ease,color .18s ease;
+}
+.hf00966-footer-section .hf00966-menu__link:hover,
+.hf00966-footer-section .hf00966-info-link__a:hover{
+  transform:translateX(3px);
+}
+.hf00966-footer-section .hf00966-menu__link:hover .hf00966-menu-dot{
+  transform:scale(1.45);
+}
+.hf00966-footer-section .hf00966-social:hover{
+  transform:translateY(-2px) scale(1.03);
+}
+.hf00966-footer-section a:focus-visible,
+.hf00966-footer-section .hf00966-button:focus-visible{
+  outline:3px solid currentColor;
+  outline-offset:3px;
+}
+.hf00966-footer-section .hf00966-text__edit,
+.hf00966-footer-section .st-logo__title,
+.hf00966-footer-section .st-logo__subtitle,
+.hf00966-footer-section .st-menu__text{
+  max-width:100%;
+}
+@container hf00966-footer (max-width: 1120px){
+  .hf00966-footer-section .hf00966-cta-row{
+    grid-template-columns:1fr !important;
+  }
+  .hf00966-footer-section .hf00966-cta-row > .hf00966-container:last-child{
+    justify-content:flex-start !important;
+  }
+  .hf00966-footer-section .hf00966-main-row{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+@container hf00966-footer (max-width: 680px){
+  .hf00966-footer-section{
+    padding-top:18px !important;
+  }
+  .hf00966-footer-section .hf00966-cta-row,
+  .hf00966-footer-section .hf00966-main-row,
+  .hf00966-footer-section .hf00966-bottom-row{
+    width:min(100% - 28px,1320px) !important;
+  }
+  .hf00966-footer-section .hf00966-cta-row{
+    padding:24px 20px !important;
+    gap:20px !important;
+  }
+  .hf00966-footer-section .hf00966-main-row{
+    grid-template-columns:1fr !important;
+  }
+  .hf00966-footer-section .hf00966-bottom-row{
+    align-items:flex-start !important;
+    flex-direction:column !important;
+  }
+  .hf00966-footer-section .hf00966-legal{
+    justify-content:flex-start !important;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .hf00966-footer-section *{
+    transition:none !important;
+  }
+}
+/* Authored Footer owns its responsive text flow; legacy Footer nowrap/min-content rules are editor-only. */
+.hf00966-footer-section .st-menu__link{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+}
+.hf00966-footer-section .st-menu__text,
+.hf00966-footer-section .st-logo__title,
+.hf00966-footer-section .st-logo__subtitle{
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:break-word !important;
+  min-width:0 !important;
+  max-width:100% !important;
+}
+.hf00966-footer-section .st-button__label{
+  white-space:nowrap !important;
+}
+
+/* 00971 · authored contact/legal flow safety.
+   Do not force widths here: contact rows and compact legal rows own width in canonical JSON. */
+.hf00966-footer-section [data-name="Контакти"]{
+  min-height:0;
+  height:auto;
+}
+.hf00966-footer-section .hf00966-info-link{
+  min-width:0;
+  max-width:100%;
+}
+.hf00966-footer-section .hf00966-info-link__a{
+  min-width:0;
+  max-width:100%;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+.hf00966-footer-section .hf00966-mini-icon{
+  flex:0 0 auto;
+}
+@container hf00966-footer (max-width: 430px){
+  .hf00966-footer-section .hf00966-cta-row > .hf00966-container:last-child{
+    width:100% !important;
+    align-items:stretch !important;
+  }
+  .hf00966-footer-section .hf00966-cta-row > .hf00966-container:last-child .hf00966-button{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+}
+
+
+/* 00971 · Legal links are authored children of the Contact card, never a floating bottom sibling. */
+.hf00966-footer-section .hf00966-contact-legal{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  align-self:stretch;
+}
+.hf00966-footer-section .hf00966-contact-legal .hf00966-info-link,
+.hf00966-footer-section .hf00966-contact-legal .hf00966-info-link__a{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}

@@ -1,0 +1,2659 @@
+[
+  {
+    "id": "background_color",
+    "label": "Колір фону",
+    "aliases": [
+      "фон",
+      "колір фону",
+      "background color"
+    ],
+    "category": "background",
+    "valueType": "color",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Суцільний колір фону",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "background_gradient",
+    "label": "Градієнт фону",
+    "aliases": [
+      "градієнт",
+      "фон градієнт",
+      "background gradient"
+    ],
+    "category": "background",
+    "valueType": "gradient",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Градієнтний фон",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "background_image",
+    "label": "Фонова картинка",
+    "aliases": [
+      "background image",
+      "фонове зображення",
+      "картинка фону"
+    ],
+    "category": "background",
+    "valueType": "image",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Фонове зображення",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "background_opacity",
+    "label": "Прозорість фону",
+    "aliases": [
+      "background opacity",
+      "background transparency",
+      "opacity фону",
+      "transparent background",
+      "додай прозорість фону",
+      "збільш прозорість фону",
+      "зменш прозорість фону",
+      "зроби фон прозорим",
+      "прозорість фону",
+      "прозоріший фон"
+    ],
+    "category": "background",
+    "valueType": "percent",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Прозорість фону",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "background_position",
+    "label": "Позиція фону",
+    "aliases": [
+      "позиція фону",
+      "background position"
+    ],
+    "category": "background",
+    "valueType": "position",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Позиція фонового зображення",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "background_size",
+    "label": "Розмір фону",
+    "aliases": [
+      "розмір фону",
+      "background size"
+    ],
+    "category": "background",
+    "valueType": "keyword_or_percent",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Розмір фонового зображення",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "overlay_color",
+    "label": "Колір overlay",
+    "aliases": [
+      "overlay color",
+      "колір overlay"
+    ],
+    "category": "background",
+    "valueType": "color",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Колір overlay",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "overlay_gradient",
+    "label": "Градієнт overlay",
+    "aliases": [
+      "overlay gradient",
+      "градієнт overlay"
+    ],
+    "category": "background",
+    "valueType": "gradient",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Градієнт overlay",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "grayscale",
+    "label": "Grayscale",
+    "aliases": [
+      "grayscale",
+      "чорно білий фільтр"
+    ],
+    "category": "effects",
+    "valueType": "percent",
+    "appliesTo": [
+      "site_canvas",
+      "site_header",
+      "site_footer",
+      "section",
+      "container",
+      "image_block",
+      "mega_panel"
+    ],
+    "description": "Grayscale фільтр",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_color",
+    "label": "Колір рамки",
+    "aliases": [
+      "border color",
+      "колір рамки"
+    ],
+    "category": "border",
+    "valueType": "color",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Колір рамки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_width",
+    "label": "Товщина рамки",
+    "aliases": [
+      "border width",
+      "товщина рамки"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Товщина рамки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_style",
+    "label": "Стиль рамки",
+    "aliases": [
+      "border style",
+      "стиль рамки"
+    ],
+    "category": "border",
+    "valueType": "border_style",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Стиль рамки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_opacity",
+    "label": "Прозорість рамки",
+    "aliases": [
+      "border opacity",
+      "прозорість рамки"
+    ],
+    "category": "border",
+    "valueType": "percent",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Прозорість рамки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_radius",
+    "label": "Радіус рамки",
+    "aliases": [
+      "border radius",
+      "радіус рамки",
+      "скруглення"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Радіус рамки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_radius_top_left",
+    "label": "Верхній лівий радіус",
+    "aliases": [
+      "верхній лівий радіус",
+      "border_radius_top_left"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Верхній лівий радіус",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_radius_top_right",
+    "label": "Верхній правий радіус",
+    "aliases": [
+      "верхній правий радіус",
+      "border_radius_top_right"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Верхній правий радіус",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_radius_bottom_right",
+    "label": "Нижній правий радіус",
+    "aliases": [
+      "нижній правий радіус",
+      "border_radius_bottom_right"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Нижній правий радіус",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "border_radius_bottom_left",
+    "label": "Нижній лівий радіус",
+    "aliases": [
+      "нижній лівий радіус",
+      "border_radius_bottom_left"
+    ],
+    "category": "border",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Нижній лівий радіус",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_color",
+    "label": "Колір тіні",
+    "aliases": [
+      "shadow color",
+      "колір тіні"
+    ],
+    "category": "effects",
+    "valueType": "color",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Колір тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_opacity",
+    "label": "Прозорість тіні",
+    "aliases": [
+      "shadow opacity",
+      "прозорість тіні"
+    ],
+    "category": "effects",
+    "valueType": "percent",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Прозорість тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_blur",
+    "label": "Blur тіні",
+    "aliases": [
+      "shadow blur",
+      "blur тіні"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Blur тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_spread",
+    "label": "Spread тіні",
+    "aliases": [
+      "shadow spread",
+      "spread тіні"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Spread тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_offset_x",
+    "label": "Offset X тіні",
+    "aliases": [
+      "shadow offset x",
+      "offset x тіні"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Offset X тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shadow_offset_y",
+    "label": "Offset Y тіні",
+    "aliases": [
+      "shadow offset y",
+      "offset y тіні"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Offset Y тіні",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "blur",
+    "label": "Розмиття",
+    "aliases": [
+      "blur",
+      "розмиття"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Розмиття",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "glow_color",
+    "label": "Колір glow",
+    "aliases": [
+      "glow color",
+      "колір glow"
+    ],
+    "category": "effects",
+    "valueType": "color",
+    "appliesTo": [
+      "image_block",
+      "icon_block",
+      "logo_block",
+      "button_block"
+    ],
+    "description": "Колір glow",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "glow_blur",
+    "label": "Blur glow",
+    "aliases": [
+      "glow blur",
+      "розмиття glow"
+    ],
+    "category": "effects",
+    "valueType": "length",
+    "appliesTo": [
+      "image_block",
+      "icon_block",
+      "logo_block",
+      "button_block"
+    ],
+    "description": "Blur glow",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "text_content",
+    "label": "Текст",
+    "aliases": [
+      "text content",
+      "текст"
+    ],
+    "category": "text",
+    "valueType": "text",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Текст",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "text_color",
+    "label": "Колір тексту",
+    "aliases": [
+      "text color",
+      "колір тексту"
+    ],
+    "category": "text",
+    "valueType": "color",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Колір тексту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "font_size",
+    "label": "Розмір шрифту",
+    "aliases": [
+      "font size",
+      "розмір шрифту"
+    ],
+    "category": "text",
+    "valueType": "length",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Розмір шрифту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "font_weight",
+    "label": "Вага шрифту",
+    "aliases": [
+      "font weight",
+      "вага шрифту"
+    ],
+    "category": "text",
+    "valueType": "font_weight",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Вага шрифту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "font_style",
+    "label": "Стиль шрифту",
+    "aliases": [
+      "font style",
+      "стиль шрифту"
+    ],
+    "category": "text",
+    "valueType": "font_style",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Стиль шрифту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "text_align",
+    "label": "Вирівнювання тексту",
+    "aliases": [
+      "text align",
+      "вирівнювання тексту"
+    ],
+    "category": "text",
+    "valueType": "text_align",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Вирівнювання тексту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "vertical_align",
+    "label": "Вертикальне вирівнювання",
+    "aliases": [
+      "vertical align",
+      "вертикальне вирівнювання"
+    ],
+    "category": "text",
+    "valueType": "vertical_align",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline"
+    ],
+    "description": "Вертикальне вирівнювання",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "line_height",
+    "label": "Міжрядковий інтервал",
+    "aliases": [
+      "line height",
+      "міжрядковий інтервал"
+    ],
+    "category": "text",
+    "valueType": "number_or_length",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Міжрядковий інтервал",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "letter_spacing",
+    "label": "Інтервал літер",
+    "aliases": [
+      "letter spacing",
+      "інтервал літер"
+    ],
+    "category": "text",
+    "valueType": "length",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Інтервал літер",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "text_shadow",
+    "label": "Тінь тексту",
+    "aliases": [
+      "text shadow",
+      "тінь тексту"
+    ],
+    "category": "text",
+    "valueType": "shadow",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Тінь тексту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "text_stroke",
+    "label": "Stroke тексту",
+    "aliases": [
+      "text stroke",
+      "stroke тексту"
+    ],
+    "category": "text",
+    "valueType": "stroke",
+    "appliesTo": [
+      "text_block",
+      "heading_block",
+      "article_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "text_inline",
+      "menu_item",
+      "mega_title",
+      "mega_link"
+    ],
+    "description": "Stroke тексту",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "icon_name",
+    "label": "Назва іконки",
+    "aliases": [
+      "icon name",
+      "назва іконки"
+    ],
+    "category": "icon",
+    "valueType": "icon_name",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Назва іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_color",
+    "label": "Колір іконки",
+    "aliases": [
+      "icon color",
+      "колір іконки"
+    ],
+    "category": "icon",
+    "valueType": "color",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Колір іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_size",
+    "label": "Розмір іконки",
+    "aliases": [
+      "icon size",
+      "розмір іконки"
+    ],
+    "category": "icon",
+    "valueType": "length",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Розмір іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_background",
+    "label": "Фон іконки",
+    "aliases": [
+      "icon background",
+      "фон іконки"
+    ],
+    "category": "icon",
+    "valueType": "color_or_gradient",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Фон іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_border",
+    "label": "Рамка іконки",
+    "aliases": [
+      "icon border",
+      "рамка іконки"
+    ],
+    "category": "icon",
+    "valueType": "border",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Рамка іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "icon_radius",
+    "label": "Радіус іконки",
+    "aliases": [
+      "icon radius",
+      "радіус іконки"
+    ],
+    "category": "icon",
+    "valueType": "length",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Радіус іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_padding_x",
+    "label": "Padding X іконки",
+    "aliases": [
+      "icon padding x",
+      "padding x іконки"
+    ],
+    "category": "icon",
+    "valueType": "length",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Padding X іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_padding_y",
+    "label": "Padding Y іконки",
+    "aliases": [
+      "icon padding y",
+      "padding y іконки"
+    ],
+    "category": "icon",
+    "valueType": "length",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Padding Y іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_position",
+    "label": "Позиція іконки",
+    "aliases": [
+      "icon position",
+      "позиція іконки"
+    ],
+    "category": "icon",
+    "valueType": "keyword",
+    "appliesTo": [
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Позиція іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "icon_shadow",
+    "label": "Тінь іконки",
+    "aliases": [
+      "icon shadow",
+      "тінь іконки"
+    ],
+    "category": "icon",
+    "valueType": "shadow",
+    "appliesTo": [
+      "icon_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "icon_inline"
+    ],
+    "description": "Тінь іконки",
+    "supportsStates": [
+      "default",
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "width",
+    "label": "Ширина",
+    "aliases": [
+      "width",
+      "ширина"
+    ],
+    "category": "layout",
+    "valueType": "length_or_keyword",
+    "appliesTo": [
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Ширина",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "height",
+    "label": "Висота",
+    "aliases": [
+      "height",
+      "висота"
+    ],
+    "category": "layout",
+    "valueType": "length_or_keyword",
+    "appliesTo": [
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Висота",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "min_width",
+    "label": "Мінімальна ширина",
+    "aliases": [
+      "min width",
+      "мінімальна ширина"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel",
+      "mega_column"
+    ],
+    "description": "Мінімальна ширина",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "max_width",
+    "label": "Максимальна ширина",
+    "aliases": [
+      "max width",
+      "максимальна ширина"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel",
+      "mega_column"
+    ],
+    "description": "Максимальна ширина",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "min_height",
+    "label": "Мінімальна висота",
+    "aliases": [
+      "min height",
+      "мінімальна висота"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Мінімальна висота",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "max_height",
+    "label": "Максимальна висота",
+    "aliases": [
+      "max height",
+      "максимальна висота"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Максимальна висота",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "size_mode",
+    "label": "Режим розміру",
+    "aliases": [
+      "size mode",
+      "режим розміру"
+    ],
+    "category": "layout",
+    "valueType": "size_mode",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block"
+    ],
+    "description": "Режим розміру",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "padding",
+    "label": "Padding",
+    "aliases": [
+      "padding",
+      "padding"
+    ],
+    "category": "layout",
+    "valueType": "box_spacing",
+    "appliesTo": [
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Padding",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "padding_x",
+    "label": "Padding X",
+    "aliases": [
+      "padding x",
+      "padding x"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "button_block",
+      "icon_block",
+      "logo_block",
+      "phone_block",
+      "menu_item",
+      "mega_panel"
+    ],
+    "description": "Padding X",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "padding_y",
+    "label": "Padding Y",
+    "aliases": [
+      "padding y",
+      "padding y"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "button_block",
+      "icon_block",
+      "logo_block",
+      "phone_block",
+      "menu_item",
+      "mega_panel"
+    ],
+    "description": "Padding Y",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "margin",
+    "label": "Margin",
+    "aliases": [
+      "margin",
+      "margin"
+    ],
+    "category": "layout",
+    "valueType": "box_spacing",
+    "appliesTo": [
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block",
+      "menu_item",
+      "submenu",
+      "mega_panel"
+    ],
+    "description": "Margin",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "gap",
+    "label": "Gap",
+    "aliases": [
+      "gap",
+      "gap"
+    ],
+    "category": "layout",
+    "valueType": "length",
+    "appliesTo": [
+      "row",
+      "container",
+      "block_host",
+      "site_header",
+      "site_footer",
+      "menu_block",
+      "mega_panel",
+      "mega_column"
+    ],
+    "description": "Gap",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "orientation",
+    "label": "Орієнтація",
+    "aliases": [
+      "orientation",
+      "орієнтація"
+    ],
+    "category": "layout",
+    "valueType": "orientation",
+    "appliesTo": [
+      "row",
+      "container",
+      "block_host"
+    ],
+    "description": "Орієнтація",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "columns",
+    "label": "Колонки",
+    "aliases": [
+      "columns",
+      "колонки"
+    ],
+    "category": "layout",
+    "valueType": "integer",
+    "appliesTo": [
+      "mega_panel",
+      "row",
+      "container"
+    ],
+    "description": "Колонки",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "fr_weight",
+    "label": "FR вага",
+    "aliases": [
+      "fr weight",
+      "fr вага"
+    ],
+    "category": "layout",
+    "valueType": "number",
+    "appliesTo": [
+      "container",
+      "block_host",
+      "row"
+    ],
+    "description": "FR вага",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "align_x",
+    "label": "Вирівнювання X",
+    "aliases": [
+      "align x",
+      "вирівнювання x"
+    ],
+    "category": "layout",
+    "valueType": "align_x",
+    "appliesTo": [
+      "row",
+      "container",
+      "block_host",
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Вирівнювання X",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "align_y",
+    "label": "Вирівнювання Y",
+    "aliases": [
+      "align y",
+      "вирівнювання y"
+    ],
+    "category": "layout",
+    "valueType": "align_y",
+    "appliesTo": [
+      "row",
+      "container",
+      "block_host",
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Вирівнювання Y",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "justify",
+    "label": "Justify",
+    "aliases": [
+      "justify",
+      "justify"
+    ],
+    "category": "layout",
+    "valueType": "justify",
+    "appliesTo": [
+      "row",
+      "container",
+      "block_host",
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Justify",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "href",
+    "label": "Посилання",
+    "aliases": [
+      "href",
+      "посилання"
+    ],
+    "category": "interaction",
+    "valueType": "url_or_ref",
+    "appliesTo": [
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "image_block",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Посилання",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "link_mode",
+    "label": "Режим посилання",
+    "aliases": [
+      "link mode",
+      "режим посилання"
+    ],
+    "category": "interaction",
+    "valueType": "keyword",
+    "appliesTo": [
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "image_block",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Режим посилання",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "open_in_new_tab",
+    "label": "Відкривати в новій вкладці",
+    "aliases": [
+      "open in new tab",
+      "відкривати в новій вкладці"
+    ],
+    "category": "interaction",
+    "valueType": "boolean",
+    "appliesTo": [
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "image_block",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Відкривати в новій вкладці",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "click_area",
+    "label": "Click area",
+    "aliases": [
+      "click area",
+      "click area"
+    ],
+    "category": "interaction",
+    "valueType": "keyword",
+    "appliesTo": [
+      "logo_block",
+      "button_block",
+      "image_block"
+    ],
+    "description": "Click area",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_scale",
+    "label": "Hover scale",
+    "aliases": [
+      "hover scale",
+      "hover scale"
+    ],
+    "category": "interaction",
+    "valueType": "number",
+    "appliesTo": [
+      "button_block",
+      "image_block",
+      "icon_block",
+      "phone_block"
+    ],
+    "description": "Hover scale",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_opacity",
+    "label": "Hover opacity",
+    "aliases": [
+      "hover opacity",
+      "hover opacity"
+    ],
+    "category": "interaction",
+    "valueType": "percent",
+    "appliesTo": [
+      "button_block",
+      "image_block",
+      "icon_block",
+      "phone_block",
+      "menu_item",
+      "mega_link"
+    ],
+    "description": "Hover opacity",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_offset_y",
+    "label": "Hover offset Y",
+    "aliases": [
+      "hover offset y",
+      "hover offset y"
+    ],
+    "category": "interaction",
+    "valueType": "length",
+    "appliesTo": [
+      "button_block",
+      "image_block",
+      "icon_block",
+      "phone_block"
+    ],
+    "description": "Hover offset Y",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_background",
+    "label": "Фон hover",
+    "aliases": [
+      "hover background",
+      "фон hover"
+    ],
+    "category": "interaction",
+    "valueType": "color_or_gradient",
+    "appliesTo": [
+      "button_block",
+      "menu_item",
+      "mega_link",
+      "icon_block",
+      "phone_block"
+    ],
+    "description": "Фон hover",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_text_color",
+    "label": "Колір тексту hover",
+    "aliases": [
+      "hover text color",
+      "колір тексту hover"
+    ],
+    "category": "interaction",
+    "valueType": "color",
+    "appliesTo": [
+      "button_block",
+      "menu_item",
+      "mega_link",
+      "phone_block"
+    ],
+    "description": "Колір тексту hover",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_border_color",
+    "label": "Колір рамки hover",
+    "aliases": [
+      "hover border color",
+      "колір рамки hover"
+    ],
+    "category": "interaction",
+    "valueType": "color",
+    "appliesTo": [
+      "button_block",
+      "menu_item",
+      "mega_link",
+      "icon_block",
+      "phone_block"
+    ],
+    "description": "Колір рамки hover",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "hover_shadow",
+    "label": "Тінь hover",
+    "aliases": [
+      "hover shadow",
+      "тінь hover"
+    ],
+    "category": "interaction",
+    "valueType": "shadow",
+    "appliesTo": [
+      "button_block",
+      "menu_item",
+      "mega_link",
+      "icon_block",
+      "phone_block"
+    ],
+    "description": "Тінь hover",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "submenu_mode",
+    "label": "Режим підменю",
+    "aliases": [
+      "submenu mode",
+      "режим підменю"
+    ],
+    "category": "menu",
+    "valueType": "keyword",
+    "appliesTo": [
+      "menu_block",
+      "menu_root",
+      "menu_item",
+      "submenu"
+    ],
+    "description": "Режим підменю",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "submenu_view",
+    "label": "Вид підменю",
+    "aliases": [
+      "submenu view",
+      "вид підменю"
+    ],
+    "category": "menu",
+    "valueType": "keyword",
+    "appliesTo": [
+      "menu_block",
+      "menu_root",
+      "menu_item",
+      "submenu"
+    ],
+    "description": "Вид підменю",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "show_arrow",
+    "label": "Показ стрілки",
+    "aliases": [
+      "show arrow",
+      "показ стрілки"
+    ],
+    "category": "menu",
+    "valueType": "boolean",
+    "appliesTo": [
+      "menu_block",
+      "menu_item"
+    ],
+    "description": "Показ стрілки",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "menu_align",
+    "label": "Вирівнювання меню",
+    "aliases": [
+      "menu align",
+      "вирівнювання меню"
+    ],
+    "category": "menu",
+    "valueType": "keyword",
+    "appliesTo": [
+      "menu_block",
+      "menu_root"
+    ],
+    "description": "Вирівнювання меню",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "menu_offset",
+    "label": "Відступ меню",
+    "aliases": [
+      "menu offset",
+      "відступ меню"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "menu_block",
+      "menu_root",
+      "submenu"
+    ],
+    "description": "Відступ меню",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_columns",
+    "label": "Колонки mega panel",
+    "aliases": [
+      "mega columns",
+      "колонки mega panel"
+    ],
+    "category": "menu",
+    "valueType": "integer",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Колонки mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_gap",
+    "label": "Gap mega panel",
+    "aliases": [
+      "mega gap",
+      "gap mega panel"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Gap mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_min_column_width",
+    "label": "Мінімальна ширина колонки mega panel",
+    "aliases": [
+      "mega min column width",
+      "мінімальна ширина колонки mega panel"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Мінімальна ширина колонки mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_panel_background",
+    "label": "Фон mega panel",
+    "aliases": [
+      "mega panel background",
+      "фон mega panel"
+    ],
+    "category": "menu",
+    "valueType": "color_or_gradient_or_image",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Фон mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_panel_opacity",
+    "label": "Прозорість mega panel",
+    "aliases": [
+      "mega menu transparency",
+      "mega panel opacity",
+      "mega panel transparency",
+      "transparent mega menu",
+      "додай прозорість мегаменю",
+      "зроби мегаменю прозорим",
+      "прозорість mega menu",
+      "прозорість mega panel",
+      "прозорість мегаменю"
+    ],
+    "category": "menu",
+    "valueType": "percent",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Прозорість mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_panel_blur",
+    "label": "Blur mega panel",
+    "aliases": [
+      "mega panel blur",
+      "blur mega panel"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Blur mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_panel_border",
+    "label": "Рамка mega panel",
+    "aliases": [
+      "mega panel border",
+      "рамка mega panel"
+    ],
+    "category": "menu",
+    "valueType": "border",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Рамка mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "mega_panel_radius",
+    "label": "Радіус mega panel",
+    "aliases": [
+      "mega panel radius",
+      "радіус mega panel"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Радіус mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_panel_shadow",
+    "label": "Тінь mega panel",
+    "aliases": [
+      "mega panel shadow",
+      "тінь mega panel"
+    ],
+    "category": "menu",
+    "valueType": "shadow",
+    "appliesTo": [
+      "mega_panel"
+    ],
+    "description": "Тінь mega panel",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": true
+  },
+  {
+    "id": "mega_title_color",
+    "label": "Колір заголовка mega",
+    "aliases": [
+      "mega title color",
+      "колір заголовка mega"
+    ],
+    "category": "menu",
+    "valueType": "color",
+    "appliesTo": [
+      "mega_title"
+    ],
+    "description": "Колір заголовка mega",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_title_size",
+    "label": "Розмір заголовка mega",
+    "aliases": [
+      "mega title size",
+      "розмір заголовка mega"
+    ],
+    "category": "menu",
+    "valueType": "length",
+    "appliesTo": [
+      "mega_title"
+    ],
+    "description": "Розмір заголовка mega",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_link_color",
+    "label": "Колір посилання mega",
+    "aliases": [
+      "mega link color",
+      "колір посилання mega"
+    ],
+    "category": "menu",
+    "valueType": "color",
+    "appliesTo": [
+      "mega_link"
+    ],
+    "description": "Колір посилання mega",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "mega_link_hover_color",
+    "label": "Колір посилання mega hover",
+    "aliases": [
+      "mega link hover color",
+      "колір посилання mega hover"
+    ],
+    "category": "menu",
+    "valueType": "color",
+    "appliesTo": [
+      "mega_link"
+    ],
+    "description": "Колір посилання mega hover",
+    "supportsStates": [
+      "hover"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shell_template",
+    "label": "Шаблон оболонки",
+    "aliases": [
+      "shell template",
+      "шаблон оболонки"
+    ],
+    "category": "shell",
+    "valueType": "template_ref",
+    "appliesTo": [
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Шаблон оболонки",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "shell_position_mode",
+    "label": "Режим позиції оболонки",
+    "aliases": [
+      "shell position mode",
+      "режим позиції оболонки"
+    ],
+    "category": "shell",
+    "valueType": "keyword",
+    "appliesTo": [
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Режим позиції оболонки",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "visibility",
+    "label": "Видимість",
+    "aliases": [
+      "visibility",
+      "видимість"
+    ],
+    "category": "shell",
+    "valueType": "boolean",
+    "appliesTo": [
+      "site_header",
+      "site_footer",
+      "section",
+      "row",
+      "container",
+      "block_host",
+      "text_block",
+      "heading_block",
+      "article_block",
+      "icon_block",
+      "line_block",
+      "image_block",
+      "logo_block",
+      "button_block",
+      "phone_block",
+      "menu_block"
+    ],
+    "description": "Видимість",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  },
+  {
+    "id": "global_page_mode",
+    "label": "Режим global/page",
+    "aliases": [
+      "global page mode",
+      "режим global/page"
+    ],
+    "category": "shell",
+    "valueType": "keyword",
+    "appliesTo": [
+      "site_header",
+      "site_footer"
+    ],
+    "description": "Режим global/page",
+    "supportsStates": [
+      "default"
+    ],
+    "supportsResponsive": true,
+    "compound": false
+  }
+]

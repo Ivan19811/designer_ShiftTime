@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Command Test Widget</title>
+  <style>
+    html,body{margin:0;padding:0;background:#020617;color:#e2e8f0;font:14px/1.45 Inter,system-ui,sans-serif}
+    .page{max-width:1500px;margin:0 auto;padding:24px}
+    .title{font-size:26px;font-weight:900;margin-bottom:8px}
+    .sub{opacity:.8;margin-bottom:18px;max-width:900px}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="title">AI Command Test Widget</div>
+    <div class="sub">Віджетова тестова поверхня для parser-only шару. Це безпечна окрема сторінка всередині проєкту.</div>
+    <div id="app"></div>
+  </div>
+  <script type="module">
+    import { initAiCommandTestWidget } from '../../js/design/ai-command/index.js';
+    initAiCommandTestWidget('#app', {
+      logToConsole: false,
+      debugOptions: { initialText: 'зроби кнопку з синьо жовтим градієнтом' }
+    });
+  </script>
+</body>
+</html>

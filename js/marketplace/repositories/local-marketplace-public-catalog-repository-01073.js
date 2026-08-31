@@ -1,0 +1,11 @@
+// 01073 · Local DEV public catalog adapter. Reads only the Marketplace Network public projection storage.
+import {LOCAL_MARKETPLACE_NETWORK_KEY_01072} from './local-marketplace-network-repository-01072.js?v=01072';
+import {createDefaultMarketplaceNetworkSnapshot01072,normalizeMarketplaceNetworkSnapshot01072} from '../data/marketplace-network-schema-01072.js?v=01072';
+import {buildGlobalCatalogDocuments01073,searchGlobalCatalog01073} from '../services/marketplace-global-search-service-01073.js?v=01073';
+import {LOCAL_MARKETPLACE_INVENTORY_KEY_01077} from './local-marketplace-inventory-repository-01077.js?v=01077';
+export class LocalMarketplacePublicCatalogRepository01073{
+  constructor({storage=globalThis.localStorage,storageKey=LOCAL_MARKETPLACE_NETWORK_KEY_01072,inventoryStorageKey=LOCAL_MARKETPLACE_INVENTORY_KEY_01077}={}){this.type='local-public-catalog';this.name='LocalMarketplacePublicCatalogRepository01073+01077';this.contractVersion=1;this.storage=storage;this.storageKey=storageKey;this.inventoryStorageKey=inventoryStorageKey;}
+  _snapshot(){try{const raw=this.storage?.getItem(this.storageKey);return raw?normalizeMarketplaceNetworkSnapshot01072(JSON.parse(raw)):createDefaultMarketplaceNetworkSnapshot01072();}catch{return createDefaultMarketplaceNetworkSnapshot01072();}}
+  _reserved(offerId){try{const raw=this.storage?.getItem(this.inventoryStorageKey),db=raw?JSON.parse(raw):{reservations:[]},t=Date.now();return (Array.isArray(db?.reservations)?db.reservations:[]).filter(r=>r?.status==='active'&&new Date(r.expiresAt).getTime()>t).flatMap(r=>Array.isArray(r.items)?r.items:[]).filter(i=>i?.status==='active'&&i.sellerOfferId===offerId).reduce((a,i)=>a+(Number(i.quantity)||0),0);}catch{return 0;}}
+  async search(query={}){const s=this._snapshot(),offers=(s.sellerOffers||[]).map(o=>{if(o.availability==='preorder')return o;const stock=Math.max(0,(Number(o.stock)||0)-this._reserved(o.id));return {...o,stock,availability:stock>0?'in-stock':'out-of-stock'};});const documents=buildGlobalCatalogDocuments01073({listings:s.listings,offers,catalogProducts:s.catalogProducts,sellers:s.sellerProfiles});const out=searchGlobalCatalog01073(documents,query);return {...out,stage:'01077'};}
+}
