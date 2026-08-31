@@ -68,7 +68,7 @@ function anonymousWorkspace(view){
       <div class="st-account-benefits">
         <article><b>01</b><div><strong>Окремий Store</strong><span>Дані ізольовані серверним scope.</span></div></article>
         <article><b>02</b><div><strong>Жива сесія</strong><span>Bearer token з Auth Runtime 01084.</span></div></article>
-        <article><b>03</b><div><strong>Готово до ролей</strong><span>Admin/Users/Roles підключимо в 01086.</span></div></article>
+        <article><b>03</b><div><strong>Готово до ролей</strong><span>Admin/Users/Roles підключимо в 01087.</span></div></article>
       </div>
       <div class="st-account-brand-card__foot">${statusBadge(view)}<span>Без DEV-role перемикача</span></div>
     </section>
@@ -213,6 +213,6 @@ export async function initAccountStudio01085(){
   unsubscribe=subscribeMarketplaceAuth01084(()=>render());
   render();
   const api=Object.freeze({stage:'01085',render,setMode,getViewModel:()=>vm(),destroy(){try{unsubscribe?.();}catch{}unsubscribe=null;initialized=false;}});
-  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01085',{stage:'01085',authStatus:vm().status,next:'01086-admin-users-roles-access'});}catch{}
+  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01085',{stage:'01085',authStatus:vm().status,next:'01087-admin-users-roles-access'});}catch{}
   return api;
 }

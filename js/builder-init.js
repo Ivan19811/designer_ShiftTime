@@ -2,7 +2,7 @@
 // Єдина ініціалізація конструктора + інтеграція віджетів "Сайт" і "Сторінки"
 
 import { initBuilderLayout } from './builder.js?v=01051';
-import { initMarketplaceStudio01085 } from './marketplace/marketplace-studio-01085.js?v=01085';
+import { initMarketplaceStudio01086 } from './marketplace/marketplace-studio-01086.js?v=01086';
 import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01085';
 import { initBuilderUiAppearance01056 } from './ui/builder-ui-appearance-01056.js?v=01056';
 import { initThemeControls } from './builder-theme.js';
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // -----------------------------
   initBuilderLayout();
   try { initBuilderUiAppearance01056(); } catch (e) { console.warn('[builder-init] Builder UI Appearance 01056 init failed', e); }
-  try { initMarketplaceStudio01085().catch(e => console.warn('[builder-init] Marketplace Studio 01085 async init failed', e)); } catch (e) { console.warn('[builder-init] Marketplace Studio 01085 init failed', e); }
+  try { initMarketplaceStudio01086().catch(e => console.warn('[builder-init] Marketplace Studio 01086 async init failed', e)); } catch (e) { console.warn('[builder-init] Marketplace Studio 01086 init failed', e); }
   try { initAccountStudio01085().catch(e => console.warn('[builder-init] Account Studio 01085 async init failed', e)); } catch (e) { console.warn('[builder-init] Account Studio 01085 init failed', e); }
   stBootMark_('shell', 30, 'Оболонка конструктора змонтована. Ініціалізуємо базові системи.');
   initRoleSwitch();

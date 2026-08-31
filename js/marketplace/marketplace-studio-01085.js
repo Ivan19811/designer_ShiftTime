@@ -13,9 +13,9 @@ export async function initMarketplaceStudio01085(){
     const metrics=studio.querySelectorAll('.mp-context__metric');
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01085</b>';
     const warning=studio.querySelector('.mp-context__notice.is-warn');
-    if(warning)warning.innerHTML='<b>Account UI 01085:</b> реальна Auth-сесія 01084 тепер має окремий «Мій акаунт» workspace, Login/Register, session/security view та identity control у шапці Builder. Керування користувачами, запрошеннями, ролями й permissions лишається окремим Admin-модулем 01086.';
+    if(warning)warning.innerHTML='<b>Account UI 01085:</b> реальна Auth-сесія 01084 тепер має окремий «Мій акаунт» workspace, Login/Register, session/security view та identity control у шапці Builder. Керування користувачами, запрошеннями, ролями й permissions лишається окремим Admin-модулем 01087.';
   }
-  api=Object.freeze({stage:'01085',base,realAuth:true,accountUi:true,loginRegisterUi:true,next:'01086-admin-users-roles-access'});
-  try{window.ST_MARKETPLACE_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('marketplace-account-ui:studio-ready-01085',{stage:'01085',next:'01086-admin-users-roles-access'});}catch{}
+  api=Object.freeze({stage:'01085',base,realAuth:true,accountUi:true,loginRegisterUi:true,next:'01087-admin-users-roles-access'});
+  try{window.ST_MARKETPLACE_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('marketplace-account-ui:studio-ready-01085',{stage:'01085',next:'01087-admin-users-roles-access'});}catch{}
   return api;
 }
