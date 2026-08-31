@@ -77,6 +77,7 @@
   <link rel="stylesheet" href="css/marketplace-studio-01080.css?v=01080" />
   <link rel="stylesheet" href="css/marketplace-studio-01081.css?v=01081" />
   <link rel="stylesheet" href="css/marketplace-studio-01083.css?v=01083" />
+  <link rel="stylesheet" href="css/account-studio-01085.css?v=01085" />
   <link rel="stylesheet" href="css/page-assembly-01028.css?v=01039" />
   <link rel="stylesheet" href="css/school-01-main-00959.css?v=00961" />
   <link rel="stylesheet" href="css/school-01-footer-00962.css?v=00965" />
@@ -408,6 +409,15 @@
           </select>
         </label>
 
+        <!-- ACCOUNT 01085: одна глобальна точка входу до Auth/Account workspace -->
+        <button id="builderAccountButton" class="st-account-head" type="button" data-open-panel="account" aria-label="Мій акаунт" title="Мій акаунт">
+          <span class="st-account-head__avatar" id="builderAccountAvatar" aria-hidden="true">U</span>
+          <span class="st-account-head__copy">
+            <b id="builderAccountLabel">Увійти</b>
+            <small id="builderAccountMeta">Мій акаунт</small>
+          </span>
+        </button>
+
         <!-- Налаштування конструктора -->
        <button id="builder-settings-btn" class="builder__header-btn" type="button" data-open-panel="constructor">Налаштування конструктора</button>
 
@@ -477,6 +487,18 @@
       >
         <span class="builder__sidebar-icon">🛒</span>
         <span class="builder__sidebar-label">МАРКЕТПЛЕЙС</span>
+      </button>
+
+      <!-- ACCOUNT 01085 -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="account"
+        id="navAccount"
+        type="button"
+        title="Мій акаунт — вхід, реєстрація, профіль і безпека"
+      >
+        <span class="builder__sidebar-icon">👤</span>
+        <span class="builder__sidebar-label">МІЙ АКАУНТ</span>
       </button>
 
       <!-- Дизайн -->
@@ -810,6 +832,9 @@
           <!-- MARKETPLACE STUDIO 01052: shell + storage-agnostic MarketplaceStore Data Core -->
           <section class="builder__settings-panel" data-panel-id="marketplace" id="marketplace-panel-root" aria-label="Marketplace Studio"></section>
 
+          <!-- ACCOUNT 01085: dedicated Inspector context; content is rendered by account-studio-01085.js -->
+          <section class="builder__settings-panel" data-panel-id="account" id="account-panel-root" aria-label="Мій акаунт"></section>
+
           <!-- САЙТ: кнопки віджета "Сайт" -->
           <section class="builder__settings-panel" data-panel-id="site" id="site-panel-root">
             <div class="sm-sidebar__header">
@@ -1114,6 +1139,9 @@
         <div class="canvas__scroll canvas__scroll--full">
           <!-- MARKETPLACE STUDIO 01051 (central workspace) -->
           <div id="marketplaceStudioView" hidden></div>
+
+          <!-- ACCOUNT 01085 (central workspace) -->
+          <div id="accountStudioView" hidden aria-label="Мій акаунт"></div>
 
           <!-- Вбудований віджет "Сайт" (головне вікно) -->
           <div id="siteManagerView" hidden>
@@ -1508,7 +1536,7 @@
 
   <!-- Головна ініціалізація конструктора + інтеграція віджета "Сайт" -->
   <script type="module" src="./js/ai-design-debug-log.js?v=01004"></script>
-  <script type="module" src="./js/builder-init.js?v=01083"></script>
+  <script type="module" src="./js/builder-init.js?v=01085"></script>
   <script type="module" src="./js/responsive-viewport/responsive-viewport-controller-00991.js?v=01014"></script>
   <script type="module" src="./js/site-delete.js"></script>
   <!-- Простий перемикач центральних вікон "Сайт" / "Сторінки" / Canvas -->
