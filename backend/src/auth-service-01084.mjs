@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import {promisify} from 'node:util';
 import {withClient} from './db.mjs';
 import {hashToken} from './auth.mjs';
+import {loadInvitationForRegistration01087,acceptInvitationForUser01087} from './admin-service-01087.mjs';
 
 const scryptAsync=promisify(crypto.scrypt);
 const SCRYPT_KEYLEN=64;
@@ -48,7 +49,7 @@ async function createSessionWithClient(client,userId){
 
 export async function registerUser01084(input={}){
   if(!registrationEnabled())throw authError('Реєстрацію тимчасово вимкнено',403);
-  const email=emailOf(input.email),name=clean(input.name),password=validatePassword(input.password);
+  const email=emailOf(input.email),name=clean(input.name),password=validatePassword(input.password),inviteToken=clean(input.inviteToken);
   validateEmail(email);validateName(name);
   const passwordHash=await hashPassword01084(password);
   const userId=uid('usr'),accountId=uid('acct'),workspaceId=uid('ws'),storeId=uid('store'),membershipId=uid('member'),credentialId=uid('cred');
@@ -59,6 +60,25 @@ export async function registerUser01084(input={}){
   return withClient(async client=>{
     await client.query('BEGIN');
     try{
+      const invitation=inviteToken?await loadInvitationForRegistration01087(client,{inviteToken,email}):null;
+      if(invitation){
+        const existing=await client.query(`SELECT u.id,u.email,u.name,u.status,c.secret_hash
+          FROM platform_users u LEFT JOIN platform_user_credentials c ON c.user_id=u.id AND c.kind='password'
+          WHERE lower(u.email)=lower($1) LIMIT 1`,[email]);
+        let joinedUserId=userId,joinedName=name;
+        if(existing.rowCount){
+          const row=existing.rows[0];
+          if(row.status!=='active'||!row.secret_hash||!(await verifyPassword01084(password,row.secret_hash)))throw authError('Для існуючого акаунта введи правильний пароль',401);
+          joinedUserId=row.id;joinedName=row.name||name;
+        }else{
+          await client.query(`INSERT INTO platform_users(id,email,name,status) VALUES($1,$2,$3,'active')`,[joinedUserId,email,name]);
+          await client.query(`INSERT INTO platform_user_credentials(id,user_id,kind,algorithm,secret_hash) VALUES($1,$2,'password','scrypt-v1',$3)`,[credentialId,joinedUserId,passwordHash]);
+        }
+        const accepted=await acceptInvitationForUser01087(client,{invitation,userId:joinedUserId});
+        const session=await createSessionWithClient(client,joinedUserId);
+        await client.query('COMMIT');
+        return {user:{id:joinedUserId,email,name:joinedName},scope:accepted.scope,...session,invitationAccepted:true};
+      }
       const exists=await client.query('SELECT 1 FROM platform_users WHERE lower(email)=lower($1) LIMIT 1',[email]);
       if(exists.rowCount)throw authError('Користувач із таким email уже існує',409);
       await client.query(`INSERT INTO platform_users(id,email,name,status) VALUES($1,$2,$3,'active')`,[userId,email,name]);

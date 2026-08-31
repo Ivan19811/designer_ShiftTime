@@ -33,7 +33,7 @@ export function validateAccountRegistration01085(input={}){
   if(!email)errors.email='Вкажіть email.';
   else if(!emailOk(email))errors.email='Перевірте формат email.';
   if(!password)errors.password='Вкажіть пароль.';
-  else if(password.length<8)errors.password='Пароль має містити щонайменше 8 символів.';
+  else if(password.length<10)errors.password='Пароль має містити щонайменше 10 символів.';
   if(!passwordConfirm)errors.passwordConfirm='Повторіть пароль.';
   else if(password!==passwordConfirm)errors.passwordConfirm='Паролі не збігаються.';
   return {valid:Object.keys(errors).length===0,errors};

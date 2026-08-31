@@ -13,6 +13,7 @@ import {
   validateAccountLogin01085,
   validateAccountRegistration01085,
 } from './account-view-model-01085.js?v=01085';
+import {getInviteTokenFromUrl01087,inspectAccountInvitation01087,clearInviteTokenFromUrl01087} from './account-invitation-01087.js?v=01087';
 
 let initialized=false;
 let unsubscribe=null;
@@ -20,6 +21,7 @@ let mode='login';
 let localError='';
 let fieldErrors={};
 const draft={loginEmail:'',registerName:'',registerEmail:''};
+let inviteToken='';let inviteInfo=null;let inviteLoading=false;
 
 const esc=(v)=>String(v??'').replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const clean=(v)=>String(v??'').trim();
@@ -45,12 +47,12 @@ function loginForm(view){
 function registerForm(view){
   const busy=view.pending;
   return `<form class="st-account-form" data-account-form="register" novalidate>
-    <div class="st-account-form__head"><span class="st-account-kicker">НОВИЙ АКАУНТ</span><h2>Створи свій простір</h2><p>Після реєстрації ShiftTime автоматично створить особисті Account → Workspace → Store.</p></div>
+    <div class="st-account-form__head"><span class="st-account-kicker">${inviteInfo?'ЗАПРОШЕННЯ · 01087':'НОВИЙ АКАУНТ'}</span><h2>${inviteInfo?`Приєднатися до ${esc(inviteInfo.accountName||'команди')}`:'Створи свій простір'}</h2><p>${inviteInfo?`Роль: ${esc(roleLabel(inviteInfo.role))}. Якщо цей email уже має ShiftTime ID — введи свій існуючий пароль.`:'Після реєстрації ShiftTime автоматично створить особисті Account → Workspace → Store.'}</p></div>${inviteInfo?`<div class="st-account-invite-banner"><b>Запрошення активне</b><span>${esc(inviteInfo.email)} · діє до ${esc(dateLabel(inviteInfo.expiresAt))}</span></div>`:''}
     ${localError||view.lastError?`<div class="st-account-message is-error" role="alert">${esc(localError||view.lastError)}</div>`:''}
     <label class="st-account-field"><span>Ім’я</span><input name="name" autocomplete="name" value="${esc(draft.registerName)}" placeholder="Ваше ім’я" ${busy?'disabled':''}>${errorText('name')}</label>
-    <label class="st-account-field"><span>Email</span><input name="email" type="email" autocomplete="email" value="${esc(draft.registerEmail)}" placeholder="name@example.com" ${busy?'disabled':''}>${errorText('email')}</label>
+    <label class="st-account-field"><span>Email</span><input name="email" type="email" autocomplete="email" value="${esc(draft.registerEmail)}" placeholder="name@example.com" ${inviteInfo?'readonly':''} ${busy?'disabled':''}>${errorText('email')}</label>
     <div class="st-account-field-grid">
-      <label class="st-account-field"><span>Пароль</span><input name="password" type="password" autocomplete="new-password" placeholder="Мінімум 8 символів" ${busy?'disabled':''}>${errorText('password')}</label>
+      <label class="st-account-field"><span>Пароль</span><input name="password" type="password" autocomplete="new-password" placeholder="Мінімум 10 символів" ${busy?'disabled':''}>${errorText('password')}</label>
       <label class="st-account-field"><span>Повторіть пароль</span><input name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Ще раз" ${busy?'disabled':''}>${errorText('passwordConfirm')}</label>
     </div>
     <button class="st-account-submit" type="submit" ${busy?'disabled':''}><span>${busy?'Створюємо…':'Створити акаунт'}</span><b aria-hidden="true">→</b></button>
@@ -62,13 +64,13 @@ function anonymousWorkspace(view){
   return `<div class="st-account-workspace is-anonymous" data-account-screen="${esc(mode)}">
     <section class="st-account-brand-card">
       <div class="st-account-brand-card__orb">S</div>
-      <span class="st-account-kicker">SHIFTTIME BUILDER · 01085</span>
+      <span class="st-account-kicker">SHIFTTIME BUILDER · 01087</span>
       <h1>Один акаунт.<br><em>Увесь твій бізнес.</em></h1>
       <p>Авторизація тепер є частиною архітектури Builder: користувач, сесія, Workspace і Store працюють як один захищений контекст.</p>
       <div class="st-account-benefits">
         <article><b>01</b><div><strong>Окремий Store</strong><span>Дані ізольовані серверним scope.</span></div></article>
         <article><b>02</b><div><strong>Жива сесія</strong><span>Bearer token з Auth Runtime 01084.</span></div></article>
-        <article><b>03</b><div><strong>Готово до ролей</strong><span>Admin/Users/Roles підключимо в 01087.</span></div></article>
+        <article><b>03</b><div><strong>Готово до ролей</strong><span>Admin/Users/Roles доступні в окремому модулі 01087.</span></div></article>
       </div>
       <div class="st-account-brand-card__foot">${statusBadge(view)}<span>Без DEV-role перемикача</span></div>
     </section>
@@ -167,7 +169,7 @@ async function submitRegister(form){
   localError='';
   if(!result.valid){render();return;}
   render();
-  try{await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password:String(data.password||'')});mode='overview';localError='';fieldErrors={};}
+  try{await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password:String(data.password||''),...(inviteToken?{inviteToken}: {})});if(inviteToken)clearInviteTokenFromUrl01087();inviteToken='';inviteInfo=null;mode='overview';localError='';fieldErrors={};}
   catch(e){localError=e?.message||'Не вдалося створити акаунт.';}
   render();
 }
@@ -211,8 +213,10 @@ export async function initAccountStudio01085(){
   workspace.addEventListener('submit',onSubmit);
   panel.addEventListener('click',onClick);
   unsubscribe=subscribeMarketplaceAuth01084(()=>render());
+  inviteToken=getInviteTokenFromUrl01087();
+  if(inviteToken&&!authState()?.user){inviteLoading=true;mode='register';try{inviteInfo=await inspectAccountInvitation01087(inviteToken);draft.registerEmail=String(inviteInfo?.email||'');}catch(e){localError=e?.message||'Запрошення недійсне.';}finally{inviteLoading=false;}}
   render();
-  const api=Object.freeze({stage:'01085',render,setMode,getViewModel:()=>vm(),destroy(){try{unsubscribe?.();}catch{}unsubscribe=null;initialized=false;}});
-  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01085',{stage:'01085',authStatus:vm().status,next:'01087-admin-users-roles-access'});}catch{}
+  const api=Object.freeze({stage:'01087',render,setMode,getViewModel:()=>vm(),destroy(){try{unsubscribe?.();}catch{}unsubscribe=null;initialized=false;}});
+  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01087',{stage:'01087',authStatus:vm().status,invite:Boolean(inviteToken),next:'01088-dynamic-table-data-model-foundation'});}catch{}
   return api;
 }

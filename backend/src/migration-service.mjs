@@ -11,7 +11,7 @@ const LOCK_A=1080,LOCK_B=10080;
 const JOURNAL_SQL=`CREATE TABLE IF NOT EXISTS shifttime_schema_migrations(
   filename text PRIMARY KEY,
   checksum_sha256 text NOT NULL,
-  applied_stage text NOT NULL DEFAULT '01081',
+  applied_stage text NOT NULL DEFAULT '01087',
   execution_ms integer NOT NULL DEFAULT 0,
   applied_at timestamptz NOT NULL DEFAULT now()
 )`;
@@ -27,8 +27,8 @@ export async function applyMigrations01080({dryRun=false,logger=console}={}){
     const files=await loadMigrationFiles01080();const rows=await client.query('SELECT filename,checksum_sha256 FROM shifttime_schema_migrations');const applied=new Map(rows.rows.map(r=>[r.filename,r.checksum_sha256]));const plan=[];
     for(const f of files){const old=applied.get(f.filename);if(old&&old!==f.checksum){const e=new Error(`Migration checksum drift: ${f.filename}`);e.code='ST_MIGRATION_CHECKSUM_DRIFT';e.expected=old;e.actual=f.checksum;throw e;}plan.push({...f,action:old?'skip':'apply'});}
     if(dryRun)return plan.map(x=>({filename:x.filename,action:x.action,checksum:x.checksum}));
-    for(const m of plan){if(m.action==='skip'){logger.log?.(`[01081] skip ${m.filename}`);continue;}const started=Date.now();logger.log?.(`[01081] migrate ${m.filename}`);await client.query(m.sql);const ms=Date.now()-started;await client.query('INSERT INTO shifttime_schema_migrations(filename,checksum_sha256,applied_stage,execution_ms) VALUES($1,$2,$3,$4)',[m.filename,m.checksum,'01081',ms]);}
-    try{await client.query(`UPDATE platform_deployment_state SET schema_stage='01081',last_migration_at=now(),updated_at=now() WHERE id='primary'`);}catch{}
+    for(const m of plan){if(m.action==='skip'){logger.log?.(`[01087] skip ${m.filename}`);continue;}const started=Date.now();logger.log?.(`[01087] migrate ${m.filename}`);await client.query(m.sql);const ms=Date.now()-started;await client.query('INSERT INTO shifttime_schema_migrations(filename,checksum_sha256,applied_stage,execution_ms) VALUES($1,$2,$3,$4)',[m.filename,m.checksum,'01087',ms]);}
+    try{await client.query(`UPDATE platform_deployment_state SET schema_stage='01087',last_migration_at=now(),updated_at=now() WHERE id='primary'`);}catch{}
     return getMigrationStatus01080(client);
   }finally{await release(client);client.release();}
 }

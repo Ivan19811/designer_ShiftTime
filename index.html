@@ -78,6 +78,7 @@
   <link rel="stylesheet" href="css/marketplace-studio-01081.css?v=01081" />
   <link rel="stylesheet" href="css/marketplace-studio-01083.css?v=01083" />
   <link rel="stylesheet" href="css/account-studio-01085.css?v=01085" />
+  <link rel="stylesheet" href="css/admin-studio-01087.css?v=01087" />
   <link rel="stylesheet" href="css/page-assembly-01028.css?v=01039" />
   <link rel="stylesheet" href="css/school-01-main-00959.css?v=00961" />
   <link rel="stylesheet" href="css/school-01-footer-00962.css?v=00965" />
@@ -501,6 +502,20 @@
         <span class="builder__sidebar-label">МІЙ АКАУНТ</span>
       </button>
 
+      <!-- ADMIN 01087 · visibility is granted by server capability admin.view -->
+      <button
+        class="builder__sidebar-item"
+        data-open-panel="admin"
+        id="navAdmin"
+        type="button"
+        title="Адміністрування — користувачі, ролі, доступ і база даних"
+        hidden
+        aria-hidden="true"
+      >
+        <span class="builder__sidebar-icon">🛡️</span>
+        <span class="builder__sidebar-label">АДМІНІСТРУВАННЯ</span>
+      </button>
+
       <!-- Дизайн -->
       <button
         class="builder__sidebar-item"
@@ -835,6 +850,9 @@
           <!-- ACCOUNT 01085: dedicated Inspector context; content is rendered by account-studio-01085.js -->
           <section class="builder__settings-panel" data-panel-id="account" id="account-panel-root" aria-label="Мій акаунт"></section>
 
+          <!-- ADMIN 01087: dedicated Inspector context; backend capability controls visibility -->
+          <section class="builder__settings-panel" data-panel-id="admin" id="admin-panel-root" aria-label="Адміністрування"></section>
+
           <!-- САЙТ: кнопки віджета "Сайт" -->
           <section class="builder__settings-panel" data-panel-id="site" id="site-panel-root">
             <div class="sm-sidebar__header">
@@ -1142,6 +1160,9 @@
 
           <!-- ACCOUNT 01085 (central workspace) -->
           <div id="accountStudioView" hidden aria-label="Мій акаунт"></div>
+
+          <!-- ADMIN 01087 (central workspace) -->
+          <div id="adminStudioView" hidden aria-label="Адміністрування"></div>
 
           <!-- Вбудований віджет "Сайт" (головне вікно) -->
           <div id="siteManagerView" hidden>
@@ -1536,7 +1557,7 @@
 
   <!-- Головна ініціалізація конструктора + інтеграція віджета "Сайт" -->
   <script type="module" src="./js/ai-design-debug-log.js?v=01004"></script>
-  <script type="module" src="./js/builder-init.js?v=01086"></script>
+  <script type="module" src="./js/builder-init.js?v=01087"></script>
   <script type="module" src="./js/responsive-viewport/responsive-viewport-controller-00991.js?v=01014"></script>
   <script type="module" src="./js/site-delete.js"></script>
   <!-- Простий перемикач центральних вікон "Сайт" / "Сторінки" / Canvas -->

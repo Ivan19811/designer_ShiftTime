@@ -16,10 +16,13 @@ import {listAuthorizedShippingProviders01078,listAuthorizedSellerDeliveries01078
 import {getDeploymentStatus01080,sanitizeImportSource01080} from './deployment-service.mjs';
 import {importLocalOperationalBundle01080} from './deployment-local-import-service.mjs';
 import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081} from './media-cloud-service.mjs';
+import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
+import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
+import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
-  if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:'01081',database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:'01081',database:'unavailable',error:e.message,requestId:rid});}}
+  if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:'01087',database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:'01087',database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
     const out=await registerUser01084(await readJson(req));
@@ -30,6 +33,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
     const scope=await resolveAuthorizedStore(out.user.id,'');
     return sendJson(res,200,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope,stage:'01084',requestId:rid});
   }
+  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='invitations'&&p[4])return sendJson(res,200,{...(await inspectInvitation01087(p[4])),stage:'01087',requestId:rid});
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='media'&&p[4]){const out=await getPublicCloudMediaDelivery01081(p[4]);res.statusCode=302;res.setHeader('location',out.url);res.setHeader('cache-control',out.public?'public, max-age=300':'private, no-store');return res.end();}
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='search'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await searchPublicMarketplace(Object.fromEntries(u.searchParams.entries())));}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='orders'){const token=String(req.headers['x-st-cart-id']||'');const out=await checkoutPublicCart(token,await readJson(req));return sendJson(res,201,out,{'x-st-cart-id':out.nextCartId});}
@@ -47,7 +51,23 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,{user:{id:session.userId,email:session.email,name:session.name},scope,stage:'01084',requestId:rid});
-  if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,{user:{id:session.userId,email:session.email,name:session.name},scope,stage:'01081',requestId:rid});
+  if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,{user:{id:session.userId,email:session.email,name:session.name},scope,stage:'01087',requestId:rid});
+  if(p[2]==='admin'){
+    assertAdminView01087(scope);
+    if(req.method==='GET'&&p[3]==='overview')return sendJson(res,200,{...(await getAdminOverview01087(scope,session.userId)),actor:{userId:session.userId,email:session.email,name:session.name,role:scope.role,capabilities:getEffectiveCapabilities01087(scope)},scope});
+    if(req.method==='GET'&&p[3]==='roles')return sendJson(res,200,{stage:'01087',roles:getRoleCatalog01087(),actorRole:scope.role,actorCapabilities:getEffectiveCapabilities01087(scope)});
+    if(req.method==='GET'&&p[3]==='members'&&!p[4])return sendJson(res,200,{stage:'01087',members:await listMembers01087(scope)});
+    if(req.method==='PATCH'&&p[3]==='members'&&p[4]){assertCapability01087(scope,'admin.users.manage','User management permission required');return sendJson(res,200,{stage:'01087',member:await updateMembership01087(scope,session.userId,p[4],await readJson(req))});}
+    if(req.method==='GET'&&p[3]==='invitations'&&!p[4])return sendJson(res,200,{stage:'01087',invitations:await listInvitations01087(scope)});
+    if(req.method==='POST'&&p[3]==='invitations'&&!p[4]){assertCapability01087(scope,'admin.invites.manage','Invitation permission required');return sendJson(res,201,{stage:'01087',...(await createInvitation01087(scope,session.userId,await readJson(req)))});}
+    if(req.method==='POST'&&p[3]==='invitations'&&p[4]&&p[5]==='revoke'){assertCapability01087(scope,'admin.invites.manage','Invitation permission required');return sendJson(res,200,{stage:'01087',invitation:await revokeInvitation01087(scope,session.userId,p[4])});}
+    if(req.method==='GET'&&p[3]==='database'&&p[4]==='overview')return sendJson(res,200,await getDatabaseOverview01087(scope));
+    if(req.method==='GET'&&p[3]==='database'&&p[4]==='tables'&&!p[5])return sendJson(res,200,{stage:'01087',tables:await listDatabaseTables01087(scope)});
+    if(req.method==='GET'&&p[3]==='database'&&p[4]==='tables'&&p[5]&&p[6]==='schema')return sendJson(res,200,await getDatabaseTableSchema01087(scope,p[5]));
+    if(req.method==='GET'&&p[3]==='database'&&p[4]==='tables'&&p[5]&&p[6]==='rows'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getDatabaseTableRows01087(scope,p[5],{limit:u.searchParams.get('limit'),offset:u.searchParams.get('offset')}));}
+    if(req.method==='GET'&&p[3]==='database'&&p[4]==='migrations')return sendJson(res,200,{stage:'01087',migrations:await listDatabaseMigrations01087(scope)});
+    return sendJson(res,404,{error:'Admin route not found',stage:'01087',requestId:rid});
+  }
   if(req.method==='GET'&&p[2]==='deployment'&&p[3]==='status')return sendJson(res,200,await getDeploymentStatus01080(scope));
   if(p[2]==='media'){
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
@@ -122,6 +142,6 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01081]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01081',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
-server.listen(config.port,config.host,()=>console.log(`[01081] ShiftTime Media Cloud Storage Backend http://${config.host}:${config.port}`));
+const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01087]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01087',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
+server.listen(config.port,config.host,()=>console.log(`[01087] ShiftTime Commerce + Admin Backend http://${config.host}:${config.port}`));
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(()=>pool.end().finally(()=>process.exit(0))));

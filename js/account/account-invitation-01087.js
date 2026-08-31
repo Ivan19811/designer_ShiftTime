@@ -1,0 +1,5 @@
+// 01087 · Public invitation inspection for Account registration flow.
+import {getMarketplaceBackendConfig01071} from '../marketplace/data/marketplace-backend-config-01071.js?v=01071';
+export function getInviteTokenFromUrl01087(url=globalThis.location?.href||''){try{return new URL(String(url),globalThis.location?.href||'http://localhost/').searchParams.get('invite')||'';}catch{return '';}}
+export async function inspectAccountInvitation01087(token){const t=String(token||'').trim();if(!t)return null;const base=String(getMarketplaceBackendConfig01071().apiBaseUrl||'').replace(/\/$/,'');const res=await fetch(`${base}/auth/invitations/${encodeURIComponent(t)}`,{headers:{accept:'application/json'}});const text=await res.text();let data={};try{data=text?JSON.parse(text):{};}catch{data={error:text||`HTTP ${res.status}`};}if(!res.ok)throw Object.assign(new Error(data.error||`HTTP ${res.status}`),{statusCode:res.status,data});return data;}
+export function clearInviteTokenFromUrl01087(){try{const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState(history.state,'',u.toString());}catch{}}

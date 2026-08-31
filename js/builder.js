@@ -36,6 +36,7 @@ export function initBuilderLayout() {
     if (id === 'pages') return 'pages';
     if (id === 'marketplace') return 'marketplace';
     if (id === 'account') return 'account';
+    if (id === 'admin') return 'admin';
     return 'canvas';
   }
 
@@ -64,6 +65,7 @@ export function initBuilderLayout() {
     if (id === 'pages') return document.getElementById('navPages');
     if (id === 'marketplace') return document.getElementById('navMarketplace');
     if (id === 'account') return document.getElementById('navAccount');
+    if (id === 'admin') return document.getElementById('navAdmin');
     return Array.from(root.querySelectorAll('.builder__sidebar-item[data-open-panel]')).find((btn) => btn.getAttribute('data-open-panel') === id) || null;
   }
 
@@ -76,6 +78,7 @@ export function initBuilderLayout() {
     pages: document.getElementById('pageManagerView'),
     marketplace: document.getElementById('marketplaceStudioView'),
     account: document.getElementById('accountStudioView'),
+    admin: document.getElementById('adminStudioView'),
   };
 
   const canvasScroll = root.querySelector('.canvas__scroll--full') || root.querySelector('.canvas__scroll');
@@ -145,12 +148,13 @@ export function initBuilderLayout() {
     // ✅ SHIFT-SITES-2025: позначаємо активний workspace-екран класами, щоб CSS міг
     // жорстко гасити canvas-шапку/канвас навіть якщо інший код випадково поверне display.
     try {
-      root.classList.remove('builder--mainview-canvas', 'builder--mainview-site', 'builder--mainview-pages', 'builder--mainview-marketplace', 'builder--mainview-account');
+      root.classList.remove('builder--mainview-canvas', 'builder--mainview-site', 'builder--mainview-pages', 'builder--mainview-marketplace', 'builder--mainview-account', 'builder--mainview-admin');
       if (key === 'canvas') root.classList.add('builder--mainview-canvas');
       if (key === 'site') root.classList.add('builder--mainview-site');
       if (key === 'pages') root.classList.add('builder--mainview-pages');
       if (key === 'marketplace') root.classList.add('builder--mainview-marketplace');
       if (key === 'account') root.classList.add('builder--mainview-account');
+      if (key === 'admin') root.classList.add('builder--mainview-admin');
       root.dataset.stWorkspaceOwner = key;
       try { window.dispatchEvent(new CustomEvent('st:workspace-view-changed', { detail: { key, owner: key, exclusive: true, version: '01065' } })); } catch (_) {}
     } catch (e) {}
@@ -248,6 +252,7 @@ const previewBtn = document.getElementById('btn-preview');
   const navPagesBtn = document.getElementById('navPages');
   const navMarketplaceBtn = document.getElementById('navMarketplace');
   const navAccountBtn = document.getElementById('navAccount');
+  const navAdminBtn = document.getElementById('navAdmin');
   const navDesignBtn = document.getElementById('navDesign');
   const navAiDesignBtn = document.getElementById('navAiDesign');
   const navAiTestBtn = document.getElementById('navAiTest');
@@ -343,6 +348,19 @@ const previewBtn = document.getElementById('btn-preview');
         } catch (_) {}
         showWorkspaceView('account');
         try { activatePanel('account'); } catch (_) {}
+        return;
+      }
+
+      if (id === 'navAdmin') {
+        try {
+          const settingsSidebar = document.getElementById('builder-settings-sidebar');
+          const settingsResizer = document.getElementById('builder-settings-resizer');
+          if (settingsSidebar) settingsSidebar.style.display = 'flex';
+          if (settingsResizer) settingsResizer.style.display = 'flex';
+        } catch (_) {}
+        showWorkspaceView('admin');
+        try { activatePanel('admin'); } catch (_) {}
+        try { window.ST_ADMIN_STUDIO_01087?.refresh?.(); } catch (_) {}
         return;
       }
 
@@ -494,6 +512,17 @@ const previewBtn = document.getElementById('btn-preview');
       try { activatePanel('account'); } catch (_) {}
       return;
     }
+    if (id === 'navAdmin') {
+      setWorkspaceSidebarActive_(navAdminBtn || btn);
+      try {
+        settingsSidebar.style.display = 'flex';
+        settingsResizer.style.display = 'flex';
+      } catch (_) {}
+      showWorkspaceView('admin');
+      try { activatePanel('admin'); } catch (_) {}
+      try { window.ST_ADMIN_STUDIO_01087?.refresh?.(); } catch (_) {}
+      return;
+    }
     if (id === 'navDesign') {
       setWorkspaceSidebarActive_(btn);
       // дизайн панелі працюють на canvas
@@ -548,6 +577,12 @@ const previewBtn = document.getElementById('btn-preview');
         try { activatePanel('account'); } catch (_) {}
         return;
       }
+      if (panel === 'admin') {
+        showWorkspaceView('admin');
+        try { activatePanel('admin'); } catch (_) {}
+        try { window.ST_ADMIN_STUDIO_01087?.refresh?.(); } catch (_) {}
+        return;
+      }
       if (panel === 'pages') {
         // ✅ pages панель працює у інспекторі, canvas лишається основним екраном
         try {
@@ -574,6 +609,7 @@ const previewBtn = document.getElementById('btn-preview');
   safeBind(navPagesBtn, 'pages');
   safeBind(navMarketplaceBtn, 'marketplace');
   safeBind(navAccountBtn, 'account');
+  safeBind(navAdminBtn, 'admin');
   safeBind(navDesignBtn, 'canvas');
   safeBind(navAiDesignBtn, 'canvas');
   safeBind(navAiTestBtn, 'canvas');
@@ -595,6 +631,7 @@ const previewBtn = document.getElementById('btn-preview');
       else if (panel === 'pages') showWorkspaceView('pages');
       else if (panel === 'marketplace') showWorkspaceView('marketplace');
       else if (panel === 'account') showWorkspaceView('account');
+      else if (panel === 'admin') showWorkspaceView('admin');
       else showWorkspaceView('canvas');
 
       // Після перемикання workspace — освіжити вміст (щоб не чекати перезавантаження)

@@ -20,7 +20,7 @@ export async function resolveAuthorizedStore(userId,requestedStoreId=''){
     const r=q.rows[0];return {userId,tenantId:r.account_id,accountId:r.account_id,accountName:r.account_name,workspaceId:r.workspace_id,workspaceName:r.workspace_name,storeId:r.store_id,storeName:r.store_name,role:r.role,permissions:Array.isArray(r.permissions)?r.permissions:[]};
   });
 }
-export function assertWriteRole(scope){if(!['owner','admin','editor','catalog-manager'].includes(scope.role)){const e=new Error('Write permission denied for this Store');e.statusCode=403;throw e;}}
+export function assertWriteRole(scope){if(!['owner','admin','manager','editor','catalog-manager'].includes(scope.role)){const e=new Error('Write permission denied for this Store');e.statusCode=403;throw e;}}
 export function assertAdminRole(scope){if(!['owner','admin'].includes(scope.role)){const e=new Error('Admin permission required');e.statusCode=403;throw e;}}
 
-export function assertOrderWriteRole(scope){if(!['owner','admin','editor','order-manager'].includes(scope.role)){const e=new Error('Order/shipping write permission denied for this Store');e.statusCode=403;throw e;}}
+export function assertOrderWriteRole(scope){if(!['owner','admin','manager','editor','order-manager'].includes(scope.role)){const e=new Error('Order/shipping write permission denied for this Store');e.statusCode=403;throw e;}}
