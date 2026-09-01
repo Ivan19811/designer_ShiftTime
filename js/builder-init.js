@@ -5,6 +5,7 @@ import { initBuilderLayout } from './builder.js?v=01051';
 import { initMarketplaceStudio01091 } from './marketplace/marketplace-studio-01091.js?v=01091';
 import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01091';
 import { initAdminStudio01087 } from './admin/admin-studio-01087.js?v=01090';
+import { initTablesStudio01092 } from './tables/tables-studio-01092.js?v=01094';
 import { initBuilderUiAppearance01056 } from './ui/builder-ui-appearance-01056.js?v=01056';
 import { initThemeControls } from './builder-theme.js';
 import { initBackgroundPanel } from './panel-background.js';
@@ -357,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { initMarketplaceStudio01091().catch(e => console.warn('[builder-init] Marketplace Studio 01091 async init failed', e)); } catch (e) { console.warn('[builder-init] Marketplace Studio 01091 init failed', e); }
   try { initAccountStudio01085().catch(e => console.warn('[builder-init] Account Studio 01085 async init failed', e)); } catch (e) { console.warn('[builder-init] Account Studio 01085 init failed', e); }
   try { initAdminStudio01087().catch(e => console.warn('[builder-init] Admin Studio 01087 async init failed', e)); } catch (e) { console.warn('[builder-init] Admin Studio 01087 init failed', e); }
+  try { initTablesStudio01092().catch(e => console.warn('[builder-init] Tables Studio 01092 async init failed', e)); } catch (e) { console.warn('[builder-init] Tables Studio 01092 init failed', e); }
   stBootMark_('shell', 30, 'Оболонка конструктора змонтована. Ініціалізуємо базові системи.');
   initRoleSwitch();
   initThemeControls();
