@@ -1,6 +1,8 @@
 // 01053 · Marketplace Product Editor.
 // UI talks only to MarketplaceStore. No persistence adapter is imported or referenced here.
 
+import {SHIFTTIME_BUILD_STAGE} from '../core/build-stage.js?v=01091';
+
 const STAGE='01053';
 const OWNED_MEDIA_SOURCE='product-editor-01053';
 
@@ -219,14 +221,15 @@ export class MarketplaceProductEditor01053 {
     const panel=document.getElementById('marketplace-panel-root');
     const hero=panel?.querySelector('.mp-inspector__hero');
     if(hero){
-      const eyebrow=hero.querySelector('.mp-inspector__eyebrow');if(eyebrow)eyebrow.textContent=`MARKETPLACE STUDIO · ${STAGE}`;
+      const eyebrow=hero.querySelector('.mp-inspector__eyebrow');if(eyebrow)eyebrow.textContent=`MARKETPLACE STUDIO · ${SHIFTTIME_BUILD_STAGE}`;
       const mode=hero.querySelector('.mp-inspector__mode');if(mode)mode.innerHTML='<span>MarketplaceStore → Repository</span><b class="mp-live-dot">PRODUCT CRUD READY</b>';
       const sub=hero.querySelector('.mp-inspector__subtitle');if(sub)sub.textContent='Товари вже створюються й редагуються через MarketplaceStore. Конкретне фізичне сховище лишається поза UI.';
     }
     const ctx=this.studio.querySelector('.mp-context');
-    const metrics=ctx?.querySelectorAll('.mp-context__metric');
-    if(metrics?.[0])metrics[0].innerHTML='<span>Studio shell</span><b>01053</b>';
-    if(metrics?.[1])metrics[1].innerHTML='<span>Product Editor</span><b>CRUD LIVE</b>';
+    const stageMetric=ctx?.querySelector('[data-mp-system-metric="stage"]');
+    const productMetric=ctx?.querySelector('[data-mp-system-metric="product-editor"]');
+    if(stageMetric)stageMetric.innerHTML=`<span>Studio stage</span><b>${SHIFTTIME_BUILD_STAGE}</b>`;
+    if(productMetric)productMetric.innerHTML='<span>Product Editor</span><b>CRUD LIVE</b>';
     const warn=ctx?.querySelector('.mp-context__notice.is-warn');
     if(warn)warn.innerHTML='Product CRUD активний через <b>MarketplaceStore</b>. Category Editor, Variants, Media Library та Importer залишаються окремими наступними етапами.';
   }

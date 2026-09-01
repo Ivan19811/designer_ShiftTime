@@ -7,6 +7,7 @@ import {
   getMarketplaceCategoryStats01057,
   getMarketplaceCategoryBindingData01057
 } from './data/marketplace-category-selectors-01057.js?v=01057';
+import {SHIFTTIME_BUILD_STAGE} from '../core/build-stage.js?v=01091';
 
 const STAGE='01057';
 const OWNED_MEDIA_SOURCE='category-editor-01057';
@@ -149,15 +150,19 @@ export class MarketplaceCategoryEditor01057{
     const panel=document.getElementById('marketplace-panel-root');
     const hero=panel?.querySelector('.mp-inspector__hero');
     if(hero){
-      const eyebrow=hero.querySelector('.mp-inspector__eyebrow');if(eyebrow)eyebrow.textContent=`MARKETPLACE STUDIO · ${STAGE}`;
+      const eyebrow=hero.querySelector('.mp-inspector__eyebrow');if(eyebrow)eyebrow.textContent=`MARKETPLACE STUDIO · ${SHIFTTIME_BUILD_STAGE}`;
       const mode=hero.querySelector('.mp-inspector__mode');if(mode)mode.innerHTML='<span>MarketplaceStore → Repository</span><b class="mp-live-dot">PRODUCT + CATEGORY CRUD</b>';
       const sub=hero.querySelector('.mp-inspector__subtitle');if(sub)sub.textContent='Товари й категорії вже працюють через MarketplaceStore. Фізичне сховище лишається повністю ізольованим за Repository contract.';
     }
-    const ctx=this.studio.querySelector('.mp-context'),metrics=ctx?.querySelectorAll('.mp-context__metric');
-    if(metrics?.[0])metrics[0].innerHTML='<span>Studio shell</span><b>01057</b>';
-    if(metrics?.[1])metrics[1].innerHTML='<span>Product Editor</span><b>CRUD LIVE</b>';
-    if(metrics?.[2])metrics[2].innerHTML='<span>Category Editor</span><b>CRUD LIVE</b>';
-    if(metrics?.[3])metrics[3].innerHTML=`<span>Repository</span><b>${esc(this.store.getRepositoryInfo().type)}</b>`;
+    const ctx=this.studio.querySelector('.mp-context');
+    const stageMetric=ctx?.querySelector('[data-mp-system-metric="stage"]');
+    const productMetric=ctx?.querySelector('[data-mp-system-metric="product-editor"]');
+    const categoryMetric=ctx?.querySelector('[data-mp-system-metric="category-editor"]');
+    const repositoryMetric=ctx?.querySelector('[data-mp-system-metric="repository"]');
+    if(stageMetric)stageMetric.innerHTML=`<span>Studio stage</span><b>${SHIFTTIME_BUILD_STAGE}</b>`;
+    if(productMetric)productMetric.innerHTML='<span>Product Editor</span><b>CRUD LIVE</b>';
+    if(categoryMetric)categoryMetric.innerHTML='<span>Category Editor</span><b>CRUD LIVE</b>';
+    if(repositoryMetric)repositoryMetric.innerHTML=`<span>Repository</span><b>${esc(this.store.getRepositoryInfo().type)}</b>`;
     const warn=ctx?.querySelector('.mp-context__notice.is-warn');
     if(warn)warn.innerHTML='Product + Category CRUD активні через <b>MarketplaceStore</b>. Наступний великий data-етап — Attributes / Variants / Filters.';
   }

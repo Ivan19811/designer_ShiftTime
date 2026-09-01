@@ -11,7 +11,7 @@ export async function initMarketplaceStudio01090(){
     const hero=document.querySelector('#marketplace-panel-root .mp-inspector__hero');
     const eyebrow=hero?.querySelector('.mp-inspector__eyebrow');
     if(eyebrow)eyebrow.textContent='MARKETPLACE STUDIO · 01090';
-    const metrics=studio.querySelectorAll('.mp-context__metric');
+    const metrics=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01090</b>';
   }
   const backend=getMarketplaceBackendStatus01071(),context=getEffectiveMarketplaceContext01089();

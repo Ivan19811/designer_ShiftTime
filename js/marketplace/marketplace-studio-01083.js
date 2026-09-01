@@ -8,7 +8,7 @@ export async function initMarketplaceStudio01083(){
     studio.dataset.mpStage='01083';
     const hero=studio.closest('#marketplaceStudioView')?.ownerDocument?.querySelector('#marketplace-panel-root .mp-inspector__hero'),eyebrow=hero?.querySelector('.mp-inspector__eyebrow');
     if(eyebrow)eyebrow.textContent='MARKETPLACE STUDIO · 01083';
-    const metrics=studio.querySelectorAll('.mp-context__metric');
+    const metrics=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01083</b>';
     const warning=studio.querySelector('.mp-context__notice.is-warn');
     if(warning)warning.innerHTML='<b>Responsive DOM Guard 01083:</b> Overview оновлює тільки власні canonical statistics і безпечно пропускає відсутні DOM-вузли. Dashboard перебудовується за реальною шириною Marketplace, зокрема при відкритих DevTools або вузькому Builder workspace.';

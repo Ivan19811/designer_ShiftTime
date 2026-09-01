@@ -9,7 +9,7 @@ export async function initMarketplaceStudio01070(){
   const studio=document.querySelector('[data-mp-studio="01051"]');
   if(studio){
     studio.dataset.mpStage='01070';
-    const metrics=studio.querySelectorAll('.mp-context__metric');
+    const metrics=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01070</b>';
     if(metrics[1])metrics[1].innerHTML='<span>Commerce scope</span><b>STORE CONTEXT</b>';
     if(metrics[2])metrics[2].innerHTML='<span>Tenant model</span><b>Account → Workspace</b>';

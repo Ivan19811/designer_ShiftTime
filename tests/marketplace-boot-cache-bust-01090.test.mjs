@@ -6,9 +6,9 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 
-test('01090 fresh boot reaches the updated Account/Admin modules',()=>{
+test('01091 fresh boot reaches the updated Account/Admin modules',()=>{
   const src=read('js/builder-init.js');
-  assert.match(src,/account-studio-01085\.js\?v=01090/);
+  assert.match(src,/account-studio-01085\.js\?v=01091/);
   assert.match(src,/admin-studio-01087\.js\?v=01090/);
 });
 

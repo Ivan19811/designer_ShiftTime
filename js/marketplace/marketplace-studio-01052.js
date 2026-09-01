@@ -3,6 +3,7 @@
 import { initMarketplaceStudio01051 } from './marketplace-studio-01051.js?v=01052';
 import { getMarketplaceStore01052 } from './data/marketplace-runtime-01052.js?v=01052';
 import { createMarketplaceDemoSeed01052 } from './data/marketplace-schema-01052.js?v=01052';
+import {SHIFTTIME_BUILD_STAGE} from '../core/build-stage.js?v=01091';
 
 const STAGE='01052';
 const store=getMarketplaceStore01052();
@@ -122,11 +123,12 @@ function renderAttributes(studio,state){
 function renderContext(studio,state){
   const ctx=studio.querySelector('.mp-context');if(!ctx)return;
   const repo=store.getRepositoryInfo(),s=store.getSummary();
-  const metrics=ctx.querySelectorAll('.mp-context__metric');
-  if(metrics[0])metrics[0].innerHTML=`<span>Studio shell</span><b>${STAGE}</b>`;
-  if(metrics[1])metrics[1].innerHTML=`<span>MarketplaceStore</span><b>LIVE · schema v${s.schemaVersion}</b>`;
-  if(metrics[2])metrics[2].innerHTML=`<span>Repository</span><b>${esc(repo.type)}</b>`;
-  if(metrics[3])metrics[3].innerHTML=`<span>Revision</span><b>${s.revision}</b>`;
+  const stageMetric=ctx.querySelector('[data-mp-system-metric="stage"]');
+  const repositoryMetric=ctx.querySelector('[data-mp-system-metric="repository"]');
+  const revisionMetric=ctx.querySelector('[data-mp-system-metric="revision"]');
+  if(stageMetric)stageMetric.innerHTML=`<span>Studio stage</span><b>${SHIFTTIME_BUILD_STAGE}</b>`;
+  if(repositoryMetric)repositoryMetric.innerHTML=`<span>Repository</span><b>${esc(repo.type)}</b>`;
+  if(revisionMetric)revisionMetric.innerHTML=`<span>Revision</span><b>${s.revision}</b>`;
   const stub=ctx.querySelector('.mp-context__notice.is-warn');if(stub)stub.innerHTML='CRUD редактори товарів і категорій ще не активні. <b>Data Core persistence уже реальний</b>: snapshot проходить тільки через Repository contract.';
 }
 

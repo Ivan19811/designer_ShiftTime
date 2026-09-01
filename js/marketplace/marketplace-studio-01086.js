@@ -10,7 +10,7 @@ export async function initMarketplaceStudio01086(){
     const hero=studio.closest('#marketplaceStudioView')?.ownerDocument?.querySelector('#marketplace-panel-root .mp-inspector__hero');
     const eyebrow=hero?.querySelector('.mp-inspector__eyebrow');
     if(eyebrow)eyebrow.textContent='MARKETPLACE STUDIO · 01086';
-    const metrics=studio.querySelectorAll('.mp-context__metric');
+    const metrics=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01086</b>';
     const warning=studio.querySelector('.mp-context__notice.is-warn');
     if(warning)warning.innerHTML='<b>Auth/API parity 01086:</b> Backend API status тепер читає Real Auth 01084 session як authority, DEV token лишається тільки fallback, а Security scope показує server-authorized Store замість локального requested Store.';

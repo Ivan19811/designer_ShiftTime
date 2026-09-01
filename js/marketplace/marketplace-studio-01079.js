@@ -6,7 +6,7 @@ export async function initMarketplaceStudio01079(){
   const studio=document.querySelector('[data-mp-studio="01051"]');
   if(studio){
     studio.dataset.mpStage='01079';
-    const m=studio.querySelectorAll('.mp-context__metric');
+    const m=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(m[0])m[0].innerHTML='<span>Studio stage</span><b>01079</b>';
     if(m[1])m[1].innerHTML='<span>Checkout totals</span><b>AUTHORITATIVE</b>';
     if(m[2])m[2].innerHTML='<span>Shipping</span><b>PER SELLER</b>';

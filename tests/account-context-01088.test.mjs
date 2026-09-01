@@ -18,6 +18,6 @@ test('01088 account context view marks the active Store and keeps account/role l
 });
 
 test('visible account build label comes from centralized current build stage',()=>{
-  assert.equal(stage.SHIFTTIME_BUILD_STAGE,'01090');
-  assert.equal(stage.buildStageLabel('ACCOUNT'),'ACCOUNT · 01090');
+  assert.equal(stage.SHIFTTIME_BUILD_STAGE,'01091');
+  assert.equal(stage.buildStageLabel('ACCOUNT'),'ACCOUNT · 01091');
 });

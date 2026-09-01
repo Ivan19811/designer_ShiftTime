@@ -11,7 +11,7 @@ export async function initMarketplaceStudio01084(){
     studio.dataset.mpStage='01084';
     const hero=studio.closest('#marketplaceStudioView')?.ownerDocument?.querySelector('#marketplace-panel-root .mp-inspector__hero'),eyebrow=hero?.querySelector('.mp-inspector__eyebrow');
     if(eyebrow)eyebrow.textContent='MARKETPLACE STUDIO · 01084';
-    const metrics=studio.querySelectorAll('.mp-context__metric');
+    const metrics=studio.querySelector('[data-mp-system-status-block]')?.querySelectorAll('.mp-context__metric')||[];
     if(metrics[0])metrics[0].innerHTML='<span>Studio stage</span><b>01084</b>';
     const warning=studio.querySelector('.mp-context__notice.is-warn');
     if(warning)warning.innerHTML='<b>Real Auth 01084:</b> backend отримує реєстрацію, password login/logout, opaque sessions і server-authorized Account → Workspace → Store scope. DEV token лишається тільки fallback для локальної діагностики. Візуальний «Мій акаунт» буде окремим модулем 01085, «Адміністрування» — 01086.';
