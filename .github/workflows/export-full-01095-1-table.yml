@@ -3,7 +3,7 @@ name: export-full-01095
 on:
   push:
     branches:
-      - 01095-table
+      - 01095-1-table
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Upload full project
         uses: actions/upload-artifact@v4
         with:
-          name: 01095-table-full-project
+          name: 01095-1-table-full-project
           path: |
             .
             !.git
