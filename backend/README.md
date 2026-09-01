@@ -1,4 +1,4 @@
-# ShiftTime Commerce Backend · 01081
+# ShiftTime Tables + Commerce Backend · 01092
 
 Production boundary remains:
 
@@ -112,6 +112,12 @@ No coupon/discount engine exists yet, therefore `discountTotal` is authoritative
 Payment creation recalculates the order snapshot first. Payment amount is the MarketplaceOrder `grandTotal`; each seller allocation and marketplace commission use the corresponding SellerOrder `grossTotal`. Once a Payment row exists, delivery status/tracking may still change, but a change to the financial `shippingPrice` is rejected so payment allocations cannot silently desynchronize.
 
 `npm run db:seed-dev` safely inserts `MP-DEMO-01079` with two SellerOrders and two independent Delivery records: items `5580 UAH`, shipping `85 + 70 = 155 UAH`, discount `0`, grand total `5735 UAH`. Existing orders/products are not deleted.
+
+## ShiftTime Tables · 01092
+
+Migration `014_shifttime_tables_foundation.sql` adds the storage-neutral Tables core: tables, fields, JSONB records, views, table permissions and reusable templates. Tables support `personal`, `account`, `workspace` and `store` scope. Every `/api/v1/tables*` request is authorized through the current session, Membership and server-resolved scope; browser-supplied IDs are never treated as proof of access.
+
+`Tables Studio → TableStore → TableRepository → HTTPS API → PostgreSQL` is the production path. LocalTableRepository remains DEV/demo only. The first field engine validates typed values on both browser and backend boundaries and reserves strict typed cell drag-and-drop contracts for the 01093 interaction engine.
 
 
 ## Real PostgreSQL Deployment / Migration · 01080

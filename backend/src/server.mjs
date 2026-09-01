@@ -21,10 +21,11 @@ import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginA
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
+import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,updateAuthorizedTableView01092} from './tables-service-01092.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
-  if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:'01091',database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:'01091',database:'unavailable',error:e.message,requestId:rid});}}
+  if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:'01092',database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:'01092',database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
     const out=await registerUser01084(await readJson(req));
@@ -51,7 +52,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   const session=await authenticateRequest(req);
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
-  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01091',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
+  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01092',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
@@ -84,6 +85,22 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context')return sendJson(res,200,await getAuthorizedPlatformSnapshot(session.userId,scope));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces')return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
+  if(p[2]==='tables'){
+    const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
+    if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01092',tables:await listAuthorizedTables01092(scope,session.userId)});
+    if(req.method==='POST'&&!tableId)return sendJson(res,201,await createAuthorizedTable01092(scope,session.userId,await readJson(req)));
+    if(req.method==='GET'&&tableId&&!resource)return sendJson(res,200,await getAuthorizedTable01092(scope,session.userId,tableId));
+    if(req.method==='PATCH'&&tableId&&!resource)return sendJson(res,200,await updateAuthorizedTable01092(scope,session.userId,tableId,await readJson(req)));
+    if(req.method==='DELETE'&&tableId&&!resource){await deleteAuthorizedTable01092(scope,session.userId,tableId);return sendNoContent(res,204);}
+    if(resource==='fields'&&req.method==='POST'&&!resourceId)return sendJson(res,201,await createAuthorizedTableField01092(scope,session.userId,tableId,await readJson(req)));
+    if(resource==='fields'&&req.method==='PATCH'&&resourceId)return sendJson(res,200,await updateAuthorizedTableField01092(scope,session.userId,tableId,resourceId,await readJson(req)));
+    if(resource==='fields'&&req.method==='DELETE'&&resourceId){await deleteAuthorizedTableField01092(scope,session.userId,tableId,resourceId);return sendNoContent(res,204);}
+    if(resource==='records'&&req.method==='POST'&&!resourceId)return sendJson(res,201,await createAuthorizedTableRecord01092(scope,session.userId,tableId,await readJson(req)));
+    if(resource==='records'&&req.method==='PATCH'&&resourceId)return sendJson(res,200,await updateAuthorizedTableRecord01092(scope,session.userId,tableId,resourceId,await readJson(req)));
+    if(resource==='records'&&req.method==='DELETE'&&resourceId){await deleteAuthorizedTableRecord01092(scope,session.userId,tableId,resourceId);return sendNoContent(res,204);}
+    if(resource==='views'&&req.method==='PATCH'&&resourceId)return sendJson(res,200,await updateAuthorizedTableView01092(scope,session.userId,tableId,resourceId,await readJson(req)));
+    return sendJson(res,404,{error:'Tables route not found',stage:'01092',requestId:rid});
+  }
   if(p[2]==='network'&&p[3]==='inventory'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedInventory01077(scope));
     if(req.method==='GET'&&p[4]==='reservations')return sendJson(res,200,await listAuthorizedInventoryReservations01077(scope));
@@ -145,6 +162,6 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01091]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01091',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
-server.listen(config.port,config.host,()=>console.log(`[01091] ShiftTime Commerce + Context Status Parity + Admin Backend http://${config.host}:${config.port}`));
+const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01092]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01092',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
+server.listen(config.port,config.host,()=>console.log(`[01092] ShiftTime Tables + Commerce Backend http://${config.host}:${config.port}`));
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(()=>pool.end().finally(()=>process.exit(0))));

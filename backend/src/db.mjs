@@ -8,7 +8,7 @@ function resolveSsl(){
   return undefined;
 }
 if(!config.databaseUrl){
-  const message='[01081] DATABASE_URL is not configured';
+  const message='[01092] DATABASE_URL is not configured';
   if(config.isProduction)throw new Error(`${message}; production backend refuses to start without PostgreSQL`);
   console.warn(message);
 }
@@ -23,7 +23,7 @@ const poolOptions={
 const ssl=resolveSsl();if(ssl!==undefined)poolOptions.ssl=ssl;
 export const pool=new Pool(poolOptions);
 
-pool.on('error',err=>console.error('[01081] PostgreSQL pool idle client error',err));
+pool.on('error',err=>console.error('[01092] PostgreSQL pool idle client error',err));
 
 export async function withClient(fn){const client=await pool.connect();try{return await fn(client);}finally{client.release();}}
 export async function withTransaction(fn){return withClient(async client=>{await client.query('BEGIN');try{const value=await fn(client);await client.query('COMMIT');return value;}catch(e){try{await client.query('ROLLBACK');}catch{}throw e;}});}
