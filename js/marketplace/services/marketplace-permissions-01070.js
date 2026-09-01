@@ -8,6 +8,7 @@ export const MARKETPLACE_PERMISSIONS_01070=Object.freeze([
 export const MARKETPLACE_ROLE_PERMISSIONS_01070=Object.freeze({
   owner:['*'],
   admin:['platform.manage','workspace.manage','store.manage','members.manage','catalog.read','catalog.write','media.write','imports.write','feeds.write','seo.write','design.write','orders.read','orders.write','inventory.write','analytics.read'],
+  manager:['catalog.read','catalog.write','media.write','imports.write','feeds.write','seo.write','orders.read','orders.write','inventory.write','analytics.read'],
   editor:['catalog.read','catalog.write','media.write','imports.write','feeds.write','seo.write','design.write','analytics.read'],
   'catalog-manager':['catalog.read','catalog.write','media.write','imports.write','feeds.write','inventory.write','analytics.read'],
   'order-manager':['catalog.read','orders.read','orders.write','inventory.write','analytics.read'],

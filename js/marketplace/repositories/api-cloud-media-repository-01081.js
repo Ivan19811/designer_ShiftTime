@@ -2,7 +2,7 @@
 // S3 credentials never enter browser code.
 import {MEDIA_ASSET_REPOSITORY_CONTRACT_VERSION_01059} from './media-asset-repository-contract-01059.js?v=01059';
 import {getMarketplaceBackendConfig01071} from '../data/marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceRepositoryContext01070} from '../data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceApiAuth01089} from '../data/marketplace-api-auth-01089.js?v=01089';
 import {bindMarketplaceFetch01082} from './fetch-binding-01082.js?v=01082';
 function str(v){return String(v??'').trim();}
 function cleanUrl(v){const url=str(v);if(!url)throw new Error('Вкажи URL або шлях до asset.');if(/^data:|^blob:/i.test(url))throw new Error('data:/blob: не є постійним медіа-посиланням.');return url;}
@@ -13,7 +13,7 @@ function absDelivery(url,apiBase){const raw=str(url);if(!raw)return'';if(/^https
 export class ApiCloudMediaRepository01081{
   constructor({fetchImpl=globalThis.fetch}={}){this.type='api-cloud-media';this.name='ApiCloudMediaRepository01081';this.contractVersion=MEDIA_ASSET_REPOSITORY_CONTRACT_VERSION_01059;this.fetchImpl=bindMarketplaceFetch01082(fetchImpl);this._status=null;}
   getInfo(){const s=this._status||{};return {type:this.type,name:this.name,contractVersion:this.contractVersion,mode:'api-r2-s3',upload:!!s.configured,persistent:true,configured:!!s.configured,provider:s.type||'',bucket:s.bucket||'',publicDelivery:!!s.publicDelivery,description:'Computer files → presigned R2/S3 PUT; PostgreSQL stores metadata only.'};}
-  canUpload(){return !!this._status?.configured&&getMarketplaceBackendConfig01071().mode==='api';}
+  canUpload(){return !!this._status?.configured&&!!getMarketplaceApiAuth01089().token;}
   async _fetch(url,options={},timeoutMs=12000,label='Media request'){
     if(typeof this.fetchImpl!=='function')throw new Error(`${label}: Fetch API is unavailable.`);
     const ms=Math.max(1000,Number(timeoutMs)||12000),Controller=globalThis.AbortController;
@@ -26,7 +26,7 @@ export class ApiCloudMediaRepository01081{
     catch(err){if(externalSignal?.aborted)throw err;if(controller.signal.aborted)throw new Error(`${label} timeout after ${ms} ms.`);if(err instanceof TypeError)throw new Error(`${label} network/CORS error: ${err.message||'request failed'}`);throw err;}
     finally{clearTimeout(timer);if(relayAbort)externalSignal.removeEventListener('abort',relayAbort);}
   }
-  async _request(path,options={}){const cfg=getMarketplaceBackendConfig01071(),ctx=getMarketplaceRepositoryContext01070(),token=str(cfg.devToken);const headers={...(options.headers||{}),'x-st-request-id':`media_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`};if(ctx.storeId)headers['x-st-store-id']=ctx.storeId;if(ctx.workspaceId)headers['x-st-workspace-id']=ctx.workspaceId;if(token)headers.authorization=`Bearer ${token}`;const res=await this._fetch(`${cfg.apiBaseUrl}${path}`,{...options,headers},cfg.requestTimeoutMs,'Media API');const text=await res.text();let data=null;if(text){try{data=JSON.parse(text);}catch{data={error:text};}}if(!res.ok)throw new Error(data?.error||`Media API ${res.status}`);return data;}
+  async _request(path,options={}){const cfg=getMarketplaceBackendConfig01071(),requestAuth=getMarketplaceApiAuth01089(),token=str(requestAuth.token);const headers={...(options.headers||{}),'x-st-request-id':`media_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`};if(requestAuth.storeId)headers['x-st-store-id']=requestAuth.storeId;if(requestAuth.workspaceId)headers['x-st-workspace-id']=requestAuth.workspaceId;if(token)headers.authorization=`Bearer ${token}`;const res=await this._fetch(`${cfg.apiBaseUrl}${path}`,{...options,headers},cfg.requestTimeoutMs,'Media API');const text=await res.text();let data=null;if(text){try{data=JSON.parse(text);}catch{data={error:text};}}if(!res.ok)throw new Error(data?.error||`Media API ${res.status}`);return data;}
   async ready(){this._status=await this._request('/media/storage/status');return this._status;}
   async listAssets(){return this._request('/media/assets');}
   async prepareReference(input={}){const kind=['image','video','document'].includes(str(input.kind))?str(input.kind):'image',url=cleanUrl(input.url),fileName=str(input.fileName)||guessFileName(url),mime=str(input.mime)||guessMime(fileName,kind);return {url,fileName,mime,metadata:{...(input.metadata||{}),assetAdapter:this.name,assetMode:'reference'}};}

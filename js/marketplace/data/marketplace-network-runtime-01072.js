@@ -5,12 +5,13 @@ import {ApiMarketplaceNetworkRepository01072} from '../repositories/api-marketpl
 import {getMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
 import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01082';
 import {getMarketplaceTenantContextStore01070,getMarketplaceRepositoryContext01070,awaitMarketplaceTenantScope01070} from './marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceApiAuth01089,getEffectiveMarketplaceContext01089} from './marketplace-api-auth-01089.js?v=01089';
 import {getMarketplaceStore01052} from './marketplace-runtime-01052.js?v=01052';
 import {buildMarketplacePublicationProjection01072} from '../services/marketplace-network-publication-service-01072.js?v=01072';
 let networkStore=null,initPromise=null,tenantUnsub=null,commerceUnsub=null,syncing=false,lastFingerprint=new Map();
-function ctx(){const c=getMarketplaceTenantContextStore01070().getActiveContext();return {...getMarketplaceRepositoryContext01070(),accountId:c.accountId,storeName:c.store?.name||'',workspaceName:c.workspace?.name||'',accountName:c.account?.name||''};}
-function makeApi(){const c=getMarketplaceBackendConfig01071();return new ApiMarketplaceNetworkRepository01072({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs,tokenProvider:()=>getMarketplaceBackendConfig01071().devToken,contextProvider:ctx});}
-function desiredRepo(){return getMarketplaceBackendConfig01071().mode==='api'&&getMarketplaceBackendStatus01071().state==='api'?makeApi():new LocalMarketplaceNetworkRepository01072();}
+function ctx(){const effective=getEffectiveMarketplaceContext01089();if(effective.source==='real-auth')return {...effective};const c=getMarketplaceTenantContextStore01070().getActiveContext();return {...getMarketplaceRepositoryContext01070(),accountId:c.accountId,storeName:c.store?.name||'',workspaceName:c.workspace?.name||'',accountName:c.account?.name||'',role:'',permissions:[]};}
+function makeApi(){const c=getMarketplaceBackendConfig01071();return new ApiMarketplaceNetworkRepository01072({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs,tokenProvider:()=>getMarketplaceApiAuth01089().token,contextProvider:ctx});}
+function desiredRepo(){return getMarketplaceBackendStatus01071().state==='api'?makeApi():new LocalMarketplaceNetworkRepository01072();}
 export function getMarketplaceNetworkStore01072(){if(!networkStore)networkStore=new MarketplaceNetworkStore01072({repository:desiredRepo(),contextProvider:ctx});return networkStore;}
 export function getMarketplaceNetworkRepositoryInfo01072(){return getMarketplaceNetworkStore01072().getRepositoryInfo();}
 async function switchRepository(reason){const store=getMarketplaceNetworkStore01072(),next=desiredRepo();if(store.getRepositoryInfo().type!==next.type)await store.setRepository(next);else await store.refresh(reason);try{window.__ST_ALL_LOG__?.push?.('marketplace-network:repository-synced-01072',{reason,repository:store.getRepositoryInfo(),context:ctx()});}catch{}}

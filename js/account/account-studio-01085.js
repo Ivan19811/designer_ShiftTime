@@ -17,7 +17,7 @@ import {
 } from './account-view-model-01085.js?v=01085';
 import {getInviteTokenFromUrl01087,inspectAccountInvitation01087,clearInviteTokenFromUrl01087} from './account-invitation-01087.js?v=01087';
 import {buildAccountContexts01088} from './account-context-view-01088.js?v=01088';
-import {SHIFTTIME_BUILD_STAGE,buildStageLabel} from '../core/build-stage.js?v=01088';
+import {SHIFTTIME_BUILD_STAGE,buildStageLabel} from '../core/build-stage.js?v=01089';
 
 let initialized=false;
 let unsubscribe=null;

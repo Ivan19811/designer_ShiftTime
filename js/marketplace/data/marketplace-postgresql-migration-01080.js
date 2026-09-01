@@ -4,6 +4,7 @@ import {awaitMarketplaceTenantScope01070,getMarketplaceRepositoryContext01070} f
 import {ScopedLocalMarketplaceRepository01070} from '../repositories/scoped-local-marketplace-repository-01070.js?v=01070';
 import {ApiMarketplaceRepository01080} from '../repositories/api-marketplace-repository-01080.js?v=01082';
 import {getMarketplaceBackendConfig01071,setMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
+import {getMarketplaceApiAuth01089} from './marketplace-api-auth-01089.js?v=01089';
 import {createLocalOperationalMigrationBundle01080,summarizeLocalOperationalMigrationBundle01080} from './marketplace-local-deployment-bundle-01080.js?v=01080';
 
 const listeners=new Set();let status={state:'idle',message:'Готово до перевірки',lastReport:null,lastError:''};
@@ -15,7 +16,7 @@ async function sha256(text){if(globalThis.crypto?.subtle){const bytes=new TextEn
 async function snapshotHash(s){return sha256(JSON.stringify(contentSnapshot(s)));}
 function counts(s={}){const out={};for(const k of ['products','categories','attributes','attributeValues','variants','media','collections','filters','recommendations','feeds'])out[k]=Array.isArray(s[k])?s[k].length:0;return out;}
 function isEmpty(s={}){return Object.values(counts(s)).every(n=>n===0);}
-function makeApi(){const c=getMarketplaceBackendConfig01071();return new ApiMarketplaceRepository01080({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs,tokenProvider:()=>getMarketplaceBackendConfig01071().devToken,contextProvider:()=>getMarketplaceRepositoryContext01070()});}
+function makeApi(){const c=getMarketplaceBackendConfig01071();return new ApiMarketplaceRepository01080({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs,tokenProvider:()=>getMarketplaceApiAuth01089().token,contextProvider:()=>getMarketplaceApiAuth01089()});}
 export function getPostgresqlMigrationStatus01080(){return clone(status);}
 export function subscribePostgresqlMigration01080(fn){if(typeof fn!=='function')return()=>{};listeners.add(fn);return()=>listeners.delete(fn);}
 export async function getPostgresqlDeploymentStatus01080(){const api=makeApi();const session=await api.getSession();const deployment=await api.getDeploymentStatus();return {session,deployment};}

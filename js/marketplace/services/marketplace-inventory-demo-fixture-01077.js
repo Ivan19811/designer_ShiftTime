@@ -19,7 +19,7 @@ async function alignLocalSourceDemoStock01077(){
 }
 export async function seedMarketplaceInventoryDemoFixture01077({force=false}={}){
   const base=await seedMarketplaceCartDemoFixture01074({force}),cfg=getMarketplaceBackendConfig01071(),st=getMarketplaceBackendStatus01071();
-  if(cfg.mode==='api'&&st.state==='api')return {stage:'01077',base,lowStock:false,reason:'api-seed-via-backend-db-seed'};
+  if(st.state==='api')return {stage:'01077',base,lowStock:false,reason:'api-seed-via-backend-db-seed'};
   const sourceChanged=await alignLocalSourceDemoStock01077();
   const low=await new LocalMarketplaceInventoryFixtureRepository01077().ensureLowStockDemo();
   try{window.dispatchEvent(new CustomEvent('st:marketplace-network-changed',{detail:{reason:'demo-low-stock-01077'}}));}catch{}
