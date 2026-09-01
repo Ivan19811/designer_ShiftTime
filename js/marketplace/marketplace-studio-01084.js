@@ -1,5 +1,5 @@
 // 01084 · Real Auth / User Registration foundation. Visual Account/Admin surfaces follow in 01085/01086.
-import {initMarketplaceAuthRuntime01084,getMarketplaceAuthState01084} from './data/marketplace-auth-runtime-01084.js?v=01084';
+import {initMarketplaceAuthRuntime01084,getMarketplaceAuthState01084} from './data/marketplace-auth-runtime-01084.js?v=01088';
 import {initMarketplaceStudio01083} from './marketplace-studio-01083.js?v=01084';
 
 let api=null;

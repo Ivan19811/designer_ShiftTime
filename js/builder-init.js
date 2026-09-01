@@ -3,7 +3,7 @@
 
 import { initBuilderLayout } from './builder.js?v=01051';
 import { initMarketplaceStudio01087 } from './marketplace/marketplace-studio-01087.js?v=01087';
-import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01085';
+import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01088';
 import { initAdminStudio01087 } from './admin/admin-studio-01087.js?v=01087';
 import { initBuilderUiAppearance01056 } from './ui/builder-ui-appearance-01056.js?v=01056';
 import { initThemeControls } from './builder-theme.js';

@@ -1,5 +1,5 @@
 // 01087 · Dedicated Admin Workspace + Inspector.
-import {initMarketplaceAuthRuntime01084,getMarketplaceAuthState01084,subscribeMarketplaceAuth01084} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01084';
+import {initMarketplaceAuthRuntime01084,getMarketplaceAuthState01084,subscribeMarketplaceAuth01084} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01088';
 import {adminApi01087} from './admin-api-01087.js?v=01087';
 import {roleLabel01087,permissionLabel01087,buildAdminSummary01087,scopeLabel01087,invitationStatusLabel01087,canShowAdmin01087,assignableRoles01087} from './admin-view-model-01087.js?v=01087';
 import {normalizeDataGridModel01087,renderDataGridHtml01087,escapeDataGridHtml01087 as esc} from '../data-grid/data-grid-core-01087.js?v=01087';

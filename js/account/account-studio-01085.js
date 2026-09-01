@@ -6,14 +6,18 @@ import {
   loginMarketplaceUser01084,
   registerMarketplaceUser01084,
   logoutMarketplaceUser01084,
+  listMarketplaceAuthContexts01088,
+  switchMarketplaceAuthContext01088,
   subscribeMarketplaceAuth01084,
-} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01084';
+} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01088';
 import {
   createAccountViewModel01085,
   validateAccountLogin01085,
   validateAccountRegistration01085,
 } from './account-view-model-01085.js?v=01085';
 import {getInviteTokenFromUrl01087,inspectAccountInvitation01087,clearInviteTokenFromUrl01087} from './account-invitation-01087.js?v=01087';
+import {buildAccountContexts01088} from './account-context-view-01088.js?v=01088';
+import {SHIFTTIME_BUILD_STAGE,buildStageLabel} from '../core/build-stage.js?v=01088';
 
 let initialized=false;
 let unsubscribe=null;
@@ -22,6 +26,7 @@ let localError='';
 let fieldErrors={};
 const draft={loginEmail:'',registerName:'',registerEmail:''};
 let inviteToken='';let inviteInfo=null;let inviteLoading=false;
+let contexts=[];let contextsLoading=false;let contextError='';
 
 const esc=(v)=>String(v??'').replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const clean=(v)=>String(v??'').trim();
@@ -64,7 +69,7 @@ function anonymousWorkspace(view){
   return `<div class="st-account-workspace is-anonymous" data-account-screen="${esc(mode)}">
     <section class="st-account-brand-card">
       <div class="st-account-brand-card__orb">S</div>
-      <span class="st-account-kicker">SHIFTTIME BUILDER · 01087</span>
+      <span class="st-account-kicker">${esc(buildStageLabel('SHIFTTIME BUILDER'))}</span>
       <h1>Один акаунт.<br><em>Увесь твій бізнес.</em></h1>
       <p>Авторизація тепер є частиною архітектури Builder: користувач, сесія, Workspace і Store працюють як один захищений контекст.</p>
       <div class="st-account-benefits">
@@ -109,11 +114,24 @@ function securityWorkspace(view){
   </div>`;
 }
 
+
+function contextsWorkspace(view){
+  const items=buildAccountContexts01088(contexts,view.storeId);
+  return `<div class="st-account-workspace is-authenticated">
+    <section class="st-account-profile-hero is-compact"><div class="st-account-profile-hero__avatar">${esc(view.initials)}</div><div class="st-account-profile-hero__copy"><span class="st-account-kicker">КОНТЕКСТИ · ${esc(SHIFTTIME_BUILD_STAGE)}</span><h1>Account / Workspace / Store</h1><p>Один ShiftTime ID може мати різні ролі в кількох магазинах. Активний контекст завжди повторно авторизує backend.</p></div><button class="st-account-ghost-btn" type="button" data-account-action="show-overview">← До профілю</button></section>
+    ${contextError?`<div class="st-account-message is-error">${esc(contextError)}</div>`:''}
+    <section class="st-account-context-card"><div class="st-account-panel-card__head"><div><span class="st-account-kicker">ДОСТУПНІ КОНТЕКСТИ</span><h3>${contextsLoading?'Оновлення…':`${items.length} доступних Store`}</h3></div><span class="st-account-panel-icon">${items.length}</span></div>
+      <div class="st-account-context-grid">${items.map(item=>`<article class="st-account-context-item ${item.active?'is-active':''}"><div><span>${esc(item.accountName||'Account')}</span><h3>${esc(item.storeName||item.storeId)}</h3><p>${esc(item.meta)}</p><code>${esc(item.storeId)}</code></div><button type="button" data-account-action="switch-context" data-store-id="${esc(item.storeId)}" ${item.active||contextsLoading?'disabled':''}>${item.active?'Активний':'Перейти →'}</button></article>`).join('')||'<div class="st-account-context-empty">Доступні контексти не знайдено.</div>'}</div>
+    </section>
+  </div>`;
+}
+
 function inspector(view){
+  const buildLabel=esc(buildStageLabel('ACCOUNT'));
   if(!view.authenticated){
-    return `<div class="st-account-inspector"><div class="st-account-inspector__hero"><span class="st-account-kicker">ACCOUNT · 01085</span><h2>Мій акаунт</h2><p>Окремий контекст входу й реєстрації, без налаштувань Canvas або Marketplace.</p></div><div class="st-account-inspector__nav"><button class="${mode==='login'?'is-active':''}" type="button" data-account-action="show-login"><span>↳</span><div><b>Вхід</b><small>Існуючий акаунт</small></div></button><button class="${mode==='register'?'is-active':''}" type="button" data-account-action="show-register"><span>＋</span><div><b>Реєстрація</b><small>Новий Account + Store</small></div></button></div><div class="st-account-inspector__status"><span>Auth Runtime</span><b>${view.pending?'Підключення…':'Готовий'}</b><small>01084 session authority</small></div></div>`;
+    return `<div class="st-account-inspector"><div class="st-account-inspector__hero"><span class="st-account-kicker">${buildLabel}</span><h2>Мій акаунт</h2><p>Окремий контекст входу й реєстрації, без налаштувань Canvas або Marketplace.</p></div><div class="st-account-inspector__nav"><button class="${mode==='login'?'is-active':''}" type="button" data-account-action="show-login"><span>↳</span><div><b>Вхід</b><small>Існуючий акаунт</small></div></button><button class="${mode==='register'?'is-active':''}" type="button" data-account-action="show-register"><span>＋</span><div><b>Реєстрація</b><small>Новий Account + Store</small></div></button></div><div class="st-account-inspector__status"><span>Auth Runtime</span><b>${view.pending?'Підключення…':'Готовий'}</b><small>01084 session authority</small></div></div>`;
   }
-  return `<div class="st-account-inspector"><div class="st-account-inspector__user"><span class="st-account-inspector__avatar">${esc(view.initials)}</span><div><span class="st-account-kicker">ACCOUNT · 01085</span><h2>${esc(view.displayName)}</h2><p>${esc(view.email)}</p></div></div><div class="st-account-inspector__nav"><button class="${mode!=='security'?'is-active':''}" type="button" data-account-action="show-overview"><span>⌂</span><div><b>Огляд</b><small>Профіль і scope</small></div></button><button class="${mode==='security'?'is-active':''}" type="button" data-account-action="show-security"><span>◈</span><div><b>Безпека</b><small>Поточна сесія</small></div></button></div><div class="st-account-inspector__scope"><span>Поточний Store</span><strong>${esc(view.storeName||view.storeId||'—')}</strong><code>${esc(view.storeId||'')}</code></div><button class="st-account-inspector__logout" type="button" data-account-action="logout">Вийти з акаунта</button></div>`;
+  return `<div class="st-account-inspector"><div class="st-account-inspector__user"><span class="st-account-inspector__avatar">${esc(view.initials)}</span><div><span class="st-account-kicker">${buildLabel}</span><h2>${esc(view.displayName)}</h2><p>${esc(view.email)}</p></div></div><div class="st-account-inspector__nav"><button class="${mode==='overview'?'is-active':''}" type="button" data-account-action="show-overview"><span>⌂</span><div><b>Огляд</b><small>Профіль і scope</small></div></button><button class="${mode==='contexts'?'is-active':''}" type="button" data-account-action="show-contexts"><span>⇄</span><div><b>Контексти</b><small>${contextsLoading?'Оновлення…':`${contexts.length||1} Store / ролі`}</small></div></button><button class="${mode==='security'?'is-active':''}" type="button" data-account-action="show-security"><span>◈</span><div><b>Безпека</b><small>Поточна сесія</small></div></button></div><div class="st-account-inspector__scope"><span>Поточний Store</span><strong>${esc(view.storeName||view.storeId||'—')}</strong><code>${esc(view.storeId||'')}</code></div><button class="st-account-inspector__logout" type="button" data-account-action="logout">Вийти з акаунта</button></div>`;
 }
 
 function updateHeader(view){
@@ -132,13 +150,29 @@ function updateHeader(view){
 
 function render(){
   const view=vm();
-  if(view.authenticated&&mode!=='security')mode='overview';
+  if(view.authenticated&&!['overview','security','contexts'].includes(mode))mode='overview';
   if(!view.authenticated&&!['login','register'].includes(mode))mode='login';
   const workspace=document.getElementById('accountStudioView');
   const panel=document.getElementById('account-panel-root');
-  if(workspace)workspace.innerHTML=view.authenticated?(mode==='security'?securityWorkspace(view):accountOverview(view)):anonymousWorkspace(view);
+  if(workspace)workspace.innerHTML=view.authenticated?(mode==='security'?securityWorkspace(view):mode==='contexts'?contextsWorkspace(view):accountOverview(view)):anonymousWorkspace(view);
   if(panel)panel.innerHTML=inspector(view);
   updateHeader(view);
+}
+
+async function loadContexts({silent=false}={}){
+  if(!authState()?.token){contexts=[];contextError='';contextsLoading=false;return [];}
+  if(!silent){contextsLoading=true;contextError='';render();}
+  try{contexts=await listMarketplaceAuthContexts01088();contextError='';return contexts;}
+  catch(e){contextError=e?.message||'Не вдалося завантажити доступні контексти.';return [];}
+  finally{contextsLoading=false;render();}
+}
+
+async function switchContext(storeId){
+  const id=clean(storeId);if(!id)return;
+  contextsLoading=true;contextError='';render();
+  try{await switchMarketplaceAuthContext01088(id);mode='overview';await loadContexts({silent:true});}
+  catch(e){contextError=e?.message||'Не вдалося перемкнути Store.';}
+  finally{contextsLoading=false;render();}
 }
 
 function setMode(next){
@@ -156,7 +190,7 @@ async function submitLogin(form){
   localError='';
   if(!result.valid){render();return;}
   render();
-  try{await loginMarketplaceUser01084({email:draft.loginEmail,password:String(data.password||'')});mode='overview';localError='';fieldErrors={};}
+  try{await loginMarketplaceUser01084({email:draft.loginEmail,password:String(data.password||'')});mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
   catch(e){localError=e?.message||'Не вдалося увійти.';}
   render();
 }
@@ -169,18 +203,20 @@ async function submitRegister(form){
   localError='';
   if(!result.valid){render();return;}
   render();
-  try{await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password:String(data.password||''),...(inviteToken?{inviteToken}: {})});if(inviteToken)clearInviteTokenFromUrl01087();inviteToken='';inviteInfo=null;mode='overview';localError='';fieldErrors={};}
+  try{await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password:String(data.password||''),...(inviteToken?{inviteToken}: {})});if(inviteToken)clearInviteTokenFromUrl01087();inviteToken='';inviteInfo=null;mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
   catch(e){localError=e?.message||'Не вдалося створити акаунт.';}
   render();
 }
 
-async function runAction(action){
+async function runAction(action,source){
   if(action==='show-login')return setMode('login');
   if(action==='show-register')return setMode('register');
   if(action==='show-overview')return setMode('overview');
   if(action==='show-security')return setMode('security');
+  if(action==='show-contexts'){mode='contexts';render();return loadContexts();}
+  if(action==='switch-context')return switchContext(source?.dataset?.storeId||'');
   if(action==='logout'){
-    localError='';fieldErrors={};
+    localError='';fieldErrors={};contexts=[];contextError='';
     await logoutMarketplaceUser01084();
     mode='login';
     render();
@@ -191,7 +227,7 @@ function onClick(ev){
   const btn=ev.target?.closest?.('[data-account-action]');
   if(!btn)return;
   ev.preventDefault();
-  runAction(btn.getAttribute('data-account-action')).catch((e)=>{localError=e?.message||String(e);render();});
+  runAction(btn.getAttribute('data-account-action'),btn).catch((e)=>{localError=e?.message||String(e);render();});
 }
 
 function onSubmit(ev){
@@ -215,8 +251,9 @@ export async function initAccountStudio01085(){
   unsubscribe=subscribeMarketplaceAuth01084(()=>render());
   inviteToken=getInviteTokenFromUrl01087();
   if(inviteToken&&!authState()?.user){inviteLoading=true;mode='register';try{inviteInfo=await inspectAccountInvitation01087(inviteToken);draft.registerEmail=String(inviteInfo?.email||'');}catch(e){localError=e?.message||'Запрошення недійсне.';}finally{inviteLoading=false;}}
+  if(authState()?.user)await loadContexts({silent:true});
   render();
-  const api=Object.freeze({stage:'01087',render,setMode,getViewModel:()=>vm(),destroy(){try{unsubscribe?.();}catch{}unsubscribe=null;initialized=false;}});
-  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01087',{stage:'01087',authStatus:vm().status,invite:Boolean(inviteToken),next:'01088-dynamic-table-data-model-foundation'});}catch{}
+  const api=Object.freeze({stage:'01088',render,setMode,getViewModel:()=>vm(),destroy(){try{unsubscribe?.();}catch{}unsubscribe=null;initialized=false;}});
+  try{window.ST_ACCOUNT_STUDIO_01085=api;window.__ST_ALL_LOG__?.push?.('account-studio:ready-01088',{stage:'01088',authStatus:vm().status,invite:Boolean(inviteToken),next:'01089-dynamic-table-data-model-foundation'});}catch{}
   return api;
 }

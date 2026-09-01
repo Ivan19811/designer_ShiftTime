@@ -4,7 +4,7 @@ import {getMarketplaceTenantContextStore01070,awaitMarketplaceTenantScope01070,g
 import {ScopedLocalMarketplaceRepository01070} from '../repositories/scoped-local-marketplace-repository-01070.js?v=01070';
 import {ApiMarketplaceRepository01071} from '../repositories/api-marketplace-repository-01071.js?v=01082';
 import {getMarketplaceBackendConfig01071,setMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceAuthToken01084,getMarketplaceAuthRepositoryContext01084} from './marketplace-auth-runtime-01084.js?v=01084';
+import {getMarketplaceAuthToken01084,getMarketplaceAuthRepositoryContext01084} from './marketplace-auth-runtime-01084.js?v=01088';
 let installed=false,contextUnsub=null,switching=Promise.resolve(),status={state:'local',message:'Local Store repository',lastTest:null,lastError:'',serverScope:null};
 const listeners=new Set();
 function emit(reason){const detail={reason,status:getMarketplaceBackendStatus01071(),config:safeConfig(),repository:getMarketplaceStore01052().getRepositoryInfo()};listeners.forEach(fn=>{try{fn(detail);}catch{}});try{window.dispatchEvent(new CustomEvent('st:marketplace-backend-status-changed',{detail}));}catch{}try{window.__ST_ALL_LOG__?.push?.('marketplace-backend:status-01071',detail);}catch{}}

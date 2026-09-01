@@ -1,6 +1,6 @@
 // 01087 · Admin API client. Real Auth 01084 remains the only token authority.
 import {getMarketplaceBackendConfig01071} from '../marketplace/data/marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceAuthToken01084,getMarketplaceAuthScope01084} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01084';
+import {getMarketplaceAuthToken01084,getMarketplaceAuthScope01084} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01088';
 
 function baseUrl(){return String(getMarketplaceBackendConfig01071().apiBaseUrl||'').replace(/\/$/,'');}
 function authHeaders(body){const token=getMarketplaceAuthToken01084(),scope=getMarketplaceAuthScope01084();const h={accept:'application/json'};if(body!==undefined)h['content-type']='application/json';if(token)h.authorization=`Bearer ${token}`;if(scope?.storeId)h['x-st-store-id']=scope.storeId;return h;}
