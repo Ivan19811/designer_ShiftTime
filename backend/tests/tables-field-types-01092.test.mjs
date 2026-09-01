@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {getCellDropCompatibility01092,normalizeTableField01092,validateTableRecordValues01092} from '../src/tables-field-types-01092.mjs';
+import {getCellDropCompatibility01092,normalizeTableField01092,normalizeTableStoredValue01094,validateTableRecordValues01092} from '../src/tables-field-types-01092.mjs';
 
 test('01092 backend repeats strict typed drag compatibility instead of trusting the browser',()=>{
   assert.equal(getCellDropCompatibility01092('date','text').allowed,false);
@@ -18,3 +18,9 @@ test('01092 backend field validation normalizes numeric, email and date values',
   assert.equal(validateTableRecordValues01092(fields,{f_name:'X',unknown:'value'}).ok,false);
 });
 
+test('01094 repairs legacy empty-object defaults without changing real values',()=>{
+  assert.equal(normalizeTableStoredValue01094({}),null);
+  assert.equal(normalizeTableField01092({id:'f_email',name:'Email',type:'email',defaultValue:{}}).defaultValue,null);
+  assert.deepEqual(normalizeTableStoredValue01094([]),[]);
+  assert.equal(normalizeTableStoredValue01094('value'),'value');
+});

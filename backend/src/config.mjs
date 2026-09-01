@@ -3,7 +3,7 @@ function int(v,fallback,min,max){const n=Number(v);return Number.isFinite(n)?Mat
 function sslMode(v){const x=String(v??'auto').trim().toLowerCase();return ['auto','true','require','false','disable'].includes(x)?x:'auto';}
 const nodeEnv=String(process.env.NODE_ENV||'development').trim().toLowerCase()||'development';
 export const config=Object.freeze({
-  stage:'01088',
+  stage:'01094',
   nodeEnv,
   isProduction:nodeEnv==='production',
   host:process.env.HOST||'127.0.0.1',
@@ -14,7 +14,7 @@ export const config=Object.freeze({
   databaseConnectTimeoutMs:int(process.env.DATABASE_CONNECT_TIMEOUT_MS,10000,1000,120000),
   databaseIdleTimeoutMs:int(process.env.DATABASE_IDLE_TIMEOUT_MS,30000,1000,300000),
   databaseStatementTimeoutMs:int(process.env.DATABASE_STATEMENT_TIMEOUT_MS,30000,1000,300000),
-  databaseApplicationName:process.env.DATABASE_APPLICATION_NAME||'shifttime-tables-01092',
+  databaseApplicationName:process.env.DATABASE_APPLICATION_NAME||'shifttime-tables-01094',
   migrationLockTimeoutMs:int(process.env.MIGRATION_LOCK_TIMEOUT_MS,60000,1000,300000),
   productionGuardStrict:bool(process.env.PRODUCTION_GUARD_STRICT,nodeEnv==='production'),
   corsOrigin:process.env.CORS_ORIGIN||'*',

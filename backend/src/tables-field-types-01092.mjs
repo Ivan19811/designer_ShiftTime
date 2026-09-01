@@ -4,7 +4,12 @@ const clean=v=>String(v??'').trim();
 const clone=v=>JSON.parse(JSON.stringify(v));
 const slug=v=>clean(v).toLowerCase().normalize('NFKD').replace(/[^a-z0-9а-яіїєґ]+/giu,'_').replace(/^_+|_+$/g,'').slice(0,54)||'field';
 
-export function normalizeTableField01092(input={},position=0){const type=TABLE_FIELD_TYPES_01092.includes(clean(input.type||input.fieldType))?clean(input.type||input.fieldType):'text',systemField=['created-time','created-by','updated-time'].includes(type);const name=clean(input.name)||'Нове поле';return {id:clean(input.id),key:slug(input.key||input.fieldKey||name),name,type,position:Number.isFinite(Number(input.position))?Number(input.position):position,required:systemField?false:Boolean(input.required),unique:systemField?false:Boolean(input.unique??input.uniqueValue),defaultValue:systemField?null:(input.defaultValue??null),config:input.config&&typeof input.config==='object'?clone(input.config):{}};}
+export function normalizeTableStoredValue01094(value){
+  if(value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===0)return null;
+  return value??null;
+}
+
+export function normalizeTableField01092(input={},position=0){const type=TABLE_FIELD_TYPES_01092.includes(clean(input.type||input.fieldType))?clean(input.type||input.fieldType):'text',systemField=['created-time','created-by','updated-time'].includes(type);const name=clean(input.name)||'Нове поле';return {id:clean(input.id),key:slug(input.key||input.fieldKey||name),name,type,position:Number.isFinite(Number(input.position))?Number(input.position):position,required:systemField?false:Boolean(input.required),unique:systemField?false:Boolean(input.unique??input.uniqueValue),defaultValue:systemField?null:normalizeTableStoredValue01094(input.defaultValue),config:input.config&&typeof input.config==='object'?clone(input.config):{}};}
 export function isSystemTableField01092(type){return ['created-time','created-by','updated-time'].includes(clean(type));}
 export function getCellDropCompatibility01092(sourceType,targetType){const source=clean(sourceType),target=clean(targetType);if(!TABLE_FIELD_TYPES_01092.includes(source)||!TABLE_FIELD_TYPES_01092.includes(target))return {allowed:false,mode:'blocked',reason:'unknown-type'};if(isSystemTableField01092(target))return {allowed:false,mode:'blocked',reason:'readonly-target'};if(source===target)return {allowed:true,mode:'exact',reason:'same-type'};return {allowed:false,mode:'blocked',reason:'strict-type-mismatch'};}
 
