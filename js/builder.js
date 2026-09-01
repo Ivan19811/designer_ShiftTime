@@ -35,6 +35,7 @@ export function initBuilderLayout() {
     if (id === 'site') return 'site';
     if (id === 'pages') return 'pages';
     if (id === 'marketplace') return 'marketplace';
+    if (id === 'tables') return 'tables';
     if (id === 'account') return 'account';
     if (id === 'admin') return 'admin';
     return 'canvas';
@@ -64,6 +65,7 @@ export function initBuilderLayout() {
     if (id === 'site') return document.getElementById('navSite');
     if (id === 'pages') return document.getElementById('navPages');
     if (id === 'marketplace') return document.getElementById('navMarketplace');
+    if (id === 'tables') return document.getElementById('navTables');
     if (id === 'account') return document.getElementById('navAccount');
     if (id === 'admin') return document.getElementById('navAdmin');
     return Array.from(root.querySelectorAll('.builder__sidebar-item[data-open-panel]')).find((btn) => btn.getAttribute('data-open-panel') === id) || null;
@@ -77,6 +79,7 @@ export function initBuilderLayout() {
     site: document.getElementById('siteManagerView'),
     pages: document.getElementById('pageManagerView'),
     marketplace: document.getElementById('marketplaceStudioView'),
+    tables: document.getElementById('tablesStudioView'),
     account: document.getElementById('accountStudioView'),
     admin: document.getElementById('adminStudioView'),
   };
@@ -148,11 +151,12 @@ export function initBuilderLayout() {
     // ✅ SHIFT-SITES-2025: позначаємо активний workspace-екран класами, щоб CSS міг
     // жорстко гасити canvas-шапку/канвас навіть якщо інший код випадково поверне display.
     try {
-      root.classList.remove('builder--mainview-canvas', 'builder--mainview-site', 'builder--mainview-pages', 'builder--mainview-marketplace', 'builder--mainview-account', 'builder--mainview-admin');
+      root.classList.remove('builder--mainview-canvas', 'builder--mainview-site', 'builder--mainview-pages', 'builder--mainview-marketplace', 'builder--mainview-tables', 'builder--mainview-account', 'builder--mainview-admin');
       if (key === 'canvas') root.classList.add('builder--mainview-canvas');
       if (key === 'site') root.classList.add('builder--mainview-site');
       if (key === 'pages') root.classList.add('builder--mainview-pages');
       if (key === 'marketplace') root.classList.add('builder--mainview-marketplace');
+      if (key === 'tables') root.classList.add('builder--mainview-tables');
       if (key === 'account') root.classList.add('builder--mainview-account');
       if (key === 'admin') root.classList.add('builder--mainview-admin');
       root.dataset.stWorkspaceOwner = key;
@@ -251,6 +255,7 @@ const previewBtn = document.getElementById('btn-preview');
   const navSiteBtn = document.getElementById('navSite');
   const navPagesBtn = document.getElementById('navPages');
   const navMarketplaceBtn = document.getElementById('navMarketplace');
+  const navTablesBtn = document.getElementById('navTables');
   const navAccountBtn = document.getElementById('navAccount');
   const navAdminBtn = document.getElementById('navAdmin');
   const navDesignBtn = document.getElementById('navDesign');
@@ -339,6 +344,19 @@ const previewBtn = document.getElementById('btn-preview');
         return;
       }
 
+      if (id === 'navTables') {
+        try {
+          const settingsSidebar = document.getElementById('builder-settings-sidebar');
+          const settingsResizer = document.getElementById('builder-settings-resizer');
+          if (settingsSidebar) settingsSidebar.style.display = 'flex';
+          if (settingsResizer) settingsResizer.style.display = 'flex';
+        } catch (_) {}
+        showWorkspaceView('tables');
+        try { activatePanel('tables'); } catch (_) {}
+        try { window.ST_TABLES_STUDIO_01092?.refresh?.(); } catch (_) {}
+        return;
+      }
+
       if (id === 'navAccount') {
         try {
           const settingsSidebar = document.getElementById('builder-settings-sidebar');
@@ -417,7 +435,7 @@ const previewBtn = document.getElementById('btn-preview');
   // Делегування гарантує, що Сайт/Сторінки/Дизайн/Фон сайту завжди працюють.
   document.addEventListener('click', (ev) => {
     const btn = ev.target && ev.target.closest
-      ? ev.target.closest('#navSite, #navPages, #navMarketplace, #navAccount, #builderAccountButton, #navDesign, #navAiDesign, #navAiTest, #navAiRuntime, #navAiAudit, #navAiDebug, .builder__sidebar-item[data-open-panel]')
+      ? ev.target.closest('#navSite, #navPages, #navMarketplace, #navTables, #navAccount, #builderAccountButton, #navDesign, #navAiDesign, #navAiTest, #navAiRuntime, #navAiAudit, #navAiDebug, .builder__sidebar-item[data-open-panel]')
       : null;
     if (!btn) return;
 
@@ -502,6 +520,17 @@ const previewBtn = document.getElementById('btn-preview');
       try { activatePanel('marketplace'); } catch (_) {}
       return;
     }
+    if (id === 'navTables') {
+      setWorkspaceSidebarActive_(btn);
+      try {
+        settingsSidebar.style.display = 'flex';
+        settingsResizer.style.display = 'flex';
+      } catch (_) {}
+      showWorkspaceView('tables');
+      try { activatePanel('tables'); } catch (_) {}
+      try { window.ST_TABLES_STUDIO_01092?.refresh?.(); } catch (_) {}
+      return;
+    }
     if (id === 'navAccount' || id === 'builderAccountButton') {
       setWorkspaceSidebarActive_(navAccountBtn || btn);
       try {
@@ -572,6 +601,12 @@ const previewBtn = document.getElementById('btn-preview');
         try { activatePanel('marketplace'); } catch (_) {}
         return;
       }
+      if (panel === 'tables') {
+        showWorkspaceView('tables');
+        try { activatePanel('tables'); } catch (_) {}
+        try { window.ST_TABLES_STUDIO_01092?.refresh?.(); } catch (_) {}
+        return;
+      }
       if (panel === 'account') {
         showWorkspaceView('account');
         try { activatePanel('account'); } catch (_) {}
@@ -608,6 +643,7 @@ const previewBtn = document.getElementById('btn-preview');
   safeBind(navSiteBtn, 'site');
   safeBind(navPagesBtn, 'pages');
   safeBind(navMarketplaceBtn, 'marketplace');
+  safeBind(navTablesBtn, 'tables');
   safeBind(navAccountBtn, 'account');
   safeBind(navAdminBtn, 'admin');
   safeBind(navDesignBtn, 'canvas');
@@ -630,6 +666,7 @@ const previewBtn = document.getElementById('btn-preview');
       if (panel === 'site') showWorkspaceView('site');
       else if (panel === 'pages') showWorkspaceView('pages');
       else if (panel === 'marketplace') showWorkspaceView('marketplace');
+      else if (panel === 'tables') showWorkspaceView('tables');
       else if (panel === 'account') showWorkspaceView('account');
       else if (panel === 'admin') showWorkspaceView('admin');
       else showWorkspaceView('canvas');
