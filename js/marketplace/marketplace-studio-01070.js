@@ -1,6 +1,6 @@
 // 01070 · Multi-Tenant Commerce Foundation.
-import {initMarketplaceStudio01069} from './marketplace-studio-01069.js?v=01083';
-import {initMarketplaceMultiTenant01070} from './marketplace-multi-tenant-01070.js?v=01070';
+import {initMarketplaceStudio01069} from './marketplace-studio-01069.js?v=01090';
+import {initMarketplaceMultiTenant01070} from './marketplace-multi-tenant-01070.js?v=01090';
 
 let api=null;
 export async function initMarketplaceStudio01070(){

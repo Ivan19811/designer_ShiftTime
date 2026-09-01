@@ -3,7 +3,7 @@ import {MarketplacePaymentStore01076} from './marketplace-payment-store-01076.js
 import {LocalMarketplacePaymentRepository01076} from '../repositories/local-marketplace-payment-repository-01076.js?v=01079';
 import {ApiMarketplacePaymentRepository01076} from '../repositories/api-marketplace-payment-repository-01076.js?v=01082';
 import {getMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01082';
+import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01090';
 import {syncMarketplaceOperationalRepository01089} from './marketplace-runtime-sync-01089.js?v=01089';
 let store=null,installed=false;
 function desired(){const c=getMarketplaceBackendConfig01071(),s=getMarketplaceBackendStatus01071();return s.state==='api'?new ApiMarketplacePaymentRepository01076({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs}):new LocalMarketplacePaymentRepository01076();}

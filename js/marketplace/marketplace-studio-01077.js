@@ -1,5 +1,5 @@
 // 01077 · Inventory reservation / stock commit stage.
-import {initMarketplaceStudio01076} from './marketplace-studio-01076.js?v=01083';
+import {initMarketplaceStudio01076} from './marketplace-studio-01076.js?v=01090';
 import {seedMarketplaceInventoryDemoFixture01077} from './services/marketplace-inventory-demo-fixture-01077.js?v=01082';
 import {initMarketplaceInventoryUi01077} from './marketplace-inventory-01077.js?v=01082';
 let api=null;

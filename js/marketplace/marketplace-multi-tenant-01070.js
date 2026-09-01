@@ -1,8 +1,8 @@
 // 01070 · Marketplace Studio multi-tenant UI and context switcher.
-import {initMarketplaceTenantRuntime01070,awaitMarketplaceTenantScope01070,getMarketplaceRepositoryContext01070,getMarketplaceMediaScope01070} from './data/marketplace-tenant-runtime-01070.js?v=01070';
+import {initMarketplaceTenantRuntime01070,awaitMarketplaceTenantScope01070,getMarketplaceRepositoryContext01070,getMarketplaceMediaScope01070} from './data/marketplace-tenant-runtime-01070.js?v=01090';
 import {MARKETPLACE_ROLE_PERMISSIONS_01070} from './services/marketplace-permissions-01070.js?v=01089';
 import {getEffectiveMarketplaceContext01089} from './data/marketplace-api-auth-01089.js?v=01089';
-import {subscribeMarketplaceAuth01084} from './data/marketplace-auth-runtime-01084.js?v=01089';
+import {subscribeMarketplaceAuth01084} from './data/marketplace-auth-runtime-01084.js?v=01090';
 
 const STAGE='01070'; let mounted=false; let contextStore=null; let commerceStore=null;
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}

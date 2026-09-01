@@ -1,5 +1,5 @@
 // 01074 · Multi-Seller Cart stage.
-import {initMarketplaceStudio01073} from './marketplace-studio-01073.js?v=01083';
+import {initMarketplaceStudio01073} from './marketplace-studio-01073.js?v=01090';
 import {seedMarketplaceCartDemoFixture01074} from './services/marketplace-cart-demo-fixture-01074.js?v=01082';
 import {initMarketplaceCartUi01074} from './marketplace-cart-01074.js?v=01082';
 let api=null;

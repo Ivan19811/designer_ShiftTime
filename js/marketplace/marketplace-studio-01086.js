@@ -1,5 +1,5 @@
 // 01086 · Real Auth session ↔ Marketplace Backend status parity fix.
-import {initMarketplaceStudio01085} from './marketplace-studio-01085.js?v=01085';
+import {initMarketplaceStudio01085} from './marketplace-studio-01085.js?v=01090';
 
 let api=null;
 export async function initMarketplaceStudio01086(){

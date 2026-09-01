@@ -2,7 +2,7 @@ import {MarketplaceShippingStore01078} from './marketplace-shipping-store-01078.
 import {LocalMarketplaceShippingRepository01078} from '../repositories/local-marketplace-shipping-repository-01078.js?v=01079';
 import {ApiMarketplaceShippingRepository01078} from '../repositories/api-marketplace-shipping-repository-01078.js?v=01082';
 import {getMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01082';
+import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01090';
 import {syncMarketplaceOperationalRepository01089} from './marketplace-runtime-sync-01089.js?v=01089';
 let store=null,installed=false;
 function desired(){const c=getMarketplaceBackendConfig01071(),s=getMarketplaceBackendStatus01071();return s.state==='api'?new ApiMarketplaceShippingRepository01078({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs}):new LocalMarketplaceShippingRepository01078();}

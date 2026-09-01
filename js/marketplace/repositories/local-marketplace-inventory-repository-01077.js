@@ -2,7 +2,7 @@
 import {createInventoryReservation01077,createInventoryLedgerEntry01077,summarizeInventoryOffer01077} from '../data/marketplace-inventory-schema-01077.js?v=01077';
 import {LOCAL_MARKETPLACE_NETWORK_KEY_01072} from './local-marketplace-network-repository-01072.js?v=01072';
 import {createDefaultMarketplaceNetworkSnapshot01072,normalizeMarketplaceNetworkSnapshot01072} from '../data/marketplace-network-schema-01072.js?v=01072';
-import {getMarketplaceRepositoryContext01070} from '../data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceRepositoryContext01070} from '../data/marketplace-tenant-runtime-01070.js?v=01090';
 import {getScopedMarketplaceStorageKey01070} from './scoped-local-marketplace-repository-01070.js?v=01070';
 import {normalizeMarketplaceSnapshot01052,touchMarketplaceSnapshot01052} from '../data/marketplace-schema-01052.js?v=01052';
 export const LOCAL_MARKETPLACE_INVENTORY_KEY_01077='st_marketplace_inventory_v1_01077';

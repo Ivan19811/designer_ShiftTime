@@ -1,6 +1,6 @@
 // 01089 · Real Auth context automatically drives Marketplace ApiRepository + server-authorized Store.
-import {initMarketplaceStudio01087} from './marketplace-studio-01087.js?v=01089';
-import {getMarketplaceBackendStatus01071} from './data/marketplace-backend-runtime-01071.js?v=01089';
+import {initMarketplaceStudio01087} from './marketplace-studio-01087.js?v=01090';
+import {getMarketplaceBackendStatus01071} from './data/marketplace-backend-runtime-01071.js?v=01090';
 import {getEffectiveMarketplaceContext01089} from './data/marketplace-api-auth-01089.js?v=01089';
 let api=null;
 export async function initMarketplaceStudio01089(){

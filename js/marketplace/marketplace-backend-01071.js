@@ -1,10 +1,10 @@
 // 01071 · Backend API / PostgreSQL control surface. Local mode remains the safe default.
 import {getMarketplaceBackendConfig01071,setMarketplaceBackendConfig01071,clearMarketplaceBackendToken01071} from './data/marketplace-backend-config-01071.js?v=01071';
-import {initMarketplaceBackendRuntime01071,getMarketplaceBackendStatus01071,subscribeMarketplaceBackend01071,testConnection,migrateActiveStoreToApi,switchToLocal,connectApiWithoutMigration} from './data/marketplace-backend-runtime-01071.js?v=01082';
+import {initMarketplaceBackendRuntime01071,getMarketplaceBackendStatus01071,subscribeMarketplaceBackend01071,testConnection,migrateActiveStoreToApi,switchToLocal,connectApiWithoutMigration} from './data/marketplace-backend-runtime-01071.js?v=01090';
 import {getMarketplaceStore01052} from './data/marketplace-runtime-01052.js?v=01052';
-import {getMarketplaceRepositoryContext01070} from './data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceRepositoryContext01070} from './data/marketplace-tenant-runtime-01070.js?v=01090';
 import {getEffectiveMarketplaceContext01089} from './data/marketplace-api-auth-01089.js?v=01089';
-import {getMarketplaceAuthState01084,subscribeMarketplaceAuth01084} from './data/marketplace-auth-runtime-01084.js?v=01089';
+import {getMarketplaceAuthState01084,subscribeMarketplaceAuth01084} from './data/marketplace-auth-runtime-01084.js?v=01090';
 import {resolveBackendAuthDisplay01086} from './data/marketplace-backend-auth-status-01086.js?v=01086';
 const STAGE='01071';let mounted=false;
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}

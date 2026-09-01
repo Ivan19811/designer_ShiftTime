@@ -1,7 +1,7 @@
 // 01072 · ShiftTime Marketplace Network control surface.
 import {initMarketplaceNetworkRuntime01072,getMarketplaceNetworkStore01072,publishCommerceProduct01072,syncCommerceProduct01072} from './data/marketplace-network-runtime-01072.js?v=01082';
 import {getMarketplaceStore01052} from './data/marketplace-runtime-01052.js?v=01052';
-import {getMarketplaceTenantContextStore01070} from './data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceTenantContextStore01070} from './data/marketplace-tenant-runtime-01070.js?v=01090';
 const STAGE='01072';let mounted=false,networkStore=null,commerceStore=null,tenantStore=null;
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function money(v,c='UAH'){try{return new Intl.NumberFormat('uk-UA',{style:'currency',currency:c,maximumFractionDigits:0}).format(Number(v)||0);}catch{return `${Number(v)||0} ${c}`;}}

@@ -1,5 +1,5 @@
 // 01079 · Checkout Price / Shipping Totals stage.
-import {initMarketplaceStudio01078} from './marketplace-studio-01078.js?v=01083';
+import {initMarketplaceStudio01078} from './marketplace-studio-01078.js?v=01090';
 let api=null;
 export async function initMarketplaceStudio01079(){
   const base=await initMarketplaceStudio01078();

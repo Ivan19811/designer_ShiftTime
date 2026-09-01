@@ -1,6 +1,6 @@
 // 01078 · LOCAL DEV shipping adapter. Operational Delivery is stored on each SellerOrder snapshot.
 import {LOCAL_MARKETPLACE_ORDERS_KEY_01075} from './local-marketplace-order-repository-01075.js?v=01079';
-import {getMarketplaceRepositoryContext01070} from '../data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceRepositoryContext01070} from '../data/marketplace-tenant-runtime-01070.js?v=01090';
 import {normalizeSellerOrderDelivery01078,defaultCarrierForMethod01078} from '../data/marketplace-shipping-schema-01078.js?v=01078';
 import {localManualDevShippingProvider01078} from './local-manual-dev-shipping-provider-01078.js?v=01078';
 import {normalizeMarketplaceOrderTotals01079,moneyRound01079} from '../data/marketplace-order-totals-01079.js?v=01079';

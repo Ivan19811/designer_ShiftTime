@@ -61,3 +61,9 @@ test('01089 store-scoped operational runtimes refresh even when API repository t
   await sync.syncMarketplaceOperationalRepository01089(store,next,{reason:'auth-context-changed'});
   assert.deepEqual(calls,['refresh:auth-context-changed']);
 });
+
+test('01090 Real Auth forbids LocalRepository fallback while the API path is authoritative',()=>{
+  assert.equal(typeof mod.shouldAllowMarketplaceLocalFallback01090,'function');
+  assert.equal(mod.shouldAllowMarketplaceLocalFallback01090(authState),false);
+  assert.equal(mod.shouldAllowMarketplaceLocalFallback01090({status:'anonymous',token:'',scope:null}),true);
+});

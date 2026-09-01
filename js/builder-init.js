@@ -2,9 +2,9 @@
 // Єдина ініціалізація конструктора + інтеграція віджетів "Сайт" і "Сторінки"
 
 import { initBuilderLayout } from './builder.js?v=01051';
-import { initMarketplaceStudio01089 } from './marketplace/marketplace-studio-01089.js?v=01089';
-import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01089';
-import { initAdminStudio01087 } from './admin/admin-studio-01087.js?v=01087';
+import { initMarketplaceStudio01090 } from './marketplace/marketplace-studio-01090.js?v=01090';
+import { initAccountStudio01085 } from './account/account-studio-01085.js?v=01090';
+import { initAdminStudio01087 } from './admin/admin-studio-01087.js?v=01090';
 import { initBuilderUiAppearance01056 } from './ui/builder-ui-appearance-01056.js?v=01056';
 import { initThemeControls } from './builder-theme.js';
 import { initBackgroundPanel } from './panel-background.js';
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // -----------------------------
   initBuilderLayout();
   try { initBuilderUiAppearance01056(); } catch (e) { console.warn('[builder-init] Builder UI Appearance 01056 init failed', e); }
-  try { initMarketplaceStudio01089().catch(e => console.warn('[builder-init] Marketplace Studio 01089 async init failed', e)); } catch (e) { console.warn('[builder-init] Marketplace Studio 01089 init failed', e); }
+  try { initMarketplaceStudio01090().catch(e => console.warn('[builder-init] Marketplace Studio 01090 async init failed', e)); } catch (e) { console.warn('[builder-init] Marketplace Studio 01090 init failed', e); }
   try { initAccountStudio01085().catch(e => console.warn('[builder-init] Account Studio 01085 async init failed', e)); } catch (e) { console.warn('[builder-init] Account Studio 01085 init failed', e); }
   try { initAdminStudio01087().catch(e => console.warn('[builder-init] Admin Studio 01087 async init failed', e)); } catch (e) { console.warn('[builder-init] Admin Studio 01087 init failed', e); }
   stBootMark_('shell', 30, 'Оболонка конструктора змонтована. Ініціалізуємо базові системи.');

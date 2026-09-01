@@ -1,5 +1,5 @@
 // 01085 · Account/Login/Register UI stage wrapper. Real Auth authority remains 01084.
-import {initMarketplaceStudio01084} from './marketplace-studio-01084.js?v=01084';
+import {initMarketplaceStudio01084} from './marketplace-studio-01084.js?v=01090';
 
 let api=null;
 export async function initMarketplaceStudio01085(){

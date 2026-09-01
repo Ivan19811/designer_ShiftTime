@@ -2,7 +2,7 @@
 import {MEDIA_ASSET_REPOSITORY_CONTRACT_VERSION_01059} from './media-asset-repository-contract-01059.js?v=01059';
 import {createBrowserCacheMediaRepository01066} from './browser-cache-media-repository-01066.js?v=01066';
 import {createApiCloudMediaRepository01081} from './api-cloud-media-repository-01081.js?v=01082';
-import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01089';
+import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01090';
 function str(v){return String(v??'').trim();}
 function apiMode(){return getMarketplaceBackendStatus01071().state==='api';}
 export class HybridMediaRepository01081{

@@ -2,7 +2,7 @@
 // Demo data is injected only through MarketplaceStore/MarketplaceRepository. No direct storage access.
 import {getMarketplaceStore01052} from '../data/marketplace-runtime-01052.js?v=01052';
 import {getMarketplaceNetworkStore01072,publishCommerceProduct01072} from '../data/marketplace-network-runtime-01072.js?v=01082';
-import {getMarketplaceTenantContextStore01070} from '../data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceTenantContextStore01070} from '../data/marketplace-tenant-runtime-01070.js?v=01090';
 
 export const MARKETPLACE_DEMO_FIXTURE_ID_01073='demo-fixture-01073-v1';
 const CAT_PANS='demo01073_cat_pans',CAT_CAULDRONS='demo01073_cat_cauldrons';

@@ -9,7 +9,7 @@ import {
   listMarketplaceAuthContexts01088,
   switchMarketplaceAuthContext01088,
   subscribeMarketplaceAuth01084,
-} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01088';
+} from '../marketplace/data/marketplace-auth-runtime-01084.js?v=01090';
 import {
   createAccountViewModel01085,
   validateAccountLogin01085,
@@ -17,7 +17,8 @@ import {
 } from './account-view-model-01085.js?v=01085';
 import {getInviteTokenFromUrl01087,inspectAccountInvitation01087,clearInviteTokenFromUrl01087} from './account-invitation-01087.js?v=01087';
 import {buildAccountContexts01088} from './account-context-view-01088.js?v=01088';
-import {SHIFTTIME_BUILD_STAGE,buildStageLabel} from '../core/build-stage.js?v=01089';
+import {SHIFTTIME_BUILD_STAGE,buildStageLabel} from '../core/build-stage.js?v=01090';
+import {offerBrowserPasswordSave01090} from './browser-password-manager-01090.js?v=01090';
 
 let initialized=false;
 let unsubscribe=null;
@@ -39,11 +40,11 @@ function statusBadge(view){if(view.restoring)return '<span class="st-account-sta
 
 function loginForm(view){
   const busy=view.pending;
-  return `<form class="st-account-form" data-account-form="login" novalidate>
+  return `<form class="st-account-form" data-account-form="login" autocomplete="on" method="post" novalidate>
     <div class="st-account-form__head"><span class="st-account-kicker">SHIFTTIME ID</span><h2>З поверненням</h2><p>Увійди до Builder, Marketplace і свого Store через одну захищену сесію.</p></div>
     ${localError||view.lastError?`<div class="st-account-message is-error" role="alert">${esc(localError||view.lastError)}</div>`:''}
-    <label class="st-account-field"><span>Email</span><input name="email" type="email" autocomplete="email" value="${esc(draft.loginEmail)}" placeholder="name@example.com" ${busy?'disabled':''}>${errorText('email')}</label>
-    <label class="st-account-field"><span>Пароль</span><input name="password" type="password" autocomplete="current-password" placeholder="Ваш пароль" ${busy?'disabled':''}>${errorText('password')}</label>
+    <label class="st-account-field"><span>Email</span><input id="stAccountLoginUsername" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(draft.loginEmail)}" placeholder="name@example.com" ${busy?'disabled':''}>${errorText('email')}</label>
+    <label class="st-account-field"><span>Пароль</span><input id="stAccountLoginPassword" name="password" type="password" autocomplete="current-password" placeholder="Ваш пароль" ${busy?'disabled':''}>${errorText('password')}</label>
     <button class="st-account-submit" type="submit" ${busy?'disabled':''}><span>${busy?'Перевіряємо…':'Увійти'}</span><b aria-hidden="true">→</b></button>
     <div class="st-account-form__switch">Ще немає акаунта? <button type="button" data-account-action="show-register">Створити акаунт</button></div>
   </form>`;
@@ -51,14 +52,14 @@ function loginForm(view){
 
 function registerForm(view){
   const busy=view.pending;
-  return `<form class="st-account-form" data-account-form="register" novalidate>
+  return `<form class="st-account-form" data-account-form="register" autocomplete="on" method="post" novalidate>
     <div class="st-account-form__head"><span class="st-account-kicker">${inviteInfo?'ЗАПРОШЕННЯ · 01087':'НОВИЙ АКАУНТ'}</span><h2>${inviteInfo?`Приєднатися до ${esc(inviteInfo.accountName||'команди')}`:'Створи свій простір'}</h2><p>${inviteInfo?`Роль: ${esc(roleLabel(inviteInfo.role))}. Якщо цей email уже має ShiftTime ID — введи свій існуючий пароль.`:'Після реєстрації ShiftTime автоматично створить особисті Account → Workspace → Store.'}</p></div>${inviteInfo?`<div class="st-account-invite-banner"><b>Запрошення активне</b><span>${esc(inviteInfo.email)} · діє до ${esc(dateLabel(inviteInfo.expiresAt))}</span></div>`:''}
     ${localError||view.lastError?`<div class="st-account-message is-error" role="alert">${esc(localError||view.lastError)}</div>`:''}
     <label class="st-account-field"><span>Ім’я</span><input name="name" autocomplete="name" value="${esc(draft.registerName)}" placeholder="Ваше ім’я" ${busy?'disabled':''}>${errorText('name')}</label>
-    <label class="st-account-field"><span>Email</span><input name="email" type="email" autocomplete="email" value="${esc(draft.registerEmail)}" placeholder="name@example.com" ${inviteInfo?'readonly':''} ${busy?'disabled':''}>${errorText('email')}</label>
+    <label class="st-account-field"><span>Email</span><input id="stAccountRegisterUsername" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(draft.registerEmail)}" placeholder="name@example.com" ${inviteInfo?'readonly':''} ${busy?'disabled':''}>${errorText('email')}</label>
     <div class="st-account-field-grid">
-      <label class="st-account-field"><span>Пароль</span><input name="password" type="password" autocomplete="new-password" placeholder="Мінімум 10 символів" ${busy?'disabled':''}>${errorText('password')}</label>
-      <label class="st-account-field"><span>Повторіть пароль</span><input name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Ще раз" ${busy?'disabled':''}>${errorText('passwordConfirm')}</label>
+      <label class="st-account-field"><span>Пароль</span><input id="stAccountRegisterPassword" name="password" type="password" autocomplete="new-password" placeholder="Мінімум 10 символів" ${busy?'disabled':''}>${errorText('password')}</label>
+      <label class="st-account-field"><span>Повторіть пароль</span><input id="stAccountRegisterPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Ще раз" ${busy?'disabled':''}>${errorText('passwordConfirm')}</label>
     </div>
     <button class="st-account-submit" type="submit" ${busy?'disabled':''}><span>${busy?'Створюємо…':'Створити акаунт'}</span><b aria-hidden="true">→</b></button>
     <div class="st-account-form__switch">Уже є акаунт? <button type="button" data-account-action="show-login">Увійти</button></div>
@@ -190,7 +191,7 @@ async function submitLogin(form){
   localError='';
   if(!result.valid){render();return;}
   render();
-  try{await loginMarketplaceUser01084({email:draft.loginEmail,password:String(data.password||'')});mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
+  try{const password=String(data.password||'');await loginMarketplaceUser01084({email:draft.loginEmail,password});await offerBrowserPasswordSave01090({email:draft.loginEmail,password,name:draft.loginEmail});mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
   catch(e){localError=e?.message||'Не вдалося увійти.';}
   render();
 }
@@ -203,7 +204,7 @@ async function submitRegister(form){
   localError='';
   if(!result.valid){render();return;}
   render();
-  try{await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password:String(data.password||''),...(inviteToken?{inviteToken}: {})});if(inviteToken)clearInviteTokenFromUrl01087();inviteToken='';inviteInfo=null;mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
+  try{const password=String(data.password||'');await registerMarketplaceUser01084({name:draft.registerName,email:draft.registerEmail,password,...(inviteToken?{inviteToken}: {})});await offerBrowserPasswordSave01090({email:draft.registerEmail,password,name:draft.registerName});if(inviteToken)clearInviteTokenFromUrl01087();inviteToken='';inviteInfo=null;mode='overview';localError='';fieldErrors={};await loadContexts({silent:true});}
   catch(e){localError=e?.message||'Не вдалося створити акаунт.';}
   render();
 }

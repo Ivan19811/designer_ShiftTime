@@ -1,6 +1,6 @@
 // 01080 · Production PostgreSQL deployment / verified migration UI.
 import {getMarketplaceStore01052} from './data/marketplace-runtime-01052.js?v=01052';
-import {getMarketplaceRepositoryContext01070} from './data/marketplace-tenant-runtime-01070.js?v=01070';
+import {getMarketplaceRepositoryContext01070} from './data/marketplace-tenant-runtime-01070.js?v=01090';
 import {getMarketplaceBackendConfig01071} from './data/marketplace-backend-config-01071.js?v=01071';
 import {getPostgresqlMigrationStatus01080,subscribePostgresqlMigration01080,getPostgresqlDeploymentStatus01080,migrateActiveLocalStoreToPostgresql01080} from './data/marketplace-postgresql-migration-01080.js?v=01082';
 let mounted=false,lastDeployment=null;

@@ -1,5 +1,5 @@
 // 01083 · Marketplace Studio DOM guard + component-width responsive layout.
-import {initMarketplaceStudio01082} from './marketplace-studio-01082.js?v=01083';
+import {initMarketplaceStudio01082} from './marketplace-studio-01082.js?v=01090';
 let api=null;
 export async function initMarketplaceStudio01083(){
   const base=await initMarketplaceStudio01082();

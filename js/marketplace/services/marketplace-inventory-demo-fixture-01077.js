@@ -2,7 +2,7 @@
 import {seedMarketplaceCartDemoFixture01074} from './marketplace-cart-demo-fixture-01074.js?v=01082';
 import {LocalMarketplaceInventoryFixtureRepository01077} from '../repositories/local-marketplace-inventory-fixture-repository-01077.js?v=01077';
 import {getMarketplaceBackendConfig01071} from '../data/marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01082';
+import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01090';
 import {getMarketplaceStore01052} from '../data/marketplace-runtime-01052.js?v=01052';
 
 const SOURCE_LOW_STOCK=new Map([

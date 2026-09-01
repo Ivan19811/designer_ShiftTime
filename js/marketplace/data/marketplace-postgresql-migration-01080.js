@@ -1,6 +1,6 @@
 // 01080 · Verified LocalRepository -> API/PostgreSQL migration. Local remains intact as fallback.
 import {getMarketplaceStore01052} from './marketplace-runtime-01052.js?v=01052';
-import {awaitMarketplaceTenantScope01070,getMarketplaceRepositoryContext01070} from './marketplace-tenant-runtime-01070.js?v=01070';
+import {awaitMarketplaceTenantScope01070,getMarketplaceRepositoryContext01070} from './marketplace-tenant-runtime-01070.js?v=01090';
 import {ScopedLocalMarketplaceRepository01070} from '../repositories/scoped-local-marketplace-repository-01070.js?v=01070';
 import {ApiMarketplaceRepository01080} from '../repositories/api-marketplace-repository-01080.js?v=01082';
 import {getMarketplaceBackendConfig01071,setMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';

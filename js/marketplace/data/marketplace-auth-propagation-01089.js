@@ -28,3 +28,5 @@ export function resolveMarketplaceRequestAuth01089({authState={},backendConfig={
   });
 }
 export function hasRealMarketplaceAuth01089(authState={}){return isRealAuth(authState);}
+
+export function shouldAllowMarketplaceLocalFallback01090(authState={}){return !isRealAuth(authState);}

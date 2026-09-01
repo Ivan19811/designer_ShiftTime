@@ -1,5 +1,5 @@
 import {seedMarketplaceInventoryDemoFixture01077} from './marketplace-inventory-demo-fixture-01077.js?v=01082';
 import {LocalMarketplaceShippingFixtureRepository01078} from '../repositories/local-marketplace-shipping-fixture-repository-01078.js?v=01079';
 import {getMarketplaceBackendConfig01071} from '../data/marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01082';
+import {getMarketplaceBackendStatus01071} from '../data/marketplace-backend-runtime-01071.js?v=01090';
 export async function seedMarketplaceShippingDemoFixture01078({force=false,createOrder=false}={}){const base=await seedMarketplaceInventoryDemoFixture01077({force}),cfg=getMarketplaceBackendConfig01071(),st=getMarketplaceBackendStatus01071();if(st.state==='api')return {stage:'01079',base,created:false,reason:'api-demo-via-backend-db-seed'};if(!createOrder)return {stage:'01079',base,created:false,reason:'explicit-demo-button'};const demo=await new LocalMarketplaceShippingFixtureRepository01078().ensureDemoOrder();try{window.dispatchEvent(new CustomEvent('st:marketplace-orders-changed',{detail:{reason:'demo-totals-01079'}}));}catch{}return {stage:'01079',base,...demo};}

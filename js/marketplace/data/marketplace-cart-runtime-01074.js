@@ -3,7 +3,7 @@ import {MarketplaceCartStore01074} from './marketplace-cart-store-01074.js?v=010
 import {LocalMarketplaceCartRepository01074} from '../repositories/local-marketplace-cart-repository-01074.js?v=01077';
 import {ApiMarketplaceCartRepository01074} from '../repositories/api-marketplace-cart-repository-01074.js?v=01082';
 import {getMarketplaceBackendConfig01071} from './marketplace-backend-config-01071.js?v=01071';
-import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01082';
+import {getMarketplaceBackendStatus01071} from './marketplace-backend-runtime-01071.js?v=01090';
 let store=null,installed=false;
 function desired(){const c=getMarketplaceBackendConfig01071(),s=getMarketplaceBackendStatus01071();return s.state==='api'?new ApiMarketplaceCartRepository01074({baseUrl:c.apiBaseUrl,requestTimeoutMs:c.requestTimeoutMs}):new LocalMarketplaceCartRepository01074();}
 export function getMarketplaceCartStore01074(){if(!store)store=new MarketplaceCartStore01074({repository:desired()});return store;}

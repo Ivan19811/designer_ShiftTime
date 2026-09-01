@@ -1,5 +1,5 @@
 // 01073 · Global Marketplace Catalog + Search Index.
-import {initMarketplaceStudio01072} from './marketplace-studio-01072.js?v=01083';
+import {initMarketplaceStudio01072} from './marketplace-studio-01072.js?v=01090';
 import {seedMarketplaceDemoFixture01073} from './services/marketplace-demo-fixture-01073.js?v=01082';
 import {initMarketplaceGlobalCatalogUi01073} from './marketplace-global-catalog-01073.js?v=01082';
 let api=null;
