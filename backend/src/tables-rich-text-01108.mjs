@@ -221,7 +221,7 @@ export function tableTextProjection01108(value){
     if(!text)continue;
     const blockLike=node.kind!=='text';
     const previousBlockLike=previousKind&&previousKind!=='text';
-    if(output&&blockLike&&previousBlockLike&&!/\s$/.test(output)&&!/^\s/.test(text))output+=' ';
+    if(output&&previousKind&&(blockLike||previousBlockLike)&&!/\s$/.test(output)&&!/^\s/.test(text))output+=' ';
     output+=text;
     previousKind=node.kind;
   }

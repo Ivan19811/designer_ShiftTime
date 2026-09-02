@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {validateTableRecordValues01092} from '../src/tables-field-types-01092.mjs';
 
 const field={id:'f_note',name:'Нотатка',type:'text'};
@@ -30,4 +31,11 @@ test('01108 table bundle advertises rich text persistence capability',async()=>{
   const fs=await import('node:fs');
   const service=fs.readFileSync(new URL('../src/tables-service-01092.mjs',import.meta.url),'utf8');
   assert.match(service,/tablesRichTextVersion\s*:\s*TABLE_RICH_TEXT_VERSION_01108/);
+});
+
+test('server advertises 01108 rich text capability on the tables collection route',()=>{
+  const server=fs.readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
+  assert.match(server,/TABLE_RICH_TEXT_VERSION_01108/);
+  assert.match(server,/tablesRichTextVersion\s*:\s*TABLE_RICH_TEXT_VERSION_01108/);
+  assert.match(server,/stage\s*:\s*'01108'/);
 });

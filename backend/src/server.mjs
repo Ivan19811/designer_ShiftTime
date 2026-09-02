@@ -22,6 +22,7 @@ import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
+import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
@@ -87,7 +88,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
   if(p[2]==='tables'){
     const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
-    if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01094',tables:await listAuthorizedTables01092(scope,session.userId)});
+    if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,tables:await listAuthorizedTables01092(scope,session.userId)});
     if(req.method==='POST'&&!tableId)return sendJson(res,201,await createAuthorizedTable01092(scope,session.userId,await readJson(req)));
     if(req.method==='GET'&&tableId&&!resource)return sendJson(res,200,await getAuthorizedTable01092(scope,session.userId,tableId));
     if(req.method==='PATCH'&&tableId&&!resource)return sendJson(res,200,await updateAuthorizedTable01092(scope,session.userId,tableId,await readJson(req)));
@@ -101,7 +102,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
     if(resource==='views'&&req.method==='POST'&&!resourceId)return sendJson(res,201,await createAuthorizedTableView01092(scope,session.userId,tableId,await readJson(req)));
     if(resource==='views'&&req.method==='PATCH'&&resourceId)return sendJson(res,200,await updateAuthorizedTableView01092(scope,session.userId,tableId,resourceId,await readJson(req)));
     if(resource==='views'&&req.method==='DELETE'&&resourceId){await deleteAuthorizedTableView01092(scope,session.userId,tableId,resourceId);return sendNoContent(res,204);}
-    return sendJson(res,404,{error:'Tables route not found',stage:'01094',requestId:rid});
+    return sendJson(res,404,{error:'Tables route not found',stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='inventory'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedInventory01077(scope));
@@ -164,6 +165,6 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01094]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01094',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
-server.listen(config.port,config.host,()=>console.log(`[01094] ShiftTime Tables + Commerce Backend http://${config.host}:${config.port}`));
+const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01108]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01094',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
+server.listen(config.port,config.host,()=>console.log(`[01108] ShiftTime Tables Rich Text Backend http://${config.host}:${config.port}`));
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(()=>pool.end().finally(()=>process.exit(0))));
