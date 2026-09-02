@@ -24,3 +24,10 @@ test('01108 backend still accepts legacy text strings unchanged',()=>{
   assert.equal(out.ok,true);
   assert.equal(out.values.f_note,'Звичайний текст');
 });
+
+
+test('01108 table bundle advertises rich text persistence capability',async()=>{
+  const fs=await import('node:fs');
+  const service=fs.readFileSync(new URL('../src/tables-service-01092.mjs',import.meta.url),'utf8');
+  assert.match(service,/tablesRichTextVersion\s*:\s*TABLE_RICH_TEXT_VERSION_01108/);
+});
