@@ -5,7 +5,7 @@ import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRo
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084} from './auth-service-01084.mjs';
-import {applyCors,sendJson,sendNoContent,readJson,requestId} from './http-utils.mjs';
+import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
@@ -17,7 +17,7 @@ import {listAuthorizedInventory01077,listAuthorizedInventoryReservations01077,de
 import {listAuthorizedShippingProviders01078,listAuthorizedSellerDeliveries01078,updateAuthorizedSellerDelivery01078,simulateAuthorizedSellerDelivery01078} from './marketplace-shipping-service.mjs';
 import {getDeploymentStatus01080,sanitizeImportSource01080} from './deployment-service.mjs';
 import {importLocalOperationalBundle01080} from './deployment-local-import-service.mjs';
-import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081} from './media-cloud-service.mjs';
+import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081} from './media-cloud-service.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -78,6 +78,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
     if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertWriteRole(scope);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(scope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertWriteRole(scope);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(scope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
     if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertWriteRole(scope);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(scope,p[4],await readJson(req)));}
     if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
