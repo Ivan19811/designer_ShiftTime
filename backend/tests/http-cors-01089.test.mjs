@@ -17,3 +17,12 @@ test('01089 production CORS remains strict',()=>{
   assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'http://127.0.0.1:5531',corsOrigin:configured,nodeEnv:'production'}),'');
   assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'https://evil.example',corsOrigin:configured,nodeEnv:'production'}),'');
 });
+
+test('01136 production CORS can explicitly allow localhost and 127.0.0.1 on any Live Server port',()=>{
+  const configured='https://studio.example.com';
+  assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'http://127.0.0.1:5549',corsOrigin:configured,nodeEnv:'production',allowLocalDev:true}),'http://127.0.0.1:5549');
+  assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'http://localhost:7788',corsOrigin:configured,nodeEnv:'production',allowLocalDev:true}),'http://localhost:7788');
+  assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'https://studio.example.com',corsOrigin:configured,nodeEnv:'production',allowLocalDev:true}),'https://studio.example.com');
+  assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'https://evil.example',corsOrigin:configured,nodeEnv:'production',allowLocalDev:true}),'');
+  assert.equal(mod.resolveCorsOrigin01089({requestOrigin:'http://localhost.evil.example:7788',corsOrigin:configured,nodeEnv:'production',allowLocalDev:true}),'');
+});

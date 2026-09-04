@@ -18,6 +18,7 @@ export const config=Object.freeze({
   migrationLockTimeoutMs:int(process.env.MIGRATION_LOCK_TIMEOUT_MS,60000,1000,300000),
   productionGuardStrict:bool(process.env.PRODUCTION_GUARD_STRICT,nodeEnv==='production'),
   corsOrigin:process.env.CORS_ORIGIN||'*',
+  corsAllowLocalDev:bool(process.env.CORS_ALLOW_LOCAL_DEV,nodeEnv!=='production'),
   devSessionToken:process.env.DEV_SESSION_TOKEN||'change-me-dev-token',
   devUserEmail:process.env.DEV_USER_EMAIL||'owner@local.shifttime',
   devUserName:process.env.DEV_USER_NAME||'ShiftTime Owner',

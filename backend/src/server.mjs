@@ -25,7 +25,7 @@ import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable0
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
-async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
+async function route(req,res){applyCors(req,res,config.corsOrigin,{nodeEnv:config.nodeEnv,allowLocalDev:config.corsAllowLocalDev});if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:'01094',database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:'01094',database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
@@ -166,6 +166,6 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01108]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01094',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
+const server=http.createServer((req,res)=>{route(req,res).catch(err=>{console.error('[01108]',err);if(!res.headersSent){applyCors(req,res,config.corsOrigin,{nodeEnv:config.nodeEnv,allowLocalDev:config.corsAllowLocalDev});sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:'01094',requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
 server.listen(config.port,config.host,()=>console.log(`[01108] ShiftTime Tables Rich Text Backend http://${config.host}:${config.port}`));
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(()=>pool.end().finally(()=>process.exit(0))));
