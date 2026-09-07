@@ -10,13 +10,18 @@ export function createSitePublishingService01143({repo,netlify,buildFiles=buildP
   async function publish(scope,userId,builderSiteId,pkg){
     const sid=clean(builderSiteId);if(!sid||clean(pkg?.site?.id)!==sid)throw Object.assign(new Error('Publish package site id does not match requested site id'),{statusCode:400});if(clean(pkg?.version)!=='01143')throw Object.assign(new Error('Unsupported publish package version'),{statusCode:400});if(!clean(pkg?.revision))throw Object.assign(new Error('Publish revision is required'),{statusCode:400});
     let record=await repo.get(scope,sid);
+    const validateRoot01150=(files)=>{if(!(files instanceof Map)||!files.has('index.html'))throw Object.assign(new Error('Production build is missing root index.html'),{statusCode:500,code:'ST_PUBLISH_ROOT_MISSING'});return files;};
+    let files;
     if(!clean(record?.netlifySiteId)){
+      // 01150: validate the real production build before creating any remote Netlify project.
+      validateRoot01150(buildFiles(pkg,{canonicalBaseUrl:'',apiProxyTarget}));
       const preferred=clean(pkg?.site?.slug||pkg?.site?.name||sid);
       const site=await netlify.createSiteWithSafeName({preferredName:preferred});
       record=await repo.saveIdentity(scope,{builderSiteId:sid,siteName:clean(pkg?.site?.name),siteSlug:clean(pkg?.site?.slug),netlifySiteId:clean(site.id),netlifySiteName:clean(site.name),netlifyUrl:clean(site.url),netlifySslUrl:clean(site.ssl_url),netlifyAdminUrl:clean(site.admin_url),createdByUserId:userId});
+      files=validateRoot01150(buildFiles(pkg,{canonicalBaseUrl:publicUrl(record),apiProxyTarget}));
+    }else{
+      files=validateRoot01150(buildFiles(pkg,{canonicalBaseUrl:publicUrl(record),apiProxyTarget}));
     }
-    const canonicalBaseUrl=publicUrl(record);const files=buildFiles(pkg,{canonicalBaseUrl,apiProxyTarget});
-    if(!(files instanceof Map)||!files.has('index.html'))throw Object.assign(new Error('Production build is missing root index.html'),{statusCode:500,code:'ST_PUBLISH_ROOT_MISSING'});
     let deploy;try{deploy=await netlify.deployFiles({siteId:record.netlifySiteId,files});}catch(err){await repo.updateDeploy(scope,{builderSiteId:sid,state:'error',error:clean(err.message)}).catch(()=>{});throw err;}
     record=await repo.recordDeploy(scope,{builderSiteId:sid,netlifyDeployId:clean(deploy.id),revision:clean(pkg.revision),state:clean(deploy.state)||'new',createdByUserId:userId});return toStatus(record);
   }
