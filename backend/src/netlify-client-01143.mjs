@@ -20,11 +20,15 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
   async function createSite({name}={}){const safe=slugify(name);return request('/sites',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:safe})});}
   async function createSiteWithSafeName({preferredName}={}){
     const baseName=slugify(preferredName);
-    try{return await createSite({name:baseName});}catch(err){
-      if(Number(err?.netlifyStatus)!==422)throw err;
-      const suffix=slugify(randomSuffix()).slice(0,12)||defaultSuffix();
-      return createSite({name:`${baseName.slice(0,Math.max(1,62-suffix.length))}-${suffix}`});
+    const readable=`${baseName.slice(0,Math.max(1,62-'shifttime'.length))}-shifttime`;
+    const suffix=slugify(randomSuffix()).slice(0,12)||defaultSuffix();
+    const randomName=`${baseName.slice(0,Math.max(1,62-suffix.length))}-${suffix}`;
+    const candidates=[baseName,readable,randomName].filter((value,index,array)=>array.indexOf(value)===index);
+    let lastError=null;
+    for(const name of candidates){
+      try{return await createSite({name});}catch(err){lastError=err;if(Number(err?.netlifyStatus)!==422)throw err;}
     }
+    throw lastError;
   }
   async function deployZip({siteId,zip}={}){if(!clean(siteId))throw Object.assign(new Error('Netlify site id is required'),{statusCode:400});if(!Buffer.isBuffer(zip))throw Object.assign(new Error('ZIP buffer is required'),{statusCode:400});return request(`/sites/${encodeURIComponent(clean(siteId))}/deploys`,{method:'POST',headers:{'content-type':'application/zip'},body:zip});}
   async function getDeploy({deployId}={}){if(!clean(deployId))throw Object.assign(new Error('Netlify deploy id is required'),{statusCode:400});return request(`/deploys/${encodeURIComponent(clean(deployId))}`,{method:'GET'});}

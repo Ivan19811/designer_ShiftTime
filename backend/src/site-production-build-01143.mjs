@@ -1,6 +1,56 @@
 const clean=value=>String(value??'').trim();
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
+
+const ROUTE_TITLE_ALIASES_01146=Object.freeze({
+  'головна':['home','main'],
+  'про-нас':['about','about-us'],
+  'контакти':['contact','contacts'],
+  'доставка-і-оплата':['delivery','shipping','shipping-and-payment'],
+  'доставка-та-оплата':['delivery','shipping','shipping-and-payment'],
+  'гарантія-і-повернення':['warranty','returns','warranty-and-returns'],
+  'гарантія-та-повернення':['warranty','returns','warranty-and-returns'],
+  'блог':['blog'],
+  'каталог':['catalog'],
+  'товари':['products','shop'],
+  'послуги':['services'],
+  'новини':['news'],
+  'акції':['sale','promotions'],
+  'гравіювання':['engraving'],
+});
+
+function routeKey01146(value){
+  return clean(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[’'`]/g,'').replace(/[^a-z0-9а-яіїєґ]+/giu,'-').replace(/^-+|-+$/g,'').replace(/-+/g,'-');
+}
+function normalizedRoute01146(value){let v=clean(value)||'/';if(!v.startsWith('/'))v='/'+v;v=v.split('#')[0].split('?')[0].replace(/\/{2,}/g,'/');return v==='/'?'/':v.replace(/\/+$/,'');}
+function stripTags01146(value){return String(value||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&#39;|&apos;/gi,"'").replace(/&quot;/gi,'"').replace(/\s+/g,' ').trim();}
+function buildRouteIndex01146(pages){
+  const byAlias=new Map(),byTitle=new Map(),routes=new Set();
+  for(const page of Array.isArray(pages)?pages:[]){
+    const route=normalizedRoute01146(page?.path||'/');routes.add(route);
+    const titleKey=routeKey01146(page?.title||page?.name);if(titleKey){byTitle.set(titleKey,route);byAlias.set(titleKey,route);}
+    const pathKey=routeKey01146(route.replace(/^\/+/,''));if(pathKey)byAlias.set(pathKey,route);
+    if(route==='/'){byAlias.set('home',route);byAlias.set('main',route);byAlias.set('головна',route);}
+    for(const alias of ROUTE_TITLE_ALIASES_01146[titleKey]||[])byAlias.set(routeKey01146(alias),route);
+  }
+  return {byAlias,byTitle,routes};
+}
+function resolvePublishedHref01146(href,label,index){
+  const raw=clean(href);if(!raw)return raw;
+  if(/^(?:https?:|mailto:|tel:|javascript:|data:|blob:|\/\/)/i.test(raw))return raw;
+  const labelRoute=index.byTitle.get(routeKey01146(label));
+  if(raw==='#')return labelRoute||raw;
+  if(raw.startsWith('#')){const route=index.byAlias.get(routeKey01146(raw.slice(1)));return route||labelRoute||raw;}
+  if(raw.startsWith('/')){const normalized=normalizedRoute01146(raw);if(index.routes.has(normalized))return normalized;const route=index.byAlias.get(routeKey01146(normalized.replace(/^\/+/,'')));return route||raw;}
+  const route=index.byAlias.get(routeKey01146(raw));return route||raw;
+}
+export function rewritePublishedNavigation01146(html,pages){
+  const index=buildRouteIndex01146(pages);
+  return String(html||'').replace(/<a\b([^>]*?\bhref\s*=\s*)(["'])(.*?)\2([^>]*)>([\s\S]*?)<\/a>/gi,(match,before,quote,href,after,inner)=>{
+    const next=resolvePublishedHref01146(href,stripTags01146(inner),index);if(next===href)return match;return `<a${before}${quote}${next}${quote}${after}>${inner}</a>`;
+  });
+}
+
 export function outputPathForRoute01143(route){
   let value=clean(route)||'/';
   value=value.split('#')[0].split('?')[0].replace(/\\/g,'/');
@@ -50,9 +100,9 @@ function renderPage(pkg,page,{canonicalBaseUrl}){
   const title=clean(page?.title||page?.name||pkg?.site?.name)||'ShiftTime Site';
   const description=clean(page?.description||pkg?.site?.description);
   const canonical=canonicalForRoute(canonicalBaseUrl,page?.path||'/');
-  const header=sanitizeProductionHtml01143(page?.html?.header);
-  const main=sanitizeProductionHtml01143(page?.html?.main);
-  const footer=sanitizeProductionHtml01143(page?.html?.footer);
+  const header=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.header),pkg?.pages);
+  const main=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.main),pkg?.pages);
+  const footer=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.footer),pkg?.pages);
   const styles=cssPaths.map(path=>`  <link rel="stylesheet" href="/${esc(path)}">`).join('\n');
   return `<!doctype html>
 <html lang="uk">
