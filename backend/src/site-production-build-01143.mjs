@@ -128,7 +128,31 @@ ${styles}
 </html>`;
 }
 
+
+const CANONICAL_BASE_TOKEN_01151='__ST_CANONICAL_BASE_01151__';
+
+export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',apiProxyTarget=''}={}){
+  const files=new Map();
+  const root=clean(canonicalBaseUrl).replace(/\/+$/,'');
+  for(const raw of Array.isArray(pkg?.files)?pkg.files:[]){
+    const path=clean(raw?.path).replace(/^\/+/, '');
+    if(!path)continue;
+    if(files.has(path))throw Object.assign(new Error(`Duplicate production file: ${path}`),{statusCode:400,code:'ST_PUBLISH_FILE_COLLISION'});
+    const encoding=clean(raw?.encoding).toLowerCase()==='base64'?'base64':'utf8';
+    if(encoding==='base64')files.set(path,Buffer.from(String(raw?.content??''),'base64'));
+    else{
+      let text=String(raw?.content??'');
+      if(path.endsWith('.html'))text=text.split(CANONICAL_BASE_TOKEN_01151).join(root);
+      files.set(path,Buffer.from(text,'utf8'));
+    }
+  }
+  const target=clean(apiProxyTarget).replace(/\/+$/,'');
+  if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
+  return files;
+}
+
 export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarget=''}={}){
+  if(clean(pkg?.exporterVersion)==='01151')return materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl,apiProxyTarget});
   if(!pkg||typeof pkg!=='object')throw Object.assign(new Error('Publish package is required'),{statusCode:400});
   if(!clean(pkg?.site?.id))throw Object.assign(new Error('Builder site id is required'),{statusCode:400});
   const pages=Array.isArray(pkg.pages)?pkg.pages:[];if(!pages.length)throw Object.assign(new Error('At least one page is required'),{statusCode:400});

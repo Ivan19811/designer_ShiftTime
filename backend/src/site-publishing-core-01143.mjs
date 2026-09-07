@@ -1,5 +1,20 @@
 const clean=v=>String(v??'').trim();
 function publicUrl(r){return clean(r?.netlifySslUrl||r?.netlifyUrl);}
+
+function assertOfflinePreflight01151(pkg){
+  const exporterVersion=clean(pkg?.exporterVersion);
+  const preflight=pkg?.preflight;
+  if(exporterVersion!=='01151'||!preflight||preflight.ok!==true||clean(preflight.exporterVersion)!=='01151'){
+    throw Object.assign(new Error('Offline production preflight 01151 is required'),{statusCode:400,code:'ST_PUBLISH_OFFLINE_PREFLIGHT_REQUIRED'});
+  }
+  const files=Array.isArray(preflight.files)?preflight.files.map(clean):[];
+  const pages=Array.isArray(preflight.pages)?preflight.pages:[];
+  if(!files.includes('index.html'))throw Object.assign(new Error('Offline preflight is missing root index.html'),{statusCode:400,code:'ST_PUBLISH_ROOT_MISSING'});
+  const roots=pages.filter(p=>clean(p?.route)==='/');
+  if(roots.length!==1||clean(roots[0]?.pageId)!=='page_home')throw Object.assign(new Error('Offline preflight has invalid canonical Home'),{statusCode:400,code:'ST_PUBLISH_HOME_REQUIRED'});
+  if(pages.some(p=>p?.ok!==true))throw Object.assign(new Error('Offline preflight contains an invalid page'),{statusCode:400,code:'ST_PUBLISH_OFFLINE_PREFLIGHT_FAILED'});
+  return preflight;
+}
 function toStatus(r,{configured=true}={}){if(!r)return {stage:'01143',provider:'netlify',configured,state:'not-published',netlifySiteId:'',deployId:'',deployState:'not-published',url:'',publishedRevision:'',requestedRevision:'',lastPublishedAt:null,lastError:''};return {
   stage:'01143',provider:'netlify',configured,state:r.lastDeployState||'not-published',builderSiteId:r.builderSiteId||'',netlifySiteId:r.netlifySiteId||'',siteName:r.netlifySiteName||r.siteName||'',url:publicUrl(r),adminUrl:r.netlifyAdminUrl||'',deployId:r.lastDeployId||'',deployState:r.lastDeployState||'not-published',requestedRevision:r.requestedRevision||'',publishedRevision:r.publishedRevision||'',lastPublishedAt:r.lastPublishedAt||null,lastError:r.lastPublishError||''
 };}
@@ -9,6 +24,7 @@ export function createSitePublishingService01143({repo,netlify,buildFiles=buildP
   void createZip;
   async function publish(scope,userId,builderSiteId,pkg){
     const sid=clean(builderSiteId);if(!sid||clean(pkg?.site?.id)!==sid)throw Object.assign(new Error('Publish package site id does not match requested site id'),{statusCode:400});if(clean(pkg?.version)!=='01143')throw Object.assign(new Error('Unsupported publish package version'),{statusCode:400});if(!clean(pkg?.revision))throw Object.assign(new Error('Publish revision is required'),{statusCode:400});
+    assertOfflinePreflight01151(pkg);
     let record=await repo.get(scope,sid);
     const validateRoot01150=(files)=>{if(!(files instanceof Map)||!files.has('index.html'))throw Object.assign(new Error('Production build is missing root index.html'),{statusCode:500,code:'ST_PUBLISH_ROOT_MISSING'});return files;};
     let files;
