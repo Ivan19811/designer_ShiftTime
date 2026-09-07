@@ -4,7 +4,7 @@ services:
     env: node
     rootDir: backend
     buildCommand: npm ci
-    startCommand: node src/server.js
+    startCommand: npm run db:migrate && npm start
     autoDeploy: true
     plan: free
     envVars:
@@ -12,6 +12,10 @@ services:
         sync: false     # значення задаси у Dashboard → Environment
       - key: NETLIFY_AUTH_TOKEN
         sync: false
+      - key: NETLIFY_API_BASE_URL
+        value: https://api.netlify.com/api/v1
+      - key: PUBLIC_API_BASE_URL
+        value: https://designer-shifttime.onrender.com
       - key: CORS_ORIGIN
         value: ""
       - key: CORS_ALLOWLIST
