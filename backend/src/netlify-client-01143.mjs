@@ -7,6 +7,13 @@ function configError(){const e=new Error('NETLIFY_AUTH_TOKEN is not configured o
 function slugify(value){return clean(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').replace(/-{2,}/g,'-').slice(0,50)||'shifttime-site';}
 function defaultSuffix(){return crypto.randomBytes(3).toString('hex');}
 function sha1(buffer){return crypto.createHash('sha1').update(buffer).digest('hex');}
+
+async function runWithConcurrency01156(items,limit,worker){
+  const rows=Array.from(items||[]);if(!rows.length)return;
+  let cursor=0;const width=Math.max(1,Math.min(Number(limit)||1,rows.length));
+  await Promise.all(Array.from({length:width},async()=>{while(true){const index=cursor++;if(index>=rows.length)return;await worker(rows[index],index);}}));
+}
+
 function normalizeDeployFiles(files){
   const entries=files instanceof Map?[...files.entries()]:Object.entries(files||{});
   const out=[];
@@ -55,10 +62,8 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     const required=new Set(Array.isArray(deploy?.required)?deploy.required.map(clean).filter(Boolean):[]);
     if(required.size){
       const firstBySha=new Map();for(const entry of entries)if(!firstBySha.has(entry.sha))firstBySha.set(entry.sha,entry);
-      for(const digest of required){
-        const entry=firstBySha.get(digest);if(!entry)throw Object.assign(new Error(`Netlify requested unknown file digest: ${digest}`),{statusCode:502,code:'ST_NETLIFY_DEPLOY_INVALID'});
-        await request(`/deploys/${encodeURIComponent(deployId)}/files/${encodeURIComponent(entry.path)}`,{method:'PUT',headers:{'content-type':'application/octet-stream'},body:entry.body});
-      }
+      const requiredEntries=[...required].map(digest=>{const entry=firstBySha.get(digest);if(!entry)throw Object.assign(new Error(`Netlify requested unknown file digest: ${digest}`),{statusCode:502,code:'ST_NETLIFY_DEPLOY_INVALID'});return entry;});
+      await runWithConcurrency01156(requiredEntries,4,entry=>request(`/deploys/${encodeURIComponent(deployId)}/files/${encodeURIComponent(entry.path)}`,{method:'PUT',headers:{'content-type':'application/octet-stream'},body:entry.body}));
     }
     return deploy;
   }
