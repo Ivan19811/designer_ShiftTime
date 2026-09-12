@@ -19,4 +19,4 @@ services:
       - key: CORS_ORIGIN
         value: ""
       - key: CORS_ALLOWLIST
-        value: https://designer-shifttime.netlify.app,http://localhost:8888,http://localhost:3000
+        value: https://designer-shifttime.netlify.app,http://localhost:*,http://127.0.0.1:*

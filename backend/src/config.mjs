@@ -2,6 +2,12 @@ function bool(v,fallback=false){const x=String(v??'').trim().toLowerCase();if(!x
 function int(v,fallback,min,max){const n=Number(v);return Number.isFinite(n)?Math.min(max,Math.max(min,Math.trunc(n))):fallback;}
 function sslMode(v){const x=String(v??'auto').trim().toLowerCase();return ['auto','true','require','false','disable'].includes(x)?x:'auto';}
 const nodeEnv=String(process.env.NODE_ENV||'development').trim().toLowerCase()||'development';
+function corsOrigins(v){return String(v||'').split(',').map(x=>x.trim()).filter(Boolean);}
+function mergedCorsOrigin01175(){
+  const origin=corsOrigins(process.env.CORS_ORIGIN),allow=corsOrigins(process.env.CORS_ALLOWLIST),all=[...origin,...allow];
+  if(all.some(x=>/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(x))){all.push('http://localhost:*','http://127.0.0.1:*');}
+  return [...new Set(all)].join(',')||'*';
+}
 export const config=Object.freeze({
   stage:'01094',
   nodeEnv,
@@ -17,7 +23,7 @@ export const config=Object.freeze({
   databaseApplicationName:process.env.DATABASE_APPLICATION_NAME||'shifttime-tables-01094',
   migrationLockTimeoutMs:int(process.env.MIGRATION_LOCK_TIMEOUT_MS,60000,1000,300000),
   productionGuardStrict:bool(process.env.PRODUCTION_GUARD_STRICT,nodeEnv==='production'),
-  corsOrigin:process.env.CORS_ORIGIN||'*',
+  corsOrigin:mergedCorsOrigin01175(),
   devSessionToken:process.env.DEV_SESSION_TOKEN||'change-me-dev-token',
   devUserEmail:process.env.DEV_USER_EMAIL||'owner@local.shifttime',
   devUserName:process.env.DEV_USER_NAME||'ShiftTime Owner',
