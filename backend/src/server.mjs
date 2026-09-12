@@ -24,6 +24,7 @@ import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema0
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
+import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
@@ -60,6 +61,11 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
+  if(p[2]==='sites'&&req.method==='GET'&&p.length===3)return sendJson(res,200,{stage:'01170',sites:await listBuilderSites01170(scope)});
+  if(p[2]==='sites'&&p[3]&&req.method==='GET'&&p.length===4)return sendJson(res,200,{stage:'01170',site:await getBuilderSite01170(scope,p[3])});
+  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertWriteRole(scope);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}))});}
+  if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,{stage:'01170',site:await saveBuilderSite01170(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024}))});}
+  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertAdminRole(scope);return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
   if(p[2]==='admin'){
     assertAdminView01087(scope);
     if(req.method==='GET'&&p[3]==='overview')return sendJson(res,200,{...(await getAdminOverview01087(scope,session.userId)),actor:{userId:session.userId,email:session.email,name:session.name,role:scope.role,capabilities:getEffectiveCapabilities01087(scope)},scope});
