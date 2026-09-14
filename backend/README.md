@@ -156,3 +156,9 @@ Important stage boundary: `db:seed-dev` remains a DEV fixture only and is not re
 ## 01081 media cloud
 
 Binary media is stored in R2/S3-compatible object storage through backend-generated presigned URLs. PostgreSQL stores only metadata in `media_cloud_assets`, derivative jobs and audit events. See `MEDIA-CLOUD-01081.md`.
+
+## 01143 · Automatic Netlify production publishing
+
+01143 adds server-side Netlify publishing for Builder-created sites. The browser sends an authenticated ShiftTime site package to `POST /api/v1/sites/:siteId/publish`; the Render backend owns the Netlify credential, creates the Netlify Site on first publish, stores its identity in PostgreSQL, and reuses the same Site for later deploys.
+
+Render requires `NETLIFY_AUTH_TOKEN`. `NETLIFY_API_BASE_URL` defaults to `https://api.netlify.com/api/v1`, and `PUBLIC_API_BASE_URL` defaults to `https://designer-shifttime.onrender.com`. Migration `016_netlify_site_publishing.sql` creates the publishing binding and deploy-history tables. Never expose `NETLIFY_AUTH_TOKEN` to frontend code or generated site files.
