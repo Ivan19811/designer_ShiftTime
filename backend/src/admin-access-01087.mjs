@@ -3,8 +3,8 @@ const clean=(v)=>String(v??'').trim();
 export const ADMIN_ROLES_01087=Object.freeze(['owner','admin','manager','editor','viewer','catalog-manager','order-manager']);
 
 export const ROLE_CAPABILITIES_01087=Object.freeze({
-  owner:Object.freeze(['admin.view','admin.users.manage','admin.roles.manage','admin.invites.manage','admin.database.schema','admin.database.rows','catalog.write','orders.write']),
-  admin:Object.freeze(['admin.view','admin.users.manage','admin.roles.manage','admin.invites.manage','admin.database.schema','admin.database.rows','catalog.write','orders.write']),
+  owner:Object.freeze(['admin.view','admin.traffic.view','admin.users.manage','admin.roles.manage','admin.invites.manage','admin.database.schema','admin.database.rows','catalog.write','orders.write']),
+  admin:Object.freeze(['admin.view','admin.traffic.view','admin.users.manage','admin.roles.manage','admin.invites.manage','admin.database.schema','admin.database.rows','catalog.write','orders.write']),
   manager:Object.freeze(['catalog.write','orders.write']),
   editor:Object.freeze(['catalog.write']),
   viewer:Object.freeze([]),

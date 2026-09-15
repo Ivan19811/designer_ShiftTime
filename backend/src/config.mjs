@@ -9,7 +9,7 @@ function mergedCorsOrigin01175(){
   return [...new Set(all)].join(',')||'*';
 }
 export const config=Object.freeze({
-  stage:'01194',
+  stage:'01200',
   nodeEnv,
   isProduction:nodeEnv==='production',
   host:process.env.HOST||'127.0.0.1',
