@@ -50,7 +50,7 @@ export const closeTrafficRecorder01194=()=>trafficRecorder01194.close();
 
 export function setTrafficScope01194(res,scope={}){
   if(!res)return false;
-  res.__stTrafficScope01194={accountId:String(scope.accountId||''),workspaceId:String(scope.workspaceId||''),storeId:String(scope.storeId||''),actorUserId:String(scope.actorUserId||scope.userId||'')};
+  res.__stTrafficScope01194={accountId:String(scope.accountId||''),workspaceId:String(scope.workspaceId||''),storeId:String(scope.storeId||''),actorUserId:String(scope.actorUserId||scope.userId||''),siteId:String(scope.siteId||'')};
   return true;
 }
 
