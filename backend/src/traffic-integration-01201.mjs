@@ -33,6 +33,12 @@ export function updateTrafficContext01201(patch={}){
 
 export function getTrafficContext01201(){const context=storage.getStore();return context?{...context}:{};}
 
+export function updateAuthenticatedTrafficContext01204({scope={},actorUserId='',publishedSiteId=''}={}){
+  const patch={accountId:clean(scope.accountId),workspaceId:clean(scope.workspaceId),storeId:clean(scope.storeId),actorUserId:clean(actorUserId)};
+  if(clean(publishedSiteId))patch.siteId=clean(publishedSiteId);
+  return updateTrafficContext01201(patch);
+}
+
 export function buildIntegrationTrafficEvent01201(input={}){
   const context=input.context||{},startedAtMs=Math.max(0,Number(input.startedAtMs)||Date.now()),finishedAtMs=Math.max(startedAtMs,Number(input.finishedAtMs)||startedAtMs),statusCode=Math.max(0,Number(input.statusCode)||0),integration=clean(input.integration)||'external',sequence=Math.max(1,Number(input.sequence)||1),requestId=clean(context.requestId)||`req_${startedAtMs}`;
   const failed=input.result==='failed'||statusCode>=400||statusCode===0;

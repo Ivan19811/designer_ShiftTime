@@ -46,7 +46,7 @@ export async function listTrafficSites01203(scope={},input={}){
     GROUP BY e.site_id
     ORDER BY SUM(e.render_billable_outbound_bytes) DESC,SUM(e.outbound_bytes) DESC
     LIMIT $2`,[scope.accountId,limit]);
-  return Object.freeze({stage:'01203',sites:q.rows.map(normalizeTrafficSiteRow01203)});
+  return Object.freeze({stage:'01204',sites:q.rows.map(normalizeTrafficSiteRow01203)});
 }
 
 export function normalizeTrafficIntegrationRows01201(rows=[]){return rows.map(row=>Object.freeze({integration:String(row.integration||'external'),todayInboundBytes:n(row.today_inbound),todayOutboundBytes:n(row.today_outbound),todayBillableOutboundBytes:n(row.today_billable),monthInboundBytes:n(row.month_inbound),monthOutboundBytes:n(row.month_outbound),monthBillableOutboundBytes:n(row.month_billable),events:n(row.events),failed:n(row.failed)}));}
@@ -77,7 +77,7 @@ export async function getTrafficSummary01194(scope={}){
       COUNT(*)::text AS events,COUNT(*) FILTER (WHERE result='failed')::text AS failed
       FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='integration' AND occurred_at>=date_trunc('month',now()) GROUP BY integration ORDER BY SUM(render_billable_outbound_bytes) DESC`,[scope.accountId])
   ]);
-  return Object.freeze({stage:'01203',meterMode:'http+service-payload-v3-site',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
+  return Object.freeze({stage:'01204',meterMode:'http+service-payload-v4-site-ping',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
 }
 
 async function listTrafficByType(scope={},input={},eventType=''){
@@ -87,7 +87,7 @@ async function listTrafficByType(scope={},input={},eventType=''){
   const args=[scope.accountId,limit],type=String(eventType||'').trim();
   const where=type?`account_id=$1 AND event_type=$3`:`account_id=$1`;if(type)args.push(type);
   const q=await pool.query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,status_code,result,duration_ms FROM shifttime_traffic_events WHERE ${where} ORDER BY occurred_at DESC,id DESC LIMIT $2`,args);
-  return Object.freeze({stage:'01203',events:q.rows.map(normalizeTrafficEventRow01194)});
+  return Object.freeze({stage:'01204',events:q.rows.map(normalizeTrafficEventRow01194)});
 }
 
 export const listTrafficEvents01194=(scope={},input={})=>listTrafficByType(scope,input,'http');

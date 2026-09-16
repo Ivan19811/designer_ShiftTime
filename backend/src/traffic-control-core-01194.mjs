@@ -29,6 +29,8 @@ export function classifyTrafficRoute01194(method,pathname){
     module='network';operation=`network.${p[3]||'request'}.${verb.toLowerCase()}`;routePath=`/api/v1/network/${p[3]||':resource'}${p[4]?`/:id`:''}${p[5]?`/${p[5]}`:''}`;
   }else if(api&&p[2]==='marketplace'){
     module='marketplace';operation=`marketplace.${p[3]||'request'}.${verb.toLowerCase()}`;routePath=`/api/v1/marketplace/${p[3]||':resource'}${p[4]?`/:id`:''}`;
+  }else if(api&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){
+    module='published-site';operation='published-site.page-open';routePath='/api/v1/public/traffic/ping';
   }else if(api&&p[2]==='public'){
     module='public';operation=`public.${p[3]||'request'}.${verb.toLowerCase()}`;routePath=`/api/v1/public/${p.slice(3,5).join('/')}`;
   }
