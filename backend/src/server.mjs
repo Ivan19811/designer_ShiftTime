@@ -26,10 +26,11 @@ import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
-import {getTrafficSummary01194,listTrafficEvents01194} from './traffic-service-01194.mjs';
+import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201} from './traffic-service-01194.mjs';
+import {runTrafficContext01201,updateTrafficContext01201} from './traffic-integration-01201.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
-async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);const rid=requestId(req);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
+async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
@@ -58,7 +59,7 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
-  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);setTrafficScope01194(res,{...scope,actorUserId:session.userId});
+  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);setTrafficScope01194(res,{...scope,actorUserId:session.userId});updateTrafficContext01201({...scope,actorUserId:session.userId});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
@@ -72,7 +73,8 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
     assertAdminView01087(scope);
     if(req.method==='GET'&&p[3]==='overview')return sendJson(res,200,{...(await getAdminOverview01087(scope,session.userId)),actor:{userId:session.userId,email:session.email,name:session.name,role:scope.role,capabilities:getEffectiveCapabilities01087(scope)},scope});
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='summary'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');return sendJson(res,200,await getTrafficSummary01194(scope));}
-    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='events'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficEvents01194(scope,{limit:u.searchParams.get('limit')}));}
+    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='events'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficEvents01194(scope,{limit:u.searchParams.get('limit')}));} 
+    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='integrations'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficIntegrationEvents01201(scope,{limit:u.searchParams.get('limit')}));}
     if(req.method==='GET'&&p[3]==='roles')return sendJson(res,200,{stage:'01087',roles:getRoleCatalog01087(),actorRole:scope.role,actorCapabilities:getEffectiveCapabilities01087(scope)});
     if(req.method==='GET'&&p[3]==='members'&&!p[4])return sendJson(res,200,{stage:'01087',members:await listMembers01087(scope)});
     if(req.method==='PATCH'&&p[3]==='members'&&p[4]){assertCapability01087(scope,'admin.users.manage','User management permission required');return sendJson(res,200,{stage:'01087',member:await updateMembership01087(scope,session.userId,p[4],await readJson(req))});}
@@ -179,6 +181,6 @@ async function route(req,res){applyCors(req,res,config.corsOrigin);if(req.method
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{attachHttpTrafficMeter01194(req,res);route(req,res).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||requestId(req)});}else res.end();});});
+const server=http.createServer((req,res)=>{const rid=requestId(req);res.setHeader('x-st-request-id',rid);attachHttpTrafficMeter01194(req,res);runTrafficContext01201({requestId:rid,method:req.method,pathname:new URL(req.url||'/','http://localhost').pathname},()=>route(req,res,rid)).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||rid});}else res.end();});});
 server.listen(config.port,config.host,()=>console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`));
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}}));

@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import {bodyBytes01201,recordIntegrationTraffic01201} from './traffic-integration-01201.mjs';
 
 const clean=v=>String(v??'').trim();
 const trimBase=v=>(clean(v)||'https://api.netlify.com/api/v1').replace(/\/+$/,'');
@@ -7,6 +8,17 @@ function configError(){const e=new Error('NETLIFY_AUTH_TOKEN is not configured o
 function slugify(value){return clean(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').replace(/-{2,}/g,'-').slice(0,50)||'shifttime-site';}
 function defaultSuffix(){return crypto.randomBytes(3).toString('hex');}
 function sha1(buffer){return crypto.createHash('sha1').update(buffer).digest('hex');}
+
+function netlifyRouteKey01201(method,path){
+  const verb=clean(method||'GET').toUpperCase(),p=clean(path).split('?')[0];
+  if(/^\/sites\/[^/]+\/deploys$/.test(p))return `${verb} /sites/:siteId/deploys`;
+  if(/^\/deploys\/[^/]+\/files\/.+/.test(p))return `${verb} /deploys/:deployId/files/:path`;
+  if(/^\/deploys\/[^/]+$/.test(p))return `${verb} /deploys/:deployId`;
+  if(/^\/sites\/[^/]+\/files\/.+/.test(p))return `${verb} /sites/:siteId/files/:path`;
+  if(/^\/sites\/[^/]+$/.test(p))return `${verb} /sites/:siteId`;
+  if(p==='/sites')return `${verb} /sites`;
+  return `${verb} netlify`;
+}
 
 async function runWithConcurrency01156(items,limit,worker){
   const rows=Array.from(items||[]);if(!rows.length)return;
@@ -29,13 +41,22 @@ function normalizeDeployFiles(files){
   return out;
 }
 
-export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.com/api/v1',fetchImpl=globalThis.fetch,randomSuffix=defaultSuffix}={}){
+export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.com/api/v1',fetchImpl=globalThis.fetch,randomSuffix=defaultSuffix,recordTraffic=recordIntegrationTraffic01201}={}){
   const auth=clean(token),base=trimBase(baseUrl);
   if(typeof fetchImpl!=='function')throw new TypeError('fetch implementation is required');
   async function request(path,{method='GET',headers={},body}={}){
     if(!auth)throw configError();
-    const res=await fetchImpl(`${base}${path}`,{method,headers:{authorization:`Bearer ${auth}`,...headers},body});
-    const raw=await res.text();let data={};try{data=raw?JSON.parse(raw):{};}catch{data={message:raw};}
+    const startedAtMs=Date.now(),outboundBytes=bodyBytes01201(body),routeKey=netlifyRouteKey01201(method,path);
+    let res,raw='';
+    try{
+      res=await fetchImpl(`${base}${path}`,{method,headers:{authorization:`Bearer ${auth}`,...headers},body});
+      raw=await res.text();
+      try{recordTraffic?.({integration:'netlify',routeKey,method,startedAtMs,finishedAtMs:Date.now(),statusCode:res.status,inboundBytes:Buffer.byteLength(raw),outboundBytes,result:res.ok?'success':'failed'});}catch{}
+    }catch(error){
+      try{recordTraffic?.({integration:'netlify',routeKey,method,startedAtMs,finishedAtMs:Date.now(),statusCode:0,inboundBytes:0,outboundBytes,result:'failed'});}catch{}
+      throw error;
+    }
+    let data={};try{data=raw?JSON.parse(raw):{};}catch{data={message:raw};}
     if(!res.ok){const e=new Error(clean(data?.message||data?.error)||`Netlify API request failed (${res.status})`);e.statusCode=res.status===401||res.status===403?502:res.status;e.netlifyStatus=res.status;e.code='ST_NETLIFY_API_ERROR';throw e;}
     return data;
   }

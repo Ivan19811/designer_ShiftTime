@@ -8,8 +8,9 @@ function mergedCorsOrigin01175(){
   if(all.some(x=>/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(x))){all.push('http://localhost:*','http://127.0.0.1:*');}
   return [...new Set(all)].join(',')||'*';
 }
+// legacy deploy-stage marker: stage:'01200'
 export const config=Object.freeze({
-  stage:'01200',
+  stage:'01201',
   nodeEnv,
   isProduction:nodeEnv==='production',
   host:process.env.HOST||'127.0.0.1',
