@@ -19,6 +19,6 @@ export function resolveCorsOrigin01089({requestOrigin='',corsOrigin='*',nodeEnv=
 export function applyCors(req,res,corsOrigin='*'){
   const allow=resolveCorsOrigin01089({requestOrigin:req.headers.origin||'',corsOrigin});
   if(allow)res.setHeader('access-control-allow-origin',allow);
-  res.setHeader('vary','Origin');res.setHeader('access-control-allow-methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');res.setHeader('access-control-allow-headers','authorization,content-type,x-st-store-id,x-st-workspace-id,x-st-request-id,x-st-cart-id,x-st-site-token,x-st-import-source');res.setHeader('access-control-expose-headers','x-st-store-id,x-st-workspace-id,x-st-account-id,x-st-request-id,x-st-cart-id');
+  res.setHeader('vary','Origin');res.setHeader('access-control-allow-methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');res.setHeader('access-control-allow-headers','authorization,content-type,x-st-store-id,x-st-workspace-id,x-st-request-id,x-st-cart-id,x-st-site-token,x-st-site-id,x-st-import-source');res.setHeader('access-control-expose-headers','x-st-store-id,x-st-workspace-id,x-st-account-id,x-st-request-id,x-st-cart-id');
 }
 export function requestId(req){return String(req.headers['x-st-request-id']||`req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`);}

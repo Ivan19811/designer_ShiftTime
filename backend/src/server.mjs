@@ -17,7 +17,7 @@ import {listAuthorizedInventory01077,listAuthorizedInventoryReservations01077,de
 import {listAuthorizedShippingProviders01078,listAuthorizedSellerDeliveries01078,updateAuthorizedSellerDelivery01078,simulateAuthorizedSellerDelivery01078} from './marketplace-shipping-service.mjs';
 import {getDeploymentStatus01080,sanitizeImportSource01080} from './deployment-service.mjs';
 import {importLocalOperationalBundle01080} from './deployment-local-import-service.mjs';
-import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081} from './media-cloud-service.mjs';
+import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081,resolveAuthorizedMediaTrafficSite01206} from './media-cloud-service.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -26,7 +26,7 @@ import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
-import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201,listTrafficSites01203} from './traffic-service-01194.mjs';
+import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201,listTrafficSites01203,listTrafficStorage01206} from './traffic-service-01194.mjs';
 import {runTrafficContext01201,updateTrafficContext01201,updateAuthenticatedTrafficContext01204} from './traffic-integration-01201.mjs';
 import {resolvePublishedSiteTrafficIdentity01203} from './published-site-identity-01203.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
@@ -81,6 +81,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='events'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficEvents01194(scope,{limit:u.searchParams.get('limit')}));} 
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='integrations'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficIntegrationEvents01201(scope,{limit:u.searchParams.get('limit')}));}
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='sites'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficSites01203(scope,{limit:u.searchParams.get('limit')}));}
+    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='storage'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficStorage01206(scope,{limit:u.searchParams.get('limit')}));}
     if(req.method==='GET'&&p[3]==='roles')return sendJson(res,200,{stage:'01087',roles:getRoleCatalog01087(),actorRole:scope.role,actorCapabilities:getEffectiveCapabilities01087(scope)});
     if(req.method==='GET'&&p[3]==='members'&&!p[4])return sendJson(res,200,{stage:'01087',members:await listMembers01087(scope)});
     if(req.method==='PATCH'&&p[3]==='members'&&p[4]){assertCapability01087(scope,'admin.users.manage','User management permission required');return sendJson(res,200,{stage:'01087',member:await updateMembership01087(scope,session.userId,p[4],await readJson(req))});}
@@ -96,11 +97,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(req.method==='GET'&&p[2]==='deployment'&&p[3]==='status')return sendJson(res,200,await getDeploymentStatus01080(scope));
   if(p[2]==='media'){
+    const candidateSiteId=String(req.headers['x-st-site-id']||'').trim();
+    const verifiedSiteId=candidateSiteId?await resolveAuthorizedMediaTrafficSite01206(scope,candidateSiteId):'';
+    const mediaSiteId=verifiedSiteId||publishedSiteId;
+    const mediaScope={...scope,actorUserId:session.userId,siteId:mediaSiteId};
+    if(mediaSiteId){setTrafficScope01194(res,mediaScope);updateTrafficContext01201({siteId:mediaSiteId});}
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
-    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertWriteRole(scope);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(scope,await readJson(req)));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertWriteRole(scope);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(scope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertWriteRole(scope);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(scope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertWriteRole(scope);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertWriteRole(scope);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertWriteRole(scope);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
     if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }

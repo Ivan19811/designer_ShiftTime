@@ -24,18 +24,18 @@ export async function writeTrafficBatch01194(rows=[]){
   const payload=rows.map(r=>({
     occurred_at:r.occurredAt,request_id:r.requestId,dedupe_key:r.dedupeKey,account_id:r.accountId,workspace_id:r.workspaceId,store_id:r.storeId,actor_user_id:r.actorUserId,site_id:r.siteId,
     module:r.module,operation:r.operation,route_key:r.routeKey,event_type:r.eventType,integration:r.integration,
-    inbound_bytes:r.inboundBytes,outbound_bytes:r.outboundBytes,render_billable_outbound_bytes:r.renderBillableOutboundBytes,status_code:r.statusCode,result:r.result,duration_ms:r.durationMs
+    inbound_bytes:r.inboundBytes,outbound_bytes:r.outboundBytes,render_billable_outbound_bytes:r.renderBillableOutboundBytes,storage_bytes:r.storageBytes||0,traffic_class:r.trafficClass||'render',metadata:r.metadata||{},status_code:r.statusCode,result:r.result,duration_ms:r.durationMs
   }));
   const q=await pool.query(`
     INSERT INTO shifttime_traffic_events(
       occurred_at,request_id,dedupe_key,account_id,workspace_id,store_id,actor_user_id,site_id,module,operation,route_key,event_type,integration,
-      inbound_bytes,outbound_bytes,render_billable_outbound_bytes,status_code,result,duration_ms
+      inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms
     )
     SELECT x.occurred_at,x.request_id,x.dedupe_key,x.account_id,x.workspace_id,x.store_id,x.actor_user_id,x.site_id,x.module,x.operation,x.route_key,x.event_type,x.integration,
-      x.inbound_bytes,x.outbound_bytes,x.render_billable_outbound_bytes,x.status_code,x.result,x.duration_ms
+      x.inbound_bytes,x.outbound_bytes,x.render_billable_outbound_bytes,x.storage_bytes,x.traffic_class,x.metadata,x.status_code,x.result,x.duration_ms
     FROM jsonb_to_recordset($1::jsonb) AS x(
       occurred_at timestamptz,request_id text,dedupe_key text,account_id text,workspace_id text,store_id text,actor_user_id text,site_id text,module text,operation text,route_key text,event_type text,integration text,
-      inbound_bytes bigint,outbound_bytes bigint,render_billable_outbound_bytes bigint,status_code integer,result text,duration_ms integer
+      inbound_bytes bigint,outbound_bytes bigint,render_billable_outbound_bytes bigint,storage_bytes bigint,traffic_class text,metadata jsonb,status_code integer,result text,duration_ms integer
     )
     ON CONFLICT (dedupe_key) DO NOTHING`,[JSON.stringify(payload)]);
   return q.rowCount||0;
