@@ -31,3 +31,9 @@ test('explicit permission grants are normalized and merged',()=>{
   const caps=getEffectiveCapabilities01087({role:'viewer',permissions:['admin.view']});
   assert.equal(caps.includes('admin.view'),true);
 });
+
+test('01194 owner and admin receive Traffic Control view capability by default',()=>{
+  assert.equal(getEffectiveCapabilities01087({role:'owner'}).includes('admin.traffic.view'),true);
+  assert.equal(getEffectiveCapabilities01087({role:'admin'}).includes('admin.traffic.view'),true);
+  assert.equal(getEffectiveCapabilities01087({role:'manager'}).includes('admin.traffic.view'),false);
+});
