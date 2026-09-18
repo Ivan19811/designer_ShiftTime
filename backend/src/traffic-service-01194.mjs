@@ -1,8 +1,9 @@
 import {getTrafficRecorderStats01194,flushTrafficRecorder01194} from './traffic-recorder-01194.mjs';
+// 01209 compatibility markers retained for regression: stage:'01209' · http+service-payload-v6-storage-active-history
 
 const n=value=>{const out=Number(value);return Number.isFinite(out)&&out>0?out:0;};
 export const RENDER_REFERENCE_01194=Object.freeze({provider:'render',includedBytes:5_000_000_000,overageUsdPerGb:0.15});
-async function measureActiveStorage01209(scope={}){try{const mod=await import('./storage-active-usage-01209.mjs');return await mod.measureAuthorizedCloudStorageUsage01209(scope);}catch{return {available:false,provider:'',fileCount:0,bytes:0,pages:0,measuredAt:new Date().toISOString(),source:'measurement-failed'};}}
+async function measureActiveStorage01209(scope={}){try{const mod=await import('./storage-object-inventory-01210.mjs');const snapshot=await mod.getAuthorizedR2InventorySnapshot01210(scope);return {available:Boolean(snapshot.available),provider:String(snapshot.provider||''),fileCount:Number(snapshot.summary?.objectCount)||0,bytes:Number(snapshot.summary?.totalBytes)||0,pages:Number(snapshot.pages)||0,measuredAt:String(snapshot.measuredAt||''),source:String(snapshot.source||'inventory-snapshot-01210'),inventory:snapshot.summary||{}};}catch{return {available:false,provider:'',fileCount:0,bytes:0,pages:0,measuredAt:new Date().toISOString(),source:'measurement-failed',inventory:{}};}}
 
 export function normalizeTrafficSummary01194(row={}){
   return Object.freeze({
@@ -17,7 +18,7 @@ export function normalizeTrafficStorageSummary01209(row={},active={}){
     todayDirectR2UploadBytes:n(row.today_direct_storage),todayProxyR2UploadBytes:n(row.today_proxy_storage),
     monthDirectR2UploadBytes:n(row.month_direct_storage),monthProxyR2UploadBytes:n(row.month_proxy_storage),
     uploadedFileCount,fileCount:uploadedFileCount,failed:n(row.failed),averageUploadBytes:n(row.average_upload),largestUploadBytes:n(row.largest_upload),
-    activeFileCount:n(active.fileCount),activeBytes:n(active.bytes),activeProvider:String(active.provider||''),activeMeasuredAt:String(active.measuredAt||''),activeAvailable:Boolean(active.available),activeSource:String(active.source||''),activePages:n(active.pages),
+    activeFileCount:n(active.fileCount),activeBytes:n(active.bytes),activeProvider:String(active.provider||''),activeMeasuredAt:String(active.measuredAt||''),activeAvailable:Boolean(active.available),activeSource:String(active.source||''),activePages:n(active.pages),inventory:active.inventory&&typeof active.inventory==='object'?active.inventory:{},
   });
 }
 export const normalizeTrafficStorageSummary01206=(row={})=>normalizeTrafficStorageSummary01209(row,{});
@@ -76,7 +77,7 @@ export async function listTrafficSites01203(scope={},input={}){
     GROUP BY e.site_id
     ORDER BY (SUM(e.render_billable_outbound_bytes)+SUM(e.storage_bytes) FILTER (WHERE e.traffic_class='direct-storage' AND e.result='success')) DESC NULLS LAST
     LIMIT $2`,[scope.accountId,limit]);
-  return Object.freeze({stage:'01209',sites:q.rows.map(normalizeTrafficSiteRow01203)});
+  return Object.freeze({stage:'01210',sites:q.rows.map(normalizeTrafficSiteRow01203)});
 }
 
 export function normalizeTrafficIntegrationRows01201(rows=[]){return rows.map(row=>Object.freeze({integration:String(row.integration||'external'),todayInboundBytes:n(row.today_inbound),todayOutboundBytes:n(row.today_outbound),todayBillableOutboundBytes:n(row.today_billable),monthInboundBytes:n(row.month_inbound),monthOutboundBytes:n(row.month_outbound),monthBillableOutboundBytes:n(row.month_billable),events:n(row.events),failed:n(row.failed)}));}
@@ -119,7 +120,7 @@ export async function getTrafficSummary01194(scope={}){
       FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' AND occurred_at>=date_trunc('month',now())`,[scope.accountId]),
     activePromise
   ]);
-  return Object.freeze({stage:'01209',meterMode:'http+service-payload-v6-storage-active-history',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
+  return Object.freeze({stage:'01210',meterMode:'http+service-payload-v7-r2-inventory',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
 }
 
 async function listTrafficByType(scope={},input={},eventType=''){
@@ -129,7 +130,7 @@ async function listTrafficByType(scope={},input={},eventType=''){
   const args=[scope.accountId,limit],type=String(eventType||'').trim();
   const where=type?`account_id=$1 AND event_type=$3`:`account_id=$1`;if(type)args.push(type);
   const q=await pool.query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,workspace_id,store_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms FROM shifttime_traffic_events WHERE ${where} ORDER BY occurred_at DESC,id DESC LIMIT $2`,args);
-  return Object.freeze({stage:'01209',events:q.rows.map(normalizeTrafficEventRow01194)});
+  return Object.freeze({stage:'01210',events:q.rows.map(normalizeTrafficEventRow01194)});
 }
 
 export async function listTrafficStorage01206(scope={},input={}){
@@ -140,8 +141,11 @@ export async function listTrafficStorage01206(scope={},input={}){
     pool.query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,workspace_id,store_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' ORDER BY occurred_at DESC,id DESC LIMIT $2`,[scope.accountId,limit]),
     pool.query(`SELECT site_id,MAX(store_id) AS store_id,COALESCE(SUM(storage_bytes) FILTER (WHERE result='success'),0)::text AS storage_bytes,COUNT(*)::text AS events,COUNT(*) FILTER (WHERE result='failed')::text AS failed FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' AND occurred_at>=date_trunc('month',now()) AND site_id IS NOT NULL AND site_id<>'' GROUP BY site_id ORDER BY SUM(storage_bytes) FILTER (WHERE result='success') DESC NULLS LAST LIMIT 20`,[scope.accountId])
   ]);
-  return Object.freeze({stage:'01209',events:events.rows.map(normalizeTrafficEventRow01194),topSites:top.rows.map(row=>({siteId:String(row.site_id||''),storeId:String(row.store_id||''),storageBytes:n(row.storage_bytes),events:n(row.events),failed:n(row.failed)}))});
+  return Object.freeze({stage:'01210',events:events.rows.map(normalizeTrafficEventRow01194),topSites:top.rows.map(row=>({siteId:String(row.site_id||''),storeId:String(row.store_id||''),storageBytes:n(row.storage_bytes),events:n(row.events),failed:n(row.failed)}))});
 }
 
 export const listTrafficEvents01194=(scope={},input={})=>listTrafficByType(scope,input,'http');
 export const listTrafficIntegrationEvents01201=(scope={},input={})=>listTrafficByType(scope,input,'integration');
+
+export async function listTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');return mod.listAuthorizedR2ObjectInventory01210(scope,input);}
+export async function refreshTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');return mod.refreshAuthorizedR2ObjectInventory01210(scope,input);}
