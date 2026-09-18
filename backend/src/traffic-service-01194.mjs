@@ -77,7 +77,7 @@ export async function listTrafficSites01203(scope={},input={}){
     GROUP BY e.site_id
     ORDER BY (SUM(e.render_billable_outbound_bytes)+SUM(e.storage_bytes) FILTER (WHERE e.traffic_class='direct-storage' AND e.result='success')) DESC NULLS LAST
     LIMIT $2`,[scope.accountId,limit]);
-  return Object.freeze({stage:'01210',sites:q.rows.map(normalizeTrafficSiteRow01203)});
+  return Object.freeze({stage:'01212',sites:q.rows.map(normalizeTrafficSiteRow01203)});
 }
 
 export function normalizeTrafficIntegrationRows01201(rows=[]){return rows.map(row=>Object.freeze({integration:String(row.integration||'external'),todayInboundBytes:n(row.today_inbound),todayOutboundBytes:n(row.today_outbound),todayBillableOutboundBytes:n(row.today_billable),monthInboundBytes:n(row.month_inbound),monthOutboundBytes:n(row.month_outbound),monthBillableOutboundBytes:n(row.month_billable),events:n(row.events),failed:n(row.failed)}));}
@@ -120,7 +120,7 @@ export async function getTrafficSummary01194(scope={}){
       FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' AND occurred_at>=date_trunc('month',now())`,[scope.accountId]),
     activePromise
   ]);
-  return Object.freeze({stage:'01210',meterMode:'http+service-payload-v7-r2-inventory',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
+  return Object.freeze({stage:'01212',meterMode:'http+service-payload-v7-r2-inventory',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
 }
 
 async function listTrafficByType(scope={},input={},eventType=''){
@@ -130,7 +130,7 @@ async function listTrafficByType(scope={},input={},eventType=''){
   const args=[scope.accountId,limit],type=String(eventType||'').trim();
   const where=type?`account_id=$1 AND event_type=$3`:`account_id=$1`;if(type)args.push(type);
   const q=await pool.query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,workspace_id,store_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms FROM shifttime_traffic_events WHERE ${where} ORDER BY occurred_at DESC,id DESC LIMIT $2`,args);
-  return Object.freeze({stage:'01210',events:q.rows.map(normalizeTrafficEventRow01194)});
+  return Object.freeze({stage:'01212',events:q.rows.map(normalizeTrafficEventRow01194)});
 }
 
 export async function listTrafficStorage01206(scope={},input={}){
@@ -141,7 +141,7 @@ export async function listTrafficStorage01206(scope={},input={}){
     pool.query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,workspace_id,store_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' ORDER BY occurred_at DESC,id DESC LIMIT $2`,[scope.accountId,limit]),
     pool.query(`SELECT site_id,MAX(store_id) AS store_id,COALESCE(SUM(storage_bytes) FILTER (WHERE result='success'),0)::text AS storage_bytes,COUNT(*)::text AS events,COUNT(*) FILTER (WHERE result='failed')::text AS failed FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' AND occurred_at>=date_trunc('month',now()) AND site_id IS NOT NULL AND site_id<>'' GROUP BY site_id ORDER BY SUM(storage_bytes) FILTER (WHERE result='success') DESC NULLS LAST LIMIT 20`,[scope.accountId])
   ]);
-  return Object.freeze({stage:'01210',events:events.rows.map(normalizeTrafficEventRow01194),topSites:top.rows.map(row=>({siteId:String(row.site_id||''),storeId:String(row.store_id||''),storageBytes:n(row.storage_bytes),events:n(row.events),failed:n(row.failed)}))});
+  return Object.freeze({stage:'01212',events:events.rows.map(normalizeTrafficEventRow01194),topSites:top.rows.map(row=>({siteId:String(row.site_id||''),storeId:String(row.store_id||''),storageBytes:n(row.storage_bytes),events:n(row.events),failed:n(row.failed)}))});
 }
 
 export const listTrafficEvents01194=(scope={},input={})=>listTrafficByType(scope,input,'http');

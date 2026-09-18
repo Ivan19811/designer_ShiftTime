@@ -94,7 +94,7 @@ export function buildInventorySnapshot01210({scope={},objects=[],referenceState=
   const byType={},byStatus={};for(const type of [...Object.keys(EXTENSIONS_01210),'other','unknown'])byType[type]=summaryBucket01210();for(const status of ['linked','unused','orphan','unknown','broken-reference'])byStatus[status]=summaryBucket01210();
   let objectCount=0,totalBytes=0;for(const item of items){if(item.physical){objectCount++;totalBytes+=num(item.sizeBytes);const bucket=byType[item.resourceType]||(byType[item.resourceType]=summaryBucket01210());bucket.count++;bucket.bytes+=num(item.sizeBytes);}for(const status of item.statusFlags){const bucket=byStatus[status]||(byStatus[status]=summaryBucket01210());bucket.count++;if(item.physical)bucket.bytes+=num(item.sizeBytes);}}
   const physicalItems=items.filter(item=>item.physical),topLargest=[...physicalItems].sort((a,b)=>b.sizeBytes-a.sizeBytes).slice(0,10),topUnknown=physicalItems.filter(item=>item.statusFlags.includes('unknown')).sort((a,b)=>b.sizeBytes-a.sizeBytes).slice(0,10),topOrphan=physicalItems.filter(item=>item.statusFlags.includes('orphan')).sort((a,b)=>b.sizeBytes-a.sizeBytes).slice(0,10);
-  return Object.freeze({stage:'01210',available:true,accountId,provider:str(providerInfo.provider),bucket:str(providerInfo.bucket),prefix:str(providerInfo.prefix),pages:num(providerInfo.pages),measuredAt:str(measuredAt),summary:Object.freeze({objectCount,totalBytes,byType,byStatus,topLargest,topUnknown,topOrphan}),items:Object.freeze(items)});
+  return Object.freeze({stage:'01212',available:true,accountId,provider:str(providerInfo.provider),bucket:str(providerInfo.bucket),prefix:str(providerInfo.prefix),pages:num(providerInfo.pages),measuredAt:str(measuredAt),summary:Object.freeze({objectCount,totalBytes,byType,byStatus,topLargest,topUnknown,topOrphan}),items:Object.freeze(items)});
 }
 
 function sortItems01210(items,sort='size',order='desc'){
@@ -114,7 +114,7 @@ export function filterInventorySnapshot01210(snapshot={},input={}){
     return true;
   });
   items=sortItems01210(items,input.sort||'size',input.order||'desc');const total=items.length;
-  return {stage:'01210',available:Boolean(snapshot.available),provider:str(snapshot.provider),bucket:str(snapshot.bucket),prefix:str(snapshot.prefix),pages:num(snapshot.pages),measuredAt:str(snapshot.measuredAt),cached:Boolean(snapshot.cached),summary:snapshot.summary||{},sites:arr(snapshot.sites),total,offset,limit,items:items.slice(offset,offset+limit)};
+  return {stage:'01212',available:Boolean(snapshot.available),provider:str(snapshot.provider),bucket:str(snapshot.bucket),prefix:str(snapshot.prefix),pages:num(snapshot.pages),measuredAt:str(snapshot.measuredAt),cached:Boolean(snapshot.cached),summary:snapshot.summary||{},sites:arr(snapshot.sites),total,offset,limit,items:items.slice(offset,offset+limit)};
 }
 
 async function enrichUnknownMimeTypes01210(objects=[],referenceState={},provider=null){
@@ -127,13 +127,13 @@ async function enrichUnknownMimeTypes01210(objects=[],referenceState={},provider
 
 async function buildAuthorizedSnapshot01210(scope={},options={}){
   const p=options.provider||await provider01210(),measuredAt=new Date().toISOString(),accountId=str(scope.accountId),prefix=`accounts/${safeSegment(accountId)}/`;
-  if(!p||!p.isConfigured?.())return {stage:'01210',available:false,provider:config.mediaStorageProvider||'',bucket:'',prefix, pages:0,measuredAt,summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'not-configured'};
-  if(typeof p.listObjects01210!=='function')return {stage:'01210',available:false,provider:p.getInfo?.().type||'',bucket:p.getInfo?.().bucket||'',prefix,pages:0,measuredAt,summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'unsupported'};
+  if(!p||!p.isConfigured?.())return {stage:'01212',available:false,provider:config.mediaStorageProvider||'',bucket:'',prefix, pages:0,measuredAt,summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'not-configured'};
+  if(typeof p.listObjects01210!=='function')return {stage:'01212',available:false,provider:p.getInfo?.().type||'',bucket:p.getInfo?.().bucket||'',prefix,pages:0,measuredAt,summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'unsupported'};
   try{
     const [listed,state]=await Promise.all([p.listObjects01210({prefix}),loadAuthorizedStorageReferenceState01210(scope,options)]),info=p.getInfo?.()||{},objects=await enrichUnknownMimeTypes01210(listed.items,state,p);
     const snapshot=buildInventorySnapshot01210({scope,objects,referenceState:state,providerInfo:{provider:info.type||p.type,bucket:info.bucket||p.bucket,prefix,pages:listed.pages},measuredAt:new Date().toISOString()});
     return {...snapshot,sites:arr(state.sites),source:'provider-prefix-list+postgresql'};
-  }catch(error){return {stage:'01210',available:false,provider:p.getInfo?.().type||p.type||'',bucket:p.getInfo?.().bucket||p.bucket||'',prefix,pages:0,measuredAt:new Date().toISOString(),summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'measurement-failed',error:str(error?.message||error)};}
+  }catch(error){return {stage:'01212',available:false,provider:p.getInfo?.().type||p.type||'',bucket:p.getInfo?.().bucket||p.bucket||'',prefix,pages:0,measuredAt:new Date().toISOString(),summary:{objectCount:0,totalBytes:0,byType:{},byStatus:{},topLargest:[],topUnknown:[],topOrphan:[]},items:[],sites:[],source:'measurement-failed',error:str(error?.message||error)};}
 }
 
 export async function getAuthorizedR2InventorySnapshot01210(scope={},options={}){

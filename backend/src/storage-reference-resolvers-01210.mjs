@@ -8,6 +8,15 @@ function objectKeyFromUrl01210(value){
   try{const url=new URL(raw);const path=decodeURIComponent(url.pathname||'').replace(/^\/+/, '');const at=path.indexOf('accounts/');return at>=0?path.slice(at):'';}catch{return '';}
 }
 
+function assetIdFromDeliveryUrl01212(value){
+  const raw=str(value);if(!raw)return '';
+  let pathname=raw;
+  try{if(/^https?:\/\//i.test(raw))pathname=new URL(raw).pathname||'';}catch{}
+  try{pathname=decodeURIComponent(pathname);}catch{}
+  const match=String(pathname).match(/(?:^|\/)api\/v1\/public\/media\/([^/?#]+)/i);
+  return match?str(match[1]):'';
+}
+
 export function inferResourceModule01210(path=[],fallback='unknown'){
   const hint=[str(fallback),...arr(path).map(str)].filter(Boolean).join('.').toLowerCase();
   if(/presentation|slides?/.test(hint))return 'presentation';
@@ -31,6 +40,7 @@ export function collectStorageReferences01210(value,context={},out=[],path=[]){
   const base={module,siteId:str(context.siteId),siteName:str(context.siteName),workspaceId:str(context.workspaceId),storeId:str(context.storeId),resourceId:str(context.resourceId),sourcePath:path.join('.')};
   let assetId='',objectKey='';
   if(/(^|_)(assetid|mediaassetid|cloudassetid)$/.test(key)||key==='assetid'||key==='mediaassetid'||key==='cloudassetid')assetId=raw;
+  if(!assetId)assetId=assetIdFromDeliveryUrl01212(raw);
   if(key==='objectkey'||key==='object_key'||raw.startsWith('accounts/'))objectKey=raw.startsWith('accounts/')?raw:'';
   if(!objectKey)objectKey=objectKeyFromUrl01210(raw);
   if(assetId||objectKey)out.push({...base,assetId,objectKey});
