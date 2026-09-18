@@ -144,3 +144,38 @@ test('01214 detail path prefers the latest Site Resource Index and manual R2 ref
   assert.match(inventory,/if\(!index\)\{const snapshot=await getAuthorizedR2InventorySnapshot01210/);
   assert.match(traffic,/clearSiteResourceIndexCache01213\(scope\.accountId\)/);
 });
+
+test('01216 rebuilds logical references from cached physical objects without changing physical measurement',async()=>{
+  const {rebuildInventorySnapshotReferences01216}=await import('../src/storage-object-inventory-01210.mjs');
+  const base={
+    accountId:'acct_1',available:true,provider:'r2',bucket:'bucket',prefix:'accounts/acct_1/',pages:1,measuredAt:'2026-09-19T10:00:00.000Z',
+    items:[{physical:true,provider:'r2',bucket:'bucket',objectKey:sharedKey,sizeBytes:100,lastModified:'2026-09-19T09:00:00.000Z',etag:'e1',storageClass:'',mimeType:'image/jpeg',assetId:'asset_shared',fileName:'shared.jpg'}],
+    summary:{objectCount:1,totalBytes:100},
+  };
+  const state={
+    sites:[sites[0],sites[1]],siteById:new Map([[sites[0].id,sites[0]],[sites[1].id,sites[1]]]),
+    mediaAssets:[{id:'asset_shared',accountId:'acct_1',workspaceId:'ws_1',storeId:'store_1',provider:'r2',bucket:'bucket',objectKey:sharedKey,kind:'image',fileName:'shared.jpg',mimeType:'image/jpeg',sizeBytes:100,status:'ready',metadata:{trafficSiteId:'site_a'}}],
+    derivativeAssets:[],
+    references:[
+      {module:'sites',siteId:'site_a',workspaceId:'ws_1',storeId:'store_1',resourceId:'site_a',assetId:'asset_shared',objectKey:'',sourcePath:'siteProject.hero'},
+      {module:'sites',siteId:'site_b',workspaceId:'ws_1',storeId:'store_1',resourceId:'site_b',assetId:'asset_shared',objectKey:'',sourcePath:'siteProject.hero'},
+    ],
+  };
+  const rebuilt=rebuildInventorySnapshotReferences01216(base,state,'2026-09-19T10:05:00.000Z');
+  assert.equal(rebuilt.measuredAt,base.measuredAt);
+  assert.equal(rebuilt.referenceMeasuredAt,'2026-09-19T10:05:00.000Z');
+  assert.equal(rebuilt.summary.objectCount,1);
+  assert.equal(rebuilt.summary.totalBytes,100);
+  assert.deepEqual(rebuilt.items[0].referencedSiteIds.sort(),['site_a','site_b']);
+});
+
+test('01216 Site Resource list refresh requests a reference-only rebuild instead of forcing R2 refresh',async()=>{
+  const fs=await import('node:fs');
+  const inventory=fs.readFileSync(new URL('../src/site-resource-inventory-01213.mjs',import.meta.url),'utf8');
+  const storage=fs.readFileSync(new URL('../src/storage-object-inventory-01210.mjs',import.meta.url),'utf8');
+  assert.match(inventory,/refreshAuthorizedR2InventoryReferences01216/);
+  assert.match(inventory,/refreshReferences/);
+  assert.match(inventory,/clearSiteResourceIndexCache01213\(scope\?\.accountId\)/);
+  assert.match(storage,/cached-provider-objects\+postgresql-reference-refresh/);
+  assert.doesNotMatch(storage,/refreshAuthorizedR2InventoryReferences01216[\s\S]{0,1200}listObjects01210/);
+});

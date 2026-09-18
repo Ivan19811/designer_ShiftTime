@@ -1,5 +1,5 @@
 // 01213 · Per-site logical resource inventory derived from one canonical Account R2 snapshot.
-import {getAuthorizedR2InventorySnapshot01210} from './storage-object-inventory-01210.mjs';
+import {getAuthorizedR2InventorySnapshot01210,refreshAuthorizedR2InventoryReferences01216} from './storage-object-inventory-01210.mjs';
 import {normalizeReferenceEdges01213,buildReferenceEdgeIndexes01213,referenceEdgesForResource01213,modulesForSiteResource01213} from './site-resource-reference-resolvers-01213.mjs';
 import {loadAuthorizedSiteAccess01213} from './site-resource-access-01213.mjs';
 
@@ -164,7 +164,10 @@ export function getLatestSiteResourceIndex01214(accountId=''){return latestIndex
 export function getOrBuildSiteResourceIndex01213(snapshot={}){const key=cacheKey01213(snapshot),accountId=str(snapshot.accountId);if(indexCache01213.has(key)){const cached=indexCache01213.get(key);if(accountId)latestIndexByAccount01214.set(accountId,cached);return cached;}const index=buildSiteResourceIndex01213(snapshot);for(const existing of indexCache01213.keys())if(existing.startsWith(`${accountId}|`)&&existing!==key)indexCache01213.delete(existing);indexCache01213.set(key,index);if(accountId)latestIndexByAccount01214.set(accountId,index);return index;}
 
 export async function listAuthorizedSiteResourceInventory01213(scope={},userId='',input={},options={}){
-  const [snapshot,access]=await Promise.all([getAuthorizedR2InventorySnapshot01210(scope,options.inventoryOptions||{}),loadAuthorizedSiteAccess01213(scope,userId,options.accessOptions||{})]);
+  const refreshReferences=['1','true','yes','on'].includes(str(input.refreshReferences).toLowerCase());
+  const snapshotPromise=refreshReferences?refreshAuthorizedR2InventoryReferences01216(scope,options.inventoryOptions||{}):getAuthorizedR2InventorySnapshot01210(scope,options.inventoryOptions||{});
+  const [snapshot,access]=await Promise.all([snapshotPromise,loadAuthorizedSiteAccess01213(scope,userId,options.accessOptions||{})]);
+  if(refreshReferences)clearSiteResourceIndexCache01213(scope?.accountId);
   const index=getOrBuildSiteResourceIndex01213(snapshot),siteMetadata=new Map(access.sites.map(site=>[site.id,site]));
   for(const [id,entry] of index.bySiteId){const meta=siteMetadata.get(id);if(meta)entry.site={...entry.site,...meta};}
   return listSiteResourceInventoryFromIndex01213(index,input,access);

@@ -145,6 +145,26 @@ export async function getAuthorizedR2InventorySnapshot01210(scope={},options={})
   cache01210.set(accountId,{snapshot:current?.snapshot||null,expiresAt:current?.expiresAt||0,promise});return {...(await promise),cached:false};
 }
 
+
+export function rebuildInventorySnapshotReferences01216(snapshot={},referenceState={},referenceMeasuredAt=new Date().toISOString()){
+  const objects=arr(snapshot.items).filter(item=>item?.physical).map(item=>({
+    provider:str(item.provider),bucket:str(item.bucket),objectKey:str(item.objectKey),sizeBytes:num(item.sizeBytes),lastModified:str(item.lastModified),etag:str(item.etag),storageClass:str(item.storageClass),mimeType:str(item.mimeType),
+  }));
+  const rebuilt=buildInventorySnapshot01210({scope:{accountId:str(snapshot.accountId)},objects,referenceState,providerInfo:{provider:str(snapshot.provider),bucket:str(snapshot.bucket),prefix:str(snapshot.prefix),pages:num(snapshot.pages)},measuredAt:str(snapshot.measuredAt)||new Date().toISOString()});
+  return {...rebuilt,sites:arr(referenceState.sites),referenceEdges:arr(referenceState.references),source:'cached-provider-objects+postgresql-reference-refresh',cached:true,referenceMeasuredAt:str(referenceMeasuredAt)};
+}
+
+export async function refreshAuthorizedR2InventoryReferences01216(scope={},options={}){
+  const accountId=str(scope.accountId);if(!accountId)throw Object.assign(new Error('Account scope is required for R2 inventory.'),{statusCode:400});
+  const current=cache01210.get(accountId);let base=current?.snapshot||null;
+  if(current?.promise&&!base)base=await current.promise;
+  if(!base)base=await getAuthorizedR2InventorySnapshot01210(scope,options);
+  const referenceState=await loadAuthorizedStorageReferenceState01210(scope,options),referenceMeasuredAt=new Date().toISOString(),rebuilt=rebuildInventorySnapshotReferences01216(base,referenceState,referenceMeasuredAt);
+  const latest=cache01210.get(accountId)||current||{};
+  cache01210.set(accountId,{snapshot:rebuilt,expiresAt:Number(latest.expiresAt)||0,promise:latest.promise||null});
+  return rebuilt;
+}
+
 export async function listAuthorizedR2ObjectInventory01210(scope={},input={},options={}){return filterInventorySnapshot01210(await getAuthorizedR2InventorySnapshot01210(scope,options),input);}
 export async function refreshAuthorizedR2ObjectInventory01210(scope={},input={},options={}){return filterInventorySnapshot01210(await getAuthorizedR2InventorySnapshot01210(scope,{...options,forceRefresh:true}),input);}
 export function clearR2InventoryCache01210(accountId=''){const id=str(accountId);if(id)cache01210.delete(id);else cache01210.clear();}
