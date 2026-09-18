@@ -1,5 +1,5 @@
 // 01081 · R2/S3 adapter. Credentials remain backend-only.
-import {S3Client,HeadObjectCommand,DeleteObjectCommand,GetObjectCommand,PutObjectCommand} from '@aws-sdk/client-s3';
+import {S3Client,HeadObjectCommand,DeleteObjectCommand,GetObjectCommand,PutObjectCommand,ListObjectsV2Command} from '@aws-sdk/client-s3';
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
 import {STORAGE_PROVIDER_CONTRACT_VERSION_01081} from '../storage-provider-contract.mjs';
 import {bodyBytes01201,recordIntegrationTraffic01201} from '../traffic-integration-01201.mjs';
@@ -20,6 +20,7 @@ export class S3CompatibleStorageProvider01081{
   }
   async headObject({key}={}){const out=await this.client().send(new HeadObjectCommand({Bucket:this.bucket,Key:key}));return {sizeBytes:Number(out.ContentLength)||0,mimeType:str(out.ContentType)||'application/octet-stream',etag:str(out.ETag).replace(/^"|"$/g,''),lastModified:out.LastModified?.toISOString?.()||'',metadata:out.Metadata||{}};}
   async createReadUrl({key}={}){const publicUrl=this.publicUrl(key);if(publicUrl)return {url:publicUrl,public:true,expiresIn:0};const url=await getSignedUrl(this.client(),new GetObjectCommand({Bucket:this.bucket,Key:key}),{expiresIn:this.downloadExpiresIn});return {url,public:false,expiresIn:this.downloadExpiresIn};}
+  async measurePrefixUsage01209({prefix='' }={}){const cleanPrefix=str(prefix),client=this.client();let continuationToken='',fileCount=0,bytes=0,pages=0;do{const out=await client.send(new ListObjectsV2Command({Bucket:this.bucket,Prefix:cleanPrefix,MaxKeys:1000,...(continuationToken?{ContinuationToken:continuationToken}:{})}));pages++;for(const item of Array.isArray(out?.Contents)?out.Contents:[]){if(!str(item?.Key))continue;fileCount++;bytes+=Math.max(0,Number(item?.Size)||0);}continuationToken=out?.IsTruncated?str(out?.NextContinuationToken):'';}while(continuationToken);return {provider:this.type,bucket:this.bucket,prefix:cleanPrefix,fileCount,bytes,pages};}
   async deleteObject({key}={}){await this.client().send(new DeleteObjectCommand({Bucket:this.bucket,Key:key}));return {deleted:true};}
 }
 export function createS3CompatibleStorageProvider01081(options){return new S3CompatibleStorageProvider01081(options);}

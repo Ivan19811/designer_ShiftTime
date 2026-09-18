@@ -1,0 +1,8 @@
+// 01209 · Physical object-storage usage for Traffic Control. No PostgreSQL dependency.
+import {config} from './config.mjs';
+import {assertStorageProvider01081} from './storage-provider-contract.mjs';
+import {createS3CompatibleStorageProvider01081} from './storage-providers/s3-compatible-storage-provider.mjs';
+const str=v=>String(v??'').trim();
+const safeSegment=v=>str(v).replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,100)||'x';
+function provider01209(){const type=config.mediaStorageProvider;if(!['r2','s3','s3-compatible'].includes(type))return null;return assertStorageProvider01081(createS3CompatibleStorageProvider01081({providerType:type,endpoint:config.mediaS3Endpoint,region:config.mediaS3Region,bucket:config.mediaS3Bucket,accessKeyId:config.mediaS3AccessKeyId,secretAccessKey:config.mediaS3SecretAccessKey,publicBaseUrl:config.mediaPublicBaseUrl,uploadExpiresIn:config.mediaUploadUrlTtlSeconds,downloadExpiresIn:config.mediaDownloadUrlTtlSeconds,forcePathStyle:config.mediaS3ForcePathStyle}));}
+export async function measureAuthorizedCloudStorageUsage01209(scope={}){const p=provider01209(),measuredAt=new Date().toISOString();if(!p||!p.isConfigured())return {available:false,provider:config.mediaStorageProvider||'',prefix:'',fileCount:0,bytes:0,pages:0,measuredAt,source:'not-configured'};const prefix=`accounts/${safeSegment(scope.accountId)}/`;if(typeof p.measurePrefixUsage01209!=='function')return {available:false,provider:p.getInfo?.().type||'',prefix,fileCount:0,bytes:0,pages:0,measuredAt,source:'unsupported'};const usage=await p.measurePrefixUsage01209({prefix});return {...usage,available:true,measuredAt:new Date().toISOString(),source:'provider-prefix-list'};}
