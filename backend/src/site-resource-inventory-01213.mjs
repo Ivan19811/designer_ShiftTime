@@ -8,6 +8,7 @@ const arr=value=>Array.isArray(value)?value:[];
 const num=value=>Math.max(0,Number(value)||0);
 const unique=values=>[...new Set(values.map(str).filter(Boolean))];
 const indexCache01213=new Map();
+const latestIndexByAccount01214=new Map();
 
 function resourceIdentity01213(item={}){const objectKey=str(item.objectKey),assetId=str(item.assetId);if(objectKey)return `object:${objectKey}`;if(assetId)return `asset:${assetId}`;return `resource:${str(item.fileName)}:${str(item.lastModified)}:${str(item.module)}`;}
 function physicalIdentity01213(item={}){return item?.physical?(str(item.objectKey)||str(item.assetId)||resourceIdentity01213(item)):'';}
@@ -158,8 +159,9 @@ export function getSiteResourceInventoryFromIndex01213(index={},siteId='',input=
 }
 
 function cacheKey01213(snapshot={}){return `${str(snapshot.accountId)}|${str(snapshot.measuredAt)}|${num(snapshot.summary?.objectCount)}|${num(snapshot.summary?.totalBytes)}`;}
-export function clearSiteResourceIndexCache01213(accountId=''){const id=str(accountId);if(!id){indexCache01213.clear();return;}for(const key of indexCache01213.keys())if(key.startsWith(`${id}|`))indexCache01213.delete(key);}
-export function getOrBuildSiteResourceIndex01213(snapshot={}){const key=cacheKey01213(snapshot);if(indexCache01213.has(key))return indexCache01213.get(key);const index=buildSiteResourceIndex01213(snapshot);for(const existing of indexCache01213.keys())if(existing.startsWith(`${str(snapshot.accountId)}|`)&&existing!==key)indexCache01213.delete(existing);indexCache01213.set(key,index);return index;}
+export function clearSiteResourceIndexCache01213(accountId=''){const id=str(accountId);if(!id){indexCache01213.clear();latestIndexByAccount01214.clear();return;}for(const key of indexCache01213.keys())if(key.startsWith(`${id}|`))indexCache01213.delete(key);latestIndexByAccount01214.delete(id);}
+export function getLatestSiteResourceIndex01214(accountId=''){return latestIndexByAccount01214.get(str(accountId))||null;}
+export function getOrBuildSiteResourceIndex01213(snapshot={}){const key=cacheKey01213(snapshot),accountId=str(snapshot.accountId);if(indexCache01213.has(key)){const cached=indexCache01213.get(key);if(accountId)latestIndexByAccount01214.set(accountId,cached);return cached;}const index=buildSiteResourceIndex01213(snapshot);for(const existing of indexCache01213.keys())if(existing.startsWith(`${accountId}|`)&&existing!==key)indexCache01213.delete(existing);indexCache01213.set(key,index);if(accountId)latestIndexByAccount01214.set(accountId,index);return index;}
 
 export async function listAuthorizedSiteResourceInventory01213(scope={},userId='',input={},options={}){
   const [snapshot,access]=await Promise.all([getAuthorizedR2InventorySnapshot01210(scope,options.inventoryOptions||{}),loadAuthorizedSiteAccess01213(scope,userId,options.accessOptions||{})]);
@@ -169,7 +171,9 @@ export async function listAuthorizedSiteResourceInventory01213(scope={},userId='
 }
 
 export async function getAuthorizedSiteResourceInventory01213(scope={},userId='',siteId='',input={},options={}){
-  const [snapshot,access]=await Promise.all([getAuthorizedR2InventorySnapshot01210(scope,options.inventoryOptions||{}),loadAuthorizedSiteAccess01213(scope,userId,options.accessOptions||{})]);
-  const index=getOrBuildSiteResourceIndex01213(snapshot),entry=index.bySiteId.get(str(siteId)),meta=access.sites.find(site=>site.id===str(siteId));if(entry&&meta)entry.site={...entry.site,...meta};
+  const accessPromise=loadAuthorizedSiteAccess01213(scope,userId,options.accessOptions||{});
+  let index=getLatestSiteResourceIndex01214(scope?.accountId);
+  if(!index){const snapshot=await getAuthorizedR2InventorySnapshot01210(scope,options.inventoryOptions||{});index=getOrBuildSiteResourceIndex01213(snapshot);}
+  const access=await accessPromise,entry=index.bySiteId.get(str(siteId)),meta=access.sites.find(site=>site.id===str(siteId));if(entry&&meta)entry.site={...entry.site,...meta};
   return getSiteResourceInventoryFromIndex01213(index,siteId,input,access);
 }

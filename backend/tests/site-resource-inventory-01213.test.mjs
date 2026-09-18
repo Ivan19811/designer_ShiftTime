@@ -4,6 +4,9 @@ import {
   buildSiteResourceIndex01213,
   listSiteResourceInventoryFromIndex01213,
   getSiteResourceInventoryFromIndex01213,
+  getOrBuildSiteResourceIndex01213,
+  getLatestSiteResourceIndex01214,
+  clearSiteResourceIndexCache01213,
 } from '../src/site-resource-inventory-01213.mjs';
 import {filterAuthorizedSitesByMemberships01213} from '../src/site-resource-access-01213.mjs';
 import {normalizeReferenceEdges01213} from '../src/site-resource-reference-resolvers-01213.mjs';
@@ -121,4 +124,23 @@ test('01213 canonical public R2 response does not expose internal reference edge
   const {filterInventorySnapshot01210}=await import('../src/storage-object-inventory-01210.mjs');
   const out=filterInventorySnapshot01210({...snapshot,referenceEdges:[{siteId:'site_a',assetId:'secret_internal_edge'}]},{limit:10});
   assert.equal(Object.hasOwn(out,'referenceEdges'),false);
+});
+
+
+test('01214 keeps the latest Account Site Resource Index available for detail navigation without another R2 snapshot build',()=>{
+  clearSiteResourceIndexCache01213('acct_1');
+  assert.equal(getLatestSiteResourceIndex01214('acct_1'),null);
+  const index=getOrBuildSiteResourceIndex01213(snapshot);
+  assert.equal(getLatestSiteResourceIndex01214('acct_1'),index);
+  clearSiteResourceIndexCache01213('acct_1');
+  assert.equal(getLatestSiteResourceIndex01214('acct_1'),null);
+});
+
+test('01214 detail path prefers the latest Site Resource Index and manual R2 refresh invalidates that index',async()=>{
+  const fs=await import('node:fs');
+  const inventory=fs.readFileSync(new URL('../src/site-resource-inventory-01213.mjs',import.meta.url),'utf8');
+  const traffic=fs.readFileSync(new URL('../src/traffic-service-01194.mjs',import.meta.url),'utf8');
+  assert.match(inventory,/let index=getLatestSiteResourceIndex01214\(scope\?\.accountId\)/);
+  assert.match(inventory,/if\(!index\)\{const snapshot=await getAuthorizedR2InventorySnapshot01210/);
+  assert.match(traffic,/clearSiteResourceIndexCache01213\(scope\.accountId\)/);
 });
