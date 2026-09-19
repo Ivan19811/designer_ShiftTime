@@ -165,6 +165,20 @@ export async function refreshAuthorizedR2InventoryReferences01216(scope={},optio
   return rebuilt;
 }
 
+
+export async function verifyAuthorizedR2ObjectMissing01219(scope={},objectKey='',options={}){
+  const key=str(objectKey);if(!key)throw Object.assign(new Error('Object key is required for cleanup verification.'),{statusCode:400,code:'ST_BROKEN_CLEANUP_OBJECT_KEY_REQUIRED'});
+  const accountId=str(scope?.accountId),parsed=parseStorageObjectPath01210(key);if(!accountId||parsed.accountId!==safeSegment(accountId))throw Object.assign(new Error('Storage object is outside the authorized account scope.'),{statusCode:403,code:'ST_BROKEN_CLEANUP_SCOPE_MISMATCH'});
+  const p=options.provider||await provider01210();if(!p||!p.isConfigured?.()||typeof p.headObject!=='function')throw Object.assign(new Error('Storage provider cannot verify cleanup target.'),{statusCode:503,code:'ST_BROKEN_CLEANUP_STORAGE_UNAVAILABLE'});
+  try{const head=await p.headObject({key});throw Object.assign(new Error('Physical storage object still exists.'),{statusCode:409,code:'ST_BROKEN_CLEANUP_OBJECT_EXISTS',data:head||{}});}
+  catch(error){
+    if(str(error?.code)==='ST_BROKEN_CLEANUP_OBJECT_EXISTS')throw error;
+    const status=Number(error?.$metadata?.httpStatusCode||error?.statusCode)||0,name=str(error?.name||error?.Code||error?.code).toLowerCase();
+    if(status===404||name==='notfound'||name==='nosuchkey'||name==='not_found')return Object.freeze({missing:true,objectKey:key});
+    throw Object.assign(new Error('Unable to verify storage object state before cleanup.'),{statusCode:502,code:'ST_BROKEN_CLEANUP_STORAGE_VERIFY_FAILED',cause:error});
+  }
+}
+
 export async function listAuthorizedR2ObjectInventory01210(scope={},input={},options={}){return filterInventorySnapshot01210(await getAuthorizedR2InventorySnapshot01210(scope,options),input);}
 export async function refreshAuthorizedR2ObjectInventory01210(scope={},input={},options={}){return filterInventorySnapshot01210(await getAuthorizedR2InventorySnapshot01210(scope,{...options,forceRefresh:true}),input);}
 export function clearR2InventoryCache01210(accountId=''){const id=str(accountId);if(id)cache01210.delete(id);else cache01210.clear();}

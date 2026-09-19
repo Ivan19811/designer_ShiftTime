@@ -151,3 +151,5 @@ export async function listTrafficR2Inventory01210(scope={},input={}){const mod=a
 export async function refreshTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');const out=await mod.refreshAuthorizedR2ObjectInventory01210(scope,input);const siteMod=await import('./site-resource-inventory-01213.mjs');siteMod.clearSiteResourceIndexCache01213(scope.accountId);return out;}
 export async function listTrafficSiteResourceInventory01213(scope={},userId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.listAuthorizedSiteResourceInventory01213(scope,userId,input);}
 export async function getTrafficSiteResourceInventory01213(scope={},userId='',siteId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.getAuthorizedSiteResourceInventory01213(scope,userId,siteId,input);}
+
+export async function cleanupTrafficSiteBrokenReference01219(scope={},userId='',siteId='',input={}){const mod=await import('./site-resource-cleanup-01219.mjs');return mod.cleanupAuthorizedBrokenReference01219(scope,userId,siteId,input);}
