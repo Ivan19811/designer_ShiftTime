@@ -120,7 +120,7 @@ export async function getTrafficSummary01194(scope={}){
       FROM shifttime_traffic_events WHERE account_id=$1 AND event_type='storage' AND occurred_at>=date_trunc('month',now())`,[scope.accountId]),
     activePromise
   ]);
-  return Object.freeze({stage:'01213',meterMode:'http+service-payload-v8-site-resource-inventory',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
+  return Object.freeze({stage:'01221',meterMode:'http+service-payload-v9-cleanup-audit',billingReference:RENDER_REFERENCE_01194,...normalizeTrafficSummary01194(q.rows[0]||{}),storage:normalizeTrafficStorageSummary01209(sq.rows[0]||{},active),integrations:normalizeTrafficIntegrationRows01201(iq.rows||[]),recorder:getTrafficRecorderStats01194()});
 }
 
 async function listTrafficByType(scope={},input={},eventType=''){
@@ -151,5 +151,46 @@ export async function listTrafficR2Inventory01210(scope={},input={}){const mod=a
 export async function refreshTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');const out=await mod.refreshAuthorizedR2ObjectInventory01210(scope,input);const siteMod=await import('./site-resource-inventory-01213.mjs');siteMod.clearSiteResourceIndexCache01213(scope.accountId);return out;}
 export async function listTrafficSiteResourceInventory01213(scope={},userId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.listAuthorizedSiteResourceInventory01213(scope,userId,input);}
 export async function getTrafficSiteResourceInventory01213(scope={},userId='',siteId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.getAuthorizedSiteResourceInventory01213(scope,userId,siteId,input);}
+
+
+export function normalizeTrafficCleanupAuditRow01221(row={}){
+  const payload=row.payload&&typeof row.payload==='object'?row.payload:{};
+  const occurred=row.created_at instanceof Date?row.created_at:new Date(row.created_at||0);
+  return Object.freeze({
+    id:String(row.id??''),
+    occurredAt:Number.isNaN(occurred.getTime())?'':occurred.toISOString(),
+    actorUserId:String(payload.actorUserId||row.actor_user_id||''),
+    actorName:String(row.actor_name||''),
+    actorEmail:String(row.actor_email||''),
+    action:String(row.event_type||'media.broken-reference.cleaned'),
+    targetType:'media_asset',
+    targetId:String(row.media_asset_id||''),
+    siteId:String(payload.siteId||''),
+    workspaceId:String(row.workspace_id||''),
+    storeId:String(row.store_id||''),
+    fileName:String(payload.fileName||row.file_name||''),
+    objectKey:String(payload.objectKey||row.object_key||''),
+    sizeBytes:n(payload.sizeBytes),
+    reason:String(payload.reason||'missing-r2-object'),
+    cleanupStage:String(payload.stage||''),
+    r2Deleted:false,
+    historyPreserved:true,
+  });
+}
+
+export async function listTrafficCleanupAudit01221(scope={},input={},options={}){
+  const limit=Math.max(1,Math.min(100,Number(input.limit)||50));
+  let query=typeof options.query==='function'?options.query:null;
+  if(!query){const {pool}=await import('./db.mjs');query=pool.query.bind(pool);}
+  const q=await query(`SELECT e.id,e.created_at,e.media_asset_id,e.store_id,e.event_type,e.payload,
+    a.workspace_id,a.file_name,a.object_key,
+    u.id AS actor_user_id,u.name AS actor_name,u.email AS actor_email
+    FROM media_asset_events e
+    JOIN media_cloud_assets a ON a.id=e.media_asset_id
+    LEFT JOIN platform_users u ON u.id=NULLIF(e.payload->>'actorUserId','')
+    WHERE a.account_id=$1 AND e.event_type='media.broken-reference.cleaned'
+    ORDER BY e.created_at DESC,e.id DESC LIMIT $2`,[scope.accountId,limit]);
+  return Object.freeze({stage:'01221',events:(q.rows||[]).map(normalizeTrafficCleanupAuditRow01221)});
+}
 
 export async function cleanupTrafficSiteBrokenReference01219(scope={},userId='',siteId='',input={}){const mod=await import('./site-resource-cleanup-01219.mjs');return mod.cleanupAuthorizedBrokenReference01219(scope,userId,siteId,input);}
