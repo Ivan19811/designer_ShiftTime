@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildInventorySnapshot01210,classifyResourceType01210,filterInventorySnapshot01210,parseStorageObjectPath01210,getAuthorizedR2InventorySnapshot01210,clearR2InventoryCache01210} from '../src/storage-object-inventory-01210.mjs';
-import {collectStorageReferences01210,collectMarketplaceStorageReferences01210} from '../src/storage-reference-resolvers-01210.mjs';
+import {collectStorageReferences01210,collectMarketplaceStorageReferences01210,collectSiteProjectStorageReferences01218} from '../src/storage-reference-resolvers-01210.mjs';
 
 const scope={accountId:'acct_1',workspaceId:'ws_1',storeId:'store_1'};
 const path=name=>`accounts/acct_1/workspaces/ws_1/stores/store_1/media/gallery/${name}`;
@@ -31,6 +31,12 @@ test('01212 site resolver recognizes canonical public media delivery URLs as ass
   const refs=collectStorageReferences01210({hero:{imageUrl:'https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_gallery123'}},{module:'sites',siteId:'site_1',siteName:'Site One'});
   assert.ok(refs.some(x=>x.assetId==='mediaasset_gallery123'));
   assert.ok(refs.some(x=>x.siteId==='site_1'));
+});
+
+test('01218 public media parser extracts exact asset ids from HTML/CSS encoded URLs without quote or parenthesis suffixes',()=>{
+  const html='<div style="--st-bgfx-bg:url(&quot;https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_exact123&quot;)"><img src="https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_second456"></div>';
+  const refs=collectStorageReferences01210(html,{module:'sites',siteId:'site_1'});
+  assert.deepEqual([...new Set(refs.map(ref=>ref.assetId).filter(Boolean))].sort(),['mediaasset_exact123','mediaasset_second456']);
 });
 
 test('01212 Gallery delivery URL changes a ready R2 object from Unused to Linked',()=>{
@@ -149,4 +155,38 @@ test('01210 active references to deleted metadata assets are surfaced as Broken 
   assert.ok(row);
   assert.ok(row.statusFlags.includes('broken-reference'));
   assert.deepEqual(row.referencedSiteIds,['site_1']);
+});
+
+
+test('01218 Site project reference resolver ignores stale legacy Main copies when canonical SiteFrame Main exists',()=>{
+  const stale='https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_stale';
+  const active='https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_active';
+  const project={
+    site:{id:'site_1',pages:[{id:'page_home',name:'Home',path:'/'}]},
+    storage:{
+      pageSnapshots:{
+        'site_1:page_home':{
+          siteFrameMain01040:{version:'st-main-area-snapshot-v1-01040',rootIds:['root'],nodes:{root:{id:'root',style:{backgroundImage:`url(${active})`}}}},
+          pageHTML:`<section style="background-image:url(${stale})"></section>`,
+          previewHtml:`<section data-old="${stale}"></section>`
+        }
+      },
+      headerState:{global:{html:''},pages:{}},footerState:{global:{html:''},pages:{}},
+      globalStyleStore:{}
+    },
+    debugCache:{lastPreview:stale}
+  };
+  const refs=collectSiteProjectStorageReferences01218(project,{siteId:'site_1',siteName:'Site One',workspaceId:'ws_1',storeId:'store_1',resourceId:'site_1'});
+  assert.ok(refs.some(ref=>ref.assetId==='mediaasset_active'));
+  assert.ok(!refs.some(ref=>ref.assetId==='mediaasset_stale'));
+});
+
+test('01218 Site project resolver follows active header/footer modes instead of counting inactive page-state media',()=>{
+  const globalAsset='https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_header_global';
+  const inactivePageAsset='https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_header_inactive';
+  const project={site:{id:'site_1',pages:[{id:'page_home'}]},storage:{pageSnapshots:{},headerGlobalMode:'global',headerPageModes:{page_home:'global'},headerHidden:'0',headerState:{global:{html:`<img src="${globalAsset}">`},pages:{page_home:{html:`<img src="${inactivePageAsset}">`}}},footerHidden:'1',footerState:{global:{html:`<img src="https://designer-shifttime.onrender.com/api/v1/public/media/mediaasset_footer_hidden">`},pages:{}},globalStyleStore:{}}};
+  const refs=collectSiteProjectStorageReferences01218(project,{siteId:'site_1'});
+  assert.ok(refs.some(ref=>ref.assetId==='mediaasset_header_global'));
+  assert.ok(!refs.some(ref=>ref.assetId==='mediaasset_header_inactive'));
+  assert.ok(!refs.some(ref=>ref.assetId==='mediaasset_footer_hidden'));
 });

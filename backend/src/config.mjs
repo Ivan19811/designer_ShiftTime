@@ -10,7 +10,7 @@ function mergedCorsOrigin01175(){
 }
 // legacy deploy-stage marker: stage:'01200'
 export const config=Object.freeze({
-  stage:'01216',
+  stage:'01218',
   nodeEnv,
   isProduction:nodeEnv==='production',
   host:process.env.HOST||'127.0.0.1',

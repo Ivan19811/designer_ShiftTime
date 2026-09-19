@@ -8,14 +8,19 @@ function objectKeyFromUrl01210(value){
   try{const url=new URL(raw);const path=decodeURIComponent(url.pathname||'').replace(/^\/+/, '');const at=path.indexOf('accounts/');return at>=0?path.slice(at):'';}catch{return '';}
 }
 
-function assetIdFromDeliveryUrl01212(value){
-  const raw=str(value);if(!raw)return '';
-  let pathname=raw;
-  try{if(/^https?:\/\//i.test(raw))pathname=new URL(raw).pathname||'';}catch{}
-  try{pathname=decodeURIComponent(pathname);}catch{}
-  const match=String(pathname).match(/(?:^|\/)api\/v1\/public\/media\/([^/?#]+)/i);
-  return match?str(match[1]):'';
+function decodeReferenceText01218(value){
+  return str(value).replace(/&quot;|&#34;|&#x22;/gi,'"').replace(/&apos;|&#39;|&#x27;/gi,"'").replace(/&amp;/gi,'&');
 }
+
+function assetIdsFromDeliveryText01218(value){
+  const decoded=decodeReferenceText01218(value);if(!decoded)return [];
+  let text=decoded;try{text=decodeURIComponent(text);}catch{}
+  const out=[];const re=/(?:^|[\s(=:'"]|https?:\/\/[^\s'"<>)]*)\/api\/v1\/public\/media\/([A-Za-z0-9._~-]+)/gi;
+  let match;while((match=re.exec(text)))if(match[1])out.push(str(match[1]));
+  return unique(out);
+}
+
+function assetIdFromDeliveryUrl01212(value){return assetIdsFromDeliveryText01218(value)[0]||'';}
 
 export function inferResourceModule01210(path=[],fallback='unknown'){
   const hint=[str(fallback),...arr(path).map(str)].filter(Boolean).join('.').toLowerCase();
@@ -40,10 +45,79 @@ export function collectStorageReferences01210(value,context={},out=[],path=[]){
   const base={module,siteId:str(context.siteId),siteName:str(context.siteName),workspaceId:str(context.workspaceId),storeId:str(context.storeId),resourceId:str(context.resourceId),sourcePath:path.join('.')};
   let assetId='',objectKey='';
   if(/(^|_)(assetid|mediaassetid|cloudassetid)$/.test(key)||key==='assetid'||key==='mediaassetid'||key==='cloudassetid')assetId=raw;
-  if(!assetId)assetId=assetIdFromDeliveryUrl01212(raw);
   if(key==='objectkey'||key==='object_key'||raw.startsWith('accounts/'))objectKey=raw.startsWith('accounts/')?raw:'';
   if(!objectKey)objectKey=objectKeyFromUrl01210(raw);
   if(assetId||objectKey)out.push({...base,assetId,objectKey});
+  if(!assetId){for(const deliveryAssetId of assetIdsFromDeliveryText01218(raw))out.push({...base,assetId:deliveryAssetId,objectKey:''});}
+  return out;
+}
+
+
+function parseJsonValue01218(value,fallback={}){
+  if(value&&typeof value==='object')return value;
+  try{const parsed=JSON.parse(str(value));return parsed&&typeof parsed==='object'?parsed:fallback;}catch{return fallback;}
+}
+
+function pageIdsFromProject01218(project={}){
+  return new Set(arr(project?.site?.pages).map(page=>str(page?.id)).filter(Boolean));
+}
+
+function readProjectMode01218(storage={},area='',pageId=''){
+  const globalMode=str(storage?.[`${area}GlobalMode`])==='page'?'page':'global';
+  const pageModes=parseJsonValue01218(storage?.[`${area}PageModes`],storage?.[`${area}PageModes`]||{});
+  const pageMode=str(pageModes?.[str(pageId)]);
+  return pageMode==='page'||pageMode==='global'?pageMode:globalMode;
+}
+
+function collectCanonicalAreaState01218(projectStorage={},area='',context={},out=[]){
+  if(str(projectStorage?.[`${area}Hidden`])==='1')return out;
+  const state=parseJsonValue01218(projectStorage?.[`${area}State`],projectStorage?.[`${area}State`]||{});
+  const globalHtml=str(state?.global?.html);
+  const ids=pageIdsFromProject01218({site:context.site});
+  for(const pageId of ids){
+    const mode=readProjectMode01218(projectStorage,area,pageId),pageHtml=str(state?.pages?.[pageId]?.html);
+    const html=mode==='page'&&pageHtml?pageHtml:(globalHtml||pageHtml);
+    if(html)collectStorageReferences01210(html,{...context,module:'sites',resourceId:pageId},out,[area,pageId,'html']);
+  }
+  if(!ids.size&&globalHtml)collectStorageReferences01210(globalHtml,{...context,module:'sites'},out,[area,'global','html']);
+  return out;
+}
+
+function canonicalLegacyMainValue01218(snapshot={}){
+  for(const key of ['pageHTML','rootHTML','previewHtml']){const value=str(snapshot?.[key]);if(value)return value;}
+  const site=snapshot?.__st_bundle_v1===true&&snapshot?.site&&typeof snapshot.site==='object'?snapshot.site:null;
+  if(site)for(const key of ['pageHTML','rootHTML','previewHtml']){const value=str(site?.[key]);if(value)return value;}
+  return '';
+}
+
+export function collectSiteProjectStorageReferences01218(projectJson={},context={}){
+  const project=projectJson&&typeof projectJson==='object'?projectJson:{},out=[],site=project?.site&&typeof project.site==='object'?project.site:{},storage=project?.storage&&typeof project.storage==='object'?project.storage:{};
+  const base={...context,module:'sites',site:site};
+
+  // Site/page metadata is canonical, but deployment metadata and caches are not resource usage.
+  for(const page of arr(site?.pages)){
+    if(!page||typeof page!=='object')continue;
+    const meta={...page};delete meta.html;delete meta.previewHtml;delete meta.rootHTML;delete meta.pageHTML;
+    collectStorageReferences01210(meta,{...base,resourceId:str(page?.id)||str(context.resourceId)},out,['site','pages',str(page?.id)||'page']);
+  }
+
+  const snapshots=storage?.pageSnapshots&&typeof storage.pageSnapshots==='object'&&!Array.isArray(storage.pageSnapshots)?storage.pageSnapshots:{};
+  const prefix=str(context.siteId)?`${str(context.siteId)}:`:'';
+  for(const [snapshotKey,snapshot] of Object.entries(snapshots)){
+    if(prefix&&!str(snapshotKey).startsWith(prefix))continue;
+    if(!snapshot||typeof snapshot!=='object')continue;
+    const pageId=str(snapshotKey).slice(prefix.length)||str(context.resourceId);
+    if(snapshot.siteFrameMain01040&&typeof snapshot.siteFrameMain01040==='object'&&!Array.isArray(snapshot.siteFrameMain01040)){
+      collectStorageReferences01210(snapshot.siteFrameMain01040,{...base,resourceId:pageId},out,['pageSnapshots',snapshotKey,'siteFrameMain01040']);
+    }else{
+      const legacy=canonicalLegacyMainValue01218(snapshot);
+      if(legacy)collectStorageReferences01210(legacy,{...base,resourceId:pageId},out,['pageSnapshots',snapshotKey,'legacyMain']);
+    }
+  }
+
+  collectCanonicalAreaState01218(storage,'header',base,out);
+  collectCanonicalAreaState01218(storage,'footer',base,out);
+  if(storage.globalStyleStore&&typeof storage.globalStyleStore==='object')collectStorageReferences01210(storage.globalStyleStore,{...base,resourceId:str(context.resourceId)},out,['globalStyleStore']);
   return out;
 }
 
@@ -90,7 +164,7 @@ export async function loadAuthorizedStorageReferenceState01210(scope={},options=
   const sites=siteRows.map(row=>({id:str(row.site_id),name:str(row.site_name),workspaceId:str(row.workspace_id),storeId:str(row.store_id),status:str(row.status)}));
   const siteById=new Map(sites.map(site=>[site.id,site]));
   const references=[];
-  for(const row of siteRows)collectStorageReferences01210(row.project_json||{}, {module:'sites',siteId:row.site_id,siteName:row.site_name,workspaceId:row.workspace_id,storeId:row.store_id,resourceId:row.site_id},references,['siteProject']);
+  for(const row of siteRows)references.push(...collectSiteProjectStorageReferences01218(row.project_json||{}, {module:'sites',siteId:row.site_id,siteName:row.site_name,workspaceId:row.workspace_id,storeId:row.store_id,resourceId:row.site_id}));
   for(const row of marketRows)references.push(...collectMarketplaceStorageReferences01210(row.snapshot||{}, {module:'marketplace',workspaceId:row.workspace_id,storeId:row.store_id,resourceId:row.store_id}));
   for(const row of tableRows)collectStorageReferences01210(row.values||{}, {module:'tables',workspaceId:row.workspace_id,storeId:row.store_id,resourceId:`${str(row.table_id)}:${str(row.record_id)}`},references,['tableRecord']);
   return {
