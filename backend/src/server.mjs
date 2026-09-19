@@ -25,7 +25,7 @@ import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable0
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
-import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
+import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
 import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201,listTrafficSites01203,listTrafficStorage01206,listTrafficR2Inventory01210,refreshTrafficR2Inventory01210,listTrafficSiteResourceInventory01213,getTrafficSiteResourceInventory01213,cleanupTrafficSiteBrokenReference01219,listTrafficCleanupAudit01221} from './traffic-service-01194.mjs';
 import {getSiteGrowthAnalytics01228} from './site-growth-service-01228.mjs';
@@ -75,10 +75,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
     if(req.method==='POST'&&p.length===5){assertWriteRole(scope);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId)});
-    if(req.method==='PUT'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
-    if(req.method==='DELETE'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}
+    if(req.method==='PUT'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
+    if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
+    if(req.method==='DELETE'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}
     if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
-    return sendJson(res,404,{error:'Site revision route not found',stage:'01231',requestId:rid});
+    return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
