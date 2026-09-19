@@ -9,8 +9,9 @@ function mergedCorsOrigin01175(){
   return [...new Set(all)].join(',')||'*';
 }
 // legacy deploy-stage marker: stage:'01200'
+// legacy deploy-stage marker: stage:'01228'
 export const config=Object.freeze({
-  stage:'01228',
+  stage:'01231',
   nodeEnv,
   isProduction:nodeEnv==='production',
   host:process.env.HOST||'127.0.0.1',
