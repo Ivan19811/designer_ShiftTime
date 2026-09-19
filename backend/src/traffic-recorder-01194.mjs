@@ -53,6 +53,11 @@ export function setTrafficScope01194(res,scope={}){
   res.__stTrafficScope01194={accountId:String(scope.accountId||''),workspaceId:String(scope.workspaceId||''),storeId:String(scope.storeId||''),actorUserId:String(scope.actorUserId||scope.userId||''),siteId:String(scope.siteId||'')};
   return true;
 }
+export function setTrafficMetadata01228(res,metadata={}){
+  if(!res)return false;
+  res.__stTrafficMetadata01228=metadata&&typeof metadata==='object'?metadata:{};
+  return true;
+}
 
 export function attachHttpTrafficMeter01194(req,res){
   const startedAtMs=Date.now();
@@ -63,7 +68,7 @@ export function attachHttpTrafficMeter01194(req,res){
       if(!scope?.accountId)return;
       if(!shouldRecordTrafficRequest01194(req.method,pathname))return;
       const requestId=String(res.getHeader?.('x-st-request-id')||req.headers?.['x-st-request-id']||'');
-      enqueueTrafficEvent01194(buildHttpTrafficEvent01194({method:req.method,pathname,requestId,startedAtMs,finishedAtMs:Date.now(),statusCode:res.statusCode,inboundBytes:req.__stTrafficInboundBytes01194||0,outboundBytes:res.__stTrafficOutboundBytes01194||0,scope}));
+      enqueueTrafficEvent01194(buildHttpTrafficEvent01194({method:req.method,pathname,requestId,startedAtMs,finishedAtMs:Date.now(),statusCode:res.statusCode,inboundBytes:req.__stTrafficInboundBytes01194||0,outboundBytes:res.__stTrafficOutboundBytes01194||0,scope,metadata:res.__stTrafficMetadata01228||{}}));
     }catch{}
   });
   return true;

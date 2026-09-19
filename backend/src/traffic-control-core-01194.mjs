@@ -46,6 +46,7 @@ export function buildHttpTrafficEvent01194(input={}){
     accountId:clean(scope.accountId)||null,workspaceId:clean(scope.workspaceId)||null,storeId:clean(scope.storeId)||null,actorUserId:clean(scope.actorUserId||scope.userId)||null,siteId:route.siteId||clean(scope.siteId)||null,
     module:route.module,operation:route.operation,routeKey:route.routeKey,eventType:'http',integration:'browser',
     inboundBytes:bytes(input.inboundBytes),outboundBytes:bytes(input.outboundBytes),renderBillableOutboundBytes:bytes(input.outboundBytes),
+    metadata:input.metadata&&typeof input.metadata==='object'?input.metadata:{},
     statusCode,result:statusCode>=400?'failed':'success',durationMs:Math.max(0,Math.round(finishedAtMs-startedAtMs)),
   });
 }
