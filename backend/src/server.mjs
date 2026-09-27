@@ -23,6 +23,7 @@ import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitat
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
+import {listAuthorizedMusicProjects01360,getAuthorizedMusicProject01360,createAuthorizedMusicProject01360,updateAuthorizedMusicProject01360,listAuthorizedMusicGalleryAssets01360} from './music-studio-service-01360.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
@@ -136,6 +137,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context')return sendJson(res,200,await getAuthorizedPlatformSnapshot(session.userId,scope));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces')return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
+  if(p[2]==='music'){
+    const projectId=p[4]||'';
+    if(req.method==='GET'&&p[3]==='projects'&&!projectId)return sendJson(res,200,await listAuthorizedMusicProjects01360(scope));
+    if(req.method==='POST'&&p[3]==='projects'&&!projectId){assertWriteRole(scope);return sendJson(res,201,await createAuthorizedMusicProject01360(scope,session.userId,await readJson(req,{limit:1024*1024})));}
+    if(req.method==='GET'&&p[3]==='projects'&&projectId)return sendJson(res,200,await getAuthorizedMusicProject01360(scope,projectId));
+    if(req.method==='PUT'&&p[3]==='projects'&&projectId){assertWriteRole(scope);return sendJson(res,200,await updateAuthorizedMusicProject01360(scope,session.userId,projectId,await readJson(req,{limit:4*1024*1024})));}
+    if(req.method==='GET'&&p[3]==='gallery-assets')return sendJson(res,200,await listAuthorizedMusicGalleryAssets01360(scope));
+    return sendJson(res,404,{error:'Music Studio route not found',stage:'01360',requestId:rid});
+  }
   if(p[2]==='tables'){
     const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
     if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,tables:await listAuthorizedTables01092(scope,session.userId)});

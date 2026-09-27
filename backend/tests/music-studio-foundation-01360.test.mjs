@@ -41,8 +41,8 @@ test('01360 Gallery exposes localized system Music folder through provider bridg
   assert.match(locale,/music:'Музика'/);
 });
 
-test('Music Studio branch uses its isolated Live Server origin after 01361',()=>{
+test('01360 preserves default Live Server origin for the main builder branch',()=>{
   const settings=JSON.parse(read(path.join(root,'.vscode/settings.json')));
   assert.equal(settings['liveServer.settings.host'],'127.0.0.1');
-  assert.equal(settings['liveServer.settings.port'],5555);
+  assert.equal(settings['liveServer.settings.port'],5544);
 });
