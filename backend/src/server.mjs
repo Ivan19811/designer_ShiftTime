@@ -24,7 +24,7 @@ import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema0
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {listAuthorizedMusicProjects01360,getAuthorizedMusicProject01360,createAuthorizedMusicProject01360,updateAuthorizedMusicProject01360,listAuthorizedMusicGalleryAssets01360} from './music-studio-service-01360.mjs';
-import {listAuthorizedMusicNotes01364,createAuthorizedMusicNote01364,deleteAuthorizedMusicNote01364} from './music-studio-note-service-01364.mjs';
+import {listAuthorizedMusicNotes01364,createAuthorizedMusicNote01364,deleteAuthorizedMusicNote01364,updateAuthorizedMusicNote01375} from './music-studio-note-service-01364.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
@@ -148,6 +148,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       const noteId=p[6]||'';
       if(req.method==='GET'&&!noteId){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listAuthorizedMusicNotes01364(scope,projectId,{trackId:u.searchParams.get('trackId')||''}));}
       if(req.method==='POST'&&!noteId){assertWriteRole(scope);return sendJson(res,201,await createAuthorizedMusicNote01364(scope,session.userId,projectId,await readJson(req,{limit:512*1024})));}
+      if(req.method==='PUT'&&noteId){assertWriteRole(scope);return sendJson(res,200,await updateAuthorizedMusicNote01375(scope,projectId,noteId,await readJson(req,{limit:512*1024})));}
       if(req.method==='DELETE'&&noteId){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedMusicNote01364(scope,projectId,noteId));}
     }
     if(req.method==='GET'&&p[3]==='gallery-assets')return sendJson(res,200,await listAuthorizedMusicGalleryAssets01360(scope));

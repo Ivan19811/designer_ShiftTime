@@ -82,3 +82,25 @@ export async function deleteAuthorizedMusicNote01364(scope,projectId,noteId){
     return {stage:'01364',deleted:true,noteId:str(noteId),projectRevision:projectState.revision};
   });
 }
+
+export async function updateAuthorizedMusicNote01375(scope,projectId,noteId,input={}){
+  assertScope(scope);
+  return withTransaction(async client=>{
+    const project=await assertProject(client,scope,projectId,{lock:true});
+    const existing=await client.query(`${NOTE_SELECT} WHERE n.id=$1 AND n.project_id=$2`,[str(noteId),str(projectId)]);
+    if(!existing.rowCount)throw httpError('Music note not found',404);
+    const current=mapNote(existing.rows[0]);
+    if(str(input.trackId)&&str(input.trackId)!==str(current.trackId))throw httpError('Piano Roll cannot move a note between tracks',400);
+    const track=await assertTrack(client,projectId,current.trackId);
+    const pitch=Math.trunc(clamp(input.pitch,0,127,current.pitch));
+    const startBeat=Math.max(0,num(input.startBeat,current.startBeat));
+    const durationBeats=Math.max(0.03125,Math.min(1024,num(input.durationBeats,current.durationBeats)));
+    const velocity=Math.trunc(clamp(input.velocity,1,127,current.velocity));
+    const channel=Math.trunc(clamp(input.channel,1,16,current.channel));
+    const instrumentData=input.instrumentData&&typeof input.instrumentData==='object'?{...(current.instrumentData||{}),...input.instrumentData,editedByStage:'01375'}:(current.instrumentData||{});
+    const q=await client.query(`UPDATE music_note_events SET track_id=$3,pitch=$4,start_beat=$5,duration_beats=$6,velocity=$7,channel=$8,instrument_data=$9::jsonb,updated_at=now() WHERE id=$1 AND project_id=$2 RETURNING id,project_id "projectId",track_id "trackId",clip_id "clipId",pitch,start_beat "startBeat",duration_beats "durationBeats",velocity,channel,instrument_data "instrumentData",created_at "createdAt",updated_at "updatedAt"`,[str(noteId),str(projectId),track.id,pitch,startBeat,durationBeats,velocity,channel,JSON.stringify(instrumentData)]);
+    await client.query(`UPDATE music_clips SET duration_beats=GREATEST(duration_beats,$2),updated_at=now() WHERE id=$1`,[current.clipId,startBeat+durationBeats]);
+    const projectState=await bumpRevision(client,scope,projectId,startBeat+durationBeats);
+    return {stage:'01375',note:mapNote(q.rows[0]),projectRevision:projectState.revision,durationBeats:projectState.durationBeats};
+  });
+}
