@@ -27,6 +27,7 @@ import {listAuthorizedMusicProjects01360,getAuthorizedMusicProject01360,createAu
 import {listAuthorizedMusicNotes01364,createAuthorizedMusicNote01364,deleteAuthorizedMusicNote01364,updateAuthorizedMusicNote01375} from './music-studio-note-service-01364.mjs';
 import {listMusicSchoolTree01409,getMusicSchoolLesson01409,exportMusicSchool01409} from './music-school-service-01409.mjs';
 import {saveMusicSchoolLesson01410,rollbackMusicSchoolLesson01410,getMusicSchoolLessonVersions01410} from './music-school-editor-service-01410.mjs';
+import {listMusicTrainingExercises01422,getMusicTrainingExercise01422} from './music-school-training-service-01422.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
@@ -154,6 +155,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       if(req.method==='DELETE'&&noteId){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedMusicNote01364(scope,projectId,noteId));}
     }
     if(req.method==='GET'&&p[3]==='school'&&p[4]==='tree')return sendJson(res,200,await listMusicSchoolTree01409());
+    if(req.method==='GET'&&p[3]==='school'&&p[4]==='training-exercises'&&!p[5]){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listMusicTrainingExercises01422({instrument:u.searchParams.get('instrument')||'guitar'}));}
+    if(req.method==='GET'&&p[3]==='school'&&p[4]==='training-exercises'&&p[5])return sendJson(res,200,await getMusicTrainingExercise01422(p[5]));
     if(req.method==='GET'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&!p[6])return sendJson(res,200,await getMusicSchoolLesson01409(p[5]));
     if(req.method==='GET'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&p[6]==='versions')return sendJson(res,200,await getMusicSchoolLessonVersions01410(p[5]));
     if(req.method==='PUT'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&!p[6]){assertWriteRole(scope);return sendJson(res,200,await saveMusicSchoolLesson01410(p[5],await readJson(req,{limit:2*1024*1024}),{actorUserId:session.userId}));}
