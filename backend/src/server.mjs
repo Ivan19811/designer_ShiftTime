@@ -21,6 +21,7 @@ import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginA
 import {fetchRemoteImage01396} from './media-remote-image-01396.mjs';
 import {listMarketplaceImportRollbacks01397,previewMarketplaceImportRollback01397,restoreMarketplaceImportRollback01397} from './marketplace-import-rollback-01397.mjs';
 import {getGoogleSheetsOAuthStatus01398,startGoogleSheetsOAuth01398,completeGoogleSheetsOAuth01398,readPrivateGoogleSheet01398,disconnectGoogleSheetsOAuth01398} from './google-sheets-oauth-01398.mjs';
+import {listSupplierSyncSchedules01399,saveSupplierSyncSchedule01399,deleteSupplierSyncSchedule01399,runSupplierSyncNow01399,startSupplierSyncScheduler01399,stopSupplierSyncScheduler01399} from './marketplace-supplier-sync-scheduler-01399.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -216,6 +217,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertWriteRole(scope);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
     if(req.method==='DELETE'&&p.length===4){assertWriteRole(scope);await resetSnapshot(scope);return sendNoContent(res,204);}
   }
+  if(p[3]==='supplier-sync-schedules'){
+    const sourceId=p[4]||'';
+    if(req.method==='GET'&&!sourceId)return sendJson(res,200,await listSupplierSyncSchedules01399(scope));
+    if(req.method==='PUT'&&sourceId){assertWriteRole(scope);return sendJson(res,200,await saveSupplierSyncSchedule01399(scope,sourceId,await readJson(req)));}
+    if(req.method==='DELETE'&&sourceId){assertWriteRole(scope);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
+    if(req.method==='POST'&&sourceId&&p[5]==='run'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
+    return sendJson(res,404,{error:'Supplier sync scheduler route not found',stage:'01399',requestId:rid});
+  }
   if(p[3]==='import-rollbacks'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listMarketplaceImportRollbacks01397(scope));
     if(req.method==='GET'&&p[4]&&p[5]==='preview')return sendJson(res,200,await previewMarketplaceImportRollback01397(scope,p[4]));
@@ -237,5 +246,5 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
 const server=http.createServer((req,res)=>{const rid=requestId(req);res.setHeader('x-st-request-id',rid);attachHttpTrafficMeter01194(req,res);runTrafficContext01201({requestId:rid,method:req.method,pathname:new URL(req.url||'/','http://localhost').pathname},()=>route(req,res,rid)).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||rid});}else res.end();});});
-server.listen(config.port,config.host,()=>console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`));
-for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}}));
+server.listen(config.port,config.host,()=>{console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`);startSupplierSyncScheduler01399();});
+for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>{stopSupplierSyncScheduler01399();server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}});});
