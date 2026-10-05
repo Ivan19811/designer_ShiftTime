@@ -18,16 +18,12 @@ import {listAuthorizedShippingProviders01078,listAuthorizedSellerDeliveries01078
 import {getDeploymentStatus01080,sanitizeImportSource01080} from './deployment-service.mjs';
 import {importLocalOperationalBundle01080} from './deployment-local-import-service.mjs';
 import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081,resolveAuthorizedMediaTrafficSite01206} from './media-cloud-service.mjs';
+import {fetchRemoteImage01396} from './media-remote-image-01396.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
-import {listAuthorizedMusicProjects01360,getAuthorizedMusicProject01360,createAuthorizedMusicProject01360,updateAuthorizedMusicProject01360,listAuthorizedMusicGalleryAssets01360} from './music-studio-service-01360.mjs';
-import {listAuthorizedMusicNotes01364,createAuthorizedMusicNote01364,deleteAuthorizedMusicNote01364,updateAuthorizedMusicNote01375} from './music-studio-note-service-01364.mjs';
-import {listMusicSchoolTree01409,getMusicSchoolLesson01409,exportMusicSchool01409} from './music-school-service-01409.mjs';
-import {saveMusicSchoolLesson01410,rollbackMusicSchoolLesson01410,getMusicSchoolLessonVersions01410} from './music-school-editor-service-01410.mjs';
-import {listMusicTrainingExercises01422,getMusicTrainingExercise01422} from './music-school-training-service-01422.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
@@ -130,6 +126,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const mediaScope={...scope,actorUserId:session.userId,siteId:mediaSiteId};
     if(mediaSiteId){setTrafficScope01194(res,mediaScope);updateTrafficContext01201({siteId:mediaSiteId});}
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
+    if(req.method==='POST'&&p[3]==='remote-image'&&p[4]==='fetch'){assertWriteRole(scope);const body=await readJson(req,{limit:64*1024}),remote=await fetchRemoteImage01396(body?.url);const bytes=remote.bytes;res.__stTrafficOutboundBytes01194=bytes.length;res.writeHead(200,{'content-type':remote.mimeType,'content-length':bytes.length,'content-disposition':`attachment; filename="${remote.fileName.replace(/["\\]/g,'_')}"`,'x-st-remote-final-url':remote.finalUrl,'x-st-remote-source-bytes':String(remote.sizeBytes),'cache-control':'no-store'});return res.end(bytes);}
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
     if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertWriteRole(scope);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
     if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertWriteRole(scope);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
@@ -141,35 +138,6 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context')return sendJson(res,200,await getAuthorizedPlatformSnapshot(session.userId,scope));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces')return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
-  if(p[2]==='music'){
-    const projectId=p[4]||'';
-    if(req.method==='GET'&&p[3]==='projects'&&!projectId)return sendJson(res,200,await listAuthorizedMusicProjects01360(scope));
-    if(req.method==='POST'&&p[3]==='projects'&&!projectId){assertWriteRole(scope);return sendJson(res,201,await createAuthorizedMusicProject01360(scope,session.userId,await readJson(req,{limit:1024*1024})));}
-    if(req.method==='GET'&&p[3]==='projects'&&projectId&&!p[5])return sendJson(res,200,await getAuthorizedMusicProject01360(scope,projectId));
-    if(req.method==='PUT'&&p[3]==='projects'&&projectId&&!p[5]){assertWriteRole(scope);return sendJson(res,200,await updateAuthorizedMusicProject01360(scope,session.userId,projectId,await readJson(req,{limit:4*1024*1024})));}
-    if(p[3]==='projects'&&projectId&&p[5]==='notes'){
-      const noteId=p[6]||'';
-      if(req.method==='GET'&&!noteId){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listAuthorizedMusicNotes01364(scope,projectId,{trackId:u.searchParams.get('trackId')||''}));}
-      if(req.method==='POST'&&!noteId){assertWriteRole(scope);return sendJson(res,201,await createAuthorizedMusicNote01364(scope,session.userId,projectId,await readJson(req,{limit:512*1024})));}
-      if(req.method==='PUT'&&noteId){assertWriteRole(scope);return sendJson(res,200,await updateAuthorizedMusicNote01375(scope,projectId,noteId,await readJson(req,{limit:512*1024})));}
-      if(req.method==='DELETE'&&noteId){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedMusicNote01364(scope,projectId,noteId));}
-    }
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='tree')return sendJson(res,200,await listMusicSchoolTree01409());
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='training-exercises'&&!p[5]){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listMusicTrainingExercises01422({instrument:u.searchParams.get('instrument')||'guitar'}));}
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='training-exercises'&&p[5])return sendJson(res,200,await getMusicTrainingExercise01422(p[5]));
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&!p[6])return sendJson(res,200,await getMusicSchoolLesson01409(p[5]));
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&p[6]==='versions')return sendJson(res,200,await getMusicSchoolLessonVersions01410(p[5]));
-    if(req.method==='PUT'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&!p[6]){assertWriteRole(scope);return sendJson(res,200,await saveMusicSchoolLesson01410(p[5],await readJson(req,{limit:2*1024*1024}),{actorUserId:session.userId}));}
-    if(req.method==='POST'&&p[3]==='school'&&p[4]==='lessons'&&p[5]&&p[6]==='rollback'){assertWriteRole(scope);const body=await readJson(req,{limit:128*1024});return sendJson(res,200,await rollbackMusicSchoolLesson01410(p[5],body?.version,{actorUserId:session.userId}));}
-    if(req.method==='GET'&&p[3]==='school'&&p[4]==='export'){
-      const u=new URL(req.url,'http://localhost'),out=await exportMusicSchool01409({levelId:u.searchParams.get('levelId')||''});
-      res.__stTrafficOutboundBytes01194=out.buffer.length;
-      res.writeHead(200,{'content-type':'application/zip','content-length':out.buffer.length,'content-disposition':`attachment; filename="${out.filename}"`,'x-st-music-school-stage':'01409','x-st-music-school-entries':String(out.entryCount)});
-      return res.end(out.buffer);
-    }
-    if(req.method==='GET'&&p[3]==='gallery-assets')return sendJson(res,200,await listAuthorizedMusicGalleryAssets01360(scope));
-    return sendJson(res,404,{error:'Music Studio route not found',stage:'01364',requestId:rid});
-  }
   if(p[2]==='tables'){
     const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
     if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,tables:await listAuthorizedTables01092(scope,session.userId)});
