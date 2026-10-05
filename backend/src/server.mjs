@@ -20,6 +20,7 @@ import {importLocalOperationalBundle01080} from './deployment-local-import-servi
 import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081,resolveAuthorizedMediaTrafficSite01206} from './media-cloud-service.mjs';
 import {fetchRemoteImage01396} from './media-remote-image-01396.mjs';
 import {listMarketplaceImportRollbacks01397,previewMarketplaceImportRollback01397,restoreMarketplaceImportRollback01397} from './marketplace-import-rollback-01397.mjs';
+import {getGoogleSheetsOAuthStatus01398,startGoogleSheetsOAuth01398,completeGoogleSheetsOAuth01398,readPrivateGoogleSheet01398,disconnectGoogleSheetsOAuth01398} from './google-sheets-oauth-01398.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -36,6 +37,7 @@ import {resolvePublishedSiteTrafficIdentity01203} from './published-site-identit
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
 function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 function sameTrafficTenant01203(a={},b={}){return String(a.accountId||'')===String(b.accountId||'')&&String(a.workspaceId||'')===String(b.workspaceId||'')&&String(a.storeId||'')===String(b.storeId||'');}
+function sendGoogleOAuthPopup01398(res,{ok=false,code='',targetOrigin=''}={}){const origin=String(targetOrigin||'').trim()||'*',message=JSON.stringify({type:'st:google-sheets-oauth:01398',ok:!!ok,code:String(code||'')}).replace(/</g,'\u003c'),target=JSON.stringify(origin).replace(/</g,'\u003c'),body=`<!doctype html><meta charset=\"utf-8\"><script>try{window.opener&&window.opener.postMessage(${message},${target})}catch{};try{window.close()}catch{}</script>`;res.writeHead(ok?200:400,{'content-type':'text/html; charset=utf-8','content-length':Buffer.byteLength(body),'cache-control':'no-store'});res.end(body);}
 async function resolveRequestPublishedTrafficIdentity01203(req){const token=String(req?.headers?.['x-st-site-token']||'').trim();return token?resolvePublishedSiteTrafficIdentity01203(token):null;}
 async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
@@ -64,6 +66,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='DELETE'&&p[5]==='items'&&p[6]){const out=await removePublicCartItem(token,p[6]);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
     return sendJson(res,404,{error:'Cart route not found',requestId:rid});
   }
+  if(req.method==='GET'&&p[2]==='integrations'&&p[3]==='google-sheets'&&p[4]==='oauth'&&p[5]==='callback'){
+    const u=new URL(req.url,'http://localhost');try{const out=await completeGoogleSheetsOAuth01398({code:u.searchParams.get('code')||'',state:u.searchParams.get('state')||'',error:u.searchParams.get('error')||''});return sendGoogleOAuthPopup01398(res,{ok:true,code:'connected',targetOrigin:out.returnOrigin});}catch(e){return sendGoogleOAuthPopup01398(res,{ok:false,code:e?.code||e?.message||'oauth_failed',targetOrigin:e?.returnOrigin||''});}
+  }
   const session=await authenticateRequest(req);
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
@@ -71,6 +76,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
+  if(p[2]==='integrations'&&p[3]==='google-sheets'){
+    if(req.method==='GET'&&p[4]==='oauth'&&p[5]==='status')return sendJson(res,200,await getGoogleSheetsOAuthStatus01398(scope));
+    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='start'){assertWriteRole(scope);return sendJson(res,200,await startGoogleSheetsOAuth01398(scope,await readJson(req,{limit:16*1024})));}
+    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='disconnect'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await disconnectGoogleSheetsOAuth01398(scope));}
+    if(req.method==='POST'&&p[4]==='read'){assertWriteRole(scope);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
+    return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
+  }
   if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope)});
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
