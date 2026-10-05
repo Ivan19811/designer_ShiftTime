@@ -22,6 +22,10 @@ import {fetchRemoteImage01396} from './media-remote-image-01396.mjs';
 import {listMarketplaceImportRollbacks01397,previewMarketplaceImportRollback01397,restoreMarketplaceImportRollback01397} from './marketplace-import-rollback-01397.mjs';
 import {getGoogleSheetsOAuthStatus01398,startGoogleSheetsOAuth01398,completeGoogleSheetsOAuth01398,readPrivateGoogleSheet01398,disconnectGoogleSheetsOAuth01398} from './google-sheets-oauth-01398.mjs';
 import {listSupplierSyncSchedules01399,saveSupplierSyncSchedule01399,deleteSupplierSyncSchedule01399,runSupplierSyncNow01399,startSupplierSyncScheduler01399,stopSupplierSyncScheduler01399} from './marketplace-supplier-sync-scheduler-01399.mjs';
+import {listSupplierSyncApprovals01400,getSupplierSyncApprovalDetail01400,approveSupplierSyncApproval01400,rejectAndUpdateSupplierSyncApproval01400} from './marketplace-supplier-sync-approval-01400.mjs';
+import {listSupplierSyncAlerts01401,setSupplierSyncAlertStatus01401} from './marketplace-supplier-sync-alerts-01401.mjs';
+import {getSupplierSyncAlertRules01402,saveSupplierSyncAlertRules01402,resetSupplierSyncAlertRules01402} from './marketplace-supplier-sync-alert-rules-01402.mjs';
+import {createPublicCustomerMessage01404,listOrderNotifications01404,listCustomerMessageNotifications01404,setNotificationReceipt01404} from './notification-inbox-01404.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -58,6 +62,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='media'&&p[4]){const out=await getPublicCloudMediaDelivery01081(p[4]);res.statusCode=302;res.setHeader('location',out.url);res.setHeader('cache-control',out.public?'public, max-age=300':'private, no-store');return res.end();}
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='search'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await searchPublicMarketplace(Object.fromEntries(u.searchParams.entries())));}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='orders'){const token=String(req.headers['x-st-cart-id']||'');const out=await checkoutPublicCart(token,await readJson(req));return sendJson(res,201,out,{'x-st-cart-id':out.nextCartId});}
+  if(req.method==='POST'&&p[2]==='public'&&p[3]==='site'&&p[4]==='messages'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01404',stage:'01404',requestId:rid});const out=await createPublicCustomerMessage01404(publishedTrafficIdentity,await readJson(req,{limit:32*1024}),{remoteAddress:req.socket?.remoteAddress||'',userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
   if(p[2]==='public'&&p[3]==='marketplace'&&p[4]==='cart'){const token=String(req.headers['x-st-cart-id']||'');
     if(req.method==='GET'&&p.length===5){const out=await getPublicCart(token);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
     if(req.method==='DELETE'&&p.length===5){const out=await clearPublicCart(token);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
@@ -76,6 +81,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
+  if(p[2]==='notifications'){
+    if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listOrderNotifications01404(scope));}
+    if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
+    if(req.method==='POST'&&['orders','messages'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
+    return sendJson(res,404,{error:'NOTIFICATION_ROUTE_NOT_FOUND_01404',stage:'01404',requestId:rid});
+  }
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(p[2]==='integrations'&&p[3]==='google-sheets'){
     if(req.method==='GET'&&p[4]==='oauth'&&p[5]==='status')return sendJson(res,200,await getGoogleSheetsOAuthStatus01398(scope));
@@ -224,6 +235,27 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='DELETE'&&sourceId){assertWriteRole(scope);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
     if(req.method==='POST'&&sourceId&&p[5]==='run'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
     return sendJson(res,404,{error:'Supplier sync scheduler route not found',stage:'01399',requestId:rid});
+  }
+  if(p[3]==='supplier-sync-alerts'){
+    const alertId=p[4]||'';
+    if(req.method==='GET'&&!alertId){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listSupplierSyncAlerts01401(scope,{status:u.searchParams.get('status')||'',kind:u.searchParams.get('kind')||'',severity:u.searchParams.get('severity')||'',sourceId:u.searchParams.get('sourceId')||''}));}
+    if(req.method==='POST'&&alertId&&p[5]==='read'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'read'));}
+    if(req.method==='POST'&&alertId&&p[5]==='dismiss'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'dismissed'));}
+    return sendJson(res,404,{error:'Supplier sync alert route not found',stage:'01401',requestId:rid});
+  }
+  if(p[3]==='supplier-sync-alert-rules'){
+    if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getSupplierSyncAlertRules01402(scope));
+    if(req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,await saveSupplierSyncAlertRules01402(scope,await readJson(req,{limit:32768})));}
+    if(req.method==='DELETE'&&p.length===4){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await resetSupplierSyncAlertRules01402(scope));}
+    return sendJson(res,404,{error:'Supplier sync alert rules route not found',stage:'01402',requestId:rid});
+  }
+  if(p[3]==='supplier-sync-approvals'){
+    const approvalId=p[4]||'';
+    if(req.method==='GET'&&!approvalId)return sendJson(res,200,await listSupplierSyncApprovals01400(scope));
+    if(req.method==='GET'&&approvalId&&p.length===5)return sendJson(res,200,await getSupplierSyncApprovalDetail01400(scope,approvalId));
+    if(req.method==='POST'&&approvalId&&p[5]==='approve'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await approveSupplierSyncApproval01400(scope,approvalId));}
+    if(req.method==='POST'&&approvalId&&p[5]==='reject'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await rejectAndUpdateSupplierSyncApproval01400(scope,approvalId));}
+    return sendJson(res,404,{error:'Supplier sync approval route not found',stage:'01400',requestId:rid});
   }
   if(p[3]==='import-rollbacks'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listMarketplaceImportRollbacks01397(scope));

@@ -26,7 +26,7 @@ test('01399 migration provides due index, lease, mode and minimum cadence',async
 
 test('01399 backend worker claims with SKIP LOCKED, runs canonical import and forces scheduled media to external URL mode',async()=>{
   const src=await read('../src/marketplace-supplier-sync-scheduler-01399.mjs');
-  assert.match(src,/FOR UPDATE SKIP LOCKED/);assert.match(src,/executeProductImport01060/);assert.match(src,/buildProductImportPlan01060/);assert.match(src,/copySupplierMedia:false/);assert.match(src,/syncMode:'scheduled-auto-01399'/);assert.match(src,/assertSafeRemoteImageUrl01396/);assert.match(src,/readPrivateGoogleSheet01398/);assert.match(src,/marketplace-import-export-service-01060\.js\?scheduler=01399/);
+  assert.match(src,/FOR UPDATE SKIP LOCKED/);assert.match(src,/executeProductImport01060/);assert.match(src,/buildProductImportPlan01060/);assert.match(src,/copySupplierMedia:false/);assert.match(src,/scheduled-auto-01399/);assert.match(src,/assertSafeRemoteImageUrl01396/);assert.match(src,/readPrivateGoogleSheet01398/);assert.match(src,/vendor\/marketplace-sync\/marketplace-import-export-service-01060\.mjs/);assert.doesNotMatch(src,/\.\.\/\.\.\/js\//);
 });
 
 test('01399 server exposes authenticated schedule CRUD/run routes and starts/stops worker with server lifecycle',async()=>{
@@ -37,4 +37,27 @@ test('01399 server exposes authenticated schedule CRUD/run routes and starts/sto
 test('01399 env/config and package check expose scheduler controls',async()=>{
   const env=await read('../.env.example'),cfg=await read('../src/config.mjs'),pkg=await read('../package.json');
   assert.match(env,/SUPPLIER_SYNC_SCHEDULER_ENABLED=true/);assert.match(env,/SUPPLIER_SYNC_POLL_SECONDS=60/);assert.match(cfg,/supplierSyncSchedulerEnabled/);assert.match(cfg,/supplierSyncMaxJobsPerTick/);assert.match(pkg,/marketplace-supplier-sync-scheduler-core-01399\.mjs/);assert.match(pkg,/marketplace-supplier-sync-scheduler-01399\.mjs/);
+});
+
+
+test('01406 scheduler is self-contained inside backend and vendor import runtime is Node-loadable',async()=>{
+  const src=await read('../src/marketplace-supplier-sync-scheduler-01399.mjs');
+  assert.doesNotMatch(src,/\.\.\/\.\.\/js\//);
+  assert.match(src,/vendor\/marketplace-sync\/marketplace-import-parsers-01060\.mjs/);
+  assert.match(src,/vendor\/marketplace-sync\/marketplace-google-sheets-import-01393\.mjs/);
+  assert.match(src,/vendor\/marketplace-sync\/marketplace-import-export-service-01060\.mjs/);
+  const mod=await import('../src/vendor/marketplace-sync/marketplace-import-export-service-01060.mjs?selfContained=01406');
+  assert.equal(typeof mod.buildProductImportPlan01060,'function');
+  assert.equal(typeof mod.executeProductImport01060,'function');
+});
+
+test('01406 backend vendor import executes canonical scheduled external-media import without browser runtime',async()=>{
+  const {buildProductImportPlan01060,executeProductImport01060}=await import('../src/vendor/marketplace-sync/marketplace-import-export-service-01060.mjs?execute=01406');
+  let state={revision:1,products:[],categories:[],attributes:[],attributeValues:[],variants:[],media:[],collections:[],filters:[],recommendations:[],feeds:[],settings:{importProfiles:[],importExportHistory:[],importHistory:[]}};
+  const store={getState:()=>state,getRepositoryInfo:()=>({type:'api-server-01406',name:'test'}),replaceSnapshot:async next=>{state={...next,revision:(state.revision||0)+1};return state;},refresh:async()=>state};
+  const rows=[{Name:'Pan',SKU:'PAN-1',Price:'1200',Stock:'3',Image:'https://example.com/pan.jpg'}],mapping={Name:'name',SKU:'sku',Price:'price',Stock:'stock',Image:'images'},options={rowMode:'products',copySupplierMedia:false,createMissingCategories:true};
+  const plan=buildProductImportPlan01060(rows,mapping,state,options);
+  assert.equal(plan.counts.create,1);assert.equal(plan.mediaCopySummary01396.externalWhenDisabled,1);
+  const out=await executeProductImport01060(store,rows,mapping,options,{sourceName:'smoke',format:'csv',syncMode:'scheduled-auto-01399'});
+  assert.equal(out.verified,true);assert.equal(state.products.length,1);assert.equal(state.products[0].sku,'PAN-1');assert.equal(state.media[0].url,'https://example.com/pan.jpg');
 });

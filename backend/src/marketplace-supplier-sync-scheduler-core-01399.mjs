@@ -1,5 +1,5 @@
 export const MARKETPLACE_SUPPLIER_SYNC_SCHEDULER_STAGE_01399='01399';
-export const SUPPLIER_SYNC_MODES_01399=Object.freeze(['validate','apply']);
+export const SUPPLIER_SYNC_MODES_01399=Object.freeze(['validate','approval','apply']);
 export const SUPPLIER_SYNC_MEDIA_MODES_01399=Object.freeze(['external-only']);
 const str=v=>String(v??'').trim();
 const n=v=>Number(v);
