@@ -23,13 +23,11 @@ async function audit(client,scope,actorUserId,action,targetType,targetId,payload
 export async function getAdminOverview01087(scope,actorUserId){
   assertCapability01087(scope,'admin.view','Admin access required');
   return withClient(async client=>{
-    const [members,workspaces,stores,invites,auditRows]=await Promise.all([
-      client.query(`SELECT count(DISTINCT user_id)::int n FROM platform_memberships WHERE account_id=$1 AND status='active'`,[scope.accountId]),
-      client.query(`SELECT count(*)::int n FROM platform_workspaces WHERE account_id=$1 AND status='active'`,[scope.accountId]),
-      client.query(`SELECT count(*)::int n FROM platform_stores s JOIN platform_workspaces w ON w.id=s.workspace_id WHERE w.account_id=$1 AND s.status<>'archived'`,[scope.accountId]),
-      client.query(`SELECT count(*)::int n FROM platform_invitations WHERE account_id=$1 AND status='pending' AND expires_at>now()`,[scope.accountId]),
-      client.query(`SELECT id,action,target_type "targetType",target_id "targetId",payload,created_at "createdAt" FROM platform_admin_audit_log WHERE account_id=$1 ORDER BY id DESC LIMIT 12`,[scope.accountId]),
-    ]);
+    const members=await client.query(`SELECT count(DISTINCT user_id)::int n FROM platform_memberships WHERE account_id=$1 AND status='active'`,[scope.accountId]);
+    const workspaces=await client.query(`SELECT count(*)::int n FROM platform_workspaces WHERE account_id=$1 AND status='active'`,[scope.accountId]);
+    const stores=await client.query(`SELECT count(*)::int n FROM platform_stores s JOIN platform_workspaces w ON w.id=s.workspace_id WHERE w.account_id=$1 AND s.status<>'archived'`,[scope.accountId]);
+    const invites=await client.query(`SELECT count(*)::int n FROM platform_invitations WHERE account_id=$1 AND status='pending' AND expires_at>now()`,[scope.accountId]);
+    const auditRows=await client.query(`SELECT id,action,target_type "targetType",target_id "targetId",payload,created_at "createdAt" FROM platform_admin_audit_log WHERE account_id=$1 ORDER BY id DESC LIMIT 12`,[scope.accountId]);
     return {stage:'01087',accountId:scope.accountId,actorUserId,counts:{members:members.rows[0]?.n||0,workspaces:workspaces.rows[0]?.n||0,stores:stores.rows[0]?.n||0,pendingInvitations:invites.rows[0]?.n||0},recentAudit:auditRows.rows};
   });
 }

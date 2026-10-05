@@ -17,12 +17,10 @@ async function tableColumns(client,table){const q=await client.query(`SELECT col
 export async function getDatabaseOverview01087(scope){
   assertCapability01087(scope,'admin.database.schema','Database schema permission required');
   return withClient(async client=>{
-    const [diag,sizeQ,tablesQ,migrationsQ]=await Promise.all([
-      getDatabaseDiagnostics(client),
-      client.query(`SELECT pg_database_size(current_database())::bigint bytes`),
-      client.query(`SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'`),
-      client.query(`SELECT count(*)::int n,max(applied_at) last_applied_at FROM shifttime_schema_migrations`),
-    ]);
+    const diag=await getDatabaseDiagnostics(client);
+    const sizeQ=await client.query(`SELECT pg_database_size(current_database())::bigint bytes`);
+    const tablesQ=await client.query(`SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'`);
+    const migrationsQ=await client.query(`SELECT count(*)::int n,max(applied_at) last_applied_at FROM shifttime_schema_migrations`);
     return {stage:'01087',database:{name:diag.database_name,serverVersion:diag.server_version,timezone:diag.timezone,ssl:diag.ssl,sslVersion:diag.sslVersion||'',sizeBytes:Number(sizeQ.rows[0]?.bytes||0),tableCount:tablesQ.rows[0]?.n||0,migrationCount:migrationsQ.rows[0]?.n||0,lastMigrationAt:migrationsQ.rows[0]?.last_applied_at||null,readOnly:String(diag.transaction_read_only||'off')==='on'},scope:{accountId:scope.accountId,workspaceId:scope.workspaceId,storeId:scope.storeId}};
   });
 }
@@ -43,12 +41,10 @@ export async function getDatabaseTableSchema01087(scope,tableName){
   assertCapability01087(scope,'admin.database.schema','Database schema permission required');const table=normalizeDatabaseTableName01087(tableName);
   return withClient(async client=>{
     if(!(await tableExists(client,table)))throw fail('Database table not found',404,'ST_DB_TABLE_NOT_FOUND');
-    const [columnsQ,pkQ,fkQ,indexQ]=await Promise.all([
-      client.query(`SELECT column_name "name",data_type "dataType",udt_name "udtName",is_nullable='YES' "nullable",column_default "defaultValue",ordinal_position "position" FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position`,[table]),
-      client.query(`SELECT kcu.column_name "column" FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON kcu.constraint_name=tc.constraint_name AND kcu.table_schema=tc.table_schema WHERE tc.table_schema='public' AND tc.table_name=$1 AND tc.constraint_type='PRIMARY KEY' ORDER BY kcu.ordinal_position`,[table]),
-      client.query(`SELECT kcu.column_name "column",ccu.table_name "referencesTable",ccu.column_name "referencesColumn",tc.constraint_name "constraint" FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON kcu.constraint_name=tc.constraint_name AND kcu.table_schema=tc.table_schema JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name=tc.constraint_name AND ccu.table_schema=tc.table_schema WHERE tc.table_schema='public' AND tc.table_name=$1 AND tc.constraint_type='FOREIGN KEY' ORDER BY kcu.ordinal_position`,[table]),
-      client.query(`SELECT indexname "name",indexdef "definition" FROM pg_indexes WHERE schemaname='public' AND tablename=$1 ORDER BY indexname`,[table]),
-    ]);
+    const columnsQ=await client.query(`SELECT column_name "name",data_type "dataType",udt_name "udtName",is_nullable='YES' "nullable",column_default "defaultValue",ordinal_position "position" FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position`,[table]);
+    const pkQ=await client.query(`SELECT kcu.column_name "column" FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON kcu.constraint_name=tc.constraint_name AND kcu.table_schema=tc.table_schema WHERE tc.table_schema='public' AND tc.table_name=$1 AND tc.constraint_type='PRIMARY KEY' ORDER BY kcu.ordinal_position`,[table]);
+    const fkQ=await client.query(`SELECT kcu.column_name "column",ccu.table_name "referencesTable",ccu.column_name "referencesColumn",tc.constraint_name "constraint" FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON kcu.constraint_name=tc.constraint_name AND kcu.table_schema=tc.table_schema JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name=tc.constraint_name AND ccu.table_schema=tc.table_schema WHERE tc.table_schema='public' AND tc.table_name=$1 AND tc.constraint_type='FOREIGN KEY' ORDER BY kcu.ordinal_position`,[table]);
+    const indexQ=await client.query(`SELECT indexname "name",indexdef "definition" FROM pg_indexes WHERE schemaname='public' AND tablename=$1 ORDER BY indexname`,[table]);
     const rawColumns=columnsQ.rows.map(r=>r.name),strategy=resolveRowScopeStrategy01087(table,rawColumns);
     return {stage:'01087',table,columns:columnsQ.rows.map(c=>({...c,redacted:!redactDatabaseColumns01087(table,[c.name]).includes(c.name)})),primaryKey:pkQ.rows.map(r=>r.column),foreignKeys:fkQ.rows,indexes:indexQ.rows,rowMode:strategy.mode,sensitive:isSensitiveDatabaseTable01087(table)};
   });
