@@ -19,6 +19,7 @@ import {getDeploymentStatus01080,sanitizeImportSource01080} from './deployment-s
 import {importLocalOperationalBundle01080} from './deployment-local-import-service.mjs';
 import {getCloudMediaStorageInfo01081,listAuthorizedCloudMediaAssets01081,beginAuthorizedCloudMediaUpload01081,completeAuthorizedCloudMediaUpload01081,uploadAuthorizedCloudMediaBytes01108,deleteAuthorizedCloudMediaAsset01081,getPublicCloudMediaDelivery01081,resolveAuthorizedMediaTrafficSite01206} from './media-cloud-service.mjs';
 import {fetchRemoteImage01396} from './media-remote-image-01396.mjs';
+import {listMarketplaceImportRollbacks01397,previewMarketplaceImportRollback01397,restoreMarketplaceImportRollback01397} from './marketplace-import-rollback-01397.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -200,8 +201,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[3]==='snapshot'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await loadSnapshot(scope));
     if(req.method==='GET'&&p[4]==='export')return sendJson(res,200,await loadSnapshot(scope),{'content-disposition':`attachment; filename="marketplace-${scope.storeId}.json"`});
-    if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertWriteRole(scope);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind}));}
+    if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertWriteRole(scope);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
     if(req.method==='DELETE'&&p.length===4){assertWriteRole(scope);await resetSnapshot(scope);return sendNoContent(res,204);}
+  }
+  if(p[3]==='import-rollbacks'){
+    if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listMarketplaceImportRollbacks01397(scope));
+    if(req.method==='GET'&&p[4]&&p[5]==='preview')return sendJson(res,200,await previewMarketplaceImportRollback01397(scope,p[4]));
+    if(req.method==='POST'&&p[4]&&p[5]==='restore'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
+    return sendJson(res,404,{error:'Import rollback route not found',stage:'01397',requestId:rid});
   }
   if(p[3]==='seo'){
     if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
