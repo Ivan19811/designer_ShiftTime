@@ -25,7 +25,7 @@ test('01413 provider reads marketplace payment ledger and reuses notification re
   const service=read('src/payment-notification-provider-01413.mjs'),inbox=read('src/notification-inbox-01404.mjs'),server=read('src/server.mjs');
   assert.match(service,/FROM marketplace_payment_events pe JOIN marketplace_payments p/);assert.match(service,/marketplace_payment_allocations/);assert.match(service,/listNotificationRules01408/);assert.match(service,/evaluateNotificationRules01408/);assert.match(service,/dispatchNotificationEvent01409/);
   assert.doesNotMatch(service,/CREATE TABLE|INSERT INTO marketplace_payments/);
-  assert.match(inbox,/PROVIDERS=new Set\(\['orders','messages','payments'\]\)/);assert.match(inbox,/provider==='payments'/);assert.match(server,/listPaymentNotifications01413/);assert.match(server,/p\[3\]==='payments'/);
+  assert.match(inbox,/PROVIDERS=new Set\(\['orders','messages','payments','sites'\]\)/);assert.match(inbox,/provider==='payments'/);assert.match(server,/listPaymentNotifications01413/);assert.match(server,/p\[3\]==='payments'/);
 });
 
 test('01413 payment mutation emits provider event only after COMMIT and keeps order lifecycle in parallel',()=>{
