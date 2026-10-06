@@ -13,6 +13,7 @@ export const NOTIFICATION_RULE_PROVIDERS_01408=Object.freeze(['suppliers','order
 export const NOTIFICATION_RULE_SEVERITIES_01408=Object.freeze(['low','medium','high','critical']);
 export const NOTIFICATION_RULE_CHANNELS_01408=Object.freeze(['inApp','email','telegram','webhook','slack']);
 export const NOTIFICATION_RULE_OPERATORS_01408=Object.freeze(['eq','neq','gt','gte','lt','lte','in','contains','exists','severityAtLeast']);
+export const NOTIFICATION_RULE_RECIPIENT_ROLES_01416=Object.freeze(['owner','admin','manager','editor','catalog-manager','order-manager','viewer']);
 
 const str=value=>String(value??'').trim();
 const bool=(value,fallback=false)=>typeof value==='boolean'?value:fallback;
@@ -38,7 +39,9 @@ export function normalizeNotificationConditions01408(input={}){
 export function normalizeNotificationActions01408(input={}){
   const source=input&&typeof input==='object'?input:{};
   const channels=arr(source.channels).map(str).filter(x=>NOTIFICATION_RULE_CHANNELS_01408.includes(x));
-  return Object.freeze({notify:bool(source.notify,true),channels:Object.freeze([...new Set(channels.length?channels:['inApp'])]),delivery:str(source.delivery)==='digest'?'digest':'immediate'});
+  const recipientSeen=new Set(),recipients=[];
+  for(const raw of arr(source.recipients)){const type=str(raw?.type);if(type==='user'){const userId=clip(raw?.userId||raw?.id,180),key=`user:${userId}`;if(userId&&!recipientSeen.has(key)){recipientSeen.add(key);recipients.push(Object.freeze({type:'user',userId}));}}else if(type==='role'){const role=clip(raw?.role||raw?.value,80),key=`role:${role}`;if(NOTIFICATION_RULE_RECIPIENT_ROLES_01416.includes(role)&&!recipientSeen.has(key)){recipientSeen.add(key);recipients.push(Object.freeze({type:'role',role}));}}}
+  return Object.freeze({notify:bool(source.notify,true),channels:Object.freeze([...new Set(channels.length?channels:['inApp'])]),delivery:str(source.delivery)==='digest'?'digest':'immediate',recipients:Object.freeze(recipients.slice(0,64))});
 }
 export function normalizeNotificationRule01408(input={},scope={}){
   const eventType=NOTIFICATION_EVENT_TYPES_01408.includes(str(input.eventType))?str(input.eventType):'system.warning';

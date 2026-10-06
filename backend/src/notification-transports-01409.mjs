@@ -24,9 +24,10 @@ export async function sendWebhookNotification01409(scope,event,{fetchImpl=global
   return {ok:true,channel:'webhook',responseCode:response.status,externalId:str(response.headers?.get?.('x-request-id')),stage:NOTIFICATION_DELIVERY_STAGE_01409};
 }
 
-export async function sendEmailNotification01409(scope,event,{smtpSendImpl=sendSmtpMail01409,settings=settingsFromConfig()}={}){
-  if(!str(settings.notificationSmtpHost)||!str(settings.notificationEmailFrom)||!str(settings.notificationEmailTo))throw Object.assign(new Error('NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'),{code:'NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'});
-  const message=buildNotificationTransportMessage01409(event,scope),result=await smtpSendImpl({host:settings.notificationSmtpHost,port:settings.notificationSmtpPort,secure:settings.notificationSmtpSecure,startTls:settings.notificationSmtpStartTls,user:settings.notificationSmtpUser,pass:settings.notificationSmtpPass,timeoutMs:settings.notificationDeliveryTimeoutMs,helloName:settings.notificationSmtpHelloName},{from:settings.notificationEmailFrom,to:settings.notificationEmailTo,subject:message.subject,text:message.text});
+export async function sendEmailNotification01409(scope,event,{smtpSendImpl=sendSmtpMail01409,settings=settingsFromConfig(),recipient=null}={}){
+  const to=str(recipient?.email)||str(settings.notificationEmailTo);
+  if(!str(settings.notificationSmtpHost)||!str(settings.notificationEmailFrom)||!to)throw Object.assign(new Error('NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'),{code:'NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'});
+  const message=buildNotificationTransportMessage01409(event,scope),result=await smtpSendImpl({host:settings.notificationSmtpHost,port:settings.notificationSmtpPort,secure:settings.notificationSmtpSecure,startTls:settings.notificationSmtpStartTls,user:settings.notificationSmtpUser,pass:settings.notificationSmtpPass,timeoutMs:settings.notificationDeliveryTimeoutMs,helloName:settings.notificationSmtpHelloName},{from:settings.notificationEmailFrom,to,subject:message.subject,text:message.text});
   return {ok:true,channel:'email',responseCode:Number(result?.responseCode)||250,externalId:str(result?.externalId),stage:NOTIFICATION_DELIVERY_STAGE_01409};
 }
 

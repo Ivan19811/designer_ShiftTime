@@ -33,6 +33,7 @@ import {listCustomerMessagesInbox01410,getCustomerMessageThread01410,updateCusto
 import {listNotificationRules01408,createNotificationRule01408,updateNotificationRule01408,deleteNotificationRule01408,duplicateNotificationRule01408} from './notification-rule-engine-01408.mjs';
 import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
 import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotificationTransportTest01409} from './notification-delivery-01409.mjs';
+import {listNotificationRecipientCatalog01416} from './notification-recipient-routing-01416.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -107,6 +108,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[3]==='transports'&&p[4]==='status'&&p.length===5)return sendJson(res,200,getNotificationTransportStatus01409());
     if(req.method==='POST'&&p[3]==='transports'&&p[4]&&p[5]==='test'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await sendNotificationTransportTest01409(scope,p[4]));}
     if(req.method==='GET'&&p[3]==='deliveries'&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listNotificationDeliveries01409(scope,Object.fromEntries(u.searchParams.entries())));}
+    if(req.method==='GET'&&p[3]==='recipients'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listNotificationRecipientCatalog01416(scope));}
     if(req.method==='POST'&&p[3]==='deliveries'&&p[4]&&p[5]==='retry'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await retryNotificationDelivery01409(scope,p[4]));}
     if(p[3]==='rules'){
       const ruleId=p[4]||'';

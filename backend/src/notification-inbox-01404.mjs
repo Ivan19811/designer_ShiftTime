@@ -3,6 +3,7 @@ import {withClient} from './db.mjs';
 import {normalizeCustomerMessageInput01404,normalizeNotificationReceiptStatus01404,customerMessageSeverity01404} from './notification-inbox-core-01404.mjs';
 import {listNotificationRules01408,evaluateNotificationRules01408} from './notification-rule-engine-01408.mjs';
 import {dispatchNotificationEvent01409} from './notification-delivery-01409.mjs';
+import {notificationDecisionAllowsInAppRecipient01416} from './notification-recipient-routing-core-01416.mjs';
 export const NOTIFICATION_INBOX_STAGE_01404='01408';
 const str=v=>String(v??'').trim();
 const PROVIDERS=new Set(['orders','messages','payments','sites','traffic']);
@@ -51,16 +52,16 @@ export async function createPublicCustomerMessage01404(identity,input={},meta={}
 export async function listOrderNotifications01404(scope){
   const rules=(await listNotificationRules01408(scope)).items;
   return withClient(async client=>{
-    const q=await client.query(`SELECT e.id,e.seller_order_id "sellerOrderId",e.marketplace_order_id "marketplaceOrderId",e.event_key "eventKey",e.event_type "eventType",e.severity,e.kind,e.payload,e.occurred_at "occurredAt",e.created_at "createdAt",nr.status "receiptStatus" FROM shifttime_order_notification_events e LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=e.store_id AND nr.provider='orders' AND nr.event_key=e.event_key WHERE e.store_id=$1 ORDER BY e.occurred_at DESC,e.id DESC LIMIT 300`,[scope.storeId]);
-    const items=[];for(const row of q.rows){const decision=orderRuleDecision(row,rules);if(decision.allowed&&decision.channels.includes('inApp'))items.push(orderView(row,scope,decision));}return {stage:'01412',items};
+    const q=await client.query(`SELECT e.id,e.seller_order_id "sellerOrderId",e.marketplace_order_id "marketplaceOrderId",e.event_key "eventKey",e.event_type "eventType",e.severity,e.kind,e.payload,e.occurred_at "occurredAt",e.created_at "createdAt",COALESCE(ur.status,nr.status) "receiptStatus" FROM shifttime_order_notification_events e LEFT JOIN shifttime_notification_user_receipts ur ON ur.store_id=e.store_id AND ur.provider='orders' AND ur.event_key=e.event_key AND ur.user_id=$2 LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=e.store_id AND nr.provider='orders' AND nr.event_key=e.event_key WHERE e.store_id=$1 ORDER BY e.occurred_at DESC,e.id DESC LIMIT 300`,[scope.storeId,scope.userId]);
+    const items=[];for(const row of q.rows){const decision=orderRuleDecision(row,rules);if(decision.allowed&&notificationDecisionAllowsInAppRecipient01416(decision,scope))items.push(orderView(row,scope,decision));}return {stage:'01416',items};
   });
 }
 
 export async function listCustomerMessageNotifications01404(scope){
   const rules=(await listNotificationRules01408(scope)).items;
   return withClient(async client=>{
-    const q=await client.query(`SELECT m.id,m.builder_site_id "builderSiteId",m.site_name "siteName",m.channel,m.subject,m.body,m.customer,m.context,m.status "messageStatus",m.created_at "createdAt",m.updated_at "updatedAt",nr.status "receiptStatus" FROM shifttime_customer_messages m LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=m.store_id AND nr.provider='messages' AND nr.event_key=m.id WHERE m.store_id=$1 ORDER BY m.created_at DESC LIMIT 200`,[scope.storeId]);
-    const items=[];for(const row of q.rows){const decision=messageRuleDecision(row,rules);if(decision.allowed&&decision.channels.includes('inApp'))items.push(messageView(row,decision));}return {stage:NOTIFICATION_INBOX_STAGE_01404,items};
+    const q=await client.query(`SELECT m.id,m.builder_site_id "builderSiteId",m.site_name "siteName",m.channel,m.subject,m.body,m.customer,m.context,m.status "messageStatus",m.created_at "createdAt",m.updated_at "updatedAt",COALESCE(ur.status,nr.status) "receiptStatus" FROM shifttime_customer_messages m LEFT JOIN shifttime_notification_user_receipts ur ON ur.store_id=m.store_id AND ur.provider='messages' AND ur.event_key=m.id AND ur.user_id=$2 LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=m.store_id AND nr.provider='messages' AND nr.event_key=m.id WHERE m.store_id=$1 ORDER BY m.created_at DESC LIMIT 200`,[scope.storeId,scope.userId]);
+    const items=[];for(const row of q.rows){const decision=messageRuleDecision(row,rules);if(decision.allowed&&notificationDecisionAllowsInAppRecipient01416(decision,scope))items.push(messageView(row,decision));}return {stage:'01416',items};
   });
 }
 
@@ -78,8 +79,10 @@ export async function setNotificationReceipt01404(scope,provider,eventKey,status
   if(!PROVIDERS.has(p)||!key||next==='unread'){const e=new Error('NOTIFICATION_RECEIPT_INVALID_01404');e.code='NOTIFICATION_RECEIPT_INVALID_01404';e.statusCode=400;throw e;}
   return withClient(async client=>{
     if(!await assertEventBelongsToStore(client,scope,p,key)){const e=new Error('NOTIFICATION_EVENT_NOT_FOUND_01404');e.code='NOTIFICATION_EVENT_NOT_FOUND_01404';e.statusCode=404;throw e;}
-    await client.query(`INSERT INTO shifttime_notification_receipts(store_id,provider,event_key,status,actor_user_id) VALUES($1,$2,$3,$4,$5) ON CONFLICT(store_id,provider,event_key) DO UPDATE SET status=EXCLUDED.status,actor_user_id=EXCLUDED.actor_user_id,updated_at=now()`,[scope.storeId,p,key,next,str(actorUserId)||null]);
+    const userId=str(actorUserId||scope.userId);
+    if(userId)await client.query(`INSERT INTO shifttime_notification_user_receipts(store_id,provider,event_key,user_id,status) VALUES($1,$2,$3,$4,$5) ON CONFLICT(store_id,provider,event_key,user_id) DO UPDATE SET status=EXCLUDED.status,updated_at=now()`,[scope.storeId,p,key,userId,next]);
+    else await client.query(`INSERT INTO shifttime_notification_receipts(store_id,provider,event_key,status,actor_user_id) VALUES($1,$2,$3,$4,NULL) ON CONFLICT(store_id,provider,event_key) DO UPDATE SET status=EXCLUDED.status,updated_at=now()`,[scope.storeId,p,key,next]);
     if(p==='messages'&&next==='read')await client.query(`UPDATE shifttime_customer_messages SET status=CASE WHEN status='new' THEN 'read' ELSE status END,updated_at=now() WHERE id=$1 AND store_id=$2`,[key,scope.storeId]);
-    return {ok:true,stage:NOTIFICATION_INBOX_STAGE_01404,provider:p,eventKey:key,status:next};
+    return {ok:true,stage:'01416',provider:p,eventKey:key,status:next,userId};
   });
 }
