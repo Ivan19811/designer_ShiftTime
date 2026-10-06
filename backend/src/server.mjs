@@ -26,6 +26,7 @@ import {listSupplierSyncApprovals01400,getSupplierSyncApprovalDetail01400,approv
 import {listSupplierSyncAlerts01401,setSupplierSyncAlertStatus01401} from './marketplace-supplier-sync-alerts-01401.mjs';
 import {getSupplierSyncAlertRules01402,saveSupplierSyncAlertRules01402,resetSupplierSyncAlertRules01402} from './marketplace-supplier-sync-alert-rules-01402.mjs';
 import {createPublicCustomerMessage01404,listOrderNotifications01404,listCustomerMessageNotifications01404,setNotificationReceipt01404} from './notification-inbox-01404.mjs';
+import {listPaymentNotifications01413} from './payment-notification-provider-01413.mjs';
 import {listCustomerMessagesInbox01410,getCustomerMessageThread01410,updateCustomerMessage01410,addCustomerMessageThreadEntry01410,listCustomerMessageManagers01410} from './customer-messages-inbox-01410.mjs';
 import {listNotificationRules01408,createNotificationRule01408,updateNotificationRule01408,deleteNotificationRule01408,duplicateNotificationRule01408} from './notification-rule-engine-01408.mjs';
 import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
@@ -88,6 +89,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='notifications'){
     if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listOrderNotifications01404(scope));}
     if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
+    if(req.method==='GET'&&p[3]==='payments'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listPaymentNotifications01413(scope));}
     if(p[3]==='messages'&&p[4]==='inbox'){
       assertOrderWriteRole(scope);
       if(req.method==='GET'&&p.length===5){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listCustomerMessagesInbox01410(scope,Object.fromEntries(u.searchParams.entries())));}
@@ -111,7 +113,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       if(req.method==='POST'&&ruleId&&p[5]==='duplicate'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,201,await duplicateNotificationRule01408(scope,ruleId));}
       return sendJson(res,404,{error:'NOTIFICATION_RULE_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
     }
-    if(req.method==='POST'&&['orders','messages'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
+    if(req.method==='POST'&&['orders','messages','payments'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
     return sendJson(res,404,{error:'NOTIFICATION_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));

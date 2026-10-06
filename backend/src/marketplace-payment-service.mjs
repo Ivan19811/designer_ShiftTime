@@ -4,6 +4,7 @@ import {config} from './config.mjs';
 import {commitInventoryReservation01077,releaseInventoryReservation01077,expireStaleInventoryReservations01077} from './marketplace-inventory-service.mjs';
 import {recalculateOrderTotals01079} from './marketplace-pricing-service.mjs';
 import {emitMarketplaceOrderPaymentLifecycleNotifications01412} from './order-notification-lifecycle-01412.mjs';
+import {emitPaymentLifecycleNotifications01413} from './payment-notification-provider-01413.mjs';
 const MARKETPLACE_ID='marketplace_shifttime';
 const clean=v=>String(v??'').trim();
 const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -11,7 +12,7 @@ const round=v=>Math.round((n(v)+Number.EPSILON)*100)/100;
 const id=prefix=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
 const STATUSES=new Set(['pending','authorized','paid','failed','partially-refunded','refunded','cancelled']);
 const TRANSITIONS={pending:new Set(['pending','authorized','paid','failed','cancelled']),authorized:new Set(['authorized','paid','failed','cancelled']),paid:new Set(['paid','partially-refunded','refunded']),'partially-refunded':new Set(['partially-refunded','refunded']),failed:new Set(['failed']),refunded:new Set(['refunded']),cancelled:new Set(['cancelled'])};
-async function event(client,paymentId,type,payload={}){await client.query(`INSERT INTO marketplace_payment_events(id,payment_id,event_type,payload) VALUES($1,$2,$3,$4)`,[id('paye'),paymentId,type,payload]);}
+async function event(client,paymentId,type,payload={}){const eventId=id('paye');await client.query(`INSERT INTO marketplace_payment_events(id,payment_id,event_type,payload) VALUES($1,$2,$3,$4)`,[eventId,paymentId,type,payload]);return {id:eventId,type};}
 async function scopedPaymentView(client,paymentId,storeId=''){
   const pq=await client.query(`SELECT p.id,p.marketplace_order_id "marketplaceOrderId",o.order_number "marketplaceOrderNumber",p.provider,p.provider_payment_id "providerPaymentId",p.method,p.status,p.currency,p.amount::float8,p.refunded_amount::float8 "refundedAmount",p.created_at "createdAt",p.updated_at "updatedAt" FROM marketplace_payments p JOIN marketplace_orders o ON o.id=p.marketplace_order_id WHERE p.id=$1`,[paymentId]);
   if(!pq.rowCount)return null;const params=[paymentId];let where='';if(storeId){params.push(storeId);where=' AND a.store_id=$2';}
@@ -64,10 +65,10 @@ export async function transitionAuthorizedPayment(scope,paymentId,input={}){
     if(status==='partially-refunded'||status==='refunded')await client.query(`UPDATE marketplace_payment_allocations SET refunded_gross=round(gross*$2::numeric,2),payout_status=CASE WHEN payout_status='paid' THEN 'reversed' WHEN payout_status='eligible' THEN 'held' ELSE payout_status END,updated_at=now() WHERE payment_id=$1`,[paymentId,ratio]);
     await client.query(`UPDATE marketplace_orders SET payment=jsonb_set(COALESCE(payment,'{}'::jsonb),'{status}',to_jsonb($1::text),true),updated_at=now() WHERE id=$2`,[status,p.marketplaceOrderId]);
     await client.query(`UPDATE marketplace_seller_orders SET payment=jsonb_set(COALESCE(payment,'{}'::jsonb),'{status}',to_jsonb($1::text),true),updated_at=now() WHERE marketplace_order_id=$2`,[status,p.marketplaceOrderId]);
-    await event(client,paymentId,`payment-${status}`,{refundAmount:n(input.refundAmount),refundedAmount:refunded,inventoryAction:status==='paid'?'commit':(['failed','cancelled'].includes(status)?'release':'none')});
-    await client.query('COMMIT');return {payment:await scopedPaymentView(client,paymentId,scope.storeId),marketplaceOrderId:p.marketplaceOrderId,status,refunded,previousStatus:p.status,previousRefunded:n(p.refundedAmount)};
+    const notificationEligible=status!==p.status||refunded!==n(p.refundedAmount);const canonicalEvent=await event(client,paymentId,`payment-${status}`,{refundAmount:n(input.refundAmount),refundedAmount:refunded,inventoryAction:status==='paid'?'commit':(['failed','cancelled'].includes(status)?'release':'none'),notificationEligible});
+    await client.query('COMMIT');return {payment:await scopedPaymentView(client,paymentId,scope.storeId),marketplaceOrderId:p.marketplaceOrderId,status,refunded,previousStatus:p.status,previousRefunded:n(p.refundedAmount),paymentEventId:canonicalEvent.id};
   }catch(e){await client.query('ROLLBACK');throw e;}});
-  if(result.status!==result.previousStatus||result.refunded!==result.previousRefunded){try{await emitMarketplaceOrderPaymentLifecycleNotifications01412({marketplaceOrderId:result.marketplaceOrderId,paymentId,status:result.status,refundedAmount:result.refunded});}catch{}}
+  if(result.status!==result.previousStatus||result.refunded!==result.previousRefunded){try{await emitMarketplaceOrderPaymentLifecycleNotifications01412({marketplaceOrderId:result.marketplaceOrderId,paymentId,status:result.status,refundedAmount:result.refunded});}catch{}try{await emitPaymentLifecycleNotifications01413({paymentId,eventId:result.paymentEventId});}catch{}}
   return result.payment;
 }
 export async function markAuthorizedPayout(scope,allocationId,input={}){
