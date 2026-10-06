@@ -3,12 +3,13 @@ import {MARKETPLACE_SUPPLIER_SYNC_ALERT_STAGE_01401} from './marketplace-supplie
 import {evaluateSupplierSyncAlertRules01402} from './marketplace-supplier-sync-alert-rules-01402.mjs';
 import {listNotificationRules01408,evaluateNotificationRules01408} from './notification-rule-engine-01408.mjs';
 import {notificationLegacySeverity01408} from './notification-rule-engine-core-01408.mjs';
+import {dispatchNotificationEvent01409} from './notification-delivery-01409.mjs';
 export {listSupplierSyncAlerts01401,setSupplierSyncAlertStatus01401,resolveApprovalAlerts01401,MARKETPLACE_SUPPLIER_SYNC_ALERT_STAGE_01401};
 export const LEGACY_SUPPLIER_RULE_EVALUATOR_01408=evaluateSupplierSyncAlertRules01402;
 const str=v=>String(v??'').trim();
 function sourceSeverityForRisk(risk={}){return risk.level==='critical'?'critical':risk.level==='high'?'high':risk.level==='medium'?'medium':'low';}
 function decisionFor(rules,type,severity,data){return evaluateNotificationRules01408(rules,{type,provider:'suppliers',severity,data});}
-async function createIfAllowed(scope,rules,{type,kind,severity='low',code,dedupeKey,common,data={}}){const decision=decisionFor(rules,type,severity,data);if(!decision.allowed||!decision.channels.includes('inApp'))return null;return createSupplierSyncAlert01401(scope,{...common,kind,severity:notificationLegacySeverity01408(decision.effectiveSeverity),code,dedupeKey,payload:{...(common.payload||{}),notificationRuleStage:'01408',matchedRuleIds:decision.matched.map(x=>x.id)}});}
+async function createIfAllowed(scope,rules,{type,kind,severity='low',code,dedupeKey,common,data={}}){const decision=decisionFor(rules,type,severity,data);if(!decision.allowed)return null;let created=null;if(decision.channels.includes('inApp'))created=await createSupplierSyncAlert01401(scope,{...common,kind,severity:notificationLegacySeverity01408(decision.effectiveSeverity),code,dedupeKey,payload:{...(common.payload||{}),notificationRuleStage:'01408',deliveryStage:'01409',matchedRuleIds:decision.matched.map(x=>x.id)}});try{await dispatchNotificationEvent01409(scope,{eventKey:dedupeKey,type,provider:'suppliers',severity,notification:{title:type,body:code||kind},data});}catch{}return created;}
 export async function createSupplierSyncApprovalAlerts01401(scope,approval={}){
   await resolveApprovalAlerts01401(scope,approval.id,'read');
   const risk=approval.risk||{},sourceSeverity=sourceSeverityForRisk(risk),rules=(await listNotificationRules01408(scope)).items;
