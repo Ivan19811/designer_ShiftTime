@@ -32,6 +32,7 @@ import {queryAiConsultantProducts01412} from './ai-consultant-product-query-0141
 import {queryAiConsultantConversation01413} from './ai-consultant-conversation-01413.mjs';
 import {getPublicAiConsultantBootstrap01414,queryPublicAiConsultant01414,getPublicAiConsultantSession01414} from './ai-consultant-public-01414.mjs';
 import {listAiConsultantSalesRules01415,createAiConsultantSalesRule01415,updateAiConsultantSalesRule01415,deleteAiConsultantSalesRule01415} from './ai-consultant-sales-rules-01415.mjs';
+import {acceptPublicAiConsultantOffer01416,redeemPublicAiConsultantOffer01416} from './ai-consultant-offers-01416.mjs';
 import {listNotificationRules01408,createNotificationRule01408,updateNotificationRule01408,deleteNotificationRule01408,duplicateNotificationRule01408} from './notification-rule-engine-01408.mjs';
 import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
 import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotificationTransportTest01409} from './notification-delivery-01409.mjs';
@@ -78,7 +79,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[4]==='bootstrap'&&p.length===5)return sendJson(res,200,{...(await getPublicAiConsultantBootstrap01414(publishedTrafficIdentity)),requestId:rid});
     if(req.method==='POST'&&p[4]==='query'&&p.length===5){const body=await readJson(req,{limit:16*1024});const visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await queryPublicAiConsultant01414(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,200,{...out,requestId:rid});}
     if(req.method==='GET'&&p[4]==='session'&&p.length===5){const u=new URL(req.url,'http://localhost'),visitorKey=String(req.headers['x-st-ai-visitor']||'').trim();const out=await getPublicAiConsultantSession01414(publishedTrafficIdentity,{sessionId:u.searchParams.get('sessionId')||'',visitorKey});return sendJson(res,200,{...out,requestId:rid});}
-    return sendJson(res,404,{error:'AI_CONSULTANT_PUBLIC_ROUTE_NOT_FOUND_01414',stage:'01414',requestId:rid});
+    if(req.method==='POST'&&p[4]==='offers'&&p[5]==='accept'&&p.length===6){const body=await readJson(req,{limit:16*1024}),visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await acceptPublicAiConsultantOffer01416(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
+    if(req.method==='POST'&&p[4]==='offers'&&p[5]==='redeem'&&p.length===6){const body=await readJson(req,{limit:16*1024}),visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await redeemPublicAiConsultantOffer01416(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,200,{...out,requestId:rid},{'x-st-cart-id':out.cartId});}
+    return sendJson(res,404,{error:'AI_CONSULTANT_PUBLIC_ROUTE_NOT_FOUND_01416',stage:'01416',requestId:rid});
   }
   if(p[2]==='public'&&p[3]==='marketplace'&&p[4]==='cart'){const token=String(req.headers['x-st-cart-id']||'');
     if(req.method==='GET'&&p.length===5){const out=await getPublicCart(token);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
