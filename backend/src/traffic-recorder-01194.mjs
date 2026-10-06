@@ -38,6 +38,7 @@ export async function writeTrafficBatch01194(rows=[]){
       inbound_bytes bigint,outbound_bytes bigint,render_billable_outbound_bytes bigint,storage_bytes bigint,traffic_class text,metadata jsonb,status_code integer,result text,duration_ms integer
     )
     ON CONFLICT (dedupe_key) DO NOTHING`,[JSON.stringify(payload)]);
+  try{const mod=await import('./traffic-notification-provider-01415.mjs');await mod.evaluateTrafficBatchNotifications01415(rows);}catch{}
   return q.rowCount||0;
 }
 

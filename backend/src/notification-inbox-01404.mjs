@@ -5,7 +5,7 @@ import {listNotificationRules01408,evaluateNotificationRules01408} from './notif
 import {dispatchNotificationEvent01409} from './notification-delivery-01409.mjs';
 export const NOTIFICATION_INBOX_STAGE_01404='01408';
 const str=v=>String(v??'').trim();
-const PROVIDERS=new Set(['orders','messages','payments','sites']);
+const PROVIDERS=new Set(['orders','messages','payments','sites','traffic']);
 const id=prefix=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
 const hashIp=value=>crypto.createHash('sha256').update(str(value)||'unknown').digest('hex');
 
@@ -69,6 +69,7 @@ async function assertEventBelongsToStore(client,scope,provider,eventKey){
   if(provider==='messages'){const q=await client.query(`SELECT 1 FROM shifttime_customer_messages WHERE id=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
   if(provider==='payments'){const q=await client.query(`SELECT 1 FROM marketplace_payment_events pe JOIN marketplace_payment_allocations a ON a.payment_id=pe.payment_id WHERE pe.id=$1 AND a.store_id=$2 AND pe.event_type IN ('payment-paid','payment-failed','payment-partially-refunded','payment-refunded') LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
   if(provider==='sites'){const q=await client.query(`SELECT 1 FROM shifttime_site_notification_events WHERE event_key=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
+  if(provider==='traffic'){const q=await client.query(`SELECT 1 FROM shifttime_traffic_notification_events WHERE event_key=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
   return false;
 }
 

@@ -149,7 +149,7 @@ export const listTrafficIntegrationEvents01201=(scope={},input={})=>listTrafficB
 
 export async function listTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');return mod.listAuthorizedR2ObjectInventory01210(scope,input);}
 export async function refreshTrafficR2Inventory01210(scope={},input={}){const mod=await import('./storage-object-inventory-01210.mjs');const out=await mod.refreshAuthorizedR2ObjectInventory01210(scope,input);const siteMod=await import('./site-resource-inventory-01213.mjs');siteMod.clearSiteResourceIndexCache01213(scope.accountId);return out;}
-export async function listTrafficSiteResourceInventory01213(scope={},userId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.listAuthorizedSiteResourceInventory01213(scope,userId,input);}
+export async function listTrafficSiteResourceInventory01213(scope={},userId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');const out=await mod.listAuthorizedSiteResourceInventory01213(scope,userId,input);try{const notify=await import('./traffic-notification-provider-01415.mjs');await notify.evaluateTrafficResourceNotifications01415(scope,out);}catch{}return out;}
 export async function getTrafficSiteResourceInventory01213(scope={},userId='',siteId='',input={}){const mod=await import('./site-resource-inventory-01213.mjs');return mod.getAuthorizedSiteResourceInventory01213(scope,userId,siteId,input);}
 
 
