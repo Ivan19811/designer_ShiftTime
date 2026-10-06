@@ -26,17 +26,7 @@ import {listSupplierSyncApprovals01400,getSupplierSyncApprovalDetail01400,approv
 import {listSupplierSyncAlerts01401,setSupplierSyncAlertStatus01401} from './marketplace-supplier-sync-alerts-01401.mjs';
 import {getSupplierSyncAlertRules01402,saveSupplierSyncAlertRules01402,resetSupplierSyncAlertRules01402} from './marketplace-supplier-sync-alert-rules-01402.mjs';
 import {createPublicCustomerMessage01404,listOrderNotifications01404,listCustomerMessageNotifications01404,setNotificationReceipt01404} from './notification-inbox-01404.mjs';
-import {listCustomerMessagesInbox01410,getCustomerMessageThread01410,updateCustomerMessage01410,addCustomerMessageThreadEntry01410,listCustomerMessageManagers01410} from './customer-messages-inbox-01410.mjs';
-import {getAiConsultantSettings01411,saveAiConsultantSettings01411} from './ai-consultant-foundation-01411.mjs';
-import {queryAiConsultantProducts01412} from './ai-consultant-product-query-01412.mjs';
-import {queryAiConsultantConversation01413} from './ai-consultant-conversation-01413.mjs';
-import {getPublicAiConsultantBootstrap01414,queryPublicAiConsultant01414,getPublicAiConsultantSession01414} from './ai-consultant-public-01414.mjs';
-import {listAiConsultantSalesRules01415,createAiConsultantSalesRule01415,updateAiConsultantSalesRule01415,deleteAiConsultantSalesRule01415} from './ai-consultant-sales-rules-01415.mjs';
-import {acceptPublicAiConsultantOffer01416,redeemPublicAiConsultantOffer01416} from './ai-consultant-offers-01416.mjs';
-import {getAiConsultantLlmStatus01417} from './ai-consultant-llm-01417.mjs';
 import {listNotificationRules01408,createNotificationRule01408,updateNotificationRule01408,deleteNotificationRule01408,duplicateNotificationRule01408} from './notification-rule-engine-01408.mjs';
-import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
-import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotificationTransportTest01409} from './notification-delivery-01409.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -55,7 +45,6 @@ function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res
 function sameTrafficTenant01203(a={},b={}){return String(a.accountId||'')===String(b.accountId||'')&&String(a.workspaceId||'')===String(b.workspaceId||'')&&String(a.storeId||'')===String(b.storeId||'');}
 function sendGoogleOAuthPopup01398(res,{ok=false,code='',targetOrigin=''}={}){const origin=String(targetOrigin||'').trim()||'*',message=JSON.stringify({type:'st:google-sheets-oauth:01398',ok:!!ok,code:String(code||'')}).replace(/</g,'\u003c'),target=JSON.stringify(origin).replace(/</g,'\u003c'),body=`<!doctype html><meta charset=\"utf-8\"><script>try{window.opener&&window.opener.postMessage(${message},${target})}catch{};try{window.close()}catch{}</script>`;res.writeHead(ok?200:400,{'content-type':'text/html; charset=utf-8','content-length':Buffer.byteLength(body),'cache-control':'no-store'});res.end(body);}
 async function resolveRequestPublishedTrafficIdentity01203(req){const token=String(req?.headers?.['x-st-site-token']||'').trim();return token?resolvePublishedSiteTrafficIdentity01203(token):null;}
-function requestClientAddress01414(req){return String(req?.headers?.['x-forwarded-for']||req?.socket?.remoteAddress||'').split(',')[0].trim();}
 async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
@@ -75,15 +64,6 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='search'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await searchPublicMarketplace(Object.fromEntries(u.searchParams.entries())));}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='orders'){const token=String(req.headers['x-st-cart-id']||'');const out=await checkoutPublicCart(token,await readJson(req));return sendJson(res,201,out,{'x-st-cart-id':out.nextCartId});}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='site'&&p[4]==='messages'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01404',stage:'01404',requestId:rid});const out=await createPublicCustomerMessage01404(publishedTrafficIdentity,await readJson(req,{limit:32*1024}),{remoteAddress:req.socket?.remoteAddress||'',userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
-  if(p[2]==='public'&&p[3]==='ai-consultant'){
-    if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01414',stage:'01414',requestId:rid});
-    if(req.method==='GET'&&p[4]==='bootstrap'&&p.length===5)return sendJson(res,200,{...(await getPublicAiConsultantBootstrap01414(publishedTrafficIdentity)),requestId:rid});
-    if(req.method==='POST'&&p[4]==='query'&&p.length===5){const body=await readJson(req,{limit:16*1024});const visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await queryPublicAiConsultant01414(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,200,{...out,requestId:rid});}
-    if(req.method==='GET'&&p[4]==='session'&&p.length===5){const u=new URL(req.url,'http://localhost'),visitorKey=String(req.headers['x-st-ai-visitor']||'').trim();const out=await getPublicAiConsultantSession01414(publishedTrafficIdentity,{sessionId:u.searchParams.get('sessionId')||'',visitorKey});return sendJson(res,200,{...out,requestId:rid});}
-    if(req.method==='POST'&&p[4]==='offers'&&p[5]==='accept'&&p.length===6){const body=await readJson(req,{limit:16*1024}),visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await acceptPublicAiConsultantOffer01416(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
-    if(req.method==='POST'&&p[4]==='offers'&&p[5]==='redeem'&&p.length===6){const body=await readJson(req,{limit:16*1024}),visitorKey=String(req.headers['x-st-ai-visitor']||body?.visitorKey||'').trim();const out=await redeemPublicAiConsultantOffer01416(publishedTrafficIdentity,{...body,visitorKey},{visitorKey,remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||''});return sendJson(res,200,{...out,requestId:rid},{'x-st-cart-id':out.cartId});}
-    return sendJson(res,404,{error:'AI_CONSULTANT_PUBLIC_ROUTE_NOT_FOUND_01416',stage:'01416',requestId:rid});
-  }
   if(p[2]==='public'&&p[3]==='marketplace'&&p[4]==='cart'){const token=String(req.headers['x-st-cart-id']||'');
     if(req.method==='GET'&&p.length===5){const out=await getPublicCart(token);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
     if(req.method==='DELETE'&&p.length===5){const out=await clearPublicCart(token);return sendJson(res,200,out,{'x-st-cart-id':out.id});}
@@ -105,20 +85,6 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='notifications'){
     if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listOrderNotifications01404(scope));}
     if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
-    if(p[3]==='messages'&&p[4]==='inbox'){
-      assertOrderWriteRole(scope);
-      if(req.method==='GET'&&p.length===5){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listCustomerMessagesInbox01410(scope,Object.fromEntries(u.searchParams.entries())));}
-      if(req.method==='GET'&&p[5]==='managers'&&p.length===6)return sendJson(res,200,await listCustomerMessageManagers01410(scope));
-      const messageId=p[5]||'';
-      if(req.method==='GET'&&messageId&&p.length===6){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getCustomerMessageThread01410(scope,messageId,{markRead:u.searchParams.get('markRead')==='1',actorUserId:session.userId}));}
-      if(req.method==='PATCH'&&messageId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
-      if(req.method==='POST'&&messageId&&p[6]==='thread'){assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
-      return sendJson(res,404,{error:'CUSTOMER_MESSAGES_INBOX_ROUTE_NOT_FOUND_01410',stage:'01410',requestId:rid});
-    }
-    if(req.method==='GET'&&p[3]==='transports'&&p[4]==='status'&&p.length===5)return sendJson(res,200,getNotificationTransportStatus01409());
-    if(req.method==='POST'&&p[3]==='transports'&&p[4]&&p[5]==='test'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await sendNotificationTransportTest01409(scope,p[4]));}
-    if(req.method==='GET'&&p[3]==='deliveries'&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listNotificationDeliveries01409(scope,Object.fromEntries(u.searchParams.entries())));}
-    if(req.method==='POST'&&p[3]==='deliveries'&&p[4]&&p[5]==='retry'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await retryNotificationDelivery01409(scope,p[4]));}
     if(p[3]==='rules'){
       const ruleId=p[4]||'';
       if(req.method==='GET'&&!ruleId)return sendJson(res,200,await listNotificationRules01408(scope));
@@ -130,38 +96,6 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
     if(req.method==='POST'&&['orders','messages'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
     return sendJson(res,404,{error:'NOTIFICATION_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
-  }
-  if(p[2]==='ai-consultant'){
-    if(p[3]==='settings'){
-      const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'';
-      if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getAiConsultantSettings01411(scope,siteId));
-      if(req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,await saveAiConsultantSettings01411(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
-      return sendJson(res,404,{error:'AI_CONSULTANT_SETTINGS_ROUTE_NOT_FOUND_01411',stage:'01411',requestId:rid});
-    }
-    if(p[3]==='product-query'){
-      const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'';
-      if(req.method==='POST'&&p.length===4)return sendJson(res,200,await queryAiConsultantProducts01412(scope,siteId,await readJson(req,{limit:8192})));
-      return sendJson(res,404,{error:'AI_CONSULTANT_PRODUCT_QUERY_ROUTE_NOT_FOUND_01412',stage:'01412',requestId:rid});
-    }
-    if(p[3]==='sales-rules'){
-      const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'',ruleId=p[4]||'';
-      if(req.method==='GET'&&!ruleId&&p.length===4)return sendJson(res,200,await listAiConsultantSalesRules01415(scope,siteId));
-      if(req.method==='POST'&&!ruleId&&p.length===4){assertWriteRole(scope);return sendJson(res,201,await createAiConsultantSalesRule01415(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
-      if(req.method==='PUT'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await updateAiConsultantSalesRule01415(scope,siteId,ruleId,await readJson(req,{limit:32768}),session.userId));}
-      if(req.method==='DELETE'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await deleteAiConsultantSalesRule01415(scope,siteId,ruleId));}
-      return sendJson(res,404,{error:'AI_CONSULTANT_SALES_RULE_ROUTE_NOT_FOUND_01415',stage:'01415',requestId:rid});
-    }
-    if(p[3]==='conversation-query'){
-      const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'';
-      if(req.method==='POST'&&p.length===4)return sendJson(res,200,await queryAiConsultantConversation01413(scope,siteId,await readJson(req,{limit:16384}),session.userId));
-      return sendJson(res,404,{error:'AI_CONSULTANT_CONVERSATION_ROUTE_NOT_FOUND_01413',stage:'01413',requestId:rid});
-    }
-    if(p[3]==='llm-status'){
-      const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'';
-      if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getAiConsultantLlmStatus01417(scope,siteId));
-      return sendJson(res,404,{error:'AI_CONSULTANT_LLM_STATUS_ROUTE_NOT_FOUND_01417',stage:'01417',requestId:rid});
-    }
-    return sendJson(res,404,{error:'AI_CONSULTANT_ROUTE_NOT_FOUND_01417',stage:'01417',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(p[2]==='integrations'&&p[3]==='google-sheets'){

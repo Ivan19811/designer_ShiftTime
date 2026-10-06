@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
 import {normalizeCustomerMessageInput01404,normalizeNotificationReceiptStatus01404,orderNotificationSeverity01404,customerMessageSeverity01404} from './notification-inbox-core-01404.mjs';
 import {listNotificationRules01408,evaluateNotificationRules01408} from './notification-rule-engine-01408.mjs';
-import {dispatchNotificationEvent01409} from './notification-delivery-01409.mjs';
 export const NOTIFICATION_INBOX_STAGE_01404='01408';
 const str=v=>String(v??'').trim();
 const PROVIDERS=new Set(['orders','messages']);
@@ -30,21 +29,14 @@ function messageView(row,decision){
 export async function createPublicCustomerMessage01404(identity,input={},meta={}){
   if(!identity?.storeId||!identity?.siteId){const e=new Error('PUBLISHED_SITE_IDENTITY_REQUIRED_01404');e.code='PUBLISHED_SITE_IDENTITY_REQUIRED_01404';e.statusCode=401;throw e;}
   const message=normalizeCustomerMessageInput01404(input),ipHash=hashIp(meta.remoteAddress);
-  const saved=await withClient(async client=>{
+  return withClient(async client=>{
     const recent=await client.query(`SELECT COUNT(*)::int AS count FROM shifttime_customer_messages WHERE builder_site_id=$1 AND ip_hash=$2 AND created_at>now()-interval '10 minutes'`,[identity.siteId,ipHash]);
     if(Number(recent.rows[0]?.count||0)>=12){const e=new Error('CUSTOMER_MESSAGE_RATE_LIMIT_01404');e.code='CUSTOMER_MESSAGE_RATE_LIMIT_01404';e.statusCode=429;throw e;}
     const messageId=id('custmsg');
     const context={...message.context,userAgent:str(meta.userAgent).slice(0,300)};
-    await client.query('BEGIN');
-    try{
-      await client.query(`INSERT INTO shifttime_customer_messages(id,account_id,workspace_id,store_id,builder_site_id,published_site_id,site_name,channel,subject,body,customer,context,ip_hash,last_activity_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,now())`,[messageId,identity.accountId,identity.workspaceId,identity.storeId,identity.siteId,identity.publishedSiteId||'',identity.siteName||'',message.channel,message.subject,message.body,JSON.stringify(message.customer),JSON.stringify(context),ipHash]);
-      await client.query(`INSERT INTO shifttime_customer_message_thread(id,message_id,store_id,kind,body,actor_name,visibility,metadata,delivery_status) VALUES($1,$2,$3,'customer',$4,$5,'customer',$6::jsonb,'none')`,[`thread_customer_${messageId}`,messageId,identity.storeId,message.body,str(message.customer?.name)||'Customer',JSON.stringify({subject:message.subject,channel:message.channel,customer:message.customer,context})]);
-      await client.query('COMMIT');
-    }catch(error){await client.query('ROLLBACK');throw error;}
-    return {ok:true,stage:NOTIFICATION_INBOX_STAGE_01404,id:messageId,context};
+    await client.query(`INSERT INTO shifttime_customer_messages(id,account_id,workspace_id,store_id,builder_site_id,published_site_id,site_name,channel,subject,body,customer,context,ip_hash) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13)`,[messageId,identity.accountId,identity.workspaceId,identity.storeId,identity.siteId,identity.publishedSiteId||'',identity.siteName||'',message.channel,message.subject,message.body,JSON.stringify(message.customer),JSON.stringify(context),ipHash]);
+    return {ok:true,stage:NOTIFICATION_INBOX_STAGE_01404,id:messageId};
   });
-  try{await dispatchNotificationEvent01409(identity,{eventKey:saved.id,type:'customer.message.created',provider:'messages',severity:customerMessageSeverity01404({...message,id:saved.id,messageStatus:'new',builderSiteId:identity.siteId,customer:message.customer,context:saved.context}),notification:{title:message.subject||'Customer message',body:message.body},data:{message:{id:saved.id,status:'new',channel:message.channel,siteId:identity.siteId},customer:message.customer||{},context:saved.context||{}}});}catch{}
-  return {ok:true,stage:NOTIFICATION_INBOX_STAGE_01404,id:saved.id};
 }
 
 export async function listOrderNotifications01404(scope){
