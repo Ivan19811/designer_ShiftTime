@@ -82,7 +82,6 @@ export async function setNotificationReceipt01404(scope,provider,eventKey,status
     const userId=str(actorUserId||scope.userId);
     if(userId)await client.query(`INSERT INTO shifttime_notification_user_receipts(store_id,provider,event_key,user_id,status) VALUES($1,$2,$3,$4,$5) ON CONFLICT(store_id,provider,event_key,user_id) DO UPDATE SET status=EXCLUDED.status,updated_at=now()`,[scope.storeId,p,key,userId,next]);
     else await client.query(`INSERT INTO shifttime_notification_receipts(store_id,provider,event_key,status,actor_user_id) VALUES($1,$2,$3,$4,NULL) ON CONFLICT(store_id,provider,event_key) DO UPDATE SET status=EXCLUDED.status,updated_at=now()`,[scope.storeId,p,key,next]);
-    if(p==='messages'&&next==='read')await client.query(`UPDATE shifttime_customer_messages SET status=CASE WHEN status='new' THEN 'read' ELSE status END,updated_at=now() WHERE id=$1 AND store_id=$2`,[key,scope.storeId]);
     return {ok:true,stage:'01416',provider:p,eventKey:key,status:next,userId};
   });
 }
