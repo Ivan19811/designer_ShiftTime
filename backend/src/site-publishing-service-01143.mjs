@@ -8,6 +8,7 @@ import {createSitePublishingService01143} from './site-publishing-core-01143.mjs
 import {createPublishedSiteTrafficToken01203} from './published-site-identity-01203.mjs';
 import {recordSiteNotificationEvent01414} from './site-notification-provider-01414.mjs';
 import {classifySitePublishingFailure01414} from './site-notification-core-01414.mjs';
+import {getAiConsultantPublishConfig01414} from './ai-consultant-public-01414.mjs';
 
 const id=(prefix)=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
 function mapRow(r){if(!r)return null;return {
@@ -33,7 +34,7 @@ export function createPostgresPublishingRepository01143(){
 
 const defaultRepo=createPostgresPublishingRepository01143();
 const defaultNetlify=createNetlifyClient01143({token:config.netlifyAuthToken,baseUrl:config.netlifyApiBaseUrl});
-const defaultService=createSitePublishingService01143({repo:defaultRepo,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken)});
+const defaultService=createSitePublishingService01143({repo:defaultRepo,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,getPublicAiConsultantConfig:getAiConsultantPublishConfig01414,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken)});
 
 function notificationInput01414(builderSiteId,status={},pkg={},eventType='',error=''){return {eventType,builderSiteId,siteName:status.siteName||pkg?.site?.name||'',siteSlug:pkg?.site?.slug||'',provider:status.provider||'netlify',url:status.url||'',adminUrl:status.adminUrl||'',netlifySiteId:status.netlifySiteId||'',deployId:status.deployId||'',state:status.deployState||status.state||'',revision:status.publishedRevision||status.requestedRevision||pkg?.revision||'',requestedRevision:status.requestedRevision||pkg?.revision||'',publishedRevision:status.publishedRevision||'',error:String(error||status.lastError||'').slice(0,1000)};}
 async function emitStatusNotification01414(scope,builderSiteId,status,pkg={}){const state=String(status?.deployState||status?.state||'').trim();if(state==='ready')return recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,pkg,'site.published',''));if(['error','failed'].includes(state)){const eventType=classifySitePublishingFailure01414(status?.lastError||'');return recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,pkg,eventType,status?.lastError||''));}return null;}
