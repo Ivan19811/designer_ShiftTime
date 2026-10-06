@@ -35,7 +35,12 @@ export async function createPublicCustomerMessage01404(identity,input={},meta={}
     if(Number(recent.rows[0]?.count||0)>=12){const e=new Error('CUSTOMER_MESSAGE_RATE_LIMIT_01404');e.code='CUSTOMER_MESSAGE_RATE_LIMIT_01404';e.statusCode=429;throw e;}
     const messageId=id('custmsg');
     const context={...message.context,userAgent:str(meta.userAgent).slice(0,300)};
-    await client.query(`INSERT INTO shifttime_customer_messages(id,account_id,workspace_id,store_id,builder_site_id,published_site_id,site_name,channel,subject,body,customer,context,ip_hash) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13)`,[messageId,identity.accountId,identity.workspaceId,identity.storeId,identity.siteId,identity.publishedSiteId||'',identity.siteName||'',message.channel,message.subject,message.body,JSON.stringify(message.customer),JSON.stringify(context),ipHash]);
+    await client.query('BEGIN');
+    try{
+      await client.query(`INSERT INTO shifttime_customer_messages(id,account_id,workspace_id,store_id,builder_site_id,published_site_id,site_name,channel,subject,body,customer,context,ip_hash,last_activity_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,now())`,[messageId,identity.accountId,identity.workspaceId,identity.storeId,identity.siteId,identity.publishedSiteId||'',identity.siteName||'',message.channel,message.subject,message.body,JSON.stringify(message.customer),JSON.stringify(context),ipHash]);
+      await client.query(`INSERT INTO shifttime_customer_message_thread(id,message_id,store_id,kind,body,actor_name,visibility,metadata,delivery_status) VALUES($1,$2,$3,'customer',$4,$5,'customer',$6::jsonb,'none')`,[`thread_customer_${messageId}`,messageId,identity.storeId,message.body,str(message.customer?.name)||'Customer',JSON.stringify({subject:message.subject,channel:message.channel,customer:message.customer,context})]);
+      await client.query('COMMIT');
+    }catch(error){await client.query('ROLLBACK');throw error;}
     return {ok:true,stage:NOTIFICATION_INBOX_STAGE_01404,id:messageId,context};
   });
   try{await dispatchNotificationEvent01409(identity,{eventKey:saved.id,type:'customer.message.created',provider:'messages',severity:customerMessageSeverity01404({...message,id:saved.id,messageStatus:'new',builderSiteId:identity.siteId,customer:message.customer,context:saved.context}),notification:{title:message.subject||'Customer message',body:message.body},data:{message:{id:saved.id,status:'new',channel:message.channel,siteId:identity.siteId},customer:message.customer||{},context:saved.context||{}}});}catch{}
