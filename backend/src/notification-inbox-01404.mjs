@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
-import {normalizeCustomerMessageInput01404,normalizeNotificationReceiptStatus01404,orderNotificationSeverity01404,customerMessageSeverity01404} from './notification-inbox-core-01404.mjs';
+import {normalizeCustomerMessageInput01404,normalizeNotificationReceiptStatus01404,customerMessageSeverity01404} from './notification-inbox-core-01404.mjs';
 import {listNotificationRules01408,evaluateNotificationRules01408} from './notification-rule-engine-01408.mjs';
 import {dispatchNotificationEvent01409} from './notification-delivery-01409.mjs';
 export const NOTIFICATION_INBOX_STAGE_01404='01408';
@@ -10,13 +10,14 @@ const id=prefix=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
 const hashIp=value=>crypto.createHash('sha256').update(str(value)||'unknown').digest('hex');
 
 function receiptStatus(row){return normalizeNotificationReceiptStatus01404(row?.receiptStatus||'');}
-function orderRuleDecision(row,rules){return evaluateNotificationRules01408(rules,{type:'order.created',provider:'orders',severity:orderNotificationSeverity01404(row),data:{order:{id:row.id,total:Number(row.total)||0,itemsCount:Number(row.itemsCount)||0,status:str(row.status),paymentStatus:str(row.payment?.status),currency:str(row.currency)||'UAH',sellerName:str(row.sellerName)}}});}
+function orderRuleDecision(row,rules){const data=row.payload&&typeof row.payload==='object'?row.payload:{},order=data.order&&typeof data.order==='object'?data.order:{};return evaluateNotificationRules01408(rules,{type:str(row.eventType),provider:'orders',severity:str(row.severity)||'low',data:{...data,order}});}
 function messageRuleDecision(row,rules){return evaluateNotificationRules01408(rules,{type:'customer.message.created',provider:'messages',severity:customerMessageSeverity01404(row),data:{message:{id:row.id,status:str(row.messageStatus),channel:str(row.channel),siteId:str(row.builderSiteId)},customer:row.customer||{},context:row.context||{}}});}
 function orderView(row,scope,decision){
+  const data=row.payload&&typeof row.payload==='object'?row.payload:{},order=data.order&&typeof data.order==='object'?data.order:{};
   return {
-    id:`order:${row.id}`,eventKey:row.id,provider:'orders',category:'orders',kind:'order-created',status:receiptStatus(row),severity:decision.effectiveSeverity,
-    sourceId:row.id,sourceName:str(scope.storeName||row.sellerName),createdAt:row.createdAt,updatedAt:row.updatedAt,
-    payload:{orderId:row.id,marketplaceOrderId:row.marketplaceOrderId,orderNumber:row.orderNumber,buyerName:str(row.buyer?.name),total:Number(row.total)||0,currency:str(row.currency)||'UAH',itemsCount:Number(row.itemsCount)||0,orderStatus:str(row.status),paymentStatus:str(row.payment?.status),notificationRuleStage:'01408',matchedRuleIds:decision.matched.map(x=>x.id)}
+    id:`order:${row.eventKey}`,eventKey:row.eventKey,provider:'orders',category:'orders',kind:str(row.kind)||'order-created',status:receiptStatus(row),severity:decision.effectiveSeverity,
+    sourceId:str(row.sellerOrderId||order.id),sourceName:str(scope.storeName||order.sellerName),createdAt:row.occurredAt||row.createdAt,updatedAt:row.occurredAt||row.createdAt,
+    payload:{orderId:str(order.id||row.sellerOrderId),marketplaceOrderId:str(order.marketplaceOrderId||row.marketplaceOrderId),orderNumber:str(order.orderNumber),buyerName:str(order.buyerName),total:Number(order.total)||0,currency:str(order.currency)||'UAH',itemsCount:Number(order.itemsCount)||0,orderStatus:str(order.status),paymentStatus:str(order.paymentStatus),paymentMethod:str(order.paymentMethod),sellerId:str(order.sellerId),sellerName:str(order.sellerName),storeId:str(order.storeId||scope.storeId),siteId:str(order.siteId),siteName:str(order.siteName),eventType:str(row.eventType),notificationRuleStage:'01412',matchedRuleIds:decision.matched.map(x=>x.id)}
   };
 }
 function messageView(row,decision){
@@ -50,8 +51,8 @@ export async function createPublicCustomerMessage01404(identity,input={},meta={}
 export async function listOrderNotifications01404(scope){
   const rules=(await listNotificationRules01408(scope)).items;
   return withClient(async client=>{
-    const q=await client.query(`SELECT so.id,so.marketplace_order_id "marketplaceOrderId",so.order_number "orderNumber",so.seller_name "sellerName",so.status,so.currency,so.total::float8 total,so.buyer,so.payment,so.created_at "createdAt",so.updated_at "updatedAt",(SELECT COUNT(*)::int FROM marketplace_order_items oi WHERE oi.seller_order_id=so.id) "itemsCount",nr.status "receiptStatus" FROM marketplace_seller_orders so LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=so.store_id AND nr.provider='orders' AND nr.event_key=so.id WHERE so.store_id=$1 ORDER BY so.created_at DESC LIMIT 200`,[scope.storeId]);
-    const items=[];for(const row of q.rows){const decision=orderRuleDecision(row,rules);if(decision.allowed&&decision.channels.includes('inApp'))items.push(orderView(row,scope,decision));}return {stage:NOTIFICATION_INBOX_STAGE_01404,items};
+    const q=await client.query(`SELECT e.id,e.seller_order_id "sellerOrderId",e.marketplace_order_id "marketplaceOrderId",e.event_key "eventKey",e.event_type "eventType",e.severity,e.kind,e.payload,e.occurred_at "occurredAt",e.created_at "createdAt",nr.status "receiptStatus" FROM shifttime_order_notification_events e LEFT JOIN shifttime_notification_receipts nr ON nr.store_id=e.store_id AND nr.provider='orders' AND nr.event_key=e.event_key WHERE e.store_id=$1 ORDER BY e.occurred_at DESC,e.id DESC LIMIT 300`,[scope.storeId]);
+    const items=[];for(const row of q.rows){const decision=orderRuleDecision(row,rules);if(decision.allowed&&decision.channels.includes('inApp'))items.push(orderView(row,scope,decision));}return {stage:'01412',items};
   });
 }
 
@@ -64,7 +65,7 @@ export async function listCustomerMessageNotifications01404(scope){
 }
 
 async function assertEventBelongsToStore(client,scope,provider,eventKey){
-  if(provider==='orders'){const q=await client.query(`SELECT 1 FROM marketplace_seller_orders WHERE id=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
+  if(provider==='orders'){const q=await client.query(`SELECT 1 FROM shifttime_order_notification_events WHERE event_key=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
   if(provider==='messages'){const q=await client.query(`SELECT 1 FROM shifttime_customer_messages WHERE id=$1 AND store_id=$2 LIMIT 1`,[eventKey,scope.storeId]);return !!q.rowCount;}
   return false;
 }

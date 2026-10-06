@@ -3,6 +3,7 @@ import {withClient} from './db.mjs';
 import {config} from './config.mjs';
 import {commitInventoryReservation01077,releaseInventoryReservation01077,expireStaleInventoryReservations01077} from './marketplace-inventory-service.mjs';
 import {recalculateOrderTotals01079} from './marketplace-pricing-service.mjs';
+import {emitMarketplaceOrderPaymentLifecycleNotifications01412} from './order-notification-lifecycle-01412.mjs';
 const MARKETPLACE_ID='marketplace_shifttime';
 const clean=v=>String(v??'').trim();
 const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -42,7 +43,7 @@ export async function listAuthorizedPayouts(scope){return withClient(async clien
 export async function transitionAuthorizedPayment(scope,paymentId,input={}){
   if(!config.devPaymentSimulation)throw Object.assign(new Error('Direct payment transitions are disabled; production status must come from payment provider/webhook'),{statusCode:403});
   const to=clean(input.status);if(!STATUSES.has(to))throw Object.assign(new Error('Unsupported payment status'),{statusCode:400});
-  return withClient(async client=>{await client.query('BEGIN');try{
+  const result=await withClient(async client=>{await client.query('BEGIN');try{
     const pq=await client.query(`SELECT p.id,p.status,p.amount::float8,p.refunded_amount::float8 "refundedAmount",p.marketplace_order_id "marketplaceOrderId" FROM marketplace_payments p WHERE p.id=$1 AND EXISTS(SELECT 1 FROM marketplace_payment_allocations a WHERE a.payment_id=p.id AND a.store_id=$2) FOR UPDATE`,[paymentId,scope.storeId]);
     if(!pq.rowCount)throw Object.assign(new Error('Payment not found for active Store'),{statusCode:404});
     const p=pq.rows[0];if(!TRANSITIONS[p.status]?.has(to))throw Object.assign(new Error(`Payment transition ${p.status} → ${to} is not allowed`),{statusCode:409});
@@ -64,8 +65,10 @@ export async function transitionAuthorizedPayment(scope,paymentId,input={}){
     await client.query(`UPDATE marketplace_orders SET payment=jsonb_set(COALESCE(payment,'{}'::jsonb),'{status}',to_jsonb($1::text),true),updated_at=now() WHERE id=$2`,[status,p.marketplaceOrderId]);
     await client.query(`UPDATE marketplace_seller_orders SET payment=jsonb_set(COALESCE(payment,'{}'::jsonb),'{status}',to_jsonb($1::text),true),updated_at=now() WHERE marketplace_order_id=$2`,[status,p.marketplaceOrderId]);
     await event(client,paymentId,`payment-${status}`,{refundAmount:n(input.refundAmount),refundedAmount:refunded,inventoryAction:status==='paid'?'commit':(['failed','cancelled'].includes(status)?'release':'none')});
-    await client.query('COMMIT');return await scopedPaymentView(client,paymentId,scope.storeId);
+    await client.query('COMMIT');return {payment:await scopedPaymentView(client,paymentId,scope.storeId),marketplaceOrderId:p.marketplaceOrderId,status,refunded,previousStatus:p.status,previousRefunded:n(p.refundedAmount)};
   }catch(e){await client.query('ROLLBACK');throw e;}});
+  if(result.status!==result.previousStatus||result.refunded!==result.previousRefunded){try{await emitMarketplaceOrderPaymentLifecycleNotifications01412({marketplaceOrderId:result.marketplaceOrderId,paymentId,status:result.status,refundedAmount:result.refunded});}catch{}}
+  return result.payment;
 }
 export async function markAuthorizedPayout(scope,allocationId,input={}){
   if(!config.devPaymentSimulation)throw Object.assign(new Error('Direct payout simulation is disabled'),{statusCode:403});

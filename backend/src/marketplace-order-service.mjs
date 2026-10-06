@@ -4,7 +4,8 @@ import {config} from './config.mjs';
 import {reserveInventoryForOrder01077,commitInventoryReservation01077,getOrderInventoryState01077,cancelSellerOrderInventory01077} from './marketplace-inventory-service.mjs';
 import {createSellerOrderDelivery01078,loadOrderDeliveries01078,loadSellerOrderDeliveries01078} from './marketplace-shipping-service.mjs';
 import {quoteCheckoutShipping01079,recalculateOrderTotals01079,moneyRound01079} from './marketplace-pricing-service.mjs';
-import {dispatchNotificationEvent01409,resolveNotificationScopeForStore01409} from './notification-delivery-01409.mjs';
+import {emitSellerOrderLifecycleNotification01412} from './order-notification-lifecycle-01412.mjs';
+import {orderNotificationEventTypeForSellerStatus01412} from './order-notification-lifecycle-core-01412.mjs';
 const MARKETPLACE_ID='marketplace_shifttime';
 const clean=v=>String(v??'').trim();
 const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -23,7 +24,7 @@ async function orderView(client,orderId){
   return {...oq.rows[0],sellerOrders:sq.rows.map(s=>({...s,delivery:deliveries.get(s.id)||s.delivery,items:by.get(s.id)||[]})),inventory:await getOrderInventoryState01077(client,orderId)};
 }
 
-export async function checkoutPublicCart(cartToken='',input={}){
+export async function checkoutPublicCart(cartToken='',input={},context={}){
   const checkout=validate(input);
   const result=await withClient(async client=>{
     await client.query('BEGIN');
@@ -77,7 +78,7 @@ export async function checkoutPublicCart(cartToken='',input={}){
     }catch(e){await client.query('ROLLBACK');throw e;}
   });
   for(const sellerOrder of result?.order?.sellerOrders||[]){
-    try{const scope=await resolveNotificationScopeForStore01409(sellerOrder.storeId);if(!scope)continue;await dispatchNotificationEvent01409(scope,{eventKey:sellerOrder.id,type:'order.created',provider:'orders',severity:'low',notification:{title:`Order ${sellerOrder.orderNumber||sellerOrder.id}`,body:`${sellerOrder.buyer?.name||'Customer'} · ${sellerOrder.items?.length||0} items · ${Number(sellerOrder.grossTotal||sellerOrder.total||0)} ${sellerOrder.currency||'UAH'}`},data:{order:{id:sellerOrder.id,total:Number(sellerOrder.grossTotal||sellerOrder.total||0),itemsCount:Array.isArray(sellerOrder.items)?sellerOrder.items.length:0,status:sellerOrder.status,paymentStatus:sellerOrder.payment?.status||'',currency:sellerOrder.currency||'UAH',sellerName:sellerOrder.sellerName||''}}});}catch{}
+    try{await emitSellerOrderLifecycleNotification01412({sellerOrderId:sellerOrder.id,eventType:'order.created',siteId:clean(context?.siteId),siteName:clean(context?.siteName),sourceType:'checkout',sourceKey:result?.order?.id||sellerOrder.marketplaceOrderId||''});}catch{}
   }
   return result;
 }
@@ -96,7 +97,7 @@ const TRANSITIONS={new:new Set(['new','confirmed','cancelled']),confirmed:new Se
 async function refreshParentStatus(client,parentId){const q=await client.query(`SELECT status FROM marketplace_seller_orders WHERE marketplace_order_id=$1`,[parentId]),st=q.rows.map(x=>x.status);let status='new';if(st.length&&st.every(x=>x==='completed'))status='completed';else if(st.length&&st.every(x=>x==='cancelled'))status='cancelled';else if(st.some(x=>x==='completed'||x==='cancelled'))status='partially-completed';else if(st.some(x=>x==='processing'||x==='shipped'))status='processing';else if(st.some(x=>x==='confirmed'))status='confirmed';await client.query(`UPDATE marketplace_orders SET status=$2,updated_at=now() WHERE id=$1`,[parentId,status]);}
 export async function updateAuthorizedSellerOrder(scope,sellerOrderId,input={}){
   const status=clean(input.status);
-  return withClient(async client=>{
+  const result=await withClient(async client=>{
     await client.query('BEGIN');
     try{
       const q=await client.query(`SELECT id,marketplace_order_id "marketplaceOrderId",status FROM marketplace_seller_orders WHERE id=$1 AND marketplace_id=$2 AND store_id=$3 FOR UPDATE`,[sellerOrderId,MARKETPLACE_ID,scope.storeId]);
@@ -105,7 +106,9 @@ export async function updateAuthorizedSellerOrder(scope,sellerOrderId,input={}){
       if(status==='cancelled'&&row.status!=='cancelled')await cancelSellerOrderInventory01077(client,sellerOrderId,{reason:'seller-order-cancelled'});
       await client.query(`UPDATE marketplace_seller_orders SET status=$2,updated_at=now() WHERE id=$1`,[sellerOrderId,status]);
       await refreshParentStatus(client,row.marketplaceOrderId);await client.query('COMMIT');
-      const list=await listAuthorizedSellerOrders(scope);return list.items.find(x=>x.id===sellerOrderId)||null;
+      const list=await listAuthorizedSellerOrders(scope);return {item:list.items.find(x=>x.id===sellerOrderId)||null,previousStatus:row.status};
     }catch(e){await client.query('ROLLBACK');throw e;}
   });
+  if(result.item&&result.previousStatus!==status){const eventType=orderNotificationEventTypeForSellerStatus01412(status);if(eventType){try{await emitSellerOrderLifecycleNotification01412({sellerOrderId,eventType,sourceType:'seller-order-status',sourceKey:status});}catch{}}}
+  return result.item;
 }

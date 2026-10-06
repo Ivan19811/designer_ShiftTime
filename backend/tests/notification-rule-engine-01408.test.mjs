@@ -38,6 +38,6 @@ test('01408 persistence migration server routes and real providers are wired to 
   assert.match(migration,/shifttime_notification_rules/);assert.match(migration,/event_type/);assert.match(migration,/conditions jsonb/);assert.match(migration,/actions jsonb/);
   assert.match(server,/listNotificationRules01408/);assert.match(server,/duplicateNotificationRule01408/);assert.match(server,/p\[3\]==='rules'/);
   assert.match(service,/ensureDefaults/);assert.match(service,/commerce_supplier_sync_alert_rules/);
-  assert.match(supplier,/evaluateNotificationRules01408/);assert.match(supplier,/supplier\.approval\.created/);assert.match(inbox,/order\.created/);assert.match(inbox,/customer\.message\.created/);
+  assert.match(supplier,/evaluateNotificationRules01408/);assert.match(supplier,/supplier\.approval\.created/);assert.match(inbox,/shifttime_order_notification_events/);assert.match(inbox,/type:str\(row\.eventType\)/);assert.match(inbox,/customer\.message\.created/);
   assert.match(pkg,/notification-rule-engine-core-01408/);
 });
