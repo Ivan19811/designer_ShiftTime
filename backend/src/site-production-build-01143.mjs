@@ -1,3 +1,4 @@
+import {injectAiConsultantPublicRuntime01414,buildAiConsultantResultsPage01414} from './ai-consultant-public-page-01414.mjs';
 const clean=value=>String(value??'').trim();
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
@@ -143,7 +144,7 @@ ${styles}
 
 const CANONICAL_BASE_TOKEN_01151='__ST_CANONICAL_BASE_01151__';
 
-export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={}}={}){
+export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={},aiConsultantPublicConfig={}}={}){
   const files=new Map();
   const root=clean(canonicalBaseUrl).replace(/\/+$/,'');
   for(const raw of Array.isArray(pkg?.files)?pkg.files:[]){
@@ -154,23 +155,25 @@ export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',
     if(encoding==='base64')files.set(path,Buffer.from(String(raw?.content??''),'base64'));
     else{
       let text=String(raw?.content??'');
-      if(path.endsWith('.html')){text=text.split(CANONICAL_BASE_TOKEN_01151).join(root);text=injectPublishedTrafficBridge01203(text,{publishedSiteIdentity,apiProxyTarget});}
+      if(path.endsWith('.html')){text=text.split(CANONICAL_BASE_TOKEN_01151).join(root);text=injectPublishedTrafficBridge01203(text,{publishedSiteIdentity,apiProxyTarget});text=injectAiConsultantPublicRuntime01414(text,{config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414});}
       files.set(path,Buffer.from(text,'utf8'));
     }
   }
+  if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:root});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
   const target=clean(apiProxyTarget).replace(/\/+$/,'');
   if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
   return files;
 }
 
-export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={}}={}){
-  if(clean(pkg?.exporterVersion)==='01151')return materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl,apiProxyTarget,publishedSiteIdentity});
+export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={},aiConsultantPublicConfig={}}={}){
+  if(clean(pkg?.exporterVersion)==='01151')return materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl,apiProxyTarget,publishedSiteIdentity,aiConsultantPublicConfig});
   if(!pkg||typeof pkg!=='object')throw Object.assign(new Error('Publish package is required'),{statusCode:400});
   if(!clean(pkg?.site?.id))throw Object.assign(new Error('Builder site id is required'),{statusCode:400});
   const pages=Array.isArray(pkg.pages)?pkg.pages:[];if(!pages.length)throw Object.assign(new Error('At least one page is required'),{statusCode:400});
   const files=new Map();
   for(const asset of normalizeAssets(pkg.assets))files.set(asset.path,asset.content);
-  for(const page of pages){const path=outputPathForRoute01143(page?.path||'/');if(files.has(path))throw Object.assign(new Error(`Duplicate published route: ${page?.path||'/'}`),{statusCode:400});files.set(path,Buffer.from(injectPublishedTrafficBridge01203(renderPage(pkg,page,{canonicalBaseUrl}),{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
+  for(const page of pages){const path=outputPathForRoute01143(page?.path||'/');if(files.has(path))throw Object.assign(new Error(`Duplicate published route: ${page?.path||'/'}`),{statusCode:400});let html=injectPublishedTrafficBridge01203(renderPage(pkg,page,{canonicalBaseUrl}),{publishedSiteIdentity,apiProxyTarget});html=injectAiConsultantPublicRuntime01414(html,{config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414});files.set(path,Buffer.from(html,'utf8'));}
+  if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:clean(canonicalBaseUrl).replace(/\/+$/,'')});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
   const target=clean(apiProxyTarget).replace(/\/+$/,'');if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
   return files;
 }

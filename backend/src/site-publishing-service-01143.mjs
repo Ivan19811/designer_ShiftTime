@@ -6,6 +6,7 @@ import {buildProductionFiles01143} from './site-production-build-01143.mjs';
 import {createZip01143} from './zip-01143.mjs';
 import {createSitePublishingService01143} from './site-publishing-core-01143.mjs';
 import {createPublishedSiteTrafficToken01203} from './published-site-identity-01203.mjs';
+import {getAiConsultantPublishConfig01414} from './ai-consultant-public-01414.mjs';
 
 const id=(prefix)=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
 function mapRow(r){if(!r)return null;return {
@@ -31,6 +32,6 @@ export function createPostgresPublishingRepository01143(){
 
 const defaultRepo=createPostgresPublishingRepository01143();
 const defaultNetlify=createNetlifyClient01143({token:config.netlifyAuthToken,baseUrl:config.netlifyApiBaseUrl});
-const defaultService=createSitePublishingService01143({repo:defaultRepo,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken)});
+const defaultService=createSitePublishingService01143({repo:defaultRepo,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,getPublicAiConsultantConfig:getAiConsultantPublishConfig01414,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken)});
 export const publishSite01143=(scope,userId,builderSiteId,pkg)=>defaultService.publish(scope,userId,builderSiteId,pkg);
 export const getSitePublishStatus01143=(scope,builderSiteId)=>defaultService.status(scope,builderSiteId);
