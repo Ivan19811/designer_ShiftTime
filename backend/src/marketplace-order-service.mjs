@@ -4,6 +4,7 @@ import {config} from './config.mjs';
 import {reserveInventoryForOrder01077,commitInventoryReservation01077,getOrderInventoryState01077,cancelSellerOrderInventory01077} from './marketplace-inventory-service.mjs';
 import {createSellerOrderDelivery01078,loadOrderDeliveries01078,loadSellerOrderDeliveries01078} from './marketplace-shipping-service.mjs';
 import {quoteCheckoutShipping01079,recalculateOrderTotals01079,moneyRound01079} from './marketplace-pricing-service.mjs';
+import {dispatchNotificationEvent01409,resolveNotificationScopeForStore01409} from './notification-delivery-01409.mjs';
 const MARKETPLACE_ID='marketplace_shifttime';
 const clean=v=>String(v??'').trim();
 const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -24,7 +25,7 @@ async function orderView(client,orderId){
 
 export async function checkoutPublicCart(cartToken='',input={}){
   const checkout=validate(input);
-  return withClient(async client=>{
+  const result=await withClient(async client=>{
     await client.query('BEGIN');
     try{
       const token=validCartToken(cartToken)?clean(cartToken):'';
@@ -75,6 +76,10 @@ export async function checkoutPublicCart(cartToken='',input={}){
       return {order:await orderView(client,mpOrderId),nextCartId};
     }catch(e){await client.query('ROLLBACK');throw e;}
   });
+  for(const sellerOrder of result?.order?.sellerOrders||[]){
+    try{const scope=await resolveNotificationScopeForStore01409(sellerOrder.storeId);if(!scope)continue;await dispatchNotificationEvent01409(scope,{eventKey:sellerOrder.id,type:'order.created',provider:'orders',severity:'low',notification:{title:`Order ${sellerOrder.orderNumber||sellerOrder.id}`,body:`${sellerOrder.buyer?.name||'Customer'} · ${sellerOrder.items?.length||0} items · ${Number(sellerOrder.grossTotal||sellerOrder.total||0)} ${sellerOrder.currency||'UAH'}`},data:{order:{id:sellerOrder.id,total:Number(sellerOrder.grossTotal||sellerOrder.total||0),itemsCount:Array.isArray(sellerOrder.items)?sellerOrder.items.length:0,status:sellerOrder.status,paymentStatus:sellerOrder.payment?.status||'',currency:sellerOrder.currency||'UAH',sellerName:sellerOrder.sellerName||''}}});}catch{}
+  }
+  return result;
 }
 
 export async function listAuthorizedSellerOrders(scope){
