@@ -5,6 +5,7 @@ import {normalizeNotificationDeliveryEvent01409,publicNotificationDeliveryRow014
 import {getNotificationTransportStatus01409,sendNotificationTransport01409} from './notification-transports-01409.mjs';
 import {resolveNotificationRecipients01416} from './notification-recipient-routing-01416.mjs';
 import {NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,notificationRecipientKey01416,notificationRecipientSelectorsForChannel01416} from './notification-recipient-routing-core-01416.mjs';
+import {notificationPolicyForTarget01417,queueNotificationDelivery01417,claimImmediateNotificationDedupe01417,scheduleNotificationEscalation01417,registerNotificationPreferenceDispatcher01417} from './notification-preferences-01417.mjs';
 const str=value=>String(value??'').trim();
 const idFor=(storeId,eventKey,channel,recipientKey='default')=>`ndel_${crypto.createHash('sha256').update(`${storeId}:${eventKey}:${channel}:${recipientKey}`).digest('hex').slice(0,28)}`;
 const externalChannels=new Set(['email','telegram','webhook','slack']);
@@ -42,13 +43,17 @@ async function deliveryTargets01416(scope,decision,channel){
 }
 
 export async function dispatchNotificationEvent01409(scope,eventInput={},options={}){
-  const event=normalizeNotificationDeliveryEvent01409(eventInput);if(!scope?.storeId||!event.eventKey||!event.type)return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,allowed:false,deliveries:[]};
-  const rules=(await listNotificationRules01408(scope)).items,decision=evaluateNotificationRules01408(rules,event),channels=decision.channels.filter(channel=>externalChannels.has(channel));
-  if(!decision.allowed||!channels.length)return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,allowed:decision.allowed,channels:decision.channels,deliveries:[]};
-  const effectiveEvent={...event,severity:decision.effectiveSeverity},deliveries=[];
-  for(const channel of channels){const targets=await deliveryTargets01416(scope,decision,channel);for(const target of targets){const saved=await ensureDeliveryRow01409(scope,effectiveEvent,channel,target);if(!saved.row)continue;if(!saved.created&&saved.row.status==='sent'){deliveries.push(publicNotificationDeliveryRow01409(saved.row));continue;}if(!saved.created&&!options.retryExisting){deliveries.push(publicNotificationDeliveryRow01409(saved.row));continue;}deliveries.push(await attemptDelivery01409(scope,saved.row,effectiveEvent,options));}}
-  return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,allowed:true,channels:decision.channels,effectiveSeverity:decision.effectiveSeverity,matchedRuleIds:decision.matched.map(x=>x.id),deliveries:deliveries.filter(Boolean)};
+  const event=normalizeNotificationDeliveryEvent01409(eventInput);if(!scope?.storeId||!event.eventKey||!event.type)return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,preferenceStage:'01417',allowed:false,deliveries:[],queued:[]};
+  const decision=options.decisionOverride||evaluateNotificationRules01408((await listNotificationRules01408(scope)).items,event),channels=(decision.channels||[]).filter(channel=>externalChannels.has(channel)),effectiveEvent={...event,severity:decision.effectiveSeverity||event.severity},deliveries=[],queued=[];
+  if(decision.allowed&&!options.preferenceBypass)await scheduleNotificationEscalation01417(scope,effectiveEvent,decision);
+  if(!decision.allowed||!channels.length)return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,preferenceStage:'01417',allowed:decision.allowed,channels:decision.channels||[],deliveries,queued};
+  for(const channel of channels){const targets=await deliveryTargets01416(scope,decision,channel);for(const target of targets){
+    if(!options.preferenceBypass){const policy=await notificationPolicyForTarget01417(scope,effectiveEvent,decision,channel,target);if(policy.mode!=='immediate'){queued.push(await queueNotificationDelivery01417(scope,effectiveEvent,channel,target,policy));continue;}const dedupe=await claimImmediateNotificationDedupe01417(scope,effectiveEvent,channel,target,policy);if(!dedupe.allowed){deliveries.push({eventKey:effectiveEvent.eventKey,eventType:effectiveEvent.type,provider:effectiveEvent.provider,channel,severity:effectiveEvent.severity,status:'skipped',attemptCount:0,errorCode:'NOTIFICATION_DEDUPLICATED_01417',recipientKey:policy.recipientKey,duplicateCount:dedupe.duplicateCount,stage:'01417'});continue;}}
+    const saved=await ensureDeliveryRow01409(scope,effectiveEvent,channel,target);if(!saved.row)continue;if(!saved.created&&saved.row.status==='sent'){deliveries.push(publicNotificationDeliveryRow01409(saved.row));continue;}if(!saved.created&&!options.retryExisting){deliveries.push(publicNotificationDeliveryRow01409(saved.row));continue;}deliveries.push(await attemptDelivery01409(scope,saved.row,effectiveEvent,options));
+  }}
+  return {stage:NOTIFICATION_DELIVERY_STAGE_01409,routingStage:NOTIFICATION_RECIPIENT_ROUTING_STAGE_01416,preferenceStage:'01417',allowed:true,channels:decision.channels||[],effectiveSeverity:decision.effectiveSeverity||event.severity,matchedRuleIds:(decision.matched||[]).map(x=>x.id),deliveries:deliveries.filter(Boolean),queued:queued.filter(Boolean)};
 }
+registerNotificationPreferenceDispatcher01417(dispatchNotificationEvent01409);
 
 export async function listNotificationDeliveries01409(scope,{limit=80,status='',channel=''}={}){
   const safeLimit=Math.max(1,Math.min(200,Number(limit)||80)),values=[scope.storeId];let where='store_id=$1';

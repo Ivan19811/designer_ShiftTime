@@ -34,6 +34,7 @@ import {listNotificationRules01408,createNotificationRule01408,updateNotificatio
 import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
 import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotificationTransportTest01409} from './notification-delivery-01409.mjs';
 import {listNotificationRecipientCatalog01416} from './notification-recipient-routing-01416.mjs';
+import {getNotificationPreferences01417,saveNotificationPreferences01417,notificationPreferenceQueueStats01417,startNotificationPreferencesScheduler01417,stopNotificationPreferencesScheduler01417} from './notification-preferences-01417.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
@@ -109,6 +110,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[3]==='transports'&&p[4]&&p[5]==='test'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await sendNotificationTransportTest01409(scope,p[4]));}
     if(req.method==='GET'&&p[3]==='deliveries'&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listNotificationDeliveries01409(scope,Object.fromEntries(u.searchParams.entries())));}
     if(req.method==='GET'&&p[3]==='recipients'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listNotificationRecipientCatalog01416(scope));}
+    if(p[3]==='preferences'&&p.length===4){if(req.method==='GET')return sendJson(res,200,await getNotificationPreferences01417(scope,session.userId));if(req.method==='PUT'){const body=await readJson(req,{limit:32768});if(String(body?.target||'user')==='store')assertWriteRole(scope);return sendJson(res,200,await saveNotificationPreferences01417(scope,body,session.userId));}}
+    if(req.method==='GET'&&p[3]==='preferences'&&p[4]==='stats'&&p.length===5)return sendJson(res,200,await notificationPreferenceQueueStats01417(scope));
     if(req.method==='POST'&&p[3]==='deliveries'&&p[4]&&p[5]==='retry'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await retryNotificationDelivery01409(scope,p[4]));}
     if(p[3]==='rules'){
       const ruleId=p[4]||'';
@@ -313,5 +316,5 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
 const server=http.createServer((req,res)=>{const rid=requestId(req);res.setHeader('x-st-request-id',rid);attachHttpTrafficMeter01194(req,res);runTrafficContext01201({requestId:rid,method:req.method,pathname:new URL(req.url||'/','http://localhost').pathname},()=>route(req,res,rid)).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||rid});}else res.end();});});
-server.listen(config.port,config.host,()=>{console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`);startSupplierSyncScheduler01399();});
-for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>{stopSupplierSyncScheduler01399();server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}});});
+server.listen(config.port,config.host,()=>{console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`);startSupplierSyncScheduler01399();startNotificationPreferencesScheduler01417({enabled:config.notificationPreferencesSchedulerEnabled,pollSeconds:config.notificationPreferencesPollSeconds,maxJobs:config.notificationPreferencesMaxJobs});});
+for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>{stopSupplierSyncScheduler01399();stopNotificationPreferencesScheduler01417();server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}});});
