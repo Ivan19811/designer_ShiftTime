@@ -1,0 +1,10 @@
+BEGIN;
+ALTER TABLE shifttime_ai_assistant_action_runs ADD COLUMN IF NOT EXISTS plan_id text NOT NULL DEFAULT '';
+ALTER TABLE shifttime_ai_assistant_action_runs ADD COLUMN IF NOT EXISTS step_id text NOT NULL DEFAULT '';
+ALTER TABLE shifttime_ai_assistant_action_runs ADD COLUMN IF NOT EXISTS sequence_no integer NOT NULL DEFAULT 0;
+ALTER TABLE shifttime_ai_assistant_action_runs ADD COLUMN IF NOT EXISTS depends_on jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE shifttime_ai_assistant_action_runs ADD COLUMN IF NOT EXISTS execution_meta jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE shifttime_ai_assistant_action_runs DROP CONSTRAINT IF EXISTS shifttime_ai_assistant_action_runs_status_check;
+ALTER TABLE shifttime_ai_assistant_action_runs ADD CONSTRAINT shifttime_ai_assistant_action_runs_status_check CHECK (status IN ('planned','approved','running','completed','failed','cancelled','skipped','undone'));
+CREATE INDEX IF NOT EXISTS idx_ai_assistant_actions_plan_01422 ON shifttime_ai_assistant_action_runs(store_id,plan_id,sequence_no,created_at);
+COMMIT;
