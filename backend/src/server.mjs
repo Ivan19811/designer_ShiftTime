@@ -37,6 +37,7 @@ import {getPublicAiConsultantBootstrap01414,queryPublicAiConsultant01414,getPubl
 import {listAiConsultantSalesRules01415,createAiConsultantSalesRule01415,updateAiConsultantSalesRule01415,deleteAiConsultantSalesRule01415} from './ai-consultant-sales-rules-01415.mjs';
 import {acceptPublicAiConsultantOffer01416,redeemPublicAiConsultantOffer01416} from './ai-consultant-offers-01416.mjs';
 import {getAiConsultantLlmStatus01417} from './ai-consultant-llm-01417.mjs';
+import {getAiAssistantBootstrap01420,saveAiAssistantSettings01420,chatAiAssistant01420} from './ai-assistant-service-01420.mjs';
 import {listNotificationRules01408,createNotificationRule01408,updateNotificationRule01408,deleteNotificationRule01408,duplicateNotificationRule01408} from './notification-rule-engine-01408.mjs';
 import {getNotificationTransportStatus01409} from './notification-transports-01409.mjs';
 import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotificationTransportTest01409} from './notification-delivery-01409.mjs';
@@ -141,6 +142,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
     if(req.method==='POST'&&['orders','messages','payments','sites','traffic'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
     return sendJson(res,404,{error:'NOTIFICATION_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
+  }
+
+  if(p[2]==='ai-assistant'){
+    if(req.method==='GET'&&p[3]==='bootstrap'&&p.length===4)return sendJson(res,200,{...(await getAiAssistantBootstrap01420(scope,session.userId)),requestId:rid});
+    if(req.method==='PUT'&&p[3]==='settings'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,{...(await saveAiAssistantSettings01420(scope,await readJson(req,{limit:32768}),session.userId)),requestId:rid});}
+    if(req.method==='POST'&&p[3]==='chat'&&p.length===4){const body=await readJson(req,{limit:64*1024});return sendJson(res,200,{...(await chatAiAssistant01420(scope,body,session.userId)),requestId:rid});}
+    return sendJson(res,404,{error:'AI_ASSISTANT_ROUTE_NOT_FOUND_01420',stage:'01420',requestId:rid});
   }
   if(p[2]==='ai-consultant'){
     if(p[3]==='settings'){
