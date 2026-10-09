@@ -77,7 +77,7 @@ export const config=Object.freeze({
   aiConsultantLlmModel:String(process.env.AI_CONSULTANT_LLM_MODEL||'gpt-6-luna').trim()||'gpt-6-luna',
   aiConsultantLlmTimeoutMs:int(process.env.AI_CONSULTANT_LLM_TIMEOUT_MS,15000,2000,60000),
   aiConsultantLlmMaxOutputTokens:int(process.env.AI_CONSULTANT_LLM_MAX_OUTPUT_TOKENS,500,64,2000),
-  aiAssistantLlmMaxOutputTokens:int(process.env.AI_ASSISTANT_LLM_MAX_OUTPUT_TOKENS,1200,256,2400),
+  aiAssistantLlmMaxOutputTokens:int(process.env.AI_ASSISTANT_LLM_MAX_OUTPUT_TOKENS,3600,256,5000),
   bootstrapOwnerEnabled:bool(process.env.BOOTSTRAP_OWNER_ENABLED,false),
   bootstrapOwnerEmail:String(process.env.BOOTSTRAP_OWNER_EMAIL||'').trim(),
   bootstrapOwnerName:String(process.env.BOOTSTRAP_OWNER_NAME||'ShiftTime Owner').trim(),
