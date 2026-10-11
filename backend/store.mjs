@@ -1,6 +1,6 @@
 import {DatabaseSync} from 'node:sqlite';
 import {randomUUID} from 'node:crypto';
-import {getTemplate,getCategory,CONNECTIVITY} from '../src/device-catalog.mjs';
+import {getTemplate,getCategory,CONNECTIVITY,DEVICE_TEMPLATES,SUPPORT_REFERENCES} from '../src/device-catalog.mjs';
 import {defaultLayout} from './schema.mjs';
 export {defaultLayout};
 import {mkdirSync} from 'node:fs';import {dirname} from 'node:path';
@@ -37,8 +37,28 @@ export class IotDb{
    id TEXT PRIMARY KEY, template_id TEXT, category_id TEXT NOT NULL, name TEXT NOT NULL,
    protocol TEXT NOT NULL, driver_id TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
    CREATE INDEX IF NOT EXISTS idx_iot_devices_category ON devices(category_id,created_at);`);
+  this.db.exec(`CREATE TABLE IF NOT EXISTS catalog_submissions (id TEXT PRIMARY KEY, kind TEXT NOT NULL, payload TEXT NOT NULL, status TEXT NOT NULL, submitted_at TEXT NOT NULL, reviewed_at TEXT);
+  CREATE INDEX IF NOT EXISTS idx_iot_submissions_status ON catalog_submissions(status,submitted_at);
+  CREATE TABLE IF NOT EXISTS catalog_assets (id TEXT PRIMARY KEY, model_id TEXT NOT NULL, folder TEXT NOT NULL, source_url TEXT, image_url TEXT, license_status TEXT NOT NULL, rights_note TEXT, approved INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL);`);
+  this.seedAssetSources();
   const exists=this.db.prepare('SELECT id FROM settings WHERE id=?').get('studio');if(!exists)this.saveLayout(defaultLayout());
  }
+ seedAssetSources(){
+  const insert=this.db.prepare(`INSERT OR IGNORE INTO catalog_assets (id,model_id,folder,source_url,image_url,license_status,rights_note,approved,updated_at) VALUES (?,?,?,?,?,?,?,?,?)`);
+  for(const m of DEVICE_TEMPLATES){if(m.photoUrl&&m.sourceUrl)insert.run('ref:'+m.id,m.id,'Apps/Photos/IoT/catalog',m.sourceUrl,m.photoUrl,'permission-required','Source reference; NOT an owned or sublicensed photo',0,now());}
+ }
+ catalog(){return {models:DEVICE_TEMPLATES,drivers:SUPPORT_REFERENCES,approved:this.db.prepare("SELECT id,kind,payload,reviewed_at AS reviewedAt FROM catalog_submissions WHERE status='approved' ORDER BY reviewed_at DESC").all().map(r=>({...r,payload:JSON.parse(r.payload)})),photoReferences:this.db.prepare('SELECT id,model_id AS modelId,folder,source_url AS sourceUrl,image_url AS imageUrl,license_status AS licenseStatus,approved FROM catalog_assets ORDER BY model_id').all()};}
+ submitCatalog(input){
+  if(!input||!['model','driver'].includes(input.kind))throw Error('INVALID_CATALOG_SUBMISSION');
+  const name=String(input.name||'').trim();const sourceUrl=String(input.sourceUrl||'').trim();const note=String(input.note||'').trim();
+  if(name.length<3||name.length>100||note.length>600||sourceUrl.length>500)throw Error('INVALID_CATALOG_SUBMISSION');
+  if(sourceUrl&&!/^https:\/\/[^\s]+$/i.test(sourceUrl))throw Error('INVALID_CATALOG_SUBMISSION');
+  if(this.db.prepare("SELECT COUNT(*) AS c FROM catalog_submissions WHERE status='pending'").get().c>1000)throw Error('SUBMISSION_LIMIT');
+  const id=randomUUID();this.db.prepare('INSERT INTO catalog_submissions(id,kind,payload,status,submitted_at) VALUES(?,?,?,?,?)').run(id,input.kind,JSON.stringify({name,sourceUrl,note}), 'pending',now());
+  return {id,status:'pending'};
+ }
+ listSubmissions(){return this.db.prepare('SELECT id,kind,payload,status,submitted_at AS submittedAt,reviewed_at AS reviewedAt FROM catalog_submissions ORDER BY submitted_at DESC').all().map(r=>({...r,payload:JSON.parse(r.payload)}));}
+ reviewSubmission(id,status){if(!['approved','rejected'].includes(status))throw Error('INVALID_MODERATION_STATUS');const r=this.db.prepare("UPDATE catalog_submissions SET status=?,reviewed_at=? WHERE id=? AND status='pending'").run(status,now(),id);if(!r.changes)throw Error('SUBMISSION_NOT_FOUND');return {id,status};}
  getLayout(){return JSON.parse(this.db.prepare('SELECT json FROM settings WHERE id=?').get('studio').json);}
  saveLayout(value){const layout=validateLayout(value);this.db.prepare(`INSERT INTO settings (id,json,updated_at) VALUES(?,?,?)
  ON CONFLICT(id) DO UPDATE SET json=excluded.json,updated_at=excluded.updated_at`).run('studio',JSON.stringify(layout),now());return layout;}
