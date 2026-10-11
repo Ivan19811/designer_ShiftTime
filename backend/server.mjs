@@ -19,11 +19,17 @@ export function createIotServer({dbFile=resolve(root,'backend/data/iot-studio.sq
     if(req.method==='GET'&&url.pathname==='/api/health')return j(res,200,{ok:true,module:'iot-studio',db:'sqlite',isolated:true});
     if(req.method==='GET'&&url.pathname==='/api/layout')return j(res,200,{layout:store.getLayout()});
     if(req.method==='GET'&&url.pathname==='/api/history')return j(res,200,{history:store.getHistory(Number(url.searchParams.get('limit'))||160)});
-    if(req.method!=='PUT'&&req.method!=='POST')return j(res,405,{error:'METHOD_NOT_ALLOWED'});
-    if(req.headers['x-iot-studio']!=='01443'||!String(req.headers['content-type']||'').startsWith('application/json'))return j(res,403,{error:'WRITE_GUARD'});
-    const body=await readJson(req);
+    if(req.method==='GET'&&url.pathname==='/api/devices')return j(res,200,{devices:store.getDevices()});
+    if(!['PUT','POST','PATCH','DELETE'].includes(req.method))return j(res,405,{error:'METHOD_NOT_ALLOWED'});
+    if(req.headers['x-iot-studio']!=='01443')return j(res,403,{error:'WRITE_GUARD'});
+    if(req.method!=='DELETE'&&!String(req.headers['content-type']||'').startsWith('application/json'))return j(res,403,{error:'WRITE_GUARD'});
+    const body=req.method==='DELETE'?null:await readJson(req);
     if(req.method==='PUT'&&url.pathname==='/api/layout')return j(res,200,{layout:store.saveLayout(body)});
     if(req.method==='POST'&&url.pathname==='/api/reading')return j(res,201,store.appendReading(body));
+    if(req.method==='POST'&&url.pathname==='/api/devices')return j(res,201,{device:store.addDevice(body)});
+    const match=url.pathname.match(/^\/api\/devices\/([a-f0-9-]{36})$/);
+    if(match&&req.method==='PATCH')return j(res,200,{device:store.renameDevice(match[1],body?.name)});
+    if(match&&req.method==='DELETE')return j(res,200,store.removeDevice(match[1]));
     return j(res,404,{error:'NOT_FOUND'});
    }
    if(req.method!=='GET'&&req.method!=='HEAD')return j(res,405,{error:'METHOD_NOT_ALLOWED'});
@@ -34,7 +40,7 @@ export function createIotServer({dbFile=resolve(root,'backend/data/iot-studio.sq
    const ext=extname(target);if(!(ext in mimetypes))return j(res,415,{error:'UNSUPPORTED_FILE'});
    res.writeHead(200,{'Content-Type':mimetypes[ext],'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin'});
    if(req.method==='HEAD')return res.end();res.end(await readFile(target));
-  }catch(e){const errors={INVALID_LAYOUT:400,INVALID_WIDGETS:400,INVALID_READING:400,INVALID_READING_SOURCE:400,INVALID_CELLS:400,INVALID_JSON:400,INVALID_PATH:400};
+  }catch(e){const errors={INVALID_LAYOUT:400,INVALID_WIDGETS:400,INVALID_READING:400,INVALID_READING_SOURCE:400,INVALID_CELLS:400,INVALID_JSON:400,INVALID_PATH:400,INVALID_DEVICE:400,INVALID_TEMPLATE:400,INVALID_CATEGORY:400,INVALID_PROTOCOL:400,INVALID_DEVICE_NAME:400,DEVICE_LIMIT:409,DEVICE_NOT_FOUND:404};
    if(e.code==='ENOENT')return j(res,404,{error:'NOT_FOUND'});
    j(res,errors[e.message]||500,{error:errors[e.message]?e.message:'SERVER_ERROR'});}
  });
