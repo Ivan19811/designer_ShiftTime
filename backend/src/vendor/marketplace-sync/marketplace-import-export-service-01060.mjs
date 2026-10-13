@@ -9,6 +9,7 @@ import { buildMarketplaceImportDiff01390 } from './marketplace-import-diff-01390
 import { generateMarketplaceCatalogExport01391 } from './marketplace-catalog-export-01391.mjs';
 import { normalizeImportProfile01392, getTransferHistory01392, prependTransferHistory01392, createTransferHistoryEntry01392, markImportProfileUsed01392 } from './marketplace-import-presets-history-01392.mjs';
 import { rollbackCopiedImportAssets01396, summarizeMediaCopyPlan01396 } from './marketplace-remote-image-copy-01396.mjs';
+import {normalizeCatalogRole01472} from './marketplace-catalog-role-01472.mjs';
 
 const BASE_FIELDS=Object.freeze([
   {id:'id',path:'product.id',label:'ID товару',aliases:['id','product id','productid','ід','ід товару','id товара']},
@@ -25,6 +26,7 @@ const BASE_FIELDS=Object.freeze([
   {id:'availability',path:'product.availability',label:'Наявність',aliases:['product availability','наявність товару','availability','наявність','доступність','наличие','stock status','available','@available']},
   {id:'shortDescription',path:'product.shortDescription',label:'Короткий опис',aliases:['short description','shortdescription','короткий опис','короткое описание','анонс','summary']},
   {id:'description',path:'product.description',label:'Повний опис',aliases:['description','опис','опис товару','описание','full description','детальний опис']},
+  {id:'catalogRole01472',path:'product.catalogRole01472',labelKey:'fields.catalogRole01472',aliases:['аксесуари категорій','аксесуари категорії','accessory category marker','тип позиції','тип товару або послуги']},
   {id:'categories',path:'product.categoryIds',label:'Категорії / шлях категорії',aliases:['category','categories','категорія','категорії','категория','категории','category name','category path','група категорій','розділ','раздел']},
   {id:'images',path:'product.mediaIds',labelKey:'fields.productImages',aliases:['image','images','image url','photo','photos','picture','pictures','фото','зображення','картинка','картинки','фотографії','picture url']}
 ]);
@@ -96,6 +98,7 @@ function rowToCanonical(row,mapping){
   out.name=str(out.name);out.sku=str(out.sku);out.id=str(out.id);out.productGroup=str(out.productGroup);out.slug=str(out.slug);out.brand=str(out.brand);out.shortDescription=str(out.shortDescription);out.description=str(out.description);out.currency=(str(out.currency)||'UAH').toUpperCase();
   if(out._mapped.has('price'))out.price=num(out.price);if(out._mapped.has('oldPrice'))out.oldPrice=num(out.oldPrice);if(out._mapped.has('stock'))out.stock=num(out.stock);
   if(out._mapped.has('status'))out.status=status(out.status);if(out._mapped.has('availability'))out.availability=availability(out.availability,out.stock);else if(out._mapped.has('stock'))out.availability=availability('',out.stock);
+  if(out._mapped.has('catalogRole01472'))out.catalogRole01472=normalizeCatalogRole01472(out.catalogRole01472);
   if(out._mapped.has('categories'))out.categories=splitList(out.categories);if(out._mapped.has('images'))out.images=[...new Set(arr(out.images).map(str).filter(Boolean))];
   out.variant.sku=str(out.variant.sku);if(out.variant._mapped.has('variant:price'))out.variant.price=num(out.variant.price);if(out.variant._mapped.has('variant:oldPrice'))out.variant.oldPrice=num(out.variant.oldPrice);if(out.variant._mapped.has('variant:stock'))out.variant.stock=num(out.variant.stock);
   if(out.variant._mapped.has('variant:status'))out.variant.status=status(out.variant.status);if(out.variant._mapped.has('variant:availability'))out.variant.availability=availability(out.variant.availability,out.variant.stock);else if(out.variant._mapped.has('variant:stock'))out.variant.availability=availability('',out.variant.stock);if(out.variant._mapped.has('variant:images'))out.variant.images=[...new Set(arr(out.variant.images).map(str).filter(Boolean))];
@@ -120,6 +123,7 @@ function validateRows(rows,mapping,state,{updateKey='sku',existingPolicy='update
     const variantStatusRaw=sourceValuesForTarget01390(rawRow,mapping,'variant:status').find(v=>str(v));if(str(variantStatusRaw)&&!knownStatus01390(variantStatusRaw))errors.push({row:i,line,field:'variant:status',code:'invalidVariantStatus',vars:{value:str(variantStatusRaw)}});
     const availabilityRaw=sourceValuesForTarget01390(rawRow,mapping,'availability').find(v=>str(v));if(str(availabilityRaw)&&!knownAvailability01390(availabilityRaw))errors.push({row:i,line,field:'availability',code:'invalidAvailability',vars:{value:str(availabilityRaw)}});
     const variantAvailabilityRaw=sourceValuesForTarget01390(rawRow,mapping,'variant:availability').find(v=>str(v));if(str(variantAvailabilityRaw)&&!knownAvailability01390(variantAvailabilityRaw))errors.push({row:i,line,field:'variant:availability',code:'invalidVariantAvailability',vars:{value:str(variantAvailabilityRaw)}});
+    if(r._mapped.has('catalogRole01472')&&!r.catalogRole01472)errors.push({row:i,line,field:'catalogRole01472',code:'invalidCatalogRole01472',vars:{value:str(sourceValuesForTarget01390(rawRow,mapping,'catalogRole01472')[0])}});
     if(r._mapped.has('categories')&&!createMissingCategories)for(const path of arr(r.categories))if(!categoryPathExists01390(state,path))errors.push({row:i,line,field:'categories',code:'categoryMissing',vars:{value:str(path)}});
     if(r._mapped.has('images'))for(const value of arr(r.images)){const check=validateMarketplaceMediaReference01389(value);if(!check.ok)errors.push({row:i,line,field:'images',code:'invalidProductMediaReference',vars:{value:str(value)}});}
     if(r.variant._mapped.has('variant:images'))for(const value of arr(r.variant.images)){const check=validateMarketplaceMediaReference01389(value);if(!check.ok)errors.push({row:i,line,field:'variant:images',code:'invalidVariantMediaReference',vars:{value:str(value)}});}
@@ -150,7 +154,7 @@ function ensureCategoryPath(snapshot,path,{createMissing=true}={}){
 function resolveCategories(snapshot,values,opts){const ids=[];for(const value of arr(values)){const id=ensureCategoryPath(snapshot,value,opts);if(id&&!ids.includes(id))ids.push(id);}return ids;}
 async function applyMappedPatch(existing,r,snapshot,opts,mediaContext={}){
   const patch={};const mapped=r._mapped;
-  for(const key of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description'])if(mapped.has(key))patch[key]=r[key];
+  for(const key of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description','catalogRole01472'])if(mapped.has(key))patch[key]=r[key];
   if(mapped.has('categories'))patch.categoryIds=resolveCategories(snapshot,r.categories,{createMissing:opts.createMissingCategories!==false});
   const mediaProduct={...(existing||{}),...patch,name:patch.name||r.name||existing?.name||'',categoryIds:patch.categoryIds??existing?.categoryIds??[]};
   if(mapped.has('images')){patch.mediaIds=await resolveCanonicalImportMedia01389(mediaContext.store,snapshot,r.images,{product:mediaProduct,alt:mediaProduct.name,role:'product',sourceName:mediaContext.sourceName,stats:mediaContext.stats,copyExternal:!!mediaContext.copyExternal,uploadedAssets:mediaContext.uploadedAssets});patch.primaryMediaId=patch.mediaIds[0]||'';}
@@ -188,7 +192,7 @@ function buildVariantRowsPlan(rows,mapping,state,options){
   for(const group of groups){
     group.action=group.existing?'update':'create';if(group.action==='create')productCreate++;else productUpdate++;
     const first=group.rows[0]?.row,baseName=norm(first?.name),baseSku=norm(first?.sku),baseGroup=norm(first?.productGroup);
-    for(const item of group.rows){if(norm(item.row.name)!==baseName||norm(item.row.sku)!==baseSku||norm(item.row.productGroup)!==baseGroup)validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupProductFieldsConflict'});}
+    for(const item of group.rows){if(first?._mapped?.has('catalogRole01472')&&item.row.catalogRole01472!==first.catalogRole01472)validation.errors.push({row:item.index,line:item.line,field:'catalogRole01472',code:'conflictingCatalogRole01472'});if(norm(item.row.name)!==baseName||norm(item.row.sku)!==baseSku||norm(item.row.productGroup)!==baseGroup)validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupProductFieldsConflict'});}
     const productId=group.existing?.id||'';const productVariants=productId?(variantsByProduct.get(productId)||[]):[];const byCombo=new Map(productVariants.map(v=>[comboKey(v.options),v]));
     for(const item of group.rows){const r=item.row;let existingVariant=variantBySku.get(norm(r.variant.sku))||null;const combo=comboKey(r.variant.options);if(existingVariant&&productId&&existingVariant.productId!==productId){validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'variantSkuOwnedByOtherProduct'});existingVariant=null;}if(!existingVariant&&combo&&productId)existingVariant=byCombo.get(combo)||null;
       let action=existingVariant?(opts.existingPolicy==='update'?'update':'skip'):'create';if(validation.errors.some(e=>e.row===item.index))action='error';if(action==='create')variantCreate++;else if(action==='update')variantUpdate++;else if(action==='skip')variantSkip++;

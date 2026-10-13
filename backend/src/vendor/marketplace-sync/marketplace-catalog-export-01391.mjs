@@ -2,6 +2,7 @@
 // Marketplace snapshot -> flat transport rows -> CSV / XLSX / JSON / XML.
 // One row per Variant when variants exist; products without variants keep one product row.
 
+import {effectiveProductRole01472,priceListMarker01472} from './marketplace-catalog-role-01472.mjs';
 const arr=v=>Array.isArray(v)?v:[];
 const str=v=>String(v??'').trim();
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
@@ -50,6 +51,7 @@ function baseColumns01391(labels){
     ['shortDescription',l('shortDescription','Short Description')],
     ['description',l('description','Description')],
     ['categories',l('categories','Categories')],
+    ['catalogRole01472',l('catalogRole01472','Category Accessories Marker')],
     ['productImages',l('productImages','Product Images')],
     ['primaryProductImage',l('primaryProductImage','Primary Product Image')]
   ];
@@ -95,7 +97,7 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
     const base={
       productId:str(product.id),productSku:str(product.sku),productName:str(product.name),productStatus:str(product.status),brand:str(product.brand),
       productPrice:num(product.price),productOldPrice:num(product.oldPrice),currency:str(product.currency)||str(state?.settings?.currency)||'UAH',productStock:num(product.stock),productAvailability:str(product.availability),
-      slug:str(product.slug),shortDescription:str(product.shortDescription),description:str(product.description),categories:categoryPaths.join(' | '),productImages:productMedia.join(' | '),primaryProductImage:productMedia[0]||''
+      slug:str(product.slug),shortDescription:str(product.shortDescription),description:str(product.description),categories:categoryPaths.join(' | '),catalogRole01472:priceListMarker01472(effectiveProductRole01472(product,categories)),productImages:productMedia.join(' | '),primaryProductImage:productMedia[0]||''
     };
     for(const attribute of productAttributes)base[`attribute:${attribute.key}`]=product?.attributes?.[attribute.key]??'';
     const variants=arr(variantsByProduct.get(product.id));if(variants.length)productsWithVariants++;

@@ -41,7 +41,7 @@ function summarize(items){
 }
 function productDiff(existing,row,state,{line=0,action='update',existingId=''}={}){
   const changes=[],mapped=row?._mapped;
-  for(const field of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description'])pushScalar(changes,mapped,field,existing?.[field],row?.[field],'product');
+  for(const field of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description','catalogRole01472'])pushScalar(changes,mapped,field,existing?.[field],row?.[field],'product');
   for(const target of mapped||[]){if(!String(target).startsWith('attribute:'))continue;const key=String(target).slice(10),before=obj(existing?.attributes)[key]??'',after=obj(row?.attributes)[key]??'';if(!equalScalar(before,after))changes.push(valueChange(`product.attribute.${key}`,before,after,'attribute',{attributeKey:key}));}
   if(mapped?.has('categories')){const before=productCategoryPaths(state,existing),after=uniqueSorted(row?.categories);if(!equalList(before,after))changes.push(valueChange('product.categories',before,after,'categories'));}
   if(mapped?.has('images')){const before=entityMediaUrls(state,existing),after=desiredMediaUrls(row?.images);if(!equalList(before,after))changes.push(valueChange('product.media',before,after,'media'));}
