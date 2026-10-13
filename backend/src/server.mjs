@@ -52,7 +52,7 @@ import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema0
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
-import {listBuilderSites01170,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
+import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
 import {listTrafficHistogram01474,getTrafficHistogramDetails01474} from './traffic-histogram-01474.mjs';
@@ -212,11 +212,20 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
-  if(p[2]==='sites'&&req.method==='GET'&&p.length===3)return sendJson(res,200,{stage:'01170',sites:await listBuilderSites01170(scope)});
+  if(p[2]==='sites'&&req.method==='GET'&&p.length===3){
+    const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
+    return sendJson(res,200,{stage:'01476',sites:await (summary?listBuilderSiteSummaries01476(scope):listBuilderSites01170(scope))});
+  }
   if(p[2]==='sites'&&p[3]&&req.method==='GET'&&p.length===4)return sendJson(res,200,{stage:'01170',site:await getBuilderSite01170(scope,p[3])});
   if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertWriteRole(scope);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}))});}
   if(p[2]==='sites'&&p[3]&&p[4]==='metadata'&&req.method==='PATCH'&&p.length===5){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',site:await saveBuilderSiteMetadata01231(scope,p[3],await readJson(req,{limit:1024*1024}))});}
-  if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,{stage:'01170',site:await saveBuilderSite01170(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024}))});}
+  if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){
+    assertWriteRole(scope);
+    const site=await saveBuilderSite01170(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024}));
+    const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
+    if(summary){const {project,...metadata}=site;return sendJson(res,200,{stage:'01476',site:metadata});}
+    return sendJson(res,200,{stage:'01170',site});
+  }
   if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertAdminRole(scope);return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
   if(p[2]==='admin'){
     assertAdminView01087(scope);

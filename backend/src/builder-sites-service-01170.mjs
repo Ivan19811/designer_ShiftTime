@@ -12,6 +12,12 @@ function mapRow(r){if(!r)return null;return {
   netlifySiteId:r.netlify_site_id||'',netlifyUrl:r.netlify_ssl_url||r.netlify_url||'',netlifySiteName:r.netlify_site_name||'',lastDeployState:r.last_deploy_state||'not-published',
 };}
 
+export function summarizeBuilderSite01476(row){
+  if(!row)return null;
+  const {project,...metadata}=row;
+  return metadata;
+}
+
 export function createBuilderSitesRepository01170(){
   const select=`SELECT s.*,p.schema_version,p.revision,p.project_json,p.updated_at project_updated_at,
     pub.netlify_site_id,pub.netlify_site_name,pub.netlify_url,pub.netlify_ssl_url,pub.last_deploy_state
@@ -20,6 +26,17 @@ export function createBuilderSitesRepository01170(){
     LEFT JOIN shifttime_published_sites pub ON pub.account_id=s.account_id AND pub.workspace_id=s.workspace_id AND pub.store_id=s.store_id AND pub.builder_site_id=s.id`;
   return {
     async list(scope){return withClient(async c=>{const q=await c.query(`${select} WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.status<>'archived' ORDER BY s.updated_at DESC,s.created_at DESC`,[scope.accountId,scope.workspaceId,scope.storeId]);return q.rows.map(mapRow);});},
+    async listSummary(scope){return withClient(async c=>{
+      const q=await c.query(`SELECT s.id,s.name,s.slug,s.description,s.status,s.owner_user_id,s.created_at,s.updated_at,
+        p.schema_version,p.revision,
+        pub.netlify_site_id,pub.netlify_site_name,pub.netlify_url,pub.netlify_ssl_url,pub.last_deploy_state
+        FROM shifttime_builder_sites s
+        LEFT JOIN shifttime_builder_site_projects p ON p.site_id=s.id
+        LEFT JOIN shifttime_published_sites pub ON pub.account_id=s.account_id AND pub.workspace_id=s.workspace_id AND pub.store_id=s.store_id AND pub.builder_site_id=s.id
+        WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.status<>'archived'
+        ORDER BY s.updated_at DESC,s.created_at DESC`,[scope.accountId,scope.workspaceId,scope.storeId]);
+      return q.rows.map(r=>summarizeBuilderSite01476(mapRow(r)));
+    });},
     async get(scope,id){return withClient(async c=>{const q=await c.query(`${select} WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.id=$4 LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,id]);return mapRow(q.rows[0]);});},
     async create(scope,userId,input){const data=normalizeBuilderSiteInput01170(input);return withClient(async c=>{await c.query('BEGIN');try{
       const existing=await c.query('SELECT account_id,workspace_id,store_id FROM shifttime_builder_sites WHERE id=$1 LIMIT 1',[data.id]);
@@ -55,6 +72,7 @@ export function createBuilderSitesRepository01170(){
 const defaultRepo=createBuilderSitesRepository01170();
 const defaultService=createBuilderSitesService01170({repo:defaultRepo,netlify:createNetlifyClient01143({token:config.netlifyAuthToken,baseUrl:config.netlifyApiBaseUrl})});
 export const listBuilderSites01170=scope=>defaultService.list(scope);
+export const listBuilderSiteSummaries01476=scope=>defaultRepo.listSummary(scope);
 export const getBuilderSite01170=(scope,id)=>defaultService.get(scope,id);
 export const createBuilderSite01170=(scope,userId,input)=>defaultService.create(scope,userId,input);
 export const saveBuilderSite01170=(scope,userId,id,input)=>defaultService.save(scope,userId,id,input);
