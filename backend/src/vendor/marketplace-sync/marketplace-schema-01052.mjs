@@ -156,6 +156,7 @@ export function createMarketplaceCategory01052(input={}){
     seo: cleanObject(input.seo),
     productDetailsTemplateId: cleanString(input.productDetailsTemplateId),
     catalogRole01472: ['product','accessory','service'].includes(cleanString(input.catalogRole01472)) ? cleanString(input.catalogRole01472) : 'product',
+    accessoryMatching01480: {enabled:input.accessoryMatching01480?.enabled===true,attributeId:cleanString(input.accessoryMatching01480?.attributeId),targetProductIds:cleanIdArray(input.accessoryMatching01480?.targetProductIds)},
     leafTargetMode01253: ['products','details'].includes(cleanString(input.leafTargetMode01253)) ? cleanString(input.leafTargetMode01253) : '',
     leafTargetUrlOverride01255: cleanString(input.leafTargetUrlOverride01255),
     createdAt: cleanString(input.createdAt) || t,
