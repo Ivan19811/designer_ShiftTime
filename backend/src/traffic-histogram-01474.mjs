@@ -54,16 +54,21 @@ export async function getTrafficHistogramDetails01474(scope={},input={},options=
   const args=[scope.accountId,range.from,range.to,...(range.siteIds.length?[range.siteIds]:[])];
   const filter=siteFilter(range.siteIds);
   const where=`e.account_id=$1 AND e.occurred_at >= $2::timestamptz AND e.occurred_at < $3::timestamptz ${filter}`;
-  const [totals,routes,events]=await Promise.all([
+  const [totals,routes,events,bursts]=await Promise.all([
     query(`SELECT ${totalFields()} FROM shifttime_traffic_events e WHERE ${where}`,args),
     query(`SELECT e.route_key,e.operation,e.module,e.event_type,${totalFields()},MAX(e.occurred_at) AS last_at
       FROM shifttime_traffic_events e WHERE ${where}
       GROUP BY e.route_key,e.operation,e.module,e.event_type
-      ORDER BY SUM(e.render_billable_outbound_bytes)+SUM(CASE WHEN e.traffic_class='direct-storage' AND e.result='success' THEN e.storage_bytes ELSE 0 END) DESC LIMIT 30`,args),
+      ORDER BY SUM(e.render_billable_outbound_bytes)+SUM(CASE WHEN e.traffic_class='direct-storage' AND e.result='success' THEN e.storage_bytes ELSE 0 END) DESC`,args),
     query(`SELECT id,occurred_at,request_id,event_type,integration,module,operation,route_key,site_id,workspace_id,store_id,inbound_bytes,outbound_bytes,render_billable_outbound_bytes,storage_bytes,traffic_class,metadata,status_code,result,duration_ms
-      FROM shifttime_traffic_events e WHERE ${where} ORDER BY e.occurred_at DESC,e.id DESC LIMIT 100`,args)
+      FROM shifttime_traffic_events e WHERE ${where} ORDER BY e.occurred_at DESC,e.id DESC LIMIT 100`,args),
+    query(`SELECT route_key,operation,site_id, to_timestamp(floor(extract(epoch FROM occurred_at)/5)*5) AS burst_at,
+      COUNT(*)::text AS requests,COALESCE(SUM(render_billable_outbound_bytes),0)::text AS render_out
+      FROM shifttime_traffic_events e WHERE ${where} AND event_type='http'
+      GROUP BY 1,2,3,4 HAVING COUNT(*) >= 5 ORDER BY COUNT(*) DESC, SUM(render_billable_outbound_bytes) DESC LIMIT 50`,args)
   ]);
   return {stage:'01474',source:'postgresql-traffic-events',window:{from:range.from,to:range.to},siteIds:range.siteIds,totals:stats(totals.rows[0]||{}),
+    bursts:bursts.rows.map(row=>({routeKey:String(row.route_key||''),operation:String(row.operation||''),siteId:String(row.site_id||''),at:new Date(row.burst_at).toISOString(),requests:number(row.requests),renderOutboundBytes:number(row.render_out)})),
     routes:routes.rows.map(row=>({routeKey:String(row.route_key||''),operation:String(row.operation||''),module:String(row.module||''),eventType:String(row.event_type||''),lastAt:new Date(row.last_at).toISOString(),...stats(row)})),
     events:events.rows.map(normalizeTrafficEventRow01194),limit:100,eventsTruncated:number(totals.rows[0]?.requests)>events.rows.length};
 }
