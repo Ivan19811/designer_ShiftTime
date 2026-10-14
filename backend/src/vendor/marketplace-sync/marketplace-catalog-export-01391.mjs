@@ -3,6 +3,8 @@
 // One row per Variant when variants exist; products without variants keep one product row.
 
 import {effectiveProductRole01472,priceListMarker01472} from './marketplace-catalog-role-01472.mjs';
+import {serializeAccessoryPriceRefs01485,explicitAccessoryPriceRefs01485} from './marketplace-accessory-price-01485.mjs';
+import {resolveAccessoryTargets01480,resolveAccessoryVariantTargets01481} from './marketplace-accessory-matching-01480.mjs';
 const arr=v=>Array.isArray(v)?v:[];
 const str=v=>String(v??'').trim();
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
@@ -52,6 +54,7 @@ function baseColumns01391(labels){
     ['description',l('description','Description')],
     ['categories',l('categories','Categories')],
     ['catalogRole01472',l('catalogRole01472','Category Accessories Marker')],
+    ['accessoryProducts01485',l('accessoryProducts01485','Accessory Products')],
     ['productImages',l('productImages','Product Images')],
     ['primaryProductImage',l('primaryProductImage','Primary Product Image')]
   ];
@@ -113,6 +116,9 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
         Object.assign(row,{variantId:'',variantSku:'',variantStatus:'',variantPrice:'',variantOldPrice:'',variantStock:'',variantAvailability:'',variantImages:'',primaryVariantImage:'',primaryVariant:'',variantSortOrder:'',variantInheritProductMedia:'',variantMediaSourceMode:''});
         for(const attribute of variantAttributes)row[`variantOption:${attribute.key}`]='';
       }
+      // 01486: XLSX exports the SAME stored ledger used by the storefront.
+      // Never infer additional matches from category rules at export time.
+      row.accessoryProducts01485=serializeAccessoryPriceRefs01485(state,explicitAccessoryPriceRefs01485(product,variant)||[]);
       rows.push(row);
     }
   }

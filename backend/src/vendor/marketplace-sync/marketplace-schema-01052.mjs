@@ -208,6 +208,7 @@ export function createMarketplaceVariant01052(input={}){
     sku: cleanString(input.sku),
     status: cleanStatus(input.status,['draft','active','archived'],'active'),
     options: cleanObject(input.options),
+    accessoryTargets01485: {mode:input.accessoryTargets01485?.mode==='explicit'?'explicit':'auto',refs:cleanArray(input.accessoryTargets01485?.refs).map(x=>({productId:cleanString(x?.productId),variantId:cleanString(x?.variantId),value:cleanString(x?.value)})).filter(x=>x.productId),generatedByRule01486:input.accessoryTargets01485?.generatedByRule01486===true,generatedRefs01486:cleanArray(input.accessoryTargets01485?.generatedRefs01486).map(x=>({productId:cleanString(x?.productId),variantId:cleanString(x?.variantId),value:cleanString(x?.value)})).filter(x=>x.productId)},
     price: cleanNumber(input.price, 0),
     oldPrice: cleanNumber(input.oldPrice, 0),
     stock: cleanNumber(input.stock, 0),
