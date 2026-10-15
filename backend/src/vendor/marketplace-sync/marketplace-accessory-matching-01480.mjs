@@ -14,7 +14,9 @@ export function productAccessoryRuleCategories01480(state,product){
     let current=categories.get(str(id)),guard=0;
     while(current&&guard++<40&&!seen.has(current.id)){
       seen.add(current.id);
-      const rule=normalizeCategoryAccessoryRule01480(current.accessoryMatching01480);
+      const serviceRole=effectiveProductRole01472(product,state?.categories)==='service';
+      const selectedConfig=serviceRole?(current.serviceMatching01487?.enabled?current.serviceMatching01487:(current.catalogRole01472==='service'&&current.accessoryMatching01480?.enabled?current.accessoryMatching01480:current.serviceMatching01487)):current.accessoryMatching01480;
+      const rule=normalizeCategoryAccessoryRule01480(selectedConfig);
       if(rule.enabled&&rule.targetProductIds.length&&rule.attributeId)found.push({category:current,rule});
       current=categories.get(str(current.parentId));
     }

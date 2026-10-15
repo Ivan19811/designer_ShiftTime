@@ -1,3 +1,4 @@
+import {serializeAdditionalServices01487,buildAdditionalServiceIndex01487} from './marketplace-additional-services-01487.mjs';
 // 01391 · Canonical Marketplace catalog export model.
 // Marketplace snapshot -> flat transport rows -> CSV / XLSX / JSON / XML.
 // One row per Variant when variants exist; products without variants keep one product row.
@@ -54,6 +55,7 @@ function baseColumns01391(labels){
     ['description',l('description','Description')],
     ['categories',l('categories','Categories')],
     ['catalogRole01472',l('catalogRole01472','Category Accessories Marker')],
+    ['additionalServices01487',l('additionalServices01487','Additional Services')],
     ['accessoryProducts01485',l('accessoryProducts01485','Accessory Products')],
     ['productImages',l('productImages','Product Images')],
     ['primaryProductImage',l('primaryProductImage','Primary Product Image')]
@@ -85,6 +87,7 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
   const unknownProductKeys=uniq(arr(state?.products).flatMap(p=>Object.keys(p?.attributes||{})).filter(key=>!knownKeys.has(key))).map((key,index)=>({id:`export_attr_${key}`,key,name:key,type:'text',unit:'',variantOption:false,sortOrder:100000+index}));
   const unknownVariantKeys=uniq(arr(state?.variants).flatMap(v=>Object.keys(v?.options||{})).filter(key=>!knownKeys.has(key))).map((key,index)=>({id:`export_var_attr_${key}`,key,name:key,type:'text',unit:'',variantOption:true,sortOrder:100000+index}));
   const productAttributes=[...attributes.filter(a=>a?.variantOption!==true),...unknownProductKeys],variantAttributes=[...attributes.filter(a=>a?.variantOption===true),...unknownVariantKeys];
+  const additionalServiceIndex01487=buildAdditionalServiceIndex01487(state);
   const variantsByProduct=new Map();
   for(const variant of arr(state?.variants)){if(!variantsByProduct.has(variant.productId))variantsByProduct.set(variant.productId,[]);variantsByProduct.get(variant.productId).push(variant);}
   variantsByProduct.forEach(list=>list.sort(variantSort01391));
@@ -119,6 +122,7 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
       // 01486: XLSX exports the SAME stored ledger used by the storefront.
       // Never infer additional matches from category rules at export time.
       row.accessoryProducts01485=serializeAccessoryPriceRefs01485(state,explicitAccessoryPriceRefs01485(product,variant)||[]);
+      row.additionalServices01487=serializeAdditionalServices01487(state,product,variant,{index:additionalServiceIndex01487});
       rows.push(row);
     }
   }
