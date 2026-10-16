@@ -7,6 +7,7 @@ import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
+import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
 import {searchPublicMarketplace} from './marketplace-public-catalog-service.mjs';
@@ -380,6 +381,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[4]&&p[5]==='restore'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
     return sendJson(res,404,{error:'Import rollback route not found',stage:'01397',requestId:rid});
   }
+  if(p[3]==='category-path'&&p[4]==='resolve'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='preview'&&req.method==='POST'){return sendJson(res,200,await previewCategoryMerge01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='apply'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
   if(p[3]==='seo'){
     if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
     if(req.method==='PATCH'){assertWriteRole(scope);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}

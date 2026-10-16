@@ -63,7 +63,7 @@ function sourceValuesForTarget01390(row,mapping,target){return Object.entries(ma
 function finiteNumber01390(value){const raw=str(value);if(!raw)return false;const cleaned=raw.replace(/\s/g,'').replace(/[^0-9,.-]/g,'').replace(/,(?=\d{1,2}$)/,'.').replace(/,/g,'');return cleaned!==''&&Number.isFinite(Number(cleaned));}
 function knownStatus01390(value){const n=norm(value);return !n||['active','активний','активна','активен','опубліковано','published','archived','archive','архів','архив','архівний','draft','чернетка','черновик'].includes(n);}
 function knownAvailability01390(value){const n=norm(value);return !n||['true','false','1','0','yes','no','так','ні','нет'].includes(n)||/^(pre.?order|передзам|предзаказ|out.?of.?stock|немає|нет в наличии|відсут|in.?stock|в наявності|есть в наличии|доступ)/.test(n);}
-function categoryPathExists01390(state,path){const parts=str(path).split(/\s*>\s*|\s*\/\s*/).map(str).filter(Boolean);if(!parts.length)return true;let parentId=null;for(const part of parts){const found=arr(state?.categories).find(c=>(c.parentId??null)===(parentId??null)&&(norm(c.name)===norm(part)||norm(c.slug)===norm(part)));if(!found)return false;parentId=found.id;}return true;}
+function categoryPathExists01390(state,path){const id=str(path);if(arr(state?.categories).some(c=>c.id===id))return true;const parts=id.split(/\s*>\s*|\s*\/\s*/).map(str).filter(Boolean);if(!parts.length)return true;let parentId=null;for(const part of parts){const matches=arr(state?.categories).filter(c=>(c.parentId??null)===(parentId??null)&&(norm(c.name)===norm(part)||norm(c.slug)===norm(part)));if(matches.length!==1)return false;parentId=matches[0].id;}return true;}
 
 export function getCanonicalImportFields01060(state,options={}){
   const attributes=arr(state?.attributes).map(a=>({id:`attribute:${a.key}`,path:`product.attributes.${a.key}`,label:`Характеристика · ${a.name}${a.unit?` (${a.unit})`:''}`,aliases:[a.name,a.key,`${a.name} ${a.unit||''}`].filter(Boolean),attribute:a}));
@@ -154,8 +154,8 @@ function validateRows(rows,mapping,state,{updateKey='sku',existingPolicy='update
   return {canonicalRows:canon,errors,warnings,existingPolicy,rowMode:mode};
 }
 function ensureCategoryPath(snapshot,path,{createMissing=true}={}){
-  const parts=str(path).split(/\s*>\s*|\s*\/\s*/).map(str).filter(Boolean);if(!parts.length)return null;let parentId=null;
-  for(const part of parts){let found=snapshot.categories.find(c=>c.parentId===parentId&&(norm(c.name)===norm(part)||norm(c.slug)===norm(part)));if(!found&&createMissing){found=createMarketplaceCategory01052({name:part,slug:slugify(part),parentId,status:'active'});snapshot.categories.push(found);}if(!found)return null;parentId=found.id;}
+  const direct=str(path);if(snapshot.categories.some(c=>c.id===direct))return direct;const parts=direct.split(/\s*>\s*|\s*\/\s*/).map(str).filter(Boolean);if(!parts.length)return null;let parentId=null;
+  for(const part of parts){const matches=snapshot.categories.filter(c=>(c.parentId??null)===(parentId??null)&&(norm(c.name)===norm(part)||norm(c.slug)===norm(part)));if(matches.length>1)return null;let found=matches[0];if(!found&&createMissing){found=createMarketplaceCategory01052({name:part,slug:slugify(part),parentId,status:'active'});snapshot.categories.push(found);}if(!found)return null;parentId=found.id;}
   return parentId;
 }
 function resolveCategories(snapshot,values,opts){const ids=[];for(const value of arr(values)){const id=ensureCategoryPath(snapshot,value,opts);if(id&&!ids.includes(id))ids.push(id);}return ids;}
