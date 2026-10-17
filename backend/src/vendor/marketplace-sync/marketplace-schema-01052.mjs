@@ -105,6 +105,7 @@ export function createMarketplaceProduct01052(input={}){
   return {
     id: cleanString(input.id) || uid('prod'),
     sku: cleanString(input.sku),
+    productGroup01512: cleanString(input.productGroup01512) || cleanString(input.configuration?.import01387?.externalGroupKey),
     status: cleanStatus(input.status,['draft','active','archived'],'draft'),
     name: cleanString(input.name),
     slug: cleanString(input.slug),

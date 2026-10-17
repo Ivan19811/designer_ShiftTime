@@ -42,6 +42,7 @@ function baseColumns01391(labels){
   return [
     ['productId',l('productId','Product ID')],
     ['productSku',l('productSku','Product SKU')],
+    ['productGroup',l('productGroup','Product Group')],
     ['productName',l('productName','Product Name')],
     ['productStatus',l('productStatus','Product Status')],
     ['brand',l('brand','Brand')],
@@ -101,7 +102,7 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
   for(const product of arr(state?.products)){
     const productMedia=orderedMediaUrls01391(product,mediaMap),categoryPaths=uniq(arr(product.categoryIds).map(id=>categoryPath01391(id,categories)).filter(Boolean));
     const base={
-      productId:str(product.id),productSku:str(product.sku),productName:str(product.name),productStatus:str(product.status),brand:str(product.brand),
+      productId:str(product.id),productSku:str(product.sku),productGroup:str(product.productGroup01512)||str(product.configuration?.import01387?.externalGroupKey),productName:str(product.name),productStatus:str(product.status),brand:str(product.brand),
       productPrice:num(product.price),productOldPrice:num(product.oldPrice),currency:str(product.currency)||str(state?.settings?.currency)||'UAH',productStock:num(product.stock),productAvailability:str(product.availability),
       slug:str(product.slug),shortDescription:str(product.shortDescription),description:str(product.description),categories:categoryPaths.join(' | '),catalogRole01472:priceListMarker01472(effectiveProductRole01472(product,categories)),productImages:productMedia.join(' | '),primaryProductImage:productMedia[0]||''
     };
