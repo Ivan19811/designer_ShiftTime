@@ -177,35 +177,102 @@ async function variantPatch(existing,r,product,snapshot,mediaContext={}){
   patch.displayName01260=Object.values(patch.options).filter(Boolean).join(' · ');
   return patch;
 }
-function groupKeyForRow(r){if(r.id)return`id:${r.id}`;if(r.productGroup)return`group:${norm(r.productGroup)}`;if(r.sku)return`sku:${norm(r.sku)}`;return`name:${norm(r.name)}`;}
+// Product IDs and SKUs must preserve punctuation; fuzzy text normalization is only for names.
+function identityKey01515(value){return str(value).normalize('NFKC').toLocaleLowerCase('en-US');}
+function groupKeyForRow(r){if(r.id)return`id:${r.id}`;if(r.productGroup)return`group:${identityKey01515(r.productGroup)}`;if(r.sku)return`sku:${identityKey01515(r.sku)}`;return`name:${norm(r.name)}`;}
 function indexExistingProducts(state){
-  const products=arr(state?.products),byId=new Map(products.map(p=>[p.id,p])),bySku=new Map(products.filter(p=>str(p.sku)).map(p=>[norm(p.sku),p])),byGroup=new Map(),byName=new Map();
-  for(const p of products){const g=str(p?.productGroup01512)||str(p?.configuration?.import01387?.externalGroupKey);if(g)byGroup.set(norm(g),p);const n=norm(p.name);if(n){const list=byName.get(n)||[];list.push(p);byName.set(n,list);}}
+  const products=arr(state?.products),byId=new Map(products.map(p=>[p.id,p])),bySku=new Map(),byGroup=new Map(),byName=new Map();
+  for(const p of products){
+    if(str(p.sku)){const k=identityKey01515(p.sku),list=bySku.get(k)||[];list.push(p);bySku.set(k,list);}
+    const g=str(p?.productGroup01512)||str(p?.configuration?.import01387?.externalGroupKey);
+    if(g){const k=identityKey01515(g),list=byGroup.get(k)||[];list.push(p);byGroup.set(k,list);}
+    const n=norm(p.name);if(n){const list=byName.get(n)||[];list.push(p);byName.set(n,list);}
+  }
   return {products,byId,bySku,byGroup,byName};
 }
-function existingProductForRow(index,r){
-  if(r.id&&index.byId.has(r.id))return index.byId.get(r.id);if(r.sku&&index.bySku.has(norm(r.sku)))return index.bySku.get(norm(r.sku));if(r.productGroup){const k=norm(r.productGroup);if(index.bySku.has(k))return index.bySku.get(k);if(index.byGroup.has(k))return index.byGroup.get(k);}const names=index.byName.get(norm(r.name))||[];return names.length===1?names[0]:null;
+// 01515 · A supplied Product Group is an identity, not a hint for name-based merging.
+// Every conflict is reported before any repository mutation.
+function resolveExistingProduct01515(index,r){
+  const issues=[],group=identityKey01515(r.productGroup),parentSku=identityKey01515(r.sku),names=index.byName.get(norm(r.name))||[];
+  const byId=r.id?index.byId.get(r.id):null;
+  const grouped=group?(index.byGroup.get(group)||[]):[];
+  const byGroupSku=group?(index.bySku.get(group)||[]):[];
+  const byParentSku=parentSku?(index.bySku.get(parentSku)||[]):[];
+  const candidates=group?([...grouped,...byGroupSku]):(byParentSku);
+  const unique=[...new Map(candidates.map(p=>[p.id,p])).values()];
+  if(r.id&&!byId)issues.push('productIdNotFound01515');
+  if(unique.length>1||byParentSku.length>1)issues.push('ambiguousProductIdentity01515');
+  let existing=byId||unique[0]||(!group&&!parentSku&&names.length===1?names[0]:null);
+  if(byId&&unique.length&&unique.some(p=>p.id!==byId.id))issues.push('productIdGroupConflict01515');
+  if(group){
+    const otherSkuMatches=byParentSku.filter(p=>p.id!==existing?.id);
+    if(otherSkuMatches.length)issues.push('productGroupSkuConflict01515');
+    if(!existing&&names.length)issues.push('productGroupNameConflict01515');
+    if(existing){
+      const stored=identityKey01515(existing?.productGroup01512||existing?.configuration?.import01387?.externalGroupKey);
+      if(stored&&stored!==group)issues.push('productIdGroupConflict01515');
+      if(r.name&&norm(existing.name)!==norm(r.name))issues.push('productGroupNameMismatch01515');
+      if(parentSku&&str(existing.sku)&&identityKey01515(existing.sku)!==parentSku)issues.push('productSkuMismatch01515');
+      // Legacy parent without a Product Group may be claimed only by explicit ID
+      // or by its exact parent SKU equal to the supplied group.
+      if(!stored&&!byId&&identityKey01515(existing.sku)!==group)issues.push('productGroupSkuConflict01515');
+    }
+  }
+  if(!group&&parentSku&&names.length&&(!existing)&&names.length===1)issues.push('productSkuNameConflict01515');
+  return {existing,issues:[...new Set(issues)]};
 }
+function existingProductForRow(index,r){return resolveExistingProduct01515(index,r).existing;}
 function buildProductOnlyPlan(rows,mapping,state,options){
-  const opts={updateKey:'sku',existingPolicy:'update',createMissingCategories:true,rowMode:'products',...options},validation=validateRows(rows,mapping,state,opts),products=arr(state?.products),bySku=new Map(products.map(p=>[norm(p.sku),p])),byId=new Map(products.map(p=>[p.id,p]));
-  const plan=validation.canonicalRows.map((r,i)=>{const existing=opts.updateKey==='id'&&r.id?byId.get(r.id):bySku.get(norm(r.sku));let action='create';if(existing)action=opts.existingPolicy==='update'?'update':'skip';if(validation.errors.some(e=>e.row===i))action='error';return {index:i,line:i+2,row:r,existingId:existing?.id||'',existingName:existing?.name||'',action,entity:'product'};});
-  const counts={create:0,update:0,skip:0,error:0,productCreate:0,productUpdate:0,variantCreate:0,variantUpdate:0,variantSkip:0};plan.forEach(x=>counts[x.action]++);counts.productCreate=counts.create;counts.productUpdate=counts.update;return {...validation,plan,counts,options:opts,groups:[]};
+  const opts={updateKey:'sku',existingPolicy:'update',createMissingCategories:true,rowMode:'products',...options},validation=validateRows(rows,mapping,state,opts),index=indexExistingProducts(state);
+  const plan=validation.canonicalRows.map((r,i)=>{
+    const found=resolveExistingProduct01515(index,r),existing=found.existing;
+    for(const code of found.issues)validation.errors.push({row:i,line:i+2,field:'productGroup',code});
+    let action=existing?(opts.existingPolicy==='update'?'update':'skip'):'create';
+    if(validation.errors.some(e=>e.row===i))action='error';
+    return {index:i,line:i+2,row:r,existingId:existing?.id||'',existingName:existing?.name||'',action,entity:'product'};
+  });
+  const counts={create:0,update:0,skip:0,error:0,productCreate:0,productUpdate:0,variantCreate:0,variantUpdate:0,variantSkip:0};
+  plan.forEach(x=>counts[x.action]++);counts.productCreate=counts.create;counts.productUpdate=counts.update;
+  return {...validation,plan,counts,options:opts,groups:[]};
 }
 function buildVariantRowsPlan(rows,mapping,state,options){
-  const opts={updateKey:'sku',existingPolicy:'update',createMissingCategories:true,rowMode:'variants',...options},validation=validateRows(rows,mapping,state,opts),index=indexExistingProducts(state),variants=arr(state?.variants),variantBySku=new Map(variants.filter(v=>str(v.sku)).map(v=>[norm(v.sku),v])),variantsByProduct=new Map();
+  const opts={updateKey:'sku',existingPolicy:'update',createMissingCategories:true,rowMode:'variants',...options},validation=validateRows(rows,mapping,state,opts),index=indexExistingProducts(state),variants=arr(state?.variants),variantBySku=new Map(),variantsByProduct=new Map(),skuMultiplicity=new Map();
+  for(const v of variants){if(!str(v.sku))continue;const k=identityKey01515(v.sku);skuMultiplicity.set(k,(skuMultiplicity.get(k)||0)+1);variantBySku.set(k,v);}
   for(const v of variants){const list=variantsByProduct.get(v.productId)||[];list.push(v);variantsByProduct.set(v.productId,list);}
-  const groupsMap=new Map();validation.canonicalRows.forEach((r,i)=>{const key=groupKeyForRow(r),g=groupsMap.get(key)||{key,rows:[],existing:null};g.rows.push({row:r,index:i,line:i+2});const existing=existingProductForRow(index,r);if(existing){if(g.existing&&g.existing.id!==existing.id)validation.errors.push({row:i,line:i+2,field:'productGroup',code:'groupResolvesMultipleProducts'});else g.existing=existing;}groupsMap.set(key,g);});
+  const groupsMap=new Map();validation.canonicalRows.forEach((r,i)=>{
+    const key=groupKeyForRow(r),g=groupsMap.get(key)||{key,rows:[],existing:null};
+    g.rows.push({row:r,index:i,line:i+2});
+    const found=resolveExistingProduct01515(index,r);
+    for(const code of found.issues)validation.errors.push({row:i,line:i+2,field:'productGroup',code});
+    if(found.existing){if(g.existing&&g.existing.id!==found.existing.id)validation.errors.push({row:i,line:i+2,field:'productGroup',code:'groupResolvesMultipleProducts'});else g.existing=found.existing;}
+    groupsMap.set(key,g);
+  });
   const groups=[...groupsMap.values()];const plan=[];let productCreate=0,productUpdate=0,variantCreate=0,variantUpdate=0,variantSkip=0;
   for(const group of groups){
-    group.action=group.existing?'update':'create';if(group.action==='create')productCreate++;else productUpdate++;
+    group.action=group.existing?'update':'create';
     const first=group.rows[0]?.row,baseName=norm(first?.name),baseSku=norm(first?.sku),baseGroup=norm(first?.productGroup);
     for(const item of group.rows){if(first?._mapped?.has('catalogRole01472')&&item.row.catalogRole01472!==first.catalogRole01472)validation.errors.push({row:item.index,line:item.line,field:'catalogRole01472',code:'conflictingCatalogRole01472'});if(norm(item.row.name)!==baseName||norm(item.row.sku)!==baseSku||norm(item.row.productGroup)!==baseGroup)validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupProductFieldsConflict'});}
-    const productId=group.existing?.id||'';const productVariants=productId?(variantsByProduct.get(productId)||[]):[];const byCombo=new Map(productVariants.map(v=>[comboKey(v.options),v]));
-    for(const item of group.rows){const r=item.row;let existingVariant=variantBySku.get(norm(r.variant.sku))||null;const combo=comboKey(r.variant.options);if(existingVariant&&productId&&existingVariant.productId!==productId){validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'variantSkuOwnedByOtherProduct'});existingVariant=null;}if(!existingVariant&&combo&&productId)existingVariant=byCombo.get(combo)||null;
+    if(group.rows.some(item=>validation.errors.some(e=>e.row===item.index&&e.field==='productGroup'))){for(const item of group.rows){if(!validation.errors.some(e=>e.row===item.index))validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupIdentityBlocked01515'});}group.action='error';}
+    const productId=group.existing?.id||'';const productVariants=productId?(variantsByProduct.get(productId)||[]):[];
+    const byCombo=new Map(productVariants.filter(v=>comboKey(v.options)).map(v=>[comboKey(v.options),v]));
+    const incomingCombos=new Map();
+    for(const item of group.rows){
+      const r=item.row,skuKey=identityKey01515(r.variant.sku),combo=comboKey(r.variant.options);
+      const existingVariant=skuKey?(variantBySku.get(skuKey)||null):null;
+      if(skuKey&&(skuMultiplicity.get(skuKey)||0)>1)validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'ambiguousVariantSku01515'});
+      // SKU is globally unique. An exact SKU is usable only inside the resolved parent.
+      if(existingVariant&&(!productId||existingVariant.productId!==productId))validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'variantSkuOwnedByOtherProduct'});
+      if(existingVariant&&combo&&comboKey(existingVariant.options)&&comboKey(existingVariant.options)!==combo)validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'variantSkuOptionsMismatch01515'});
+      // Identical options with a different SKU represent a collision, never a SKU rename.
+      const colliding=combo&&productId?byCombo.get(combo):null;
+      if(colliding&&skuKey&&identityKey01515(colliding.sku)!==skuKey)validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'variantOptionsSkuConflict01515'});
+      if(combo){const previous=incomingCombos.get(combo);if(previous!==undefined)validation.errors.push({row:item.index,line:item.line,field:'variant:sku',code:'duplicateVariantOptions01515',vars:{line:previous}});else incomingCombos.set(combo,item.line);}
       let action=existingVariant?(opts.existingPolicy==='update'?'update':'skip'):'create';if(validation.errors.some(e=>e.row===item.index))action='error';if(action==='create')variantCreate++;else if(action==='update')variantUpdate++;else if(action==='skip')variantSkip++;
       plan.push({index:item.index,line:item.line,row:r,groupKey:group.key,productExistingId:productId,existingId:existingVariant?.id||'',existingName:group.existing?.name||'',action,entity:'variant'});
     }
   }
+  const validGroups=groups.filter(g=>g.rows.every(item=>!validation.errors.some(e=>e.row===item.index)));
+  productCreate=validGroups.filter(g=>g.action==='create').length;productUpdate=validGroups.filter(g=>g.action==='update').length;
   const counts={create:variantCreate,update:variantUpdate,skip:variantSkip,error:0,productCreate,productUpdate,variantCreate,variantUpdate,variantSkip};counts.error=plan.filter(x=>x.action==='error').length;return {...validation,plan,counts,options:opts,groups};
 }
 export function buildProductImportPlan01060(rows,mapping,state,options={}){const built=importMode(options)==='variants'?buildVariantRowsPlan(rows,mapping,state,options):buildProductOnlyPlan(rows,mapping,state,options);const mediaEnabled=hasMediaMapping01389(mapping),result={...built,mediaEnabled,mediaSummary:summarizeImportMediaReferences01389(built.canonicalRows,state),mediaCopySummary01396:summarizeMediaCopyPlan01396(built.canonicalRows,mediaEnabled&&!!options.copySupplierMedia)};result.diff01390=buildMarketplaceImportDiff01390(result,state);return result;}
@@ -250,7 +317,7 @@ async function executeVariantRowsImport01387(store,current,built,meta){
   }catch(error){if(!commitStarted&&uploadedAssets.length)await rollbackCopiedImportAssets01396(uploadedAssets);throw error;}
 }
 export async function executeProductImport01060(store,rows,mapping,options={},meta={}){
-  if(!store)throw new Error('MarketplaceStore required.');assertMarketplaceImportDatabase01386(store);const current=store.getState(),built=buildProductImportPlan01060(rows,mapping,current,options);if(built.counts.error){const error=new Error('MARKETPLACE_IMPORT_VALIDATION_BLOCKED_01387');error.code='MARKETPLACE_IMPORT_VALIDATION_BLOCKED_01387';error.count=built.counts.error;throw error;}
+  if(!store)throw new Error('MarketplaceStore required.');assertMarketplaceImportDatabase01386(store);const current=store.getState(),built=buildProductImportPlan01060(rows,mapping,current,options);if(built.counts.error||built.errors.length){const error=new Error('MARKETPLACE_IMPORT_VALIDATION_BLOCKED_01387');error.code='MARKETPLACE_IMPORT_VALIDATION_BLOCKED_01387';error.count=built.counts.error;throw error;}
   if(built.rowMode==='variants')return executeVariantRowsImport01387(store,current,built,meta);
   const next=clone(current);next.products=arr(next.products);next.categories=arr(next.categories);next.media=arr(next.media);const productById=new Map(next.products.map((p,i)=>[p.id,{p,i}])),accessoryPending01485=[],additionalPending01487=[],mediaStats={created:0,reused:0,copied:0,copyReused:0,external:0,copySourceBytes:0,copyStoredBytes:0,copySavedBytes:0},uploadedAssets=[],mediaContext={store,sourceName:str(meta.sourceName),stats:mediaStats,copyExternal:!!built.options.copySupplierMedia,uploadedAssets};let commitStarted=false;try{
   for(const item of built.plan){if(item.action==='skip')continue;const r=item.row;if(item.action==='update'){const ref=productById.get(item.existingId);if(!ref)continue;const patch=await applyMappedPatch(ref.p,r,next,built.options,mediaContext);const merged=createMarketplaceProduct01052({...ref.p,...patch,productGroup01512:ref.p.productGroup01512||r.productGroup,id:ref.p.id,createdAt:ref.p.createdAt,updatedAt:new Date().toISOString()});next.products[ref.i]=merged;ref.p=merged;if(r._mapped.has('accessoryProducts01485'))accessoryPending01485.push({productId:merged.id,text:str(r.accessoryProducts01485),sku:r.sku});if(r._mapped.has('additionalServices01487'))additionalPending01487.push({productId:merged.id,text:str(r.additionalServices01487),sku:r.sku});}else{const patch=await applyMappedPatch(null,r,next,built.options,mediaContext);const created=createMarketplaceProduct01052({...patch,name:r.name,sku:r.sku,productGroup01512:r.productGroup,status:patch.status||'draft',slug:patch.slug||slugify(r.name)});next.products.push(created);productById.set(created.id,{p:created,i:next.products.length-1});if(r._mapped.has('accessoryProducts01485'))accessoryPending01485.push({productId:created.id,text:str(r.accessoryProducts01485),sku:r.sku});if(r._mapped.has('additionalServices01487'))additionalPending01487.push({productId:created.id,text:str(r.additionalServices01487),sku:r.sku});}}
