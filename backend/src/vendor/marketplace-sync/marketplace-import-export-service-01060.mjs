@@ -275,7 +275,81 @@ function buildVariantRowsPlan(rows,mapping,state,options){
   productCreate=validGroups.filter(g=>g.action==='create').length;productUpdate=validGroups.filter(g=>g.action==='update').length;
   const counts={create:variantCreate,update:variantUpdate,skip:variantSkip,error:0,productCreate,productUpdate,variantCreate,variantUpdate,variantSkip};counts.error=plan.filter(x=>x.action==='error').length;return {...validation,plan,counts,options:opts,groups};
 }
-export function buildProductImportPlan01060(rows,mapping,state,options={}){const built=importMode(options)==='variants'?buildVariantRowsPlan(rows,mapping,state,options):buildProductOnlyPlan(rows,mapping,state,options);const mediaEnabled=hasMediaMapping01389(mapping),result={...built,mediaEnabled,mediaSummary:summarizeImportMediaReferences01389(built.canonicalRows,state),mediaCopySummary01396:summarizeMediaCopyPlan01396(built.canonicalRows,mediaEnabled&&!!options.copySupplierMedia)};result.diff01390=buildMarketplaceImportDiff01390(result,state);return result;}
+
+// 01519 · Resolve staged accessory links before allowing a DB commit. The projected
+// inventory contains all incoming products/variants, including forward references.
+// Unresolved names/values are row-scoped errors, not post-approval surprises.
+function attachAccessoryPreflight01519(built,state){
+  const products=arr(state?.products).map(p=>({...p}));
+  const variants=arr(state?.variants).map(v=>({...v,options:{...obj(v.options)}}));
+  const projected={...state,products,variants};
+  const byProductId=new Map(products.map(p=>[p.id,p]));
+  const byVariantId=new Map(variants.map(v=>[v.id,v]));
+  const groupParents=new Map();
+  for(const group of arr(built.groups)){
+    if(!group.rows?.length||group.action==='error')continue;
+    const first=group.rows[0].row;
+    const id=group.existing?.id||`__preflight_p_${group.key}`;
+    if(!byProductId.has(id)){
+      const created={id,name:str(first.name),sku:str(first.sku),productGroup01512:str(first.productGroup)};
+      products.push(created);byProductId.set(id,created);
+    }else if(first?._mapped?.has('name'))byProductId.get(id).name=str(first.name);
+    groupParents.set(group.key,id);
+  }
+  // Product-row imports do not expose groups; make their future identities visible.
+  if(built.rowMode!=='variants')for(const item of arr(built.plan)){
+    if(!['create','update'].includes(item.action))continue;
+    const id=item.existingId||`__preflight_p_${item.line}`;
+    if(!byProductId.has(id)){
+      const created={id,name:str(item.row.name),sku:str(item.row.sku)};
+      products.push(created);byProductId.set(id,created);
+    }else if(item.row?._mapped?.has('name'))byProductId.get(id).name=str(item.row.name);
+  }
+  if(built.rowMode==='variants')for(const item of arr(built.plan)){
+    if(!['create','update'].includes(item.action))continue;
+    const parentId=groupParents.get(item.groupKey);
+    if(!parentId)continue;
+    const id=item.existingId||`__preflight_v_${item.line}`;
+    const existing=byVariantId.get(id);
+    if(existing){
+      existing.options={...obj(existing.options),...obj(item.row.variant?.options)};
+      existing.status=str(item.row.variant?.status)||existing.status;
+    }else{
+      const created={id,productId:parentId,sku:str(item.row.variant?.sku),status:'active',options:{...obj(item.row.variant?.options)}};
+      variants.push(created);byVariantId.set(id,created);
+    }
+  }
+  let addedRows=0;
+  const detailed=[];
+  for(const item of arr(built.plan)){
+    if(!['create','update'].includes(item.action)||!item.row?._mapped?.has('accessoryProducts01485'))continue;
+    const raw=str(item.row.accessoryProducts01485);
+    if(!raw)continue;
+    const resolved=resolveAccessoryPriceRefs01485(projected,parseAccessoryProducts01485(raw));
+    if(!resolved.errors.length)continue;
+    for(const problem of resolved.errors){
+      const issue={row:item.index,line:item.line,field:'accessoryProducts01485',code:'accessoryTargetUnresolved01519',vars:{name:str(problem.name),value:str(problem.value),reason:str(problem.code),sku:str(item.row.variant?.sku||item.row.sku)},details:problem};
+      built.errors.push(issue);detailed.push(issue);
+    }
+    item.action='error';addedRows++;
+  }
+  if(addedRows){
+    built.counts.error=arr(built.plan).filter(x=>x.action==='error').length;
+    if(built.rowMode==='variants'){
+      built.counts.variantCreate=arr(built.plan).filter(x=>x.action==='create').length;
+      built.counts.variantUpdate=arr(built.plan).filter(x=>x.action==='update').length;
+      built.counts.productCreate=arr(built.groups).filter(g=>g.action==='create'&&g.rows.some(x=>built.plan.some(p=>p.index===x.index&&p.action==='create'))).length;
+      built.counts.productUpdate=arr(built.groups).filter(g=>g.action==='update'&&g.rows.some(x=>built.plan.some(p=>p.index===x.index&&p.action==='update'))).length;
+      built.counts.create=built.counts.variantCreate;built.counts.update=built.counts.variantUpdate;
+    }else{
+      built.counts.create=arr(built.plan).filter(x=>x.action==='create').length;
+      built.counts.update=arr(built.plan).filter(x=>x.action==='update').length;
+    }
+  }
+  built.accessoryPreflight01519={errors:detailed,affectedRows:addedRows};
+  return built;
+}
+export function buildProductImportPlan01060(rows,mapping,state,options={}){const built=importMode(options)==='variants'?buildVariantRowsPlan(rows,mapping,state,options):buildProductOnlyPlan(rows,mapping,state,options);const mediaEnabled=hasMediaMapping01389(mapping),result={...built,mediaEnabled,mediaSummary:summarizeImportMediaReferences01389(built.canonicalRows,state),mediaCopySummary01396:summarizeMediaCopyPlan01396(built.canonicalRows,mediaEnabled&&!!options.copySupplierMedia)};attachAccessoryPreflight01519(result,state);result.diff01390=buildMarketplaceImportDiff01390(result,state);return result;}
 function applyAccessoryImportPending01485(next,pending){
   for(const item of pending){
     const parsed=parseAccessoryProducts01485(item.text);
