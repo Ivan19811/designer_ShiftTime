@@ -6,7 +6,7 @@ import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
-import {loadSnapshot,replaceSnapshot,resetSnapshot,bulkSetProductStatus01523,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
+import {loadSnapshot,replaceSnapshot,resetSnapshot,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
@@ -388,6 +388,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
     if(req.method==='PATCH'){assertWriteRole(scope);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
   }
+  if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
+  if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
   if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await bulkSetProductStatus01523(scope,await readJson(req,{limit:1024*1024})));}
   const key=RESOURCE_PATHS_01071[p[3]];
   if(key){const id=p[4]||'';

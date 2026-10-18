@@ -1,3 +1,4 @@
+import {planProductReplacement01528,applyProductReplacement01528} from './marketplace-product-replacement-core-01528.mjs';
 import {planBulkProductStatus01523} from './marketplace-bulk-status-core-01523.mjs';
 import {assignProductGroup01512,assignSnapshotProductGroups01512} from './marketplace-product-group-01512.mjs';
 import crypto from 'node:crypto';
@@ -29,6 +30,22 @@ export async function bulkSetProductStatus01523(scope,input={}){
     if(!plan.changedIds.length)return {stage:'01523',requested:plan.requested,changed:0,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:before.revision,changedIds:[]};
     const next=await persist(client,scope,{...before,products:plan.products},'commerce.products.bulk-status',{status:plan.status,changed:plan.changedIds.length,requested:plan.requested});
     return {stage:'01523',requested:plan.requested,changed:plan.changedIds.length,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:next.revision,changedIds:plan.changedIds};
+  });
+}
+
+// 01528 · read-only preview; one locked transaction for the final replacement.
+export async function previewProductReplacement01528(scope,input={}){
+  const state=await loadSnapshot(scope);
+  return planProductReplacement01528(state,input);
+}
+export async function executeProductReplacement01528(scope,input={}){
+  return withTransaction(async client=>{
+    const before=await ensureRow(client,scope.storeId);
+    const applied=applyProductReplacement01528(before,input);
+    const after=await persist(client,scope,applied.snapshot,'commerce.products.replaced-01528',applied.report);
+    const rollbackId=uid('replace01528');
+    await persistMarketplaceImportRollback01397(client,scope,{historyId:rollbackId,sourceKind:'product-replacement-01528',before,after,preRevision:before.revision,postRevision:after.revision});
+    return {...applied.report,revision:after.revision,rollbackId};
   });
 }
 export async function resetSnapshot(scope){return withTransaction(async client=>{await ensureRow(client,scope.storeId);const next=await persist(client,scope,emptySnapshot(),'commerce.snapshot.reset',{});return next;});}
