@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {planBulkProductStatus01523 as plan} from '../src/marketplace-bulk-status-core-01523.mjs';
+const sample={products:[{id:'a',status:'draft',categoryIds:['c'],sku:'A'},{id:'b',status:'active',sku:'B'},{id:'c',status:'archived',sku:'C'}]};
+test('updates only drafts and preserves product metadata',()=>{const p=plan(sample,{ids:['a','b','c','x'],status:'active'});assert.deepEqual(p.changedIds,['a']);assert.deepEqual(p.archived,['c']);assert.deepEqual(p.unchanged,['b']);assert.deepEqual(p.missing,['x']);assert.deepEqual(p.products[0].categoryIds,['c']);assert.equal(sample.products[0].status,'draft');});
+test('draft transition',()=>{const p=plan(sample,{ids:['b'],status:'draft'});assert.deepEqual(p.changedIds,['b']);});
+test('invalid status blocked',()=>assert.throws(()=>plan(sample,{ids:['a'],status:'deleted'})));
+test('duplicate ids blocked',()=>assert.throws(()=>plan(sample,{ids:['a','a'],status:'active'})));
+test('empty ids blocked',()=>assert.throws(()=>plan(sample,{ids:[],status:'active'})));
+test('over limit blocked',()=>assert.throws(()=>plan(sample,{ids:Array.from({length:5001},(_,i)=>String(i)),status:'active'})));
+test('5000 can be changed in one plan',()=>{const many={products:Array.from({length:5000},(_,i)=>({id:`p${i}`,status:'draft'}))};assert.equal(plan(many,{ids:many.products.map(p=>p.id),status:'active'}).changedIds.length,5000);});

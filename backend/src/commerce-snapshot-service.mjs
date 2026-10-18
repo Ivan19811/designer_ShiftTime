@@ -1,3 +1,4 @@
+import {planBulkProductStatus01523} from './marketplace-bulk-status-core-01523.mjs';
 import {assignProductGroup01512,assignSnapshotProductGroups01512} from './marketplace-product-group-01512.mjs';
 import crypto from 'node:crypto';
 import {withTransaction} from './db.mjs';
@@ -17,6 +18,19 @@ function importCounts01080(s={}){const out={};for(const key of Object.keys(COLLE
 function stable01080(v){if(Array.isArray(v))return v.map(stable01080);if(v&&typeof v==='object'){const o={};for(const k of Object.keys(v).sort())o[k]=stable01080(v[k]);return o;}return v;}
 function importHash01080(s={}){const c=clone(s||{});delete c.revision;delete c.updatedAt;return crypto.createHash('sha256').update(JSON.stringify(stable01080(c))).digest('hex');}
 export async function replaceSnapshot(scope,input,{sourceKind='api-snapshot-replace',rollbackJobId='',expectedRevision=null}={}){return withTransaction(async client=>{const previous=await ensureRow(client,scope.storeId);if(expectedRevision!==null&&expectedRevision!==undefined&&Number(previous.revision)!==Number(expectedRevision)){const e=new Error('MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400');e.code='MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400';e.statusCode=409;e.expectedRevision=Number(expectedRevision);e.actualRevision=Number(previous.revision)||0;throw e;}const normalized=assignSnapshotProductGroups01512(normalizeSnapshot(input));const next=await persist(client,scope,normalized,'commerce.snapshot.replaced',{revision:Number(input?.revision)||0,sourceKind,rollbackJobId:String(rollbackJobId||'')});if(String(rollbackJobId||'').trim())await persistMarketplaceImportRollback01397(client,scope,{historyId:String(rollbackJobId||'').trim(),sourceKind,before:previous,after:next,preRevision:Number(previous.revision)||0,postRevision:Number(next.revision)||0});try{await client.query(`INSERT INTO commerce_store_imports(id,account_id,workspace_id,store_id,imported_by_user_id,source_kind,source_revision,imported_revision,snapshot_sha256,entity_counts) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)`,[uid('import'),scope.accountId,scope.workspaceId,scope.storeId,scope.userId||null,String(sourceKind||'api-snapshot-replace').slice(0,80),Number(normalized.revision)||0,Number(next.revision)||0,importHash01080(next),JSON.stringify(importCounts01080(next))]);await client.query(`UPDATE platform_deployment_state SET last_import_at=now(),updated_at=now() WHERE id='primary'`);}catch(e){if(e?.code!=='42P01')throw e;}return next;});}
+export async function bulkSetProductStatus01523(scope,input={}){
+  const expectedRevision=Number(input.expectedRevision);
+  if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)throw Object.assign(new Error('MARKETPLACE_BULK_EXPECTED_REVISION_REQUIRED_01523'),{statusCode:400});
+  // One locked PostgreSQL transaction for up to 5000 changes, not N status PATCH requests.
+  return withTransaction(async client=>{
+    const before=await ensureRow(client,scope.storeId);
+    if(Number(before.revision)!==expectedRevision)throw Object.assign(new Error('MARKETPLACE_BULK_REVISION_CONFLICT_01523'),{statusCode:409});
+    const plan=planBulkProductStatus01523(before,input);
+    if(!plan.changedIds.length)return {stage:'01523',requested:plan.requested,changed:0,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:before.revision,changedIds:[]};
+    const next=await persist(client,scope,{...before,products:plan.products},'commerce.products.bulk-status',{status:plan.status,changed:plan.changedIds.length,requested:plan.requested});
+    return {stage:'01523',requested:plan.requested,changed:plan.changedIds.length,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:next.revision,changedIds:plan.changedIds};
+  });
+}
 export async function resetSnapshot(scope){return withTransaction(async client=>{await ensureRow(client,scope.storeId);const next=await persist(client,scope,emptySnapshot(),'commerce.snapshot.reset',{});return next;});}
 export async function listResource(scope,key){const s=await loadSnapshot(scope);return clone(s[key]||[]);}
 export async function getResource(scope,key,id){const s=await loadSnapshot(scope);return clone((s[key]||[]).find(x=>String(x.id)===String(id))||null);}
