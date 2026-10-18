@@ -1,3 +1,4 @@
+import {decideImportCategories01521,categoryPath01521} from './marketplace-import-category-policy-01521.mjs';
 import {applyAdditionalServiceImports01487} from './marketplace-additional-services-01487.mjs';
 import {materializeAccessoryLedger01486} from './marketplace-accessory-ledger-01486.mjs';
 // 01060 · Storage-agnostic Import/Export + Mapping service.
@@ -162,7 +163,7 @@ function resolveCategories(snapshot,values,opts){const ids=[];for(const value of
 async function applyMappedPatch(existing,r,snapshot,opts,mediaContext={}){
   const patch={};const mapped=r._mapped;
   for(const key of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description','catalogRole01472'])if(mapped.has(key))patch[key]=r[key];
-  if(mapped.has('categories'))patch.categoryIds=resolveCategories(snapshot,r.categories,{createMissing:opts.createMissingCategories!==false});
+  if(mapped.has('categories')){const incoming=resolveCategories(snapshot,r.categories,{createMissing:opts.createMissingCategories!==false});patch.categoryIds=decideImportCategories01521(existing,incoming,snapshot.categories,opts.categoryMoveApprovals01521).effectiveIds;}
   const mediaProduct={...(existing||{}),...patch,name:patch.name||r.name||existing?.name||'',categoryIds:patch.categoryIds??existing?.categoryIds??[]};
   if(mapped.has('images')){patch.mediaIds=await resolveCanonicalImportMedia01389(mediaContext.store,snapshot,r.images,{product:mediaProduct,alt:mediaProduct.name,role:'product',sourceName:mediaContext.sourceName,stats:mediaContext.stats,copyExternal:!!mediaContext.copyExternal,uploadedAssets:mediaContext.uploadedAssets});patch.primaryMediaId=patch.mediaIds[0]||'';}
   const attrKeys=[...mapped].filter(x=>x.startsWith('attribute:')).map(x=>x.slice(10));if(attrKeys.length){patch.attributes={...(existing?.attributes||{})};for(const k of attrKeys)patch.attributes[k]=r.attributes[k]??'';}
@@ -251,7 +252,7 @@ function buildVariantRowsPlan(rows,mapping,state,options){
   for(const group of groups){
     group.action=group.existing?'update':'create';
     const first=group.rows[0]?.row,baseName=norm(first?.name),baseSku=norm(first?.sku),baseGroup=norm(first?.productGroup);
-    for(const item of group.rows){if(first?._mapped?.has('catalogRole01472')&&item.row.catalogRole01472!==first.catalogRole01472)validation.errors.push({row:item.index,line:item.line,field:'catalogRole01472',code:'conflictingCatalogRole01472'});if(norm(item.row.name)!==baseName||norm(item.row.sku)!==baseSku||norm(item.row.productGroup)!==baseGroup)validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupProductFieldsConflict'});}
+    for(const item of group.rows){if(first?._mapped?.has('categories')&&JSON.stringify(arr(item.row.categories).map(norm).sort())!==JSON.stringify(arr(first.categories).map(norm).sort()))validation.errors.push({row:item.index,line:item.line,field:'categories',code:'groupCategoryFieldsConflict01521'});if(first?._mapped?.has('catalogRole01472')&&item.row.catalogRole01472!==first.catalogRole01472)validation.errors.push({row:item.index,line:item.line,field:'catalogRole01472',code:'conflictingCatalogRole01472'});if(norm(item.row.name)!==baseName||norm(item.row.sku)!==baseSku||norm(item.row.productGroup)!==baseGroup)validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupProductFieldsConflict'});}
     if(group.rows.some(item=>validation.errors.some(e=>e.row===item.index&&e.field==='productGroup'))){for(const item of group.rows){if(!validation.errors.some(e=>e.row===item.index))validation.errors.push({row:item.index,line:item.line,field:'productGroup',code:'groupIdentityBlocked01515'});}group.action='error';}
     const productId=group.existing?.id||'';const productVariants=productId?(variantsByProduct.get(productId)||[]):[];
     const byCombo=new Map(productVariants.filter(v=>comboKey(v.options)).map(v=>[comboKey(v.options),v]));
@@ -279,10 +280,19 @@ function buildVariantRowsPlan(rows,mapping,state,options){
 // 01519 · Resolve staged accessory links before allowing a DB commit. The projected
 // inventory contains all incoming products/variants, including forward references.
 // Unresolved names/values are row-scoped errors, not post-approval surprises.
+// 01520 · Mirror the intended product role and category on preflight-only identities.
+// Additional services may be created in the same XLSX; their role must be visible
+// to the exact same resolver that the final transaction uses.
+function preparePreflightProduct01520(projected,product,row){
+  if(row?._mapped?.has('name'))product.name=str(row.name);
+  if(row?._mapped?.has('catalogRole01472'))product.catalogRole01472=str(row.catalogRole01472);
+  if(row?._mapped?.has('categories')){const incoming=resolveCategories(projected,arr(row.categories),{createMissing:false});product.categoryIds=decideImportCategories01521(product.id?.startsWith('__preflight_p_')?null:product,incoming,projected.categories,projected.categoryMoveApprovals01521).effectiveIds;}
+  return product;
+}
 function attachAccessoryPreflight01519(built,state){
   const products=arr(state?.products).map(p=>({...p}));
   const variants=arr(state?.variants).map(v=>({...v,options:{...obj(v.options)}}));
-  const projected={...state,products,variants};
+  const projected={...state,products,variants,categoryMoveApprovals01521:built.options?.categoryMoveApprovals01521||{}};
   const byProductId=new Map(products.map(p=>[p.id,p]));
   const byVariantId=new Map(variants.map(v=>[v.id,v]));
   const groupParents=new Map();
@@ -293,7 +303,8 @@ function attachAccessoryPreflight01519(built,state){
     if(!byProductId.has(id)){
       const created={id,name:str(first.name),sku:str(first.sku),productGroup01512:str(first.productGroup)};
       products.push(created);byProductId.set(id,created);
-    }else if(first?._mapped?.has('name'))byProductId.get(id).name=str(first.name);
+    }
+    preparePreflightProduct01520(projected,byProductId.get(id),first);
     groupParents.set(group.key,id);
   }
   // Product-row imports do not expose groups; make their future identities visible.
@@ -303,7 +314,8 @@ function attachAccessoryPreflight01519(built,state){
     if(!byProductId.has(id)){
       const created={id,name:str(item.row.name),sku:str(item.row.sku)};
       products.push(created);byProductId.set(id,created);
-    }else if(item.row?._mapped?.has('name'))byProductId.get(id).name=str(item.row.name);
+    }
+    preparePreflightProduct01520(projected,byProductId.get(id),item.row);
   }
   if(built.rowMode==='variants')for(const item of arr(built.plan)){
     if(!['create','update'].includes(item.action))continue;
@@ -320,18 +332,33 @@ function attachAccessoryPreflight01519(built,state){
     }
   }
   let addedRows=0;
-  const detailed=[];
+  const detailed=[],serviceDetailed=[];
   for(const item of arr(built.plan)){
-    if(!['create','update'].includes(item.action)||!item.row?._mapped?.has('accessoryProducts01485'))continue;
-    const raw=str(item.row.accessoryProducts01485);
-    if(!raw)continue;
-    const resolved=resolveAccessoryPriceRefs01485(projected,parseAccessoryProducts01485(raw));
-    if(!resolved.errors.length)continue;
-    for(const problem of resolved.errors){
-      const issue={row:item.index,line:item.line,field:'accessoryProducts01485',code:'accessoryTargetUnresolved01519',vars:{name:str(problem.name),value:str(problem.value),reason:str(problem.code),sku:str(item.row.variant?.sku||item.row.sku)},details:problem};
-      built.errors.push(issue);detailed.push(issue);
+    if(!['create','update'].includes(item.action))continue;
+    const r=item.row,sku=str(r.variant?.sku||r.sku);
+    let rowHasError=false;
+    if(r?._mapped?.has('accessoryProducts01485')&&str(r.accessoryProducts01485)){
+      const resolved=resolveAccessoryPriceRefs01485(projected,parseAccessoryProducts01485(str(r.accessoryProducts01485)));
+      for(const problem of resolved.errors){
+        const issue={row:item.index,line:item.line,field:'accessoryProducts01485',code:'accessoryTargetUnresolved01519',vars:{name:str(problem.name),value:str(problem.value),reason:str(problem.code),sku},details:problem};
+        built.errors.push(issue);detailed.push(issue);rowHasError=true;
+      }
     }
-    item.action='error';addedRows++;
+    if(r?._mapped?.has('additionalServices01487')&&str(r.additionalServices01487)){
+      const parentId=built.rowMode==='variants'?groupParents.get(item.groupKey):(item.existingId||`__preflight_p_${item.line}`);
+      const variantId=built.rowMode==='variants'?(item.existingId||`__preflight_v_${item.line}`):'';
+      try{
+        // This only mutates the projected snapshot. The real Repository is untouched.
+        applyAdditionalServiceImports01487(projected,[{productId:parentId,variantId,text:str(r.additionalServices01487),sku}]);
+      }catch(error){
+        const problems=arr(error?.details?.issues);
+        for(const problem of problems.length?problems:[{code:str(error?.code||'unknown')}]){
+          const issue={row:item.index,line:item.line,field:'additionalServices01487',code:'additionalServiceUnresolved01520',vars:{name:str(problem.name),value:str(problem.value||problem.text||r.additionalServices01487),reason:str(problem.code),sku},details:problem};
+          built.errors.push(issue);serviceDetailed.push(issue);rowHasError=true;
+        }
+      }
+    }
+    if(rowHasError){item.action='error';addedRows++;}
   }
   if(addedRows){
     built.counts.error=arr(built.plan).filter(x=>x.action==='error').length;
@@ -346,10 +373,39 @@ function attachAccessoryPreflight01519(built,state){
       built.counts.update=arr(built.plan).filter(x=>x.action==='update').length;
     }
   }
-  built.accessoryPreflight01519={errors:detailed,affectedRows:addedRows};
+  built.accessoryPreflight01519={errors:detailed,affectedRows:new Set(detailed.map(x=>x.row)).size};
+  built.additionalServicePreflight01520={errors:serviceDetailed,affectedRows:new Set(serviceDetailed.map(x=>x.row)).size};
   return built;
 }
-export function buildProductImportPlan01060(rows,mapping,state,options={}){const built=importMode(options)==='variants'?buildVariantRowsPlan(rows,mapping,state,options):buildProductOnlyPlan(rows,mapping,state,options);const mediaEnabled=hasMediaMapping01389(mapping),result={...built,mediaEnabled,mediaSummary:summarizeImportMediaReferences01389(built.canonicalRows,state),mediaCopySummary01396:summarizeMediaCopyPlan01396(built.canonicalRows,mediaEnabled&&!!options.copySupplierMedia)};attachAccessoryPreflight01519(result,state);result.diff01390=buildMarketplaceImportDiff01390(result,state);return result;}
+export function buildProductImportPlan01060(rows,mapping,state,options={}){const built=importMode(options)==='variants'?buildVariantRowsPlan(rows,mapping,state,options):buildProductOnlyPlan(rows,mapping,state,options);const mediaEnabled=hasMediaMapping01389(mapping),result={...built,mediaEnabled,mediaSummary:summarizeImportMediaReferences01389(built.canonicalRows,state),mediaCopySummary01396:summarizeMediaCopyPlan01396(built.canonicalRows,mediaEnabled&&!!options.copySupplierMedia)};attachAccessoryPreflight01519(result,state);
+  // 01521 · Resolve category policy once in the canonical plan. The transaction,
+  // projected relationship preflight and Diff must all use the identical decision.
+  const reviews=[];
+  const candidates=result.rowMode==='variants'
+    ?arr(result.groups).filter(g=>g.existing&&g.rows?.length).map(g=>({existing:g.existing,row:g.rows[0].row,line:g.rows[0].line}))
+    :arr(result.plan).filter(x=>x.existingId&&x.action==='update').map(x=>({existing:arr(state?.products).find(p=>p.id===x.existingId),row:x.row,line:x.line}));
+  for(const {existing,row,line} of candidates){
+    if(!existing||!row?._mapped?.has('categories'))continue;
+    const incoming=resolveCategories({categories:arr(state?.categories).map(c=>({...c}))},row.categories,{createMissing:false});
+    // Existing products may not move into a category that is missing even if
+    // missing-category creation is enabled for newly imported products.
+    if(incoming.length!==arr(row.categories).length){
+      const from=arr(existing.categoryIds).map(id=>categoryPath01521(state?.categories,id));
+      reviews.push({kind:'missingTarget',productId:existing.id,name:existing.name,sku:existing.sku,line,from,to:arr(row.categories),needsApproval:true,token:'',effectiveIds:arr(existing.categoryIds)});
+      result.errors.push({row:line-2,line,field:'categories',code:'categoryMoveTargetMissing01521',vars:{name:existing.name,from:from.join(', '),to:arr(row.categories).join(', ')}});
+      result.counts.error++;
+      continue;
+    }
+    const decision=decideImportCategories01521(existing,incoming,state?.categories,result.options?.categoryMoveApprovals01521);
+    if(decision.kind==='same')continue;
+    const item={...decision,productId:existing.id,name:existing.name,sku:existing.sku,line,
+      from:decision.before.map(id=>categoryPath01521(state?.categories,id)),
+      to:decision.requested.map(id=>categoryPath01521(state?.categories,id))};
+    reviews.push(item);
+    if(decision.needsApproval){result.errors.push({row:line-2,line,field:'categories',code:'categoryMoveApprovalRequired01521',vars:{name:existing.name,from:item.from.join(', '),to:item.to.join(', ')}});result.counts.error++;}
+  }
+  result.categoryReviews01521=reviews;
+  result.diff01390=buildMarketplaceImportDiff01390(result,state);return result;}
 function applyAccessoryImportPending01485(next,pending){
   for(const item of pending){
     const parsed=parseAccessoryProducts01485(item.text);

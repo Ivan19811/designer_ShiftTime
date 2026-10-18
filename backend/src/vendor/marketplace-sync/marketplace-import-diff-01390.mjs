@@ -39,11 +39,11 @@ function summarize(items){
     productUnchanged:unchangedUpdates.filter(x=>x.entity==='product').length,variantUnchanged:unchangedUpdates.filter(x=>x.entity==='variant').length
   };
 }
-function productDiff(existing,row,state,{line=0,action='update',existingId=''}={}){
+function productDiff(existing,row,state,{line=0,action='update',existingId='',categoryReview=null}={}){
   const changes=[],mapped=row?._mapped;
   for(const field of ['name','sku','status','slug','brand','price','oldPrice','currency','stock','availability','shortDescription','description','catalogRole01472'])pushScalar(changes,mapped,field,existing?.[field],row?.[field],'product');
   for(const target of mapped||[]){if(!String(target).startsWith('attribute:'))continue;const key=String(target).slice(10),before=obj(existing?.attributes)[key]??'',after=obj(row?.attributes)[key]??'';if(!equalScalar(before,after))changes.push(valueChange(`product.attribute.${key}`,before,after,'attribute',{attributeKey:key}));}
-  if(mapped?.has('categories')){const before=productCategoryPaths(state,existing),after=uniqueSorted(row?.categories);if(!equalList(before,after))changes.push(valueChange('product.categories',before,after,'categories'));}
+  if(mapped?.has('categories')){const before=productCategoryPaths(state,existing),after=categoryReview?uniqueSorted(arr(categoryReview.effectiveIds).map(id=>categoryPath(state,id))):uniqueSorted(row?.categories);if(!equalList(before,after))changes.push(valueChange('product.categories',before,after,'categories'));}
   if(mapped?.has('images')){const before=entityMediaUrls(state,existing),after=desiredMediaUrls(row?.images);if(!equalList(before,after))changes.push(valueChange('product.media',before,after,'media'));}
   return {id:`product:${existingId||row?.id||row?.sku||line}`,entity:'product',line,action,existingId:existingId||str(existing?.id),name:str(row?.name||existing?.name),sku:str(row?.sku||existing?.sku),changed:action==='create'||changes.length>0,changes};
 }
@@ -60,7 +60,7 @@ export function buildMarketplaceImportDiff01390(plan,state){
   if(plan?.rowMode==='variants'){
     for(const group of arr(plan?.groups)){
       const first=group?.rows?.[0],existing=group?.existing?products.get(str(group.existing.id))||group.existing:null;
-      items.push(productDiff(existing,first?.row,state,{line:first?.line||0,action:group?.action||'create',existingId:existing?.id||''}));
+      items.push(productDiff(existing,first?.row,state,{line:first?.line||0,action:group?.action||'create',existingId:existing?.id||'',categoryReview:arr(plan?.categoryReviews01521).find(c=>c.productId===existing?.id)||null}));
     }
     for(const item of arr(plan?.plan)){
       const existing=item?.existingId?variants.get(str(item.existingId)):null;
@@ -69,7 +69,7 @@ export function buildMarketplaceImportDiff01390(plan,state){
   }else{
     for(const item of arr(plan?.plan)){
       const existing=item?.existingId?products.get(str(item.existingId)):null;
-      items.push(productDiff(existing,item?.row,state,{line:item?.line||0,action:item?.action||'create',existingId:item?.existingId||''}));
+      items.push(productDiff(existing,item?.row,state,{line:item?.line||0,action:item?.action||'create',existingId:item?.existingId||'',categoryReview:arr(plan?.categoryReviews01521).find(c=>c.productId===existing?.id)||null}));
     }
   }
   const summary=summarize(items),byLine={};
