@@ -12,6 +12,7 @@ import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorized
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
 import {searchPublicMarketplace} from './marketplace-public-catalog-service.mjs';
 import {getPublicCart,addPublicCartOffer,setPublicCartQuantity,removePublicCartItem,clearPublicCart,refreshPublicCart} from './marketplace-cart-service.mjs';
+import {shopCartView01535,addShopBundle01535,setShopCartQty01535,removeShopCartItem01535,clearShopCart01535} from './marketplace-shop-cart-service-01535.mjs';
 import {checkoutPublicCart,listAuthorizedSellerOrders,updateAuthorizedSellerOrder} from './marketplace-order-service.mjs';
 import {ensureAuthorizedPaymentForOrder,listAuthorizedPayments,listAuthorizedPayouts,transitionAuthorizedPayment,markAuthorizedPayout} from './marketplace-payment-service.mjs';
 import {listAuthorizedInventory01077,listAuthorizedInventoryReservations01077,devTransitionInventoryReservation01077,expireAuthorizedInventoryReservations01077} from './marketplace-inventory-service.mjs';
@@ -113,6 +114,21 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
+  // 01535: authenticated Store-scoped authored-product cart. No anonymous checkout here.
+  if(p[2]==='shop'&&p[3]==='cart'){
+    const siteId=String(req.headers['x-st-site-id']||'');
+    const token=String(req.headers['x-st-cart-id']||'');
+    let out;
+    if(req.method==='GET'&&p.length===4)out=await shopCartView01535(scope,siteId,token);
+    else if(req.method==='POST'&&p[4]==='refresh'&&p.length===5)out=await shopCartView01535(scope,siteId,token);
+    else if(req.method==='POST'&&p[4]==='bundles'&&p.length===5)out=await addShopBundle01535(scope,siteId,token,await readJson(req,{limit:16384}));
+    else if(req.method==='PATCH'&&p[4]==='items'&&p[5]&&p.length===6)out=await setShopCartQty01535(scope,siteId,token,p[5],(await readJson(req,{limit:4096})).quantity);
+    else if(req.method==='DELETE'&&p[4]==='items'&&p[5]&&p.length===6)out=await removeShopCartItem01535(scope,siteId,token,p[5]);
+    else if(req.method==='DELETE'&&p.length===4)out=await clearShopCart01535(scope,siteId,token);
+    else return sendJson(res,404,{error:'SHOP_CART_ROUTE_NOT_FOUND_01535',stage:'01535',requestId:rid});
+    return sendJson(res,200,out,{'x-st-cart-id':out.id});
+  }
+
   if(p[2]==='notifications'){
     if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listOrderNotifications01404(scope));}
     if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}

@@ -35,6 +35,8 @@ export async function checkoutPublicCart(cartToken='',input={},context={}){
       const cq=await client.query(`SELECT id,status,currency FROM marketplace_carts WHERE id=$1 AND marketplace_id=$2 FOR UPDATE`,[token,MARKETPLACE_ID]);
       if(!cq.rowCount)throw Object.assign(new Error('Cart not found'),{statusCode:404});
       if(cq.rows[0].status!=='active')throw Object.assign(new Error('Cart was already converted'),{statusCode:409});
+      const authored=await client.query(`SELECT 1 FROM marketplace_cart_items WHERE cart_id=$1 AND source_kind='store-product-01534' LIMIT 1`,[token]);
+      if(authored.rowCount)throw Object.assign(new Error('SHOP_CART_AUTHORED_CHECKOUT_NOT_READY_01535'),{statusCode:409});
       const rows=(await client.query(`SELECT ci.id "cartItemId",ci.quantity,o.id "offerId",o.seller_profile_id "sellerProfileId",o.store_id "storeId",o.catalog_product_id "catalogProductId",o.source_product_id "sourceProductId",o.sku,o.price::float8 price,o.old_price::float8 "oldPrice",o.currency,o.stock::float8 stock,o.availability,l.id "listingId",l.title "listingTitle",l.public_projection "publicProjection",s.display_name "sellerName",c.title "catalogTitle",c.brand "catalogBrand",c.media "catalogMedia"
         FROM marketplace_cart_items ci
         JOIN marketplace_seller_offers o ON o.id=ci.seller_offer_id AND o.status='active'
