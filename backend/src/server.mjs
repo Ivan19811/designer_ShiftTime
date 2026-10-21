@@ -1,5 +1,6 @@
 import http from 'node:http';
 import {config} from './config.mjs';
+import {novaPoshtaDirectory01542,assertNovaPoshtaRateLimit01542,novaPoshtaDirectoryConfigured01542} from './nova-poshta-directory-01542.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -112,6 +113,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
+  if(req.method==='GET'&&p[2]==='integrations'&&p[3]==='nova-poshta'&&p.length===5){
+    const kind=p[4],u=new URL(req.url,'http://localhost');
+    if(kind==='status')return sendJson(res,200,{configured:novaPoshtaDirectoryConfigured01542(),stage:'01542'});
+    if(kind==='cities'||kind==='warehouses'){
+      assertNovaPoshtaRateLimit01542(session.userId+':'+String(req.socket?.remoteAddress||''));
+      const out=await novaPoshtaDirectory01542(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'));
+      return sendJson(res,200,{...out,stage:'01542'},{'cache-control':'private, max-age=60'});
+    }
+  }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   // 01535: authenticated Store-scoped authored-product cart. No anonymous checkout here.
