@@ -1,6 +1,8 @@
 import http from 'node:http';
 import {config} from './config.mjs';
-import {novaPoshtaDirectory01542,assertNovaPoshtaRateLimit01542,novaPoshtaDirectoryConfigured01542} from './nova-poshta-directory-01542.mjs';
+import {shippingHubStatus01543,hubDirectory01543,verifyCrmBridgeToken01543} from './shipping-hub-01543.mjs';
+import {getStoreShippingConnection01543,saveStoreShippingConnection01543,deleteStoreShippingConnection01543} from './shipping-store-credentials-01543.mjs';
+import {getQuoteProfile01544,saveQuoteProfile01544,previewStoreQuote01544} from './shipping-quote-service-01544.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -74,6 +76,34 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01544 · Published-site indicative quote is bound to validated site/store identity.
+  if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
+    if(req.method!=='POST')return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
+    if(!publishedTrafficIdentity?.storeId)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01543',requestId:rid});
+    const out=await previewStoreQuote01544(publishedTrafficIdentity.storeId,await readJson(req,{limit:2048}),{clientId:requestClientAddress01414(req)});
+    return sendJson(res,200,{...out,requestId:rid},{'cache-control':'no-store'});
+  }
+  // 01543 · Public read-only directory requires a validated published-site identity.
+  if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p.length===6){
+    if(req.method!=='GET')return sendJson(res,405,{error:'SHIPPING_METHOD_NOT_ALLOWED_01543',requestId:rid});
+    if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01543',requestId:rid});
+    const kind=p[5],u=new URL(req.url,'http://localhost');
+    if(!['cities','warehouses'].includes(kind))return sendJson(res,404,{error:'SHIPPING_DIRECTORY_KIND_INVALID_01543',requestId:rid});
+    const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'published',clientId:publishedTrafficIdentity.siteId+':'+String(req.socket?.remoteAddress||'')});
+    return sendJson(res,200,out,{'cache-control':'private, max-age=30'});
+  }
+  // 01543 · CRM backend-to-backend token, never returned to browser. Read-only.
+  if(p[2]==='bridge'&&p[3]==='crm'&&p[4]==='nova-poshta'&&p.length===6){
+    if(req.method!=='GET')return sendJson(res,405,{error:'SHIPPING_BRIDGE_READ_ONLY_01543',requestId:rid});
+    const token=String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
+    if(!verifyCrmBridgeToken01543(token))return sendJson(res,401,{error:'SHIPPING_BRIDGE_NOT_AUTHORIZED_01543',requestId:rid});
+    const kind=p[5],u=new URL(req.url,'http://localhost');
+    if(kind==='status')return sendJson(res,200,{configured:shippingHubStatus01543().directoryConfigured,stage:'01543'});
+    if(!['cities','warehouses'].includes(kind))return sendJson(res,404,{error:'SHIPPING_BRIDGE_KIND_INVALID_01543',requestId:rid});
+    const client=String(req.headers['x-st-shipping-client']||'crm').replace(/[^a-zA-Z0-9:_-]/g,'').slice(0,80);
+    const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'crm',clientId:client});
+    return sendJson(res,200,out,{'cache-control':'private, max-age=30'});
+  }
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
     const out=await registerUser01084(await readJson(req));
     return sendJson(res,201,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope:out.scope,stage:'01084',requestId:rid});
@@ -113,16 +143,37 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
+  // 01543 · Authorized builder directory independent of local/API product repository mode.
   if(req.method==='GET'&&p[2]==='integrations'&&p[3]==='nova-poshta'&&p.length===5){
     const kind=p[4],u=new URL(req.url,'http://localhost');
-    if(kind==='status')return sendJson(res,200,{configured:novaPoshtaDirectoryConfigured01542(),stage:'01542'});
-    if(kind==='cities'||kind==='warehouses'){
-      assertNovaPoshtaRateLimit01542(session.userId+':'+String(req.socket?.remoteAddress||''));
-      const out=await novaPoshtaDirectory01542(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'));
-      return sendJson(res,200,{...out,stage:'01542'},{'cache-control':'private, max-age=60'});
+    if(kind==='status')return sendJson(res,200,{configured:shippingHubStatus01543().directoryConfigured,stage:'01543',requestId:rid});
+    if(['cities','warehouses'].includes(kind)){
+      const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'builder',clientId:session.userId+':'+String(req.socket?.remoteAddress||'')});
+      return sendJson(res,200,{...out,requestId:rid},{'cache-control':'private, max-age=30'});
     }
   }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  if(p[2]==='integrations'&&p[3]==='shipping-hub'){
+    if(req.method==='GET'&&p[4]==='status'&&p.length===5)return sendJson(res,200,{...shippingHubStatus01543(),requestId:rid});
+    if(p[4]==='stores'&&p[5]==='nova-poshta'&&p[6]==='quote-settings'&&p.length===7){
+      if(req.method==='GET')return sendJson(res,200,{...(await getQuoteProfile01544(scope.storeId)),requestId:rid});
+      assertAdminRole(scope);
+      if(req.method==='PUT')return sendJson(res,200,{...(await saveQuoteProfile01544(scope,await readJson(req,{limit:2048}))),requestId:rid});
+      return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
+    }
+    if(p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
+      const out=await previewStoreQuote01544(scope.storeId,await readJson(req,{limit:2048}),{clientId:session.userId+':'+requestClientAddress01414(req)});
+      return sendJson(res,200,{...out,requestId:rid},{'cache-control':'no-store'});
+    }
+    if(p[4]==='stores'&&p[5]==='nova-poshta'&&p.length===6){
+      if(req.method==='GET')return sendJson(res,200,{...(await getStoreShippingConnection01543(scope)),requestId:rid});
+      assertAdminRole(scope);
+      if(req.method==='PUT')return sendJson(res,200,{...(await saveStoreShippingConnection01543(scope,await readJson(req,{limit:4096}))),requestId:rid});
+      if(req.method==='DELETE')return sendJson(res,200,{...(await deleteStoreShippingConnection01543(scope)),requestId:rid});
+    }
+    return sendJson(res,404,{error:'SHIPPING_HUB_ROUTE_NOT_FOUND_01543',requestId:rid});
+  }
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   // 01535: authenticated Store-scoped authored-product cart. No anonymous checkout here.
   if(p[2]==='shop'&&p[3]==='cart'){
