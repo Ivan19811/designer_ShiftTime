@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {parseReviewList01558,listReviewOrders01558,safeReviewRow01558} from '../src/orders-review-read-01558.mjs';
 const scope={userId:'user-a',storeId:'store-a',workspaceId:'workspace-a',accountId:'account-a'};
 test('01558 query accepts only safe bounded read filters',()=>{
- assert.deepEqual(parseReviewList01558(new URLSearchParams('siteId=site_1&limit=15&offset=2')),{siteId:'site_1',limit:15,offset:2});
+ assert.deepEqual(parseReviewList01558(new URLSearchParams('siteId=site_1&limit=15&offset=2')),{siteId:'site_1',limit:15,offset:2,search:'',status:'',priority:'',assigneeId:''});
  for(const x of ['limit=100','offset=-2','siteId=site_1%27%3BDROP','unknown=hello','limit=x'])assert.throws(()=>parseReviewList01558(new URLSearchParams(x)));
 });
 test('01558 projects strictly non-PII internal order data',()=>{
