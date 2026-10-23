@@ -4,6 +4,7 @@ import {shippingHubStatus01543,hubDirectory01543,verifyCrmBridgeToken01543} from
 import {getStoreShippingConnection01543,saveStoreShippingConnection01543,deleteStoreShippingConnection01543} from './shipping-store-credentials-01543.mjs';
 import {getQuoteProfile01544,saveQuoteProfile01544,previewStoreQuote01544} from './shipping-quote-service-01544.mjs';
 import {listStoreProductParcels01545,saveStoreProductParcel01545,previewServerCartQuote01545} from './shipping-product-parcels-01545.mjs';
+import {previewCartPacking01548} from './shipping-packing-preview-01548.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -172,6 +173,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       assertAdminRole(scope);
       if(req.method==='PUT')return sendJson(res,200,{...(await saveStoreProductParcel01545(scope,await readJson(req,{limit:4096}))),requestId:rid});
       return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
+    }
+    if(p[4]==='nova-poshta'&&p[5]==='cart-packing-preview'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_PACKING_METHOD_NOT_ALLOWED_01548',requestId:rid});
+      return sendJson(res,200,{...(await previewCartPacking01548(scope,await readJson(req,{limit:32768}))),requestId:rid},{'cache-control':'no-store'});
     }
     if(p[4]==='nova-poshta'&&p[5]==='cart-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
