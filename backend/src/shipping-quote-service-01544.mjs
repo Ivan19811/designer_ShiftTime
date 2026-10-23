@@ -33,7 +33,7 @@ export async function saveQuoteProfile01544(scope,data,{client=undefined}={}){
   };
   return client?work(client):withStoreClient01544(work);
 }
-export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImpl=globalThis.fetch,trustedParcelWeightKg=null}={}){
+export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImpl=globalThis.fetch,trustedParcelWeightKg=null,trustedSeats=null}={}){
   // Inputs are intentionally untrusted. Price is an estimate only, not used in any order API.
   const q=normalizeQuoteRequest01544(input);
   assertQuoteLimit01544(storeId,clientId);
@@ -44,6 +44,8 @@ export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImp
   const usingCart=trustedParcelWeightKg!==null;
   const weight=usingCart?Number(trustedParcelWeightKg):profile.sampleParcelWeightKg;
   if(!Number.isFinite(weight)||weight<=0||weight>1000)throw fail('NP_PARCEL_WEIGHT_INVALID_01545',409);
-  const result=await requestNovaPoshtaQuote01544({...profile,sampleParcelWeightKg:weight},q,{fetchImpl});
-  return {...result,parcelWeightKg:weight,seats:profile.sampleSeats,quoteBasis:usingCart?'server-cart-product-parcels':'seller-sample-parcel',orderReady:false};
+  const seats=trustedSeats===null?profile.sampleSeats:Number(trustedSeats);
+  if(!Number.isSafeInteger(seats)||seats<1||seats>100)throw fail('NP_QUOTE_SEATS_INVALID_01544',409);
+  const result=await requestNovaPoshtaQuote01544({...profile,sampleParcelWeightKg:weight,sampleSeats:seats},q,{fetchImpl});
+  return {...result,parcelWeightKg:weight,seats,quoteBasis:usingCart?'server-cart-product-parcels':'seller-sample-parcel',orderReady:false};
 }

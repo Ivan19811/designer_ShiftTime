@@ -6,6 +6,8 @@ import {getQuoteProfile01544,saveQuoteProfile01544,previewStoreQuote01544} from 
 import {listStoreProductParcels01545,saveStoreProductParcel01545,previewServerCartQuote01545} from './shipping-product-parcels-01545.mjs';
 import {previewCartPacking01548} from './shipping-packing-preview-01548.mjs';
 import {cartPackingLayout01549} from './shipping-packing-layout-01549.mjs';
+import {previewCartMultiPlaceQuote01551} from './shipping-multiplace-quote-01551.mjs';
+import {assertPublishedShippingRate01551,publicPackingLayout01551,publicMultiPlaceQuote01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -79,6 +81,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01551 · Verified Netlify buyer cart: published-site + unguessable cart bearer,
+  // protected independently from administrator credentials and seller configurations.
+  if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&['cart-packing-layout','cart-multiplace-quote'].includes(p[5])&&p.length===6){
+    if(req.method!=='POST')return sendJson(res,405,{error:'NP_PUBLIC_PACKING_METHOD_01551',requestId:rid});
+    if(!publishedTrafficIdentity?.storeId||!publishedTrafficIdentity?.siteId)return sendJson(res,401,{error:'NP_PUBLIC_SITE_REQUIRED_01551',requestId:rid});
+    assertPublishedShippingRate01551(publishedTrafficIdentity.siteId,String(req.socket?.remoteAddress||''));
+    const cartId=String(req.headers['x-st-cart-id']||'');
+    const input=await readJson(req,{limit:32768});
+    const output=p[5]==='cart-packing-layout'
+      ?await publicPackingLayout01551(publishedTrafficIdentity,cartId,input)
+      :await publicMultiPlaceQuote01551(publishedTrafficIdentity,cartId,input,{clientId:publishedTrafficIdentity.siteId+':'+String(req.socket?.remoteAddress||'')});
+    return sendJson(res,200,{...output,requestId:rid},{'cache-control':'private, no-store','vary':'x-st-site-token, x-st-cart-id'});
+  }
   // 01544 · Published-site indicative quote is bound to validated site/store identity.
   if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
     if(req.method!=='POST')return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
@@ -182,6 +197,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-packing-preview'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_PACKING_METHOD_NOT_ALLOWED_01548',requestId:rid});
       return sendJson(res,200,{...(await previewCartPacking01548(scope,await readJson(req,{limit:32768}))),requestId:rid},{'cache-control':'no-store'});
+    }
+    if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
+      return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
     }
     if(p[4]==='nova-poshta'&&p[5]==='cart-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
