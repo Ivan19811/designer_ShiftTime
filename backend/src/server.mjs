@@ -12,6 +12,7 @@ import {checkoutPreflight01553} from './shipping-checkout-preflight-01553.mjs';
 import {createCheckoutDraft01554} from './shipping-checkout-draft-01554.mjs';
 import {bindCheckoutContacts01555,eraseCheckoutContacts01555} from './shipping-checkout-contacts-01555.mjs';
 import {prepareDraftReview01556} from './shipping-checkout-review-01556.mjs';
+import {listReviewOrders01558} from './orders-review-read-01558.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -216,6 +217,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01558 · Authenticated, store-scoped, strictly read-only internal queue.
+    if(p[4]==='orders-review'&&p.length===5){
+      assertOrderWriteRole(scope);
+      if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_METHOD_NOT_ALLOWED_01558',requestId:rid});
+      const q=new URL(req.url,'http://localhost').searchParams;
+      return sendJson(res,200,{...(await listReviewOrders01558(scope,q)),requestId:rid},{'cache-control':'private, no-store'});
     }
     // 01556 · Prepare only a MANUAL REVIEW record. CRM delivery is disabled.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='prepare-review'){
