@@ -9,6 +9,7 @@ import {cartPackingLayout01549} from './shipping-packing-layout-01549.mjs';
 import {previewCartMultiPlaceQuote01551} from './shipping-multiplace-quote-01551.mjs';
 import {assertPublishedShippingRate01551,publicPackingLayout01551,publicMultiPlaceQuote01551} from './shipping-public-cart-01551.mjs';
 import {checkoutPreflight01553} from './shipping-checkout-preflight-01553.mjs';
+import {createCheckoutDraft01554} from './shipping-checkout-draft-01554.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -213,6 +214,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01554 · Test-only authenticated checkout draft; no real order, payment or TTN.
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_DRAFT_METHOD_01554',requestId:rid});
+      assertOrderWriteRole(scope);
+      return sendJson(res,201,{...(await createCheckoutDraft01554(scope,await readJson(req,{limit:4096}))),requestId:rid},{'cache-control':'private, no-store'});
     }
     // 01553 · Authenticated Live Server checkout preflight; never creates an order.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-preflight'&&p.length===6){

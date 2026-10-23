@@ -95,6 +95,11 @@ export function buildPackingPlan01548(items,catalog,moves=[]){
     numberOfPackages:packages.length,readyForOrder:false,hasCarrierQuote:false,quoteStatus:'carrier-price',
     relationsChanged:false,orderCreated:false,waybillCreated:false};
 }
+export function packingFingerprint01548(items,output){
+  const identity=[...items].map(i=>[str(i.id),str(i.productId),str(i.variantId),str(i.componentKind),str(i.bundleId),str(i.parentItemId),Number(i.quantity),Number(i.unitPrice),Number(i.lineTotal),str(i.status)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const parcelUnits=[...output.packages.map(p=>p.main),...output.packages.flatMap(p=>p.accessories),...output.unassigned].map(i=>[i.unitKey,i.weightKg,i.dimensions,i.locked,i.calculateDelivery]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  return createHash('sha256').update(JSON.stringify({identity,parcelUnits})).digest('hex');
+}
 export async function previewCartPacking01548(scope,input,{cartView,parcelView}={}){
   if(!scope?.storeId)throw fail('NP_PACKING_SCOPE_REQUIRED_01548',403);
   assertPreviewRate01548(scope);
@@ -107,8 +112,6 @@ export async function previewCartPacking01548(scope,input,{cartView,parcelView}=
   const catalog=await resolveCatalog(scope);
   const output=buildPackingPlan01548(cart.items,catalog,input?.moves||[]);
   // No customer/address/token data in the revision fingerprint.
-  const identity=[...cart.items].map(i=>[str(i.id),str(i.productId),str(i.variantId),str(i.componentKind),str(i.bundleId),str(i.parentItemId),Number(i.quantity),Number(i.unitPrice),Number(i.lineTotal),str(i.status)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
-  const parcelUnits=[...output.packages.map(p=>p.main),...output.packages.flatMap(p=>p.accessories),...output.unassigned].map(i=>[i.unitKey,i.weightKg,i.dimensions,i.locked,i.calculateDelivery]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
-  const cartFingerprint=createHash('sha256').update(JSON.stringify({identity,parcelUnits})).digest('hex');
+  const cartFingerprint=packingFingerprint01548(cart.items,output);
   return {...output,siteId,cartId,cartFingerprint,previewOnly:true};
 }

@@ -10,7 +10,7 @@ const fail=(code,statusCode=409)=>Object.assign(new Error(code),{code,statusCode
 const cents=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=10000000&&Math.abs(Math.round(x*100)-x*100)<0.00001?Math.round(x*100):null;
 const cartIdRe=/^cart_[a-z0-9]{24,48}$/i;
 const siteIdRe=/^[-\w:]{1,160}$/;
-function fingerprint(cart){
+export function checkoutCartFingerprint01553(cart){
   const rows=(cart?.items||[]).map(i=>[str(i.id),str(i.productId),str(i.variantId),str(i.parentItemId),str(i.bundleId),str(i.sourceKind),str(i.status),str(i.currency),i.quantity,cents(Number(i.lineTotal))]);
   return createHash('sha256').update(JSON.stringify([cart?.siteId,cart?.id,cart?.currency,rows])).digest('hex');
 }
@@ -24,13 +24,13 @@ export function validateCheckoutPreflightInput01553(input){
   if(typeof input?.expectedWeightKg!=='number'||!Number.isFinite(input.expectedWeightKg)||input.expectedWeightKg<=0||input.expectedWeightKg>1000)throw fail('NP_PREFLIGHT_WEIGHT_INVALID_01553',400);
   return {siteId,cartId,cityRecipient:input.cityRecipient,warehouseRef:input.warehouseRef,expectedPackingRevision:input.expectedPackingRevision,expectedPlaces:input.expectedPlaces,expectedPriceCents:cents(input.expectedPrice),expectedDeclaredCents:cents(input.expectedDeclaredValue),expectedWeightKg:input.expectedWeightKg};
 }
-export async function checkoutPreflight01553(scope,input,{layout=cartPackingLayout01549,cartView=shopCartView01535,quote=previewCartMultiPlaceQuote01551,clientId=''}={}){
+export async function checkoutPreflight01553(scope,input,{layout=cartPackingLayout01549,cartView=shopCartView01535,quote=previewCartMultiPlaceQuote01551,clientId='',includeDraftContext=false}={}){
   if(!str(scope?.storeId))throw fail('NP_PREFLIGHT_SCOPE_REQUIRED_01553',403);
   const p=validateCheckoutPreflightInput01553(input);
   const read=async()=>{
     const plan=await layout(scope,{action:'load',siteId:p.siteId,cartId:p.cartId});
     const cart=await cartView(scope,p.siteId,p.cartId);
-    return {plan,cart,trusted:validateMultiPlacePlan01551(plan,cart),cartFingerprint:fingerprint(cart)};
+    return {plan,cart,trusted:validateMultiPlacePlan01551(plan,cart),cartFingerprint:checkoutCartFingerprint01553(cart)};
   };
   const initial=await read();
   const {plan,trusted}=initial;
@@ -44,5 +44,5 @@ export async function checkoutPreflight01553(scope,input,{layout=cartPackingLayo
   if(result.packingRevision!==plan.savedRevision||result.numberOfPackages!==trusted.seats||Math.abs(result.weightKg-trusted.weightKg)>.001||cents(result.declaredValue)!==cents(trusted.declaredValue))throw fail('NP_PREFLIGHT_QUOTE_INVALID_01553',502);
   if(cents(result.price)!==p.expectedPriceCents)throw fail('NP_PREFLIGHT_PRICE_CHANGED_01553');
   const amount=cents(trusted.declaredValue),delivery=cents(result.price);
-  return Object.freeze({stage:'01553',preflightPassed:true,previewOnly:true,final:false,orderReady:false,canPlaceOrder:false,canPay:false,waybillCreated:false,fitUnverified:true,quoteBasis:'server-cart-packing-01551',provider:'nova-poshta',currency:'UAH',packingRevision:plan.savedRevision,numberOfPackages:trusted.seats,weightKg:trusted.weightKg,subtotal:amount/100,shippingCost:delivery/100,estimatedTotal:(amount+delivery)/100,checkedAt:new Date().toISOString()});
+  return Object.freeze({stage:'01553',preflightPassed:true,previewOnly:true,final:false,orderReady:false,canPlaceOrder:false,canPay:false,waybillCreated:false,fitUnverified:true,quoteBasis:'server-cart-packing-01551',provider:'nova-poshta',currency:'UAH',packingRevision:plan.savedRevision,numberOfPackages:trusted.seats,weightKg:trusted.weightKg,subtotal:amount/100,shippingCost:delivery/100,estimatedTotal:(amount+delivery)/100,checkedAt:new Date().toISOString(),...(includeDraftContext?{_draftContext:{cartFingerprint:after.cartFingerprint,packingFingerprint:after.plan.cartFingerprint,cart:after.cart,plan:after.plan}}:{})});
 }
