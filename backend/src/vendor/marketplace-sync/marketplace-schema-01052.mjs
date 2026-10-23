@@ -1,3 +1,4 @@
+import {normalizeDelivery01547} from './marketplace-shipping-fields-01547.mjs';
 // 01052 · Marketplace canonical data schema.
 // Storage-agnostic domain models. No model knows where or how it is persisted.
 
@@ -123,6 +124,7 @@ export function createMarketplaceProduct01052(input={}){
     mediaIds: cleanIdArray(input.mediaIds),
     primaryMediaId: cleanString(input.primaryMediaId),
     attributes: cleanObject(input.attributes),
+    shipping01547: normalizeDelivery01547(input.shipping01547),
     variantIds: cleanIdArray(input.variantIds),
     primaryVariantId: cleanString(input.primaryVariantId),
     configuration: cleanObject(input.configuration),
@@ -210,6 +212,7 @@ export function createMarketplaceVariant01052(input={}){
     sku: cleanString(input.sku),
     status: cleanStatus(input.status,['draft','active','archived'],'active'),
     options: cleanObject(input.options),
+    shipping01547: normalizeDelivery01547(input.shipping01547),
     accessoryTargets01485: {mode:input.accessoryTargets01485?.mode==='explicit'?'explicit':'auto',refs:cleanArray(input.accessoryTargets01485?.refs).map(x=>({productId:cleanString(x?.productId),variantId:cleanString(x?.variantId),value:cleanString(x?.value)})).filter(x=>x.productId),generatedByRule01486:input.accessoryTargets01485?.generatedByRule01486===true,generatedRefs01486:cleanArray(input.accessoryTargets01485?.generatedRefs01486).map(x=>({productId:cleanString(x?.productId),variantId:cleanString(x?.variantId),value:cleanString(x?.value)})).filter(x=>x.productId)},
     price: cleanNumber(input.price, 0),
     oldPrice: cleanNumber(input.oldPrice, 0),

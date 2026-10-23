@@ -81,8 +81,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
     if(req.method!=='POST')return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
     if(!publishedTrafficIdentity?.storeId)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01543',requestId:rid});
+    // 01547: unauthenticated sample quotes cannot verify the specific variant's consent.
+    // Until a verified published-site cart route exists, show carrier price only.
+    return sendJson(res,409,{error:'NP_PARCEL_CARRIER_PRICE_01547',requestId:rid},{'cache-control':'no-store'});
+    /* LEGACY_SAMPLE_QUOTE_DISABLED_01547
     const out=await previewStoreQuote01544(publishedTrafficIdentity.storeId,await readJson(req,{limit:2048}),{clientId:requestClientAddress01414(req)});
     return sendJson(res,200,{...out,requestId:rid},{'cache-control':'no-store'});
+    */
   }
   // 01543 · Public read-only directory requires a validated published-site identity.
   if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p.length===6){

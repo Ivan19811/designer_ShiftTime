@@ -50,7 +50,7 @@ export async function listStoreProductParcels01545(scope,{snapshotImpl=loadSnaps
   const catalog=await snapshotImpl(scope);const products=list(catalog.products),variants=list(catalog.variants);
   const query=async db=>(await db.query(`SELECT product_id "productId",variant_id "variantId",shipping_required "shippingRequired",weight_kg "weightKg",length_cm "lengthCm",width_cm "widthCm",height_cm "heightCm" FROM shifttime_shipping_product_parcels WHERE store_id=$1`,[scope.storeId])).rows;
   const specs=dbClient?await query(dbClient):await withClient(query);
-  return {products:products.map(p=>({id:str(p.id),name:str(p.name),sku:str(p.sku),status:str(p.status)})).filter(p=>p.id),variants:variants.map(v=>({id:str(v.id),productId:str(v.productId),name:str(v.displayName01260||v.name||v.sku),sku:str(v.sku)})).filter(v=>v.id&&v.productId),specs:specs.map(r=>({...r,weightKg:r.weightKg==null?null:Number(r.weightKg),lengthCm:r.lengthCm==null?null:Number(r.lengthCm),widthCm:r.widthCm==null?null:Number(r.widthCm),heightCm:r.heightCm==null?null:Number(r.heightCm)})),stage:'01545'};
+  return {products:products.map(p=>({id:str(p.id),name:str(p.name),sku:str(p.sku),status:str(p.status),catalogRole01472:str(p.catalogRole01472),shipping01547:p.shipping01547||null})).filter(p=>p.id),variants:variants.map(v=>({id:str(v.id),productId:str(v.productId),name:str(v.displayName01260||v.name||v.sku),sku:str(v.sku),shipping01547:v.shipping01547||null})).filter(v=>v.id&&v.productId),specs:specs.map(r=>({...r,weightKg:r.weightKg==null?null:Number(r.weightKg),lengthCm:r.lengthCm==null?null:Number(r.lengthCm),widthCm:r.widthCm==null?null:Number(r.widthCm),heightCm:r.heightCm==null?null:Number(r.heightCm)})),stage:'01545'};
 }
 export async function saveStoreProductParcel01545(scope,input,{snapshotImpl=loadSnapshot,dbClient=undefined}={}){
   const data=normalizeProductParcel01545(input),s=await snapshotImpl(scope);
@@ -61,14 +61,50 @@ export async function saveStoreProductParcel01545(scope,input,{snapshotImpl=load
     [scope.storeId,data.productId,data.variantId,data.shippingRequired,data.weightKg,data.lengthCm,data.widthCm,data.heightCm,scope.userId||null]);return {saved:true,...data,stage:'01545'};};
   return dbClient?query(dbClient):withClient(query);
 }
+// 01547: Authenticated shop snapshot is authoritative for variation packaging flags.
+// The old 01545 DB rows remain a compatibility fallback only for items with no new settings.
+export function applySnapshotParcelSettings01547(items,catalog){
+  const products=new Map(list(catalog.products).map(p=>[str(p.id),p]));
+  const variants=new Map(list(catalog.variants).map(v=>[str(v.id),v]));
+  const records=list(catalog.specs).map(r=>({...r}));
+  let fixedPackages=0,groupableUnits=0,usingNewSettings=false;
+  for(const item of list(items)){
+    const product=products.get(str(item.productId));
+    if(!product)continue; // Legacy test/mock catalogs omit products; server cart/spec validation remains authoritative.
+    const existing=records.find(r=>str(r.productId)===str(item.productId)&&(str(r.variantId)===str(item.variantId)||!str(r.variantId)));
+    if(product.catalogRole01472==='service'||existing?.shippingRequired===false)continue;
+    const specific=item.variantId?variants.get(str(item.variantId)):null;
+    if(specific&&str(specific.productId)!==str(item.productId))throw bad('NP_PARCEL_CART_INVALID_01545',409);
+    const data=specific?.shipping01547||product.shipping01547||null;
+    if(!data)continue;
+    usingNewSettings=true;
+    // Unchecked = carrier decides price. Do not fall back to sample merchant tariff.
+    if(data.calculateDelivery!==true)throw bad('NP_PARCEL_CARRIER_PRICE_01547',409);
+    const weight=Number(data.weightKg);
+    const dims=['lengthCm','widthCm','heightCm'].map(k=>Number(data[k]));
+    if(!Number.isFinite(weight)||weight<=0||weight>1000||dims.some(d=>!Number.isFinite(d)||d<=0||d>300))throw bad('NP_PARCEL_PRODUCTS_NOT_CONFIGURED_01545',409);
+    const count=Number(item.quantity)||0;
+    if(!Number.isSafeInteger(count)||count<1||count>99)throw bad('NP_PARCEL_CART_INVALID_01545',409);
+    if(data.separatePackage===true)fixedPackages+=count;else groupableUnits+=count;
+    const id=str(item.productId),variantId=str(item.variantId);
+    const exactIndex=records.findIndex(r=>str(r.productId)===id&&str(r.variantId)===variantId);
+    const record={productId:id,variantId,shippingRequired:true,weightKg:weight,lengthCm:dims[0],widthCm:dims[1],heightCm:dims[2],separatePackage:data.separatePackage===true};
+    if(exactIndex>=0)records[exactIndex]=record;else records.push(record);
+  }
+  // A single-weight upstream request must not claim an exact multi-place quote.
+  // Groupable accessories cannot be inserted inside an explicitly separate package.
+  if(fixedPackages>1||(fixedPackages>0&&groupableUnits>0))throw bad('NP_PARCEL_MULTIPLACE_QUOTE_UNSUPPORTED_01547',409);
+  return {records,usingNewSettings,fixedPackages,groupableUnits};
+}
 export async function previewServerCartQuote01545(scope,input,{cartView=shopCartView01535,parcelView=listStoreProductParcels01545,quote=previewStoreQuote01544,clientId=''}={}){
   const siteId=validateId(input.siteId,'NP_PARCEL_SITE_INVALID_01545'),cartId=str(input.cartId);
   if(!/^cart_[a-z0-9]{24,48}$/i.test(cartId))throw bad('NP_PARCEL_CART_INVALID_01545',400);
   const cart=await cartView(scope,siteId,cartId);
   if(str(cart.siteId)!==siteId||str(cart.id)!==cartId||list(cart.issues).length)throw bad('NP_PARCEL_CART_INVALID_01545',409);
   const catalog=await parcelView(scope);
-  const plan=makeCartParcelPlan01545(cart.items,catalog.specs);
+  const planned=applySnapshotParcelSettings01547(cart.items,catalog);
+  const plan=makeCartParcelPlan01545(cart.items,planned.records);
   // Site/store/product and prices are rehydrated by the server, not sent by the browser.
   const result=await quote(scope.storeId,{cityRecipient:input.cityRecipient,warehouseRef:input.warehouseRef,declaredValue:plan.declaredValue},{clientId,trustedParcelWeightKg:plan.weightKg});
-  return {...result,weightKg:plan.weightKg,declaredValue:plan.declaredValue,quoteBasis:'server-cart-product-parcels',parcelStage:'01545',orderReady:false};
+  return {...result,weightKg:plan.weightKg,declaredValue:plan.declaredValue,quoteBasis:'server-cart-product-parcels',parcelStage:planned.usingNewSettings?'01547':'01545',fixedPackages:planned.fixedPackages,groupableUnits:planned.groupableUnits,orderReady:false};
 }
