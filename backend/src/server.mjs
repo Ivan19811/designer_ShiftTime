@@ -13,6 +13,7 @@ import {createCheckoutDraft01554} from './shipping-checkout-draft-01554.mjs';
 import {bindCheckoutContacts01555,eraseCheckoutContacts01555} from './shipping-checkout-contacts-01555.mjs';
 import {prepareDraftReview01556} from './shipping-checkout-review-01556.mjs';
 import {listReviewOrders01558} from './orders-review-read-01558.mjs';
+import {isReviewManager01560,getReviewManagers01560,getReviewHistory01560,updateReviewWorkflow01560} from './orders-review-workflow-01560.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -217,6 +218,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01560 · Internal workflow only, separate from checkout state and financial actions.
+    if(p[4]==='orders-review'&&p[5]==='managers'&&p.length===6){
+      if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_WORKFLOW_METHOD_01560',requestId:rid});
+      return sendJson(res,200,{...(await getReviewManagers01560(scope)),requestId:rid},{'cache-control':'private, no-store'});
+    }
+    if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='history'){
+      if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_WORKFLOW_METHOD_01560',requestId:rid});
+      return sendJson(res,200,{...(await getReviewHistory01560(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+    }
+    if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='workflow'){
+      if(req.method!=='PATCH')return sendJson(res,405,{error:'ORDERS_WORKFLOW_METHOD_01560',requestId:rid});
+      return sendJson(res,200,{...(await updateReviewWorkflow01560(scope,p[5],await readJson(req,{limit:512}))),requestId:rid},{'cache-control':'private, no-store'});
     }
     // 01558 · Authenticated, store-scoped, strictly read-only internal queue.
     if(p[4]==='orders-review'&&p.length===5){
