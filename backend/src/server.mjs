@@ -3,6 +3,7 @@ import {config} from './config.mjs';
 import {shippingHubStatus01543,hubDirectory01543,verifyCrmBridgeToken01543} from './shipping-hub-01543.mjs';
 import {getStoreShippingConnection01543,saveStoreShippingConnection01543,deleteStoreShippingConnection01543} from './shipping-store-credentials-01543.mjs';
 import {getQuoteProfile01544,saveQuoteProfile01544,previewStoreQuote01544} from './shipping-quote-service-01544.mjs';
+import {listStoreProductParcels01545,saveStoreProductParcel01545,previewServerCartQuote01545} from './shipping-product-parcels-01545.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -160,6 +161,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       assertAdminRole(scope);
       if(req.method==='PUT')return sendJson(res,200,{...(await saveQuoteProfile01544(scope,await readJson(req,{limit:2048}))),requestId:rid});
       return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
+    }
+    if(p[4]==='stores'&&p[5]==='nova-poshta'&&p[6]==='product-parcels'&&p.length===7){
+      if(req.method==='GET')return sendJson(res,200,{...(await listStoreProductParcels01545(scope)),requestId:rid},{'cache-control':'no-store'});
+      assertAdminRole(scope);
+      if(req.method==='PUT')return sendJson(res,200,{...(await saveStoreProductParcel01545(scope,await readJson(req,{limit:4096}))),requestId:rid});
+      return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
+    }
+    if(p[4]==='nova-poshta'&&p[5]==='cart-quote'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
+      return sendJson(res,200,{...(await previewServerCartQuote01545(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
     }
     if(p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});

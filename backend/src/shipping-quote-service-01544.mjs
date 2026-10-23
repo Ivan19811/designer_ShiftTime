@@ -33,7 +33,7 @@ export async function saveQuoteProfile01544(scope,data,{client=undefined}={}){
   };
   return client?work(client):withStoreClient01544(work);
 }
-export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImpl=globalThis.fetch}={}){
+export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImpl=globalThis.fetch,trustedParcelWeightKg=null}={}){
   // Inputs are intentionally untrusted. Price is an estimate only, not used in any order API.
   const q=normalizeQuoteRequest01544(input);
   assertQuoteLimit01544(storeId,clientId);
@@ -41,6 +41,9 @@ export async function previewStoreQuote01544(storeId,input,{clientId='',fetchImp
   if(!profile.configured||!profile.enabled)throw fail('NP_QUOTE_STORE_NOT_CONFIGURED_01544',409);
   const warehouses=(await novaPoshtaDirectory01542('warehouses',q.cityRecipient)).items;
   if(!warehouses.some(w=>w.ref.toLowerCase()===q.warehouseRef.toLowerCase()))throw fail('NP_QUOTE_WAREHOUSE_NOT_IN_CITY_01544',400);
-  const result=await requestNovaPoshtaQuote01544(profile,q,{fetchImpl});
-  return {...result,parcelWeightKg:profile.sampleParcelWeightKg,seats:profile.sampleSeats,quoteBasis:'seller-sample-parcel',orderReady:false};
+  const usingCart=trustedParcelWeightKg!==null;
+  const weight=usingCart?Number(trustedParcelWeightKg):profile.sampleParcelWeightKg;
+  if(!Number.isFinite(weight)||weight<=0||weight>1000)throw fail('NP_PARCEL_WEIGHT_INVALID_01545',409);
+  const result=await requestNovaPoshtaQuote01544({...profile,sampleParcelWeightKg:weight},q,{fetchImpl});
+  return {...result,parcelWeightKg:weight,seats:profile.sampleSeats,quoteBasis:usingCart?'server-cart-product-parcels':'seller-sample-parcel',orderReady:false};
 }
