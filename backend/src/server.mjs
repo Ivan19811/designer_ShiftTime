@@ -8,6 +8,8 @@ import {previewCartPacking01548} from './shipping-packing-preview-01548.mjs';
 import {cartPackingLayout01549} from './shipping-packing-layout-01549.mjs';
 import {previewCartMultiPlaceQuote01551} from './shipping-multiplace-quote-01551.mjs';
 import {assertPublishedShippingRate01551,publicPackingLayout01551,publicMultiPlaceQuote01551} from './shipping-public-cart-01551.mjs';
+import {checkoutPreflight01553} from './shipping-checkout-preflight-01553.mjs';
+import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -93,6 +95,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       ?await publicPackingLayout01551(publishedTrafficIdentity,cartId,input)
       :await publicMultiPlaceQuote01551(publishedTrafficIdentity,cartId,input,{clientId:publishedTrafficIdentity.siteId+':'+String(req.socket?.remoteAddress||'')});
     return sendJson(res,200,{...output,requestId:rid},{'cache-control':'private, no-store','vary':'x-st-site-token, x-st-cart-id'});
+  }
+  // 01553 · Public site checkout preflight: separately scoped buyer cart, read-only.
+  if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p[5]==='checkout-preflight'&&p.length===6){
+    if(req.method!=='POST')return sendJson(res,405,{error:'NP_PREFLIGHT_METHOD_01553',requestId:rid});
+    if(!publishedTrafficIdentity?.storeId||!publishedTrafficIdentity?.siteId)return sendJson(res,401,{error:'NP_PUBLIC_SITE_REQUIRED_01551',requestId:rid});
+    assertPublishedShippingRate01551(publishedTrafficIdentity.siteId,requestClientAddress01414(req));
+    const cartId=String(req.headers['x-st-cart-id']||'');
+    const scope=await provePublishedCart01551(publishedTrafficIdentity,cartId);
+    const input=await readJson(req,{limit:2048});
+    return sendJson(res,200,{...(await checkoutPreflight01553(scope,{...input,siteId:scope.siteId,cartId:scope.cartId},{clientId:scope.siteId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'private, no-store','vary':'x-st-site-token, x-st-cart-id'});
   }
   // 01544 · Published-site indicative quote is bound to validated site/store identity.
   if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&p[5]==='quote'&&p.length===6){
@@ -201,6 +213,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01553 · Authenticated Live Server checkout preflight; never creates an order.
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-preflight'&&p.length===6){
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_PREFLIGHT_METHOD_01553',requestId:rid});
+      return sendJson(res,200,{...(await checkoutPreflight01553(scope,await readJson(req,{limit:2048}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'private, no-store'});
     }
     if(p[4]==='nova-poshta'&&p[5]==='cart-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
