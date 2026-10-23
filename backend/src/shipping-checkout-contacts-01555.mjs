@@ -60,6 +60,8 @@ export async function eraseCheckoutContacts01555(scope,{draftId,siteId},{transac
   return transaction(async client=>{
     const owned=await client.query(`SELECT id FROM shifttime_checkout_drafts_01554 WHERE id=$1 AND store_id=$2 AND account_id=$3 AND workspace_id=$4 AND created_by_user_id=$5 AND site_id=$6 FOR UPDATE`,[draftId,scope.storeId,scope.accountId,scope.workspaceId,scope.userId,siteId]);
     if(!owned.rowCount)throw failure('NP_CONTACT_DRAFT_NOT_FOUND_01555',404);
+    // 01556: deleting consent invalidates any previously prepared review/outbox record (FK cascade).
+    await client.query(`DELETE FROM shifttime_checkout_review_queue_01556 WHERE draft_id=$1 AND store_id=$2`,[draftId,scope.storeId]);
     const deleted=await client.query(`DELETE FROM shifttime_checkout_contacts_01555 WHERE draft_id=$1 AND store_id=$2`,[draftId,scope.storeId]);
     return {stage:'01555',draftId,contactState:'not_bound',erased:Boolean(deleted.rowCount),previewOnly:true,canPlaceOrder:false};
   });

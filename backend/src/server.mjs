@@ -11,6 +11,7 @@ import {assertPublishedShippingRate01551,publicPackingLayout01551,publicMultiPla
 import {checkoutPreflight01553} from './shipping-checkout-preflight-01553.mjs';
 import {createCheckoutDraft01554} from './shipping-checkout-draft-01554.mjs';
 import {bindCheckoutContacts01555,eraseCheckoutContacts01555} from './shipping-checkout-contacts-01555.mjs';
+import {prepareDraftReview01556} from './shipping-checkout-review-01556.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -215,6 +216,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01556 · Prepare only a MANUAL REVIEW record. CRM delivery is disabled.
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='prepare-review'){
+      assertOrderWriteRole(scope);
+      if(req.method!=='POST')return sendJson(res,405,{error:'NP_REVIEW_METHOD_01556',requestId:rid});
+      const input=await readJson(req,{limit:512});
+      if(input?.draftId!==p[6])return sendJson(res,400,{error:'NP_REVIEW_INPUT_INVALID_01556',requestId:rid});
+      return sendJson(res,200,{...(await prepareDraftReview01556(scope,input)),requestId:rid},{'cache-control':'private, no-store'});
     }
     // 01555 · Owner-scoped encrypted PII binding; no public writes or order creation.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='contacts'){
