@@ -66,3 +66,16 @@ test('accessory independently flagged forms a locked standalone package',()=>{
   assert.equal(plan.packages.at(-1).locked,true);
   assert.throws(()=>buildPackingPlan01548(items,catalog,[{unitKey:'case:1',packageId:'main40:1'}]),{code:'NP_PACKING_MOVE_INVALID_01548'});
 });
+test('01549 destination hints distinguish allowed, dimensions and locked packages',()=>{
+  const {items,catalog}=fixture();
+  const plan=buildPackingPlan01548(items,catalog);
+  assert.equal(plan.allowedDestinations['case:1']['main40:1'],'allowed');
+  catalog.products.find(p=>p.id==='cover50').shipping01547=spec(50,50,10,3);
+  const tooLarge=buildPackingPlan01548(items,catalog);
+  assert.equal(tooLarge.allowedDestinations['cover:1']['main40:1'],'dimensions');
+  // The incompatible lid can remain unassigned, but never be auto-fitted.
+  assert.equal(tooLarge.unassigned.some(x=>x.unitKey==='cover:1'),true);
+  catalog.products.find(p=>p.id==='pan50').shipping01547.separatePackage=true;
+  const locked=buildPackingPlan01548(items,catalog);
+  assert.equal(locked.allowedDestinations['cover:1']['main50:1'],'locked');
+});

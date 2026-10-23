@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 // 01548 · Server-authoritative, read-only packing plan for one authenticated Store/site cart.
 // The browser may suggest accessory destinations; it may NEVER edit catalog relations,
 // quantities, prices, main anchors, courier tariffs, orders or waybills.
@@ -78,7 +79,19 @@ export function buildPackingPlan01548(items,catalog,moves=[]){
   if(unassigned.length)warnings.add('NP_PACKING_UNASSIGNED_01548');
   // Geometric bounding-box comparison is only a preliminary test, not an actual packing certification.
   warnings.add('NP_PACKING_FIT_UNVERIFIED_01548');
-  return {stage:'01548',packages,unassigned,serviceLines,warnings:[...warnings],
+  // Destinations are UI hints only; server continues to validate every proposed move.
+  const allowedDestinations={};
+  for(const item of [...packages.flatMap(p=>p.accessories),...unassigned]){
+    const row={};
+    for(const target of packages){
+      const alreadyHere=target.accessories.some(a=>a.unitKey===item.unitKey);
+      const before=target.weightKg===null?null:target.weightKg-(alreadyHere?item.weightKg||0:0);
+      const reason=target.locked||target.standaloneAccessory?'locked':!fits(item.dimensions,target.dimensions)?'dimensions':before!==null&&item.weightKg!==null&&before+item.weightKg>1000?'overweight':'allowed';
+      row[target.id]=reason;
+    }
+    allowedDestinations[item.unitKey]=row;
+  }
+  return {stage:'01548',packages,unassigned,allowedDestinations,serviceLines,warnings:[...warnings],
     numberOfPackages:packages.length,readyForOrder:false,hasCarrierQuote:false,quoteStatus:'carrier-price',
     relationsChanged:false,orderCreated:false,waybillCreated:false};
 }
@@ -93,5 +106,9 @@ export async function previewCartPacking01548(scope,input,{cartView,parcelView}=
   if(str(cart.id)!==cartId||str(cart.siteId)!==siteId||arr(cart.issues).length)throw fail('NP_PACKING_CART_INVALID_01548');
   const catalog=await resolveCatalog(scope);
   const output=buildPackingPlan01548(cart.items,catalog,input?.moves||[]);
-  return {...output,siteId,cartId,previewOnly:true};
+  // No customer/address/token data in the revision fingerprint.
+  const identity=[...cart.items].map(i=>[str(i.id),str(i.productId),str(i.variantId),str(i.componentKind),str(i.bundleId),str(i.parentItemId),Number(i.quantity),Number(i.unitPrice),Number(i.lineTotal),str(i.status)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const parcelUnits=[...output.packages.map(p=>p.main),...output.packages.flatMap(p=>p.accessories),...output.unassigned].map(i=>[i.unitKey,i.weightKg,i.dimensions,i.locked,i.calculateDelivery]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const cartFingerprint=createHash('sha256').update(JSON.stringify({identity,parcelUnits})).digest('hex');
+  return {...output,siteId,cartId,cartFingerprint,previewOnly:true};
 }
