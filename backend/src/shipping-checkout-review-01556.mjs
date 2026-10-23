@@ -1,12 +1,15 @@
 // 01556 · Prepare an authenticated CHECKOUT DRAFT for MANUAL review only.
 // The CRM outbox is intentionally disabled. No real order, payment, stock reservation, PII disclosure or TTN.
-import {checkoutPreflight01553} from './shipping-checkout-preflight-01553.mjs';
+import {checkoutPreflight01553,validateCheckoutPreflightInput01553} from './shipping-checkout-preflight-01553.mjs';
 import {lockedSnapshot01554} from './shipping-checkout-draft-01554.mjs';
 const withTransaction=async (...args)=>(await import('./db.mjs')).withTransaction(...args);
 const fail=(code,statusCode=409)=>Object.assign(new Error(code),{code,statusCode});
 const draftPattern=/^orderdraft_[a-f0-9]{32}$/i;
 const sitePattern=/^[-\w:]{1,160}$/;
 const cents=n=>Math.round(Number(n)*100);
+// 01557: JSONB canonicalizes object key order. Compare the exact same data by value,
+// retaining array order and all fields, instead of comparing JS property insertion order.
+const stableJson01557=value=>JSON.stringify(value,(_key,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export function validateDraftReview01556(input){
   if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['draftId','siteId','acknowledgeProvisional'].includes(k)))throw fail('NP_REVIEW_INPUT_INVALID_01556',400);
   if(!draftPattern.test(String(input.draftId||''))||!sitePattern.test(String(input.siteId||''))||input.acknowledgeProvisional!==true)throw fail('NP_REVIEW_CONFIRMATION_REQUIRED_01556',400);
@@ -26,6 +29,10 @@ export async function prepareDraftReview01556(scope,input,{transaction=withTrans
   });
   if(clock()-new Date(draft.created_at).getTime()>24*3600_000)throw fail('NP_REVIEW_DRAFT_EXPIRED_01556');
   const p={siteId:draft.site_id,cartId:draft.cart_id,cityRecipient:draft.recipient_city_ref,warehouseRef:draft.recipient_warehouse_ref,expectedPackingRevision:Number(draft.packing_revision),expectedPlaces:Number(draft.number_of_packages),expectedPrice:Number(draft.provisional_delivery_cents)/100,expectedWeightKg:Number(draft.total_weight_grams)/1000,expectedDeclaredValue:Number(draft.subtotal_cents)/100};
+  // 01557: draft column stores declared value in cents, but lockedSnapshot01554
+  // expects the NORMALIZED expectedDeclaredCents (not expectedDeclaredValue).
+  // The 01556 path passed an unnormalized p and always failed its last guard.
+  const validated=validateCheckoutPreflightInput01553(p);
   // A trusted server preflight refreshes cart, packing and provisional carrier estimate.
   const verified=await preflight(scope,p,{includeDraftContext:true});
   if(!verified?.preflightPassed||!verified?._draftContext||verified.canPlaceOrder!==false||cents(verified.shippingCost)!==Number(draft.provisional_delivery_cents)||cents(verified.subtotal)!==Number(draft.subtotal_cents)||cents(verified.estimatedTotal)!==Number(draft.provisional_total_cents))throw fail('NP_REVIEW_PRICE_OR_CART_CHANGED_01556');
@@ -37,8 +44,8 @@ export async function prepareDraftReview01556(scope,input,{transaction=withTrans
     const contacts=await db.query(`SELECT draft_id FROM shifttime_checkout_contacts_01555 WHERE draft_id=$1 AND store_id=$2 AND site_id=$3 AND created_by_user_id=$4 AND expires_at>now() FOR SHARE`,[args.draftId,scope.storeId,args.siteId,scope.userId]);
     if(!contacts.rowCount)throw fail('NP_REVIEW_CONTACTS_REQUIRED_01556');
     // Do not trust a browser-provided snapshot; verify current catalog/cart/packaging in the same PG TX.
-    const freshItems=await snapshot(db,scope,p,verified._draftContext);
-    if(!Array.isArray(freshItems)||!freshItems.length||JSON.stringify(freshItems)!==JSON.stringify(locked.items))throw fail('NP_REVIEW_PRICE_OR_CART_CHANGED_01556');
+    const freshItems=await snapshot(db,scope,validated,verified._draftContext);
+    if(!Array.isArray(freshItems)||!freshItems.length||stableJson01557(freshItems)!==stableJson01557(locked.items))throw fail('NP_REVIEW_PRICE_OR_CART_CHANGED_01556');
     const prior=await db.query(`SELECT * FROM shifttime_checkout_review_queue_01556 WHERE draft_id=$1 AND store_id=$2 FOR UPDATE`,[args.draftId,scope.storeId]);
     if(prior.rowCount)return reviewResponse01556(prior.rows[0],{replayed:true});
     const review=await db.query(`INSERT INTO shifttime_checkout_review_queue_01556 (draft_id,store_id,site_id,created_by_user_id,cart_fingerprint,packing_fingerprint,provisional_total_cents) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (draft_id) DO NOTHING RETURNING *`,[args.draftId,scope.storeId,args.siteId,scope.userId,locked.cart_fingerprint,locked.packing_fingerprint,locked.provisional_total_cents]);
