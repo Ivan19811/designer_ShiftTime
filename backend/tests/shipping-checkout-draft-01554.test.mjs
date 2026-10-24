@@ -51,7 +51,7 @@ test('01554 never commits if rows changed during cart validation',async()=>{
 test('01554 migration and route are store-scoped, public writes not enabled',()=>{
  const source=readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
  const ddl=readFileSync(new URL('../sql/047_shipping_checkout_drafts_01554.sql',import.meta.url),'utf8');
- assert.match(source,/createCheckoutDraft01554\(scope/);assert.match(source,/assertOrderWriteRole\(scope\);\s*return sendJson\(res,201/);
+ assert.match(source,/createCheckoutDraft01554\(scope/);assert.match(source,/assertOrderWriteRole\(scope\);\s*try\s*\{\s*return sendJson\(res,201/);
  assert.doesNotMatch(source,/p\[2\]==='public'.*p\[5\]==='checkout-draft'/);
  assert.match(ddl,/UNIQUE \(store_id,created_by_user_id,idempotency_key\)/);
  assert.match(ddl,/state text NOT NULL DEFAULT 'draft'/);

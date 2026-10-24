@@ -356,7 +356,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_DRAFT_METHOD_01554',requestId:rid});
       assertOrderWriteRole(scope);
-      return sendJson(res,201,{...(await createCheckoutDraft01554(scope,await readJson(req,{limit:4096}))),requestId:rid},{'cache-control':'private, no-store'});
+      try{
+        return sendJson(res,201,{...(await createCheckoutDraft01554(scope,await readJson(req,{limit:4096}))),requestId:rid},{'cache-control':'private, no-store'});
+      }catch(error){
+        const status=Number(error?.statusCode)||500;
+        if(status<500)throw error;
+        const code=/^NP_[A-Z0-9_]{5,110}$/.test(String(error?.code||''))?String(error.code):'NP_DRAFT_SERVER_FAILURE_01568';
+        // 01568: Security-safe Render correlation. NEVER log requests, SQL, secrets, contacts or full errors.
+        const sqlState=/^[A-Z0-9]{5}$/.test(String(error?.code||''))?String(error.code):'';
+        console.error('[01568][checkout-draft]',JSON.stringify({requestId:rid,status:Math.min(599,status),code,sqlState}));
+        return sendJson(res,Math.min(599,status),{error:code,requestId:rid},{'cache-control':'private, no-store'});
+      }
     }
     // 01553 · Authenticated Live Server checkout preflight; never creates an order.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-preflight'&&p.length===6){
