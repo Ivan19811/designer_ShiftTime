@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {readFile} from 'node:fs/promises';
 import {config} from './config.mjs';
 import {shippingHubStatus01543,hubDirectory01543,verifyCrmBridgeToken01543} from './shipping-hub-01543.mjs';
 import {getStoreShippingConnection01543,saveStoreShippingConnection01543,deleteStoreShippingConnection01543} from './shipping-store-credentials-01543.mjs';
@@ -20,6 +21,7 @@ import {getDraftRequote01563,refreshDraftRequote01563} from './orders-carrier-re
 import {createBuyerOffer01564,getBuyerOfferStatus01564,previewBuyerOffer01564,acknowledgeBuyerOffer01564,enforceOfferRate01564} from './orders-buyer-offer-01564.mjs';
 import {startBuyerEmailProof01565,verifyBuyerEmailProof01565,buyerEmailProofStatus01565,getManagerEmailProof01565} from './orders-buyer-identity-01565.mjs';
 import {createProductionOrder01566,getProductionOrderForDraft01566,listProductionOrders01566} from './orders-production-01566.mjs';
+import {placeBuyerOrder01567,buyerOrderStatus01567} from './orders-buyer-checkout-01567.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -94,6 +96,21 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01567 · Public buyer page lives on Render, never sends a loopback URL to customers.
+  if(p[2]==='public'&&p[3]==='orders-offers'&&['page','page-script','page-locale'].includes(p[4])&&p.length===5){
+    if(req.method!=='GET')return sendJson(res,405,{error:'BUYER_PAGE_METHOD_01567',requestId:rid});
+    const names={page:['orders-buyer-01567.html','text/html; charset=utf-8'], 'page-script':['orders-buyer-01567.js','text/javascript; charset=utf-8'], 'page-locale':['orders-buyer-01567.uk.json','application/json; charset=utf-8']};
+    const [name,contentType]=names[p[4]];const bytes=await readFile(new URL('../public/'+name,import.meta.url));
+    res.writeHead(200,{'content-type':contentType,'cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'content-length':bytes.length});return res.end(bytes);
+  }
+  // 01567 · Buyer explicitly places an accepted, short-lived offer. No client price fields.
+  if(p[2]==='public'&&p[3]==='orders-offers'&&p[4]==='checkout'&&p.length===6){
+    if(req.method!=='POST'||!['place','status'].includes(p[5]))return sendJson(res,405,{error:'BUYER_CHECKOUT_METHOD_01567',requestId:rid});
+    enforceOfferRate01564(requestClientAddress01414(req));
+    const body=await readJson(req,{limit:768});
+    const output=p[5]==='place'?await placeBuyerOrder01567(body):await buyerOrderStatus01567(body.token);
+    return sendJson(res,p[5]==='place'&&!output.replayed?201:200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   // 01565 · Email possession verification. OTP never exposed to browser responses/logs.
   if(p[2]==='public'&&p[3]==='orders-offers'&&p[4]==='identity'&&p.length===6){
     if(req.method!=='POST'||!['start','verify','status'].includes(p[5]))return sendJson(res,405,{error:'ORDERS_IDENTITY_METHOD_01565',requestId:rid});
