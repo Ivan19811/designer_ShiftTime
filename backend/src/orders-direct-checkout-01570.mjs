@@ -79,5 +79,5 @@ export async function placeDirectCheckout01570(scope,cartId,input,{transaction=w
 }
 export async function directCheckoutStatus01570(scope,cartId,{lookup=withClient}={}){
  if(!scope?.storeId||!sitePattern.test(String(scope.siteId||''))||!cartPattern.test(String(cartId||'')))throw fail('DIRECT_CHECKOUT_SCOPE_INVALID_01570',403);
- return lookup(async db=>{const q=await db.query(`SELECT * FROM shifttime_production_orders_01566 WHERE store_id=$1 AND site_id=$2 AND source_cart_id=$3 AND placement_channel='direct_checkout' LIMIT 1`,[scope.storeId,scope.siteId,cartId]);return {stage:'01570',found:Boolean(q.rowCount),order:q.rowCount?safe(q.rows[0]):null};});
+ return lookup(async db=>{const q=await db.query(`SELECT * FROM shifttime_production_orders_01566 WHERE store_id=$1 AND site_id=$2 AND source_cart_id=$3 ORDER BY created_at DESC LIMIT 1`,[scope.storeId,scope.siteId,cartId]);const r=q.rows[0];return {stage:'01570',found:Boolean(q.rowCount),order:r?{stage:'01570',orderCreated:true,orderNumber:String(r.order_number),orderStatus:String(r.order_status),placementChannel:String(r.placement_channel||'manager'),total:Number(r.total_cents)/100,currency:'UAH',numberOfPackages:Number(r.number_of_packages)}:null};});
 }

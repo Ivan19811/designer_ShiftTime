@@ -23,6 +23,7 @@ import {startBuyerEmailProof01565,verifyBuyerEmailProof01565,buyerEmailProofStat
 import {createProductionOrder01566,getProductionOrderForDraft01566,listProductionOrders01566} from './orders-production-01566.mjs';
 import {placeBuyerOrder01567,buyerOrderStatus01567} from './orders-buyer-checkout-01567.mjs';
 import {placeDirectCheckout01570,directCheckoutStatus01570} from './orders-direct-checkout-01570.mjs';
+import {renewOrderedShopCart01573} from './orders-direct-reorder-01573.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -99,13 +100,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
   // 01570: buyer's own published cart + site identity, no manager involvement.
   if(p[2]==='public'&&p[3]==='shop'&&p[4]==='direct-checkout'&&p.length===6){
-    if(req.method!=='POST'||!['place','status'].includes(p[5]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});
+    if(req.method!=='POST'||!['place','status','renew'].includes(p[5]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});
     if(!publishedTrafficIdentity?.storeId||!publishedTrafficIdentity?.siteId)return sendJson(res,401,{error:'DIRECT_CHECKOUT_SITE_REQUIRED_01570',requestId:rid});
     assertPublishedShippingRate01551(publishedTrafficIdentity.siteId,requestClientAddress01414(req));
     const cartId=String(req.headers['x-st-cart-id']||'');
     await provePublishedCart01551(publishedTrafficIdentity,cartId);
-    const output=p[5]==='status'?await directCheckoutStatus01570(publishedTrafficIdentity,cartId):await placeDirectCheckout01570(publishedTrafficIdentity,cartId,await readJson(req,{limit:4096}));
-    return sendJson(res,p[5]==='place'&&!output.replayed?201:200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer','vary':'x-st-site-token, x-st-cart-id'});
+    const output=p[5]==='status'?await directCheckoutStatus01570(publishedTrafficIdentity,cartId):p[5]==='renew'?await renewOrderedShopCart01573(publishedTrafficIdentity,cartId):await placeDirectCheckout01570(publishedTrafficIdentity,cartId,await readJson(req,{limit:4096}));
+    return sendJson(res,p[5]==='renew'||p[5]==='place'&&!output.replayed?201:200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer','vary':'x-st-site-token, x-st-cart-id'});
   }
   // 01567 · Public buyer page lives on Render, never sends a loopback URL to customers.
   if(p[2]==='public'&&p[3]==='orders-offers'&&['page','page-script','page-locale'].includes(p[4])&&p.length===5){
@@ -116,7 +117,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   // 01567 · Buyer explicitly places an accepted, short-lived offer. No client price fields.
   if(p[2]==='public'&&p[3]==='orders-offers'&&p[4]==='checkout'&&p.length===6){
-    if(req.method!=='POST'||!['place','status'].includes(p[5]))return sendJson(res,405,{error:'BUYER_CHECKOUT_METHOD_01567',requestId:rid});
+    if(req.method!=='POST'||!['place','status','renew'].includes(p[5]))return sendJson(res,405,{error:'BUYER_CHECKOUT_METHOD_01567',requestId:rid});
     enforceOfferRate01564(requestClientAddress01414(req));
     const body=await readJson(req,{limit:768});
     const output=p[5]==='place'?await placeBuyerOrder01567(body):await buyerOrderStatus01567(body.token);
@@ -245,14 +246,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   if(p[2]==='shop'&&p[3]==='direct-checkout'&&p.length===5){
-    if(req.method!=='POST'||!['place','status'].includes(p[4]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});
+    if(req.method!=='POST'||!['place','status','renew'].includes(p[4]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});
     const body=await readJson(req,{limit:4096});
     const cartId=String(body?.cartId||'');const siteId=String(body?.siteId||'');
     if(!/^[-\w:]{1,160}$/.test(siteId)||!/^cart_[a-z0-9]{24,48}$/i.test(cartId))return sendJson(res,400,{error:'DIRECT_CHECKOUT_INPUT_INVALID_01570',requestId:rid});
     // Store is derived from the authenticated session. The cart is revalidated against it.
     const directScope={...scope,siteId};
-    const output=p[4]==='status'?await directCheckoutStatus01570(directScope,cartId):await placeDirectCheckout01570(directScope,cartId,((({siteId,cartId,...rest})=>rest)(body)));
-    return sendJson(res,p[4]==='place'&&!output.replayed?201:200,{...output,requestId:rid},{'cache-control':'private, no-store'});
+    const output=p[4]==='status'?await directCheckoutStatus01570(directScope,cartId):p[4]==='renew'?await renewOrderedShopCart01573(directScope,cartId):await placeDirectCheckout01570(directScope,cartId,((({siteId,cartId,...rest})=>rest)(body)));
+    return sendJson(res,p[4]==='renew'||p[4]==='place'&&!output.replayed?201:200,{...output,requestId:rid},{'cache-control':'private, no-store'});
   }
   if(p[2]==='integrations'&&p[3]==='shipping-hub'){
     if(req.method==='GET'&&p[4]==='status'&&p.length===5)return sendJson(res,200,{...shippingHubStatus01543(),requestId:rid});
