@@ -19,6 +19,7 @@ import {getOrderReadiness01562} from './orders-readiness-01562.mjs';
 import {getDraftRequote01563,refreshDraftRequote01563} from './orders-carrier-requote-01563.mjs';
 import {createBuyerOffer01564,getBuyerOfferStatus01564,previewBuyerOffer01564,acknowledgeBuyerOffer01564,enforceOfferRate01564} from './orders-buyer-offer-01564.mjs';
 import {startBuyerEmailProof01565,verifyBuyerEmailProof01565,buyerEmailProofStatus01565,getManagerEmailProof01565} from './orders-buyer-identity-01565.mjs';
+import {createProductionOrder01566,getProductionOrderForDraft01566,listProductionOrders01566} from './orders-production-01566.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -240,6 +241,21 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01566 · REAL store order, owner/manager initiated only. All state and prices revalidated in PostgreSQL transaction.
+    if(p[4]==='orders-production'&&p.length===5){
+      if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_PRODUCTION_METHOD_01566',requestId:rid});
+      const u=new URL(req.url,'http://localhost');const limit=u.searchParams.has('limit')?Number(u.searchParams.get('limit')):20,offset=u.searchParams.has('offset')?Number(u.searchParams.get('offset')):0;
+      return sendJson(res,200,{...(await listProductionOrders01566(scope,{limit,offset})),requestId:rid},{'cache-control':'private, no-store'});
+    }
+    if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='production-order'){
+      if(req.method==='GET')return sendJson(res,200,{...(await getProductionOrderForDraft01566(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+      if(req.method==='POST'){
+        const body=await readJson(req,{limit:1024});
+        const data=await createProductionOrder01566(scope,p[5],body);
+        return sendJson(res,data.replayed?200:201,{...data,requestId:rid},{'cache-control':'private, no-store'});
+      }
+      return sendJson(res,405,{error:'ORDERS_PRODUCTION_METHOD_01566',requestId:rid});
     }
     // 01565 · Store-scoped manager view of buyer email proof (read only, no PII).
     if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='buyer-identity'){
