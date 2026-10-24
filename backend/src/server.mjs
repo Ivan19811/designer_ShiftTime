@@ -28,6 +28,7 @@ import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
+import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
@@ -235,6 +236,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
+  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='profile'&&p.length===4)return sendJson(res,200,{stage:'01579',profile:await getAccountProfile01579(session),requestId:rid},{'cache-control':'private, no-store'});
   // 01543 · Authorized builder directory independent of local/API product repository mode.
   if(req.method==='GET'&&p[2]==='integrations'&&p[3]==='nova-poshta'&&p.length===5){
     const kind=p[4],u=new URL(req.url,'http://localhost');
