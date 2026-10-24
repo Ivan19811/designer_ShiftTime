@@ -17,6 +17,7 @@ import {isReviewManager01560,getReviewManagers01560,getReviewHistory01560,update
 import {getReviewActivity01561,setReviewPriority01561,createReviewNote01561} from './orders-review-manager-01561.mjs';
 import {getOrderReadiness01562} from './orders-readiness-01562.mjs';
 import {getDraftRequote01563,refreshDraftRequote01563} from './orders-carrier-requote-01563.mjs';
+import {createBuyerOffer01564,getBuyerOfferStatus01564,previewBuyerOffer01564,acknowledgeBuyerOffer01564,enforceOfferRate01564} from './orders-buyer-offer-01564.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -91,6 +92,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01564 · Buyer bearer-link quote acknowledgement. Token is ONLY in the POST body,
+  // NEVER in a URL query, cookie, ALL LOG or authorization header. No real order is created.
+  if(p[2]==='public'&&p[3]==='orders-offers'&&p.length===5){
+    if(req.method!=='POST'||!['preview','acknowledge'].includes(p[4]))return sendJson(res,405,{error:'ORDERS_OFFER_METHOD_01564',requestId:rid});
+    enforceOfferRate01564(requestClientAddress01414(req));
+    const body=await readJson(req,{limit:512});
+    const data=p[4]==='preview'?await previewBuyerOffer01564(body.token):await acknowledgeBuyerOffer01564(body.token,body.acknowledge);
+    return sendJson(res,200,{...data,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   // 01551 · Verified Netlify buyer cart: published-site + unguessable cart bearer,
   // protected independently from administrator credentials and seller configurations.
   if(p[2]==='public'&&p[3]==='shipping'&&p[4]==='nova-poshta'&&['cart-packing-layout','cart-multiplace-quote'].includes(p[5])&&p.length===6){
@@ -221,6 +231,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='nova-poshta'&&p[5]==='cart-multiplace-quote'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_MULTI_QUOTE_METHOD_01551',requestId:rid});
       return sendJson(res,200,{...(await previewCartMultiPlaceQuote01551(scope,await readJson(req,{limit:4096}),{clientId:session.userId+':'+requestClientAddress01414(req)})),requestId:rid},{'cache-control':'no-store'});
+    }
+    // 01564 · Authenticated proposal creation and store-scoped status. Neither endpoint creates an order.
+    if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='buyer-offer'){
+      if(req.method==='GET')return sendJson(res,200,{...(await getBuyerOfferStatus01564(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+      if(req.method==='POST')return sendJson(res,201,{...(await createBuyerOffer01564(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+      return sendJson(res,405,{error:'ORDERS_OFFER_METHOD_01564',requestId:rid});
     }
     // 01563 · Manager initiated indicative Nova Poshta price refresh; no order/TTN/payment.
     if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='carrier-quote'){
