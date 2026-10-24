@@ -36,15 +36,22 @@ export async function lockedSnapshot01554(db,scope,p,ctx){
   const actual={id:p.cartId,siteId:p.siteId,currency:cart.currency,items:projected.items};
   if(projected.issues.length||checkoutCartFingerprint01553(actual)!==ctx.cartFingerprint)throw fail('NP_DRAFT_CART_CHANGED_01554');
   const packingQ=await db.query(`SELECT cart_fingerprint "cartFingerprint",revision,moves FROM shifttime_shipping_cart_packing_01549 WHERE store_id=$1 AND site_id=$2 AND cart_id=$3 FOR SHARE`,[scope.storeId,p.siteId,p.cartId]);
-  if(!packingQ.rowCount||packingQ.rows[0].revision!==p.expectedPackingRevision||str(packingQ.rows[0].cartFingerprint)!==ctx.packingFingerprint)throw fail('NP_DRAFT_PACKING_CHANGED_01554');
+  // 01567B: The read-only checkout preflight legitimately accepts the server's
+  // canonical *unsaved automatic* plan (revision 0, no layout row). A draft must
+  // accept the same plan, but only after reconstructing and checking it under
+  // transaction locks below. Never accept a missing row for an older saved revision.
+  const savedPacking=packingQ.rows[0]||null;
+  const unsavedAutomatic=!savedPacking&&p.expectedPackingRevision===0&&ctx.plan.savedRevision===0&&ctx.plan.saved===false&&ctx.plan.layoutStale===false;
+  if(!unsavedAutomatic&&(!savedPacking||savedPacking.revision!==p.expectedPackingRevision||str(savedPacking.cartFingerprint)!==ctx.packingFingerprint))throw fail('NP_DRAFT_PACKING_CHANGED_01554');
+  const verifiedMoves=unsavedAutomatic?[]:savedPacking.moves;
   // Recompute live unit dimensions AND grouping with catalog + parcel rows locked in this transaction.
   const parcelQ=await db.query(`SELECT product_id "productId",variant_id "variantId",shipping_required "shippingRequired",weight_kg "weightKg",length_cm "lengthCm",width_cm "widthCm",height_cm "heightCm" FROM shifttime_shipping_product_parcels WHERE store_id=$1 FOR SHARE`,[scope.storeId]);
   const s=catalogQ.rows[0].snapshot||{};
   const shippingCatalog={products:(s.products||[]).map(x=>({id:x.id,catalogRole01472:x.catalogRole01472,shipping01547:x.shipping01547||null})),variants:(s.variants||[]).map(x=>({id:x.id,productId:x.productId,shipping01547:x.shipping01547||null})),specs:parcelQ.rows.map(x=>({...x,weightKg:x.weightKg===null?null:Number(x.weightKg),lengthCm:x.lengthCm===null?null:Number(x.lengthCm),widthCm:x.widthCm===null?null:Number(x.widthCm),heightCm:x.heightCm===null?null:Number(x.heightCm)}))};
-  const livePlan=buildPackingPlan01548(projected.items,shippingCatalog,packingQ.rows[0].moves);
+  const livePlan=buildPackingPlan01548(projected.items,shippingCatalog,verifiedMoves);
   const liveFingerprint=packingFingerprint01548(projected.items,livePlan);
   if(liveFingerprint!==ctx.packingFingerprint||JSON.stringify(livePlan.packages.map(x=>[x.id,x.main.itemId,x.dimensions,x.weightKg,x.accessories.map(a=>a.unitKey)]))!==JSON.stringify(ctx.plan.packages.map(x=>[x.id,x.main.itemId,x.dimensions,x.weightKg,x.accessories.map(a=>a.unitKey)])))throw fail('NP_DRAFT_PACKING_CHANGED_01554');
-  const liveTrusted=validateMultiPlacePlan01551({...livePlan,siteId:p.siteId,cartId:p.cartId,previewOnly:true,layoutStale:false,moves:packingQ.rows[0].moves},actual);
+  const liveTrusted=validateMultiPlacePlan01551({...livePlan,siteId:p.siteId,cartId:p.cartId,previewOnly:true,layoutStale:false,moves:verifiedMoves},actual);
   if(liveTrusted.seats!==p.expectedPlaces||Math.abs(liveTrusted.weightKg-p.expectedWeightKg)>.001||toCents(liveTrusted.declaredValue)!==p.expectedDeclaredCents)throw fail('NP_DRAFT_PACKING_CHANGED_01554');
   return projected.items.map(i=>({itemId:i.id,productId:i.productId,variantId:i.variantId||'',sku:i.sku||'',componentKind:i.componentKind,quantity:i.quantity,unitPriceCents:toCents(i.unitPrice),lineTotalCents:toCents(i.lineTotal),parentItemId:i.parentItemId||null,bundleId:i.bundleId||null,title:str(i.title).slice(0,180)}));
 }
