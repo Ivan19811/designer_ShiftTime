@@ -102,3 +102,6 @@ export async function acknowledgeBuyerOffer01564(token,acknowledge,{transaction=
   return {...details(saved.rows[0],clock()),items:publicItems(o.items),alreadyAcknowledged:false};
  });
 }
+
+// 01565 uses the exact same persisted buyer snapshot validator, never a browser supplied price.
+export {buyerSelect as buyerSelect01564,digest as digestOffer01564,buyerBasis as buyerBasis01564,assertOfferMatches as assertOfferMatches01564};
