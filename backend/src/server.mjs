@@ -1,5 +1,6 @@
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
+import path from 'node:path';
 import {config} from './config.mjs';
 import {shippingHubStatus01543,hubDirectory01543,verifyCrmBridgeToken01543} from './shipping-hub-01543.mjs';
 import {getStoreShippingConnection01543,saveStoreShippingConnection01543,deleteStoreShippingConnection01543} from './shipping-store-credentials-01543.mjs';
@@ -29,8 +30,10 @@ import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
+import {createSsoHandoff01581,establishSso01581,authorizeSso01581,exchangeSso01581} from './sso-service-01581.mjs';
+import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
-import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084} from './auth-service-01084.mjs';
+import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
@@ -94,7 +97,28 @@ function sameTrafficTenant01203(a={},b={}){return String(a.accountId||'')===Stri
 function sendGoogleOAuthPopup01398(res,{ok=false,code='',targetOrigin=''}={}){const origin=String(targetOrigin||'').trim()||'*',message=JSON.stringify({type:'st:google-sheets-oauth:01398',ok:!!ok,code:String(code||'')}).replace(/</g,'\u003c'),target=JSON.stringify(origin).replace(/</g,'\u003c'),body=`<!doctype html><meta charset=\"utf-8\"><script>try{window.opener&&window.opener.postMessage(${message},${target})}catch{};try{window.close()}catch{}</script>`;res.writeHead(ok?200:400,{'content-type':'text/html; charset=utf-8','content-length':Buffer.byteLength(body),'cache-control':'no-store'});res.end(body);}
 async function resolveRequestPublishedTrafficIdentity01203(req){const token=String(req?.headers?.['x-st-site-token']||'').trim();return token?resolvePublishedSiteTrafficIdentity01203(token):null;}
 function requestClientAddress01414(req){return String(req?.headers?.['x-forwarded-for']||req?.socket?.remoteAddress||'').split(',')[0].trim();}
+function ssoCookieConfig01581(req){
+  const secure=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'||!!req.socket.encrypted;
+  return {secure};
+}
+function ssoLoginCookie01581(req,sessionId){
+  if(String(process.env.SSO_COOKIE_SECRET||'').length<32)return {};
+  return {'set-cookie':ssoCookieHeader01581(sessionId,process.env.SSO_COOKIE_SECRET,ssoCookieConfig01581(req))};
+}
+function ssoRedirect01581(res,url,{cookie=''}={}){
+  res.writeHead(303,{'location':url,'cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff',...(cookie?{'set-cookie':cookie}:{})});return res.end();
+}
+async function crmStatic01581(req,res,parts){
+  if(req.method!=='GET'&&req.method!=='HEAD')return sendJson(res,405,{error:'CRM_STATIC_READ_ONLY_01581'});
+  const target=parts.length===1?'index.html':parts.slice(1).join('/');
+  if(!/^[A-Za-z0-9_.\/-]+$/.test(target)||target.split('/').some(part=>part==='..'||part.startsWith('.')))return sendJson(res,404,{error:'CRM_ASSET_NOT_FOUND_01581'});
+  const ext=path.extname(target).toLowerCase();const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.ico':'image/x-icon','.json':'application/json; charset=utf-8'};
+  if(!types[ext])return sendJson(res,404,{error:'CRM_ASSET_NOT_FOUND_01581'});
+  try{const data=await readFile(new URL('../public/crm/'+target,import.meta.url));res.writeHead(200,{'content-type':types[ext],'cache-control':ext==='.html'?'no-store':'public, max-age=300','x-content-type-options':'nosniff','referrer-policy':'no-referrer','x-frame-options':'DENY','content-length':data.length});return req.method==='HEAD'?res.end():res.end(data);}catch(e){if(e.code==='ENOENT'||e.code==='EISDIR')return sendJson(res,404,{error:'CRM_ASSET_NOT_FOUND_01581'});throw e;}
+}
 async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
+  if(p[0]==='crm'){if(p.length===1&&new URL(req.url,'http://localhost').pathname==='/crm')return ssoRedirect01581(res,'/crm/');return crmStatic01581(req,res,p);}
+
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
@@ -197,14 +221,32 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'crm',clientId:client});
     return sendJson(res,200,out,{'cache-control':'private, max-age=30'});
   }
+  // 01581 · Central first-party SSO broker. Redirects must match explicit SSO_ALLOWED_CALLBACKS.
+  if(p[2]==='auth'&&p[3]==='sso'&&p[4]==='authorize'&&req.method==='GET'){
+    const q=new URL(req.url,'http://localhost').searchParams;
+    const clientId=q.get('client_id')||'',redirectUri=q.get('redirect_uri')||'',state=q.get('state')||'';
+    if(!validState01581(state))return sendJson(res,400,{error:'SSO_STATE_INVALID_01581'});
+    const out=await authorizeSso01581(req,{clientId,redirectUri,codeChallenge:q.get('code_challenge')||''});
+    return ssoRedirect01581(res,appendSsoCallback01581(redirectUri,out.error?{error:out.error,state}:{code:out.code,state}));
+  }
+  if(p[2]==='auth'&&p[3]==='sso'&&p[4]==='establish'&&req.method==='POST'){
+    const buf=await readBuffer(req,{limit:2048}),form=new URLSearchParams(buf.toString('utf8'));
+    const clientId=form.get('client_id')||'',redirectUri=form.get('redirect_uri')||'';
+    const established=await establishSso01581(form.get('ticket')||'',{clientId,redirectUri});
+    return ssoRedirect01581(res,established.redirectUri,{cookie:ssoCookieHeader01581(established.sessionId,process.env.SSO_COOKIE_SECRET,ssoCookieConfig01581(req))});
+  }
+  if(p[2]==='auth'&&p[3]==='sso'&&p[4]==='exchange'&&req.method==='POST'){
+    const out=await exchangeSso01581(await readJson(req,{limit:2048}));
+    return sendJson(res,200,{...out,stage:'01581',requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='register'){
     const out=await registerUser01084(await readJson(req));
-    return sendJson(res,201,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope:out.scope,stage:'01084',requestId:rid});
+    return sendJson(res,201,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope:out.scope,stage:'01084',requestId:rid},{...ssoLoginCookie01581(req,out.sessionId),'cache-control':'no-store'});
   }
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='login'){
     const out=await loginUser01084(await readJson(req));
     const scope=await resolveAuthorizedStore(out.user.id,'');
-    return sendJson(res,200,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope,stage:'01084',requestId:rid});
+    return sendJson(res,200,{token:out.token,expiresAt:out.expiresAt,user:out.user,scope,stage:'01084',requestId:rid},{...ssoLoginCookie01581(req,out.sessionId),'cache-control':'no-store'});
   }
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='invitations'&&p[4])return sendJson(res,200,{...(await inspectInvitation01087(p[4])),stage:'01087',requestId:rid});
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='media'&&p[4]){const out=await getPublicCloudMediaDelivery01081(p[4]);res.statusCode=302;res.setHeader('location',out.url);res.setHeader('cache-control',out.public?'public, max-age=300':'private, no-store');return res.end();}
@@ -233,8 +275,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const u=new URL(req.url,'http://localhost');try{const out=await completeGoogleSheetsOAuth01398({code:u.searchParams.get('code')||'',state:u.searchParams.get('state')||'',error:u.searchParams.get('error')||''});return sendGoogleOAuthPopup01398(res,{ok:true,code:'connected',targetOrigin:out.returnOrigin});}catch(e){return sendGoogleOAuthPopup01398(res,{ok:false,code:e?.code||e?.message||'oauth_failed',targetOrigin:e?.returnOrigin||''});}
   }
   const session=await authenticateRequest(req);
+  if(req.method==='POST'&&p[2]==='auth'&&p[3]==='sso'&&p[4]==='logout-all'){
+    const count=await revokeAllUserSessions01084(session.userId);
+    return sendJson(res,200,{ok:true,revoked:count,stage:'01581',requestId:rid},{'cache-control':'no-store','set-cookie':clearSsoCookie01581(ssoCookieConfig01581(req))});
+  }
+  if(req.method==='POST'&&p[2]==='auth'&&p[3]==='sso'&&p[4]==='handoff'){
+    const out=await createSsoHandoff01581(session,await readJson(req,{limit:2048}));
+    return sendJson(res,200,{...out,stage:'01581',requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
-  if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid});}
+  if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid},{'set-cookie':clearSsoCookie01581(ssoCookieConfig01581(req))});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='profile'&&p.length===4)return sendJson(res,200,{stage:'01579',profile:await getAccountProfile01579(session),requestId:rid},{'cache-control':'private, no-store'});
   // 01543 · Authorized builder directory independent of local/API product repository mode.

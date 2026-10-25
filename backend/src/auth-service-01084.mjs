@@ -99,6 +99,16 @@ export async function registerUser01084(input={}){
   });
 }
 
+// 01581 · Fresh, independently revocable session after verified authorization-code exchange.
+export async function createSessionForUser01581(userId){
+  return withClient(async client=>{
+    const q=await client.query(`SELECT id,email,name FROM platform_users WHERE id=$1 AND status='active' LIMIT 1`,[userId]);
+    if(!q.rowCount)throw authError('SSO_SESSION_INVALID_01581',401);
+    const session=await createSessionWithClient(client,userId);
+    return {...session,userId,email:q.rows[0].email,name:q.rows[0].name};
+  });
+}
+
 export async function loginUser01084(input={}){
   const email=emailOf(input.email),password=String(input.password??'');validateEmail(email);if(!password)throw authError('Email або пароль неправильні',401);
   return withClient(async client=>{
