@@ -83,6 +83,7 @@ import {listNotificationDeliveries01409,retryNotificationDelivery01409,sendNotif
 import {listNotificationRecipientCatalog01416} from './notification-recipient-routing-01416.mjs';
 import {getNotificationPreferences01417,saveNotificationPreferences01417,notificationPreferenceQueueStats01417,startNotificationPreferencesScheduler01417,stopNotificationPreferencesScheduler01417} from './notification-preferences-01417.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
+import {accessPolicyService01597} from './access-policy-service-01597.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
@@ -343,6 +344,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
   }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  // 01597 · Self-only projected custom grants. Never accepts a client-supplied actor ID.
+  if(p[2]==='access'&&p[3]==='my-permissions'&&p.length===4){
+    if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_METHOD_DENIED_01597',requestId:rid});
+    const u=new URL(req.url,'http://localhost');
+    return sendJson(res,200,await accessPolicyService01597.myAccess(scope,session.userId,u.searchParams.get('siteId')||''),{'cache-control':'private, no-store'});
+  }
   if(p[2]==='shop'&&p[3]==='direct-checkout'&&p.length===5){
     if(req.method!=='POST'||!['place','status','renew'].includes(p[4]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});
     const body=await readJson(req,{limit:4096});
@@ -643,6 +650,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertAdminRole(scope);return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
   if(p[2]==='admin'){
     assertAdminView01087(scope);
+    // 01597 · Owner-only management of explicit store/site permission roles.
+    if(p[3]==='role-center'){
+      const action=p[4]||'',id=p[5]||'',u=new URL(req.url,'http://localhost');
+      if(req.method==='GET'&&action==='catalog'&&p.length===5)return sendJson(res,200,accessPolicyService01597.catalog(),{'cache-control':'private, no-store'});
+      if(req.method==='GET'&&action==='roles'&&p.length===5)return sendJson(res,200,{stage:'01597',roles:await accessPolicyService01597.roles(scope)},{'cache-control':'private, no-store'});
+      if(req.method==='POST'&&action==='roles'&&p.length===5)return sendJson(res,201,{stage:'01597',role:await accessPolicyService01597.createRole(scope,session.userId,await readJson(req,{limit:16384}))});
+      if(req.method==='PATCH'&&action==='roles'&&id&&p.length===6)return sendJson(res,200,{stage:'01597',role:await accessPolicyService01597.updateRole(scope,session.userId,id,await readJson(req,{limit:16384}))});
+      if(req.method==='GET'&&action==='assignments'&&p.length===5)return sendJson(res,200,{stage:'01597',assignments:await accessPolicyService01597.assignments(scope)},{'cache-control':'private, no-store'});
+      if(req.method==='POST'&&action==='assignments'&&p.length===5)return sendJson(res,201,{stage:'01597',assignment:await accessPolicyService01597.assign(scope,session.userId,await readJson(req,{limit:4096}))});
+      if(req.method==='POST'&&action==='assignments'&&id&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,{stage:'01597',assignment:await accessPolicyService01597.revoke(scope,session.userId,id)});
+      if(req.method==='GET'&&action==='preview'&&p.length===5)return sendJson(res,200,await accessPolicyService01597.preview(scope,u.searchParams.get('userId')||'',u.searchParams.get('siteId')||''),{'cache-control':'private, no-store'});
+      return sendJson(res,404,{error:'ST_ACCESS_ROUTE_NOT_FOUND_01597',requestId:rid});
+    }
     if(req.method==='GET'&&p[3]==='overview')return sendJson(res,200,{...(await getAdminOverview01087(scope,session.userId)),actor:{userId:session.userId,email:session.email,name:session.name,role:scope.role,capabilities:getEffectiveCapabilities01087(scope)},scope});
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='histogram'){
       assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');
