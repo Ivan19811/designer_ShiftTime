@@ -31,6 +31,9 @@ import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRo
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
+import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} from './site-customer-account-service-01595.mjs';
+import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
+import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
 import {createSsoHandoff01581,establishSso01581,authorizeSso01581,exchangeSso01581} from './sso-service-01581.mjs';
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
@@ -120,11 +123,44 @@ async function crmStatic01581(req,res,parts){
 }
 async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOrigin);if(req.method==='OPTIONS')return sendNoContent(res,204);res.setHeader('x-st-request-id',rid);const p=pathParts(req.url);
   if(p[0]==='crm'){if(p.length===1&&new URL(req.url,'http://localhost').pathname==='/crm')return ssoRedirect01581(res,'/crm/');return crmStatic01581(req,res,p);}
+  // 01595 · Hosted ShiftTime ID only; user passwords must not be entered on merchant pages.
+  if(req.method==='GET'&&p[0]==='identity'&&p[1]==='site'&&p.length<=3){
+    const asset=p[2]||'index.html',paths={'index.html':['site-customer-identity-01595.html','text/html; charset=utf-8'],'script.js':['site-customer-identity-01595.js','text/javascript; charset=utf-8'],'locale.json':['site-customer-account-01595.uk.json','application/json; charset=utf-8']};
+    if(!paths[asset])return sendJson(res,404,{error:'SITE_ACCOUNT_HOSTED_ASSET_NOT_FOUND_01595'});
+    const [file,contentType]=paths[asset],bytes=await readFile(new URL('../public/'+file,import.meta.url));
+    res.writeHead(200,{'content-type':contentType,'cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff','x-frame-options':'DENY','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'content-length':bytes.length});return res.end(bytes);
+  }
+
 
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01595 · Customer sessions are NOT Builder/CRM sessions. Credentials live only on trusted Render.
+  if(p[2]==='public'&&p[3]==='site'&&p[4]==='account'&&p.length===6){
+    const action=p[5],site=publishedTrafficIdentity;
+    if(!site)return sendJson(res,401,{error:'SITE_ACCOUNT_SITE_REQUIRED_01595',stage:'01595',requestId:rid},siteAccountHeaders01595);
+    if(!['start','exchange','me','logout'].includes(action))return sendJson(res,404,{error:'SITE_ACCOUNT_ROUTE_01595',requestId:rid},siteAccountHeaders01595);
+    if(action==='me'&&req.method==='GET')return sendJson(res,200,{...(await customerSession01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
+    if(req.method!=='POST'||action==='me')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
+    if(action==='logout')return sendJson(res,200,{...(await logoutSiteCustomer01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
+    limitCustomerAuth01595(site.siteId,requestClientAddress01414(req));
+    const input=await readJson(req,{limit:2048});
+    const output=action==='start'?await startSiteCustomerFlow01595(site,input):await exchangeSiteCustomerCode01595(site,input.code,input.verifier);
+    return sendJson(res,200,{...output,requestId:rid},siteAccountHeaders01595);
+  }
+  if(p[2]==='public'&&p[3]==='identity'&&p[4]==='site'&&p.length===6){
+    const action=p[5];
+    if(action==='flow'&&req.method==='GET'){
+      const tx=new URL(req.url,'http://localhost').searchParams.get('tx')||'';
+      return sendJson(res,200,{...(await flowPublicInfo01595(tx)),requestId:rid},siteAccountHeaders01595);
+    }
+    if(!['login','register'].includes(action)||req.method!=='POST')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
+    const input=await readJson(req,{limit:2048});
+    limitCustomerAuth01595(String(input.tx||'').slice(0,120),requestClientAddress01414(req));
+    const output=await finishHostedIdentity01595(input.tx,action,input);
+    return sendJson(res,200,{...output,requestId:rid},siteAccountHeaders01595);
+  }
   // 01570: buyer's own published cart + site identity, no manager involvement.
   if(p[2]==='public'&&p[3]==='shop'&&p[4]==='direct-checkout'&&p.length===6){
     if(req.method!=='POST'||!['place','status','renew'].includes(p[5]))return sendJson(res,405,{error:'DIRECT_CHECKOUT_METHOD_01570',requestId:rid});

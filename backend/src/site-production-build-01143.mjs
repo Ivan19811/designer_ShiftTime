@@ -1,4 +1,5 @@
 import {injectAiConsultantPublicRuntime01414,buildAiConsultantResultsPage01414} from './ai-consultant-public-page-01414.mjs';
+import {installPublishedCustomerAccount01595} from './site-customer-account-publish-01595.mjs';
 const clean=value=>String(value??'').trim();
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
@@ -168,7 +169,7 @@ export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',
   if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:root});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
   const target=clean(apiProxyTarget).replace(/\/+$/,'');
   if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
-  return files;
+  return installPublishedCustomerAccount01595(files);
 }
 
 export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={},aiConsultantPublicConfig={}}={}){
@@ -181,5 +182,5 @@ export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarge
   for(const page of pages){const path=outputPathForRoute01143(page?.path||'/');if(files.has(path))throw Object.assign(new Error(`Duplicate published route: ${page?.path||'/'}`),{statusCode:400});let html=injectPublishedTrafficBridge01203(renderPage(pkg,page,{canonicalBaseUrl}),{publishedSiteIdentity,apiProxyTarget});html=injectAiConsultantPublicRuntime01414(html,{config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414});files.set(path,Buffer.from(html,'utf8'));}
   if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:clean(canonicalBaseUrl).replace(/\/+$/,'')});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
   const target=clean(apiProxyTarget).replace(/\/+$/,'');if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
-  return files;
+  return installPublishedCustomerAccount01595(files);
 }

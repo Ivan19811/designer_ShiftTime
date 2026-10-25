@@ -27,7 +27,7 @@ export async function noteServiceUseSafely01592(userId,service,source,logger=con
   catch(e){logger.warn?.('[01592] trusted service tracking unavailable',{service,code:e?.code||'DB_ERROR'});return false;}
 }
 
-const siteCountSql=`(SELECT COUNT(*)::int FROM shifttime_builder_sites b WHERE b.owner_user_id=u.id AND b.status<>'archived')`;
+const siteCountSql=`(SELECT COUNT(DISTINCT b.id)::int FROM shifttime_builder_sites b LEFT JOIN platform_user_site_memberships_01592 sm ON sm.site_id=b.id AND sm.user_id=u.id AND sm.status='active' WHERE (b.owner_user_id=u.id OR sm.user_id IS NOT NULL) AND b.status<>'archived')`;
 const storeCountSql=`(SELECT COUNT(DISTINCT s.id)::int FROM platform_stores s JOIN platform_workspaces w ON w.id=s.workspace_id JOIN platform_accounts a ON a.id=w.account_id WHERE s.status<>'archived' AND w.status='active' AND a.status='active' AND (EXISTS (SELECT 1 FROM platform_memberships m WHERE m.user_id=u.id AND m.status='active' AND m.account_id=a.id AND (m.workspace_id IS NULL OR m.workspace_id=w.id) AND (m.store_id IS NULL OR m.store_id=s.id)) OR EXISTS(SELECT 1 FROM platform_user_shop_customers_01592 sc WHERE sc.user_id=u.id AND sc.store_id=s.id AND sc.status='active')))`;
 const rolesSql=`COALESCE((SELECT jsonb_agg(DISTINCT m.role) FROM platform_memberships m WHERE m.user_id=u.id AND m.status='active'),'[]'::jsonb)`;
 const servicesSql=`COALESCE((SELECT jsonb_agg(jsonb_build_object('serviceCode',us.service_code,'evidence',us.evidence,'lastSeenAt',us.last_seen_at) ORDER BY us.service_code) FROM platform_user_services_01592 us WHERE us.user_id=u.id),'[]'::jsonb)`;
