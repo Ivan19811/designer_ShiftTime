@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {normalizeRegistryFilters01592,assertPlatformSuperadmin01592} from '../src/platform-user-registry-core-01592.mjs';
+const source=fs.readFileSync(new URL('../src/platform-user-registry-service-01592.mjs',import.meta.url),'utf8');
+test('01593 sort uses strict allowlist',()=>{for(const sort of ['createdAt','name','email','siteCount','storeCount'])assert.equal(normalizeRegistryFilters01592({sort}).sort,sort);assert.throws(()=>normalizeRegistryFilters01592({sort:'id;DROP TABLE platform_users;'}),/INVALID_SORT_FILTER/);});
+test('01593 order uses strict allowlist',()=>{assert.equal(normalizeRegistryFilters01592({order:'ASC'}).order,'asc');assert.throws(()=>normalizeRegistryFilters01592({order:'desc;select'}),/INVALID_ORDER_FILTER/);});
+test('01593 role filters bound as parameter and whitelisted',()=>{assert.equal(normalizeRegistryFilters01592({role:'manager'}).role,'manager');assert.throws(()=>normalizeRegistryFilters01592({role:'superadmin'}),/INVALID_ROLE_FILTER/);assert.match(source,/mr\.role=\$\$\{params\.length\}/);});
+test('01593 sort SQL uses server-owned column map',()=>{assert.match(source,/sortColumns=\{createdAt:/);assert.match(source,/const direction=f\.order==='asc'\?'ASC':'DESC'/);assert.match(source,/ORDER BY \$\{sortBy\} \$\{direction\} NULLS LAST/);});
+test('01593 global rights never derived from membership role',()=>{assert.throws(()=>assertPlatformSuperadmin01592('usr_abc','usr_other'),/PLATFORM_SUPERADMIN_REQUIRED/);});
+test('01593 read-only service with no role changes',()=>{assert.match(source,/assertPlatformSuperadmin01592\(actorId\)/);assert.doesNotMatch(source,/UPDATE platform_memberships/);});
