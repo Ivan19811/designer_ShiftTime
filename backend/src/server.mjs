@@ -344,6 +344,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
   }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  // 01599 · Own UI navigation grants, never another member's data.
+  if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
+    if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_NAVIGATION_METHOD_DENIED_01599',requestId:rid});
+    return sendJson(res,200,await accessPolicyService01597.myNavigation01599(scope,session.userId),{'cache-control':'private, no-store'});
+  }
   // 01597 · Self-only projected custom grants. Never accepts a client-supplied actor ID.
   if(p[2]==='access'&&p[3]==='my-permissions'&&p.length===4){
     if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_METHOD_DENIED_01597',requestId:rid});

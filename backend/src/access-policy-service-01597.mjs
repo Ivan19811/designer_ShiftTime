@@ -1,6 +1,7 @@
 // 01597 · Site/store-scoped role catalog, management, and read-only grant projection.
 // Not yet wired into legacy write endpoints (01600); do not represent the preview as enforcement.
 import crypto from 'node:crypto';
+import {projectOwnNavigation01599} from './access-visibility-core-01599.mjs';
 import {accessCatalog01597,assertAccessPolicyManager01597,mergeAccessGrants01597,normalizeAccessRoleInput01597,normalizeAccessAssignment01597} from './access-policy-core-01597.mjs';
 const clean=v=>String(v??'').trim();
 const uid=prefix=>`${prefix}_${crypto.randomUUID().replace(/-/g,'').slice(0,20)}`;
@@ -81,6 +82,27 @@ export function createAccessPolicyService01597({run=defaultRun}={}){
         await audit(c,scope,actor,'access.assignment.revoke',id,{roleId:q.rows[0].roleId,membershipId:q.rows[0].membershipId});await c.query('COMMIT');return q.rows[0];
       }catch(e){await c.query('ROLLBACK');throw e;}
     });},
+    async myNavigation01599(scope,userId){
+      ensureScope(scope);if(!USER_ID.test(clean(userId)))throw err('ST_ACCESS_USER_ID_INVALID_01597');
+      return run(async c=>{
+        // Tenant and Store verified by resolveAuthorizedStore in the router. The actor is
+        // taken from the authenticated session and NEVER from a query parameter.
+        const q=await c.query(`SELECT a.role_id "roleId",a.status,a.scope_kind "scopeKind",
+          a.site_id "siteId",r.status "roleStatus",r.permissions
+          FROM platform_role_assignments_01597 a
+          JOIN platform_custom_roles_01597 r ON r.id=a.role_id AND r.account_id=a.account_id
+          JOIN platform_memberships m ON m.id=a.membership_id AND m.account_id=a.account_id
+          LEFT JOIN shifttime_builder_sites s ON s.id=a.site_id AND s.account_id=a.account_id
+            AND s.workspace_id=$2 AND s.store_id=a.store_id AND s.status='active'
+          WHERE a.account_id=$1 AND a.store_id=$3
+            AND m.user_id=$4 AND m.status='active' AND a.status='active' AND r.status='active'
+            AND (m.workspace_id IS NULL OR m.workspace_id=$2)
+            AND (m.store_id IS NULL OR m.store_id=$3)
+            AND (a.scope_kind='store' OR (a.scope_kind='site' AND s.id IS NOT NULL))
+          ORDER BY a.id LIMIT 500`,[scope.accountId,scope.workspaceId,scope.storeId,userId]);
+        return projectOwnNavigation01599(q.rows,{accountId:scope.accountId,storeId:scope.storeId,userId});
+      });
+    },
     async myAccess(scope,userId,siteId=''){
       ensureScope(scope);if(!USER_ID.test(clean(userId)))throw err('ST_ACCESS_USER_ID_INVALID_01597');
       return run(async c=>{await assertSiteInStore(c,scope,clean(siteId));return {stage:'01597',storeId:scope.storeId,accountId:scope.accountId,userId,...await listGrants(c,scope,userId,siteId),enforcement:'foundation-only'};});
