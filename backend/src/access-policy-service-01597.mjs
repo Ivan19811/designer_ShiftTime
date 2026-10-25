@@ -70,6 +70,11 @@ export function createAccessPolicyService01597({run=defaultRun}={}){
       await c.query('BEGIN');try{
         const role=await ensureRole(c,scope,data.roleId,true);if(role.status!=='active')throw err('ST_ACCESS_ROLE_DISABLED_01597',409);
         const member=await ensureMembership(c,scope,data.membershipId);await assertSiteInStore(c,scope,data.siteId);
+        // 01600: persist explicit-access enrollment inside the SAME transaction as assignment.
+        // This marker survives role revocation, preventing silent legacy privilege restoration.
+        await c.query(`INSERT INTO platform_access_enrollments_01600(account_id,store_id,user_id)
+          VALUES($1,$2,$3) ON CONFLICT (account_id,store_id,user_id) DO NOTHING`,
+          [scope.accountId,scope.storeId,member.user_id]);
         const id=uid('agrant');
         const q=await c.query(`INSERT INTO platform_role_assignments_01597(id,account_id,role_id,membership_id,store_id,site_id,scope_kind,assigned_by_user_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,role_id "roleId",membership_id "membershipId",store_id "storeId",site_id "siteId",scope_kind "scopeKind",status`,[id,scope.accountId,data.roleId,data.membershipId,scope.storeId,data.siteId,data.scopeKind,actor]);
         await audit(c,scope,actor,'access.assignment.create',id,{roleId:data.roleId,membershipId:data.membershipId,userId:member.user_id,scopeKind:data.scopeKind,siteId:data.siteId});await c.query('COMMIT');return q.rows[0];

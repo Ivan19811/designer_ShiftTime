@@ -27,6 +27,8 @@ import {placeDirectCheckout01570,directCheckoutStatus01570} from './orders-direc
 import {renewOrderedShopCart01573} from './orders-direct-reorder-01573.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
+import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
+import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
@@ -344,6 +346,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
   }
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  // 01600 · Central server gate runs before route-specific parsing/mutations.
+  // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
+  const protectedAction01600=classifyProtectedAction01600(req.method,p);
+  const protectedDecision01600=protectedAction01600
+    ? await inspectProtectedAccess01600(scope,session.userId,protectedAction01600)
+    : null;
   // 01599 · Own UI navigation grants, never another member's data.
   if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
     if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_NAVIGATION_METHOD_DENIED_01599',requestId:rid});
@@ -456,14 +464,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
     // 01558 · Authenticated, store-scoped, strictly read-only internal queue.
     if(p[4]==='orders-review'&&p.length===5){
-      assertOrderWriteRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');
       if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_METHOD_NOT_ALLOWED_01558',requestId:rid});
       const q=new URL(req.url,'http://localhost').searchParams;
       return sendJson(res,200,{...(await listReviewOrders01558(scope,q)),requestId:rid},{'cache-control':'private, no-store'});
     }
     // 01556 · Prepare only a MANUAL REVIEW record. CRM delivery is disabled.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='prepare-review'){
-      assertOrderWriteRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_REVIEW_METHOD_01556',requestId:rid});
       const input=await readJson(req,{limit:512});
       if(input?.draftId!==p[6])return sendJson(res,400,{error:'NP_REVIEW_INPUT_INVALID_01556',requestId:rid});
@@ -471,7 +479,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
     // 01555 · Owner-scoped encrypted PII binding; no public writes or order creation.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='contacts'){
-      assertOrderWriteRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');
       if(!/^orderdraft_[a-f0-9]{32}$/i.test(p[6]))return sendJson(res,400,{error:'NP_CONTACT_INPUT_INVALID_01555',requestId:rid});
       if(req.method==='POST'){
         const input=await readJson(req,{limit:8192});
@@ -487,7 +495,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     // 01554 · Test-only authenticated checkout draft; no real order, payment or TTN.
     if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===6){
       if(req.method!=='POST')return sendJson(res,405,{error:'NP_DRAFT_METHOD_01554',requestId:rid});
-      assertOrderWriteRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');
       try{
         return sendJson(res,201,{...(await createCheckoutDraft01554(scope,await readJson(req,{limit:4096}))),requestId:rid},{'cache-control':'private, no-store'});
       }catch(error){
@@ -628,31 +636,34 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
-    if(req.method==='POST'&&p.length===5){assertWriteRole(scope);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
+    if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId)});
-    if(req.method==='PUT'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
-    if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
-    if(req.method==='DELETE'&&revisionId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}
-    if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
+    if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
+    if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
+    if(req.method==='DELETE'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}
+    if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
-  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
+  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
   if(p[2]==='sites'&&req.method==='GET'&&p.length===3){
     const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
-    return sendJson(res,200,{stage:'01476',sites:await (summary?listBuilderSiteSummaries01476(scope):listBuilderSites01170(scope))});
+    const sites=await (summary?listBuilderSiteSummaries01476(scope):listBuilderSites01170(scope));
+    // 01600: Never return other sites to a site-only employee.
+    const onlySites=protectedDecision01600?.allowedSiteIds;
+    return sendJson(res,200,{stage:'01476',sites:Array.isArray(onlySites)&&Array.isArray(sites)?sites.filter(s=>onlySites.includes(s.id)):sites});
   }
   if(p[2]==='sites'&&p[3]&&req.method==='GET'&&p.length===4)return sendJson(res,200,{stage:'01170',site:await getBuilderSite01170(scope,p[3])});
-  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertWriteRole(scope);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}))});}
-  if(p[2]==='sites'&&p[3]&&p[4]==='metadata'&&req.method==='PATCH'&&p.length===5){assertWriteRole(scope);return sendJson(res,200,{stage:'01231',site:await saveBuilderSiteMetadata01231(scope,p[3],await readJson(req,{limit:1024*1024}))});}
+  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}))});}
+  if(p[2]==='sites'&&p[3]&&p[4]==='metadata'&&req.method==='PATCH'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',site:await saveBuilderSiteMetadata01231(scope,p[3],await readJson(req,{limit:1024*1024}))});}
   if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){
-    assertWriteRole(scope);
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
     const site=await saveBuilderSite01170(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024}));
     const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
     if(summary){const {project,...metadata}=site;return sendJson(res,200,{stage:'01476',site:metadata});}
     return sendJson(res,200,{stage:'01170',site});
   }
-  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertAdminRole(scope);return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
+  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
   if(p[2]==='admin'){
     assertAdminView01087(scope);
     // 01597 · Owner-only management of explicit store/site permission roles.
@@ -764,7 +775,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='network'&&p[3]==='orders'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedSellerOrders(scope));
-    if(req.method==='PATCH'&&p[4]){assertOrderWriteRole(scope);return sendJson(res,200,await updateAuthorizedSellerOrder(scope,p[4],await readJson(req)));}
+    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerOrder(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Seller order route not found',requestId:rid});
   }
   if(p[2]==='network'){
@@ -772,17 +783,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[3]==='join'){assertWriteRole(scope);return sendJson(res,200,await ensureSeller(scope,await readJson(req)));}
     if(req.method==='PATCH'&&p[3]==='seller'){assertWriteRole(scope);return sendJson(res,200,await updateSeller(scope,await readJson(req)));}
     if(req.method==='PATCH'&&p[3]==='policy'){assertWriteRole(scope);return sendJson(res,200,await updatePolicy(scope,await readJson(req)));}
-    if(req.method==='POST'&&p[3]==='products'&&p[5]==='publish'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await publishNetworkProduct(scope,p[4]));}
-    if(req.method==='POST'&&p[3]==='products'&&p[5]==='sync'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await syncNetworkProduct(scope,p[4]));}
-    if(req.method==='POST'&&p[3]==='listings'&&p[5]==='unpublish'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await unpublishListing(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='products'&&p[5]==='publish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await publishNetworkProduct(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='products'&&p[5]==='sync'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await syncNetworkProduct(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='listings'&&p[5]==='unpublish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await unpublishListing(scope,p[4]));}
     return sendJson(res,404,{error:'Network route not found',requestId:rid});
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(p[3]==='snapshot'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await loadSnapshot(scope));
     if(req.method==='GET'&&p[4]==='export')return sendJson(res,200,await loadSnapshot(scope),{'content-disposition':`attachment; filename="marketplace-${scope.storeId}.json"`});
-    if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertWriteRole(scope);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
-    if(req.method==='DELETE'&&p.length===4){assertWriteRole(scope);await resetSnapshot(scope);return sendNoContent(res,204);}
+    if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
+    if(req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await resetSnapshot(scope);return sendNoContent(res,204);}
   }
   if(p[3]==='supplier-sync-schedules'){
     const sourceId=p[4]||'';
@@ -826,16 +837,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
     if(req.method==='PATCH'){assertWriteRole(scope);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
   }
-  if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
-  if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
-  if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await bulkSetProductStatus01523(scope,await readJson(req,{limit:1024*1024})));}
+  if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
+  if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
+  if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await bulkSetProductStatus01523(scope,await readJson(req,{limit:1024*1024})));}
   const key=RESOURCE_PATHS_01071[p[3]];
   if(key){const id=p[4]||'';
     if(req.method==='GET'&&!id)return sendJson(res,200,await listResource(scope,key));
     if(req.method==='GET'&&id){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
-    if(req.method==='POST'&&!id){assertWriteRole(scope);return sendJson(res,201,await createResource(scope,key,await readJson(req)));}
-    if(req.method==='PATCH'&&id){assertWriteRole(scope);return sendJson(res,200,await updateResource(scope,key,id,await readJson(req)));}
-    if(req.method==='DELETE'&&id){assertWriteRole(scope);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
+    if(req.method==='POST'&&!id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await createResource(scope,key,await readJson(req)));}
+    if(req.method==='PATCH'&&id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateResource(scope,key,id,await readJson(req)));}
+    if(req.method==='DELETE'&&id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }

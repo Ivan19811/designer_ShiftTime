@@ -61,6 +61,6 @@ test('01555 migration and route protect private contacts and no payment/order si
  const server=readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
  assert.match(sql,/REFERENCES shifttime_checkout_drafts_01554\(id\) ON DELETE CASCADE/);
  assert.doesNotMatch(sql,/phone\s+text|first_name\s+text|email\s+text/i);
- assert.match(server,/assertOrderWriteRole\(scope\);\s*if\(!\/\^orderdraft_/);
+ assert.match(server,/assertLegacyForUnmanaged01600\(scope,protectedDecision01600,'order'\);\s*if\(!\/\^orderdraft_/);
  assert.match(server,/bindCheckoutContacts01555\(scope,input\)/);
 });
