@@ -30,6 +30,8 @@ import {pool} from './db.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
+import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
+import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
 import {createSsoHandoff01581,establishSso01581,authorizeSso01581,exchangeSso01581} from './sso-service-01581.mjs';
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
@@ -286,6 +288,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='activate-password'){const out=await activatePasswordForUser01084(session.userId,await readJson(req));return sendJson(res,200,{...out,stage:'01084',requestId:rid});}
   if(req.method==='POST'&&p[2]==='auth'&&p[3]==='logout'){await revokeSession01084(session.sessionId);return sendJson(res,200,{ok:true,stage:'01084',requestId:rid},{'set-cookie':clearSsoCookie01581(ssoCookieConfig01581(req))});}
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='contexts')return sendJson(res,200,{stage:'01094',contexts:await listAuthorizedStoreContexts01088(session.userId),requestId:rid});
+  // 01592: Cross-tenant directory has a separate platform-only gate (not account owner/admin).
+  if(p[2]==='platform'&&p[3]==='admin'&&p[4]==='users'){
+    assertPlatformSuperadmin01592(session.userId);
+    if(req.method==='GET'&&p.length===5){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listPlatformUsers01592(session.userId,Object.fromEntries(u.searchParams.entries())),{'cache-control':'private, no-store'});}
+    if(req.method==='GET'&&p.length===6)return sendJson(res,200,await getPlatformUser01592(session.userId,p[5]),{'cache-control':'private, no-store'});
+    return sendJson(res,405,{error:'REGISTRY_READ_ONLY_01592',stage:'01592',requestId:rid});
+  }
+  if(req.method==='GET'&&p[2]==='platform'&&p[3]==='me'&&p[4]==='services'&&p.length===5)return sendJson(res,200,await myServices01592(session.userId),{'cache-control':'private, no-store'});
   if(req.method==='GET'&&p[2]==='auth'&&p[3]==='profile'&&p.length===4)return sendJson(res,200,{stage:'01579',profile:await getAccountProfile01579(session),requestId:rid},{'cache-control':'private, no-store'});
   // 01543 · Authorized builder directory independent of local/API product repository mode.
   if(req.method==='GET'&&p[2]==='integrations'&&p[3]==='nova-poshta'&&p.length===5){
@@ -645,7 +655,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }
   if(req.method==='POST'&&p[2]==='deployment'&&p[3]==='import-local-operational'){assertAdminRole(scope);return sendJson(res,200,await importLocalOperationalBundle01080(scope,await readJson(req)));}
-  if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context')return sendJson(res,200,await getAuthorizedPlatformSnapshot(session.userId,scope));
+  if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context'){const result=await getAuthorizedPlatformSnapshot(session.userId,scope);await noteServiceUseSafely01592(session.userId,'builder','builder_context');return sendJson(res,200,result);}
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces')return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
   if(p[2]==='tables'){

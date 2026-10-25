@@ -2,6 +2,7 @@
 import {withClient} from './db.mjs';
 import {createSessionForUser01581} from './auth-service-01084.mjs';
 import {resolveAuthorizedStore} from './auth.mjs';
+import {noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
 import {hashSsoCode01581,newSsoCode01581,ssoChallenge01581,validChallenge01581,validVerifier01581,ssoRedirectAllowed01581,readSsoCookie01581,ssoCookieFromRequest01581} from './sso-core-01581.mjs';
 const clean=x=>String(x??'').trim();
 const failure=(code,statusCode=400)=>Object.assign(new Error(code),{statusCode});
@@ -57,5 +58,6 @@ export async function exchangeSso01581({code,codeVerifier,clientId,redirectUri}=
  if(ssoChallenge01581(codeVerifier)!==row.code_challenge)throw failure('SSO_PKCE_MISMATCH_01581',401);
  const fresh=await createSessionForUser01581(session.user_id);
  const scope=await resolveAuthorizedStore(session.user_id,'');
+ if(clientId==='crm')await noteServiceUseSafely01592(session.user_id,'crm','crm_sso_exchange');
  return {token:fresh.token,user:{id:fresh.userId,email:fresh.email,name:fresh.name},scope,expiresAt:fresh.expiresAt};
 }
