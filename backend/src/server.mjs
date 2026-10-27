@@ -28,6 +28,7 @@ import {renewOrderedShopCart01573} from './orders-direct-reorder-01573.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
+import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -348,7 +349,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
-  const protectedAction01600=classifyProtectedAction01600(req.method,p);
+  const protectedAction01600=classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const protectedDecision01600=protectedAction01600
     ? await inspectProtectedAccess01600(scope,session.userId,protectedAction01600)
     : null;
@@ -584,19 +585,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
 
   if(p[2]==='ai-assistant'){
     if(req.method==='GET'&&p[3]==='bootstrap'&&p.length===4)return sendJson(res,200,{...(await getAiAssistantBootstrap01424(scope,session.userId)),requestId:rid});
-    if(req.method==='PUT'&&p[3]==='settings'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,{...(await saveAiAssistantSettings01424(scope,await readJson(req,{limit:64*1024}),session.userId)),requestId:rid});}
+    if(req.method==='PUT'&&p[3]==='settings'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{...(await saveAiAssistantSettings01424(scope,await readJson(req,{limit:64*1024}),session.userId)),requestId:rid});}
     if(req.method==='POST'&&p[3]==='chat'&&p.length===4){const body=await readJson(req,{limit:96*1024});return sendJson(res,200,{...(await chatAiAssistant01424(scope,body,session.userId)),requestId:rid});}
     if(req.method==='GET'&&p[3]==='usage'&&p.length===4)return sendJson(res,200,{...(await getAiAssistantUsage01424(scope)),requestId:rid});
     if(req.method==='GET'&&p[3]==='diagnostics'&&p.length===4)return sendJson(res,200,{...(await getAiAssistantDiagnostics01424(scope)),requestId:rid});
     if(req.method==='GET'&&p[3]==='log'&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,{...(await getAiAssistantLog01424(scope,{limit:Number(u.searchParams.get('limit'))||120})),requestId:rid});}
-    if(req.method==='POST'&&p[3]==='action-run'&&p.length===4){assertWriteRole(scope);return sendJson(res,201,{...(await recordAiAssistantActionRun01424(scope,await readJson(req,{limit:96*1024}),session.userId)),requestId:rid});}
+    if(req.method==='POST'&&p[3]==='action-run'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{...(await recordAiAssistantActionRun01424(scope,await readJson(req,{limit:96*1024}),session.userId)),requestId:rid});}
     return sendJson(res,404,{error:'AI_ASSISTANT_ROUTE_NOT_FOUND_01424',stage:'01424',requestId:rid});
   }
   if(p[2]==='ai-consultant'){
     if(p[3]==='settings'){
       const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'';
       if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getAiConsultantSettings01411(scope,siteId));
-      if(req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,await saveAiConsultantSettings01411(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
+      if(req.method==='PUT'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await saveAiConsultantSettings01411(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
       return sendJson(res,404,{error:'AI_CONSULTANT_SETTINGS_ROUTE_NOT_FOUND_01411',stage:'01411',requestId:rid});
     }
     if(p[3]==='product-query'){
@@ -607,9 +608,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[3]==='sales-rules'){
       const u=new URL(req.url,'http://localhost'),siteId=u.searchParams.get('siteId')||'',ruleId=p[4]||'';
       if(req.method==='GET'&&!ruleId&&p.length===4)return sendJson(res,200,await listAiConsultantSalesRules01415(scope,siteId));
-      if(req.method==='POST'&&!ruleId&&p.length===4){assertWriteRole(scope);return sendJson(res,201,await createAiConsultantSalesRule01415(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
-      if(req.method==='PUT'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await updateAiConsultantSalesRule01415(scope,siteId,ruleId,await readJson(req,{limit:32768}),session.userId));}
-      if(req.method==='DELETE'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await deleteAiConsultantSalesRule01415(scope,siteId,ruleId));}
+      if(req.method==='POST'&&!ruleId&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await createAiConsultantSalesRule01415(scope,siteId,await readJson(req,{limit:32768}),session.userId));}
+      if(req.method==='PUT'&&ruleId&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateAiConsultantSalesRule01415(scope,siteId,ruleId,await readJson(req,{limit:32768}),session.userId));}
+      if(req.method==='DELETE'&&ruleId&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteAiConsultantSalesRule01415(scope,siteId,ruleId));}
       return sendJson(res,404,{error:'AI_CONSULTANT_SALES_RULE_ROUTE_NOT_FOUND_01415',stage:'01415',requestId:rid});
     }
     if(p[3]==='conversation-query'){
@@ -627,9 +628,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='session')return sendJson(res,200,buildAuthSessionResponse01089({session,scope,requestId:rid}));
   if(p[2]==='integrations'&&p[3]==='google-sheets'){
     if(req.method==='GET'&&p[4]==='oauth'&&p[5]==='status')return sendJson(res,200,await getGoogleSheetsOAuthStatus01398(scope));
-    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='start'){assertWriteRole(scope);return sendJson(res,200,await startGoogleSheetsOAuth01398(scope,await readJson(req,{limit:16*1024})));}
-    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='disconnect'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await disconnectGoogleSheetsOAuth01398(scope));}
-    if(req.method==='POST'&&p[4]==='read'){assertWriteRole(scope);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
+    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='start'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await startGoogleSheetsOAuth01398(scope,await readJson(req,{limit:16*1024})));}
+    if(req.method==='POST'&&p[4]==='oauth'&&p[5]==='disconnect'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await disconnectGoogleSheetsOAuth01398(scope));}
+    if(req.method==='POST'&&p[4]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
     return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope)});
@@ -718,12 +719,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const mediaScope={...scope,actorUserId:session.userId,siteId:mediaSiteId};
     if(mediaSiteId){setTrafficScope01194(res,mediaScope);updateTrafficContext01201({siteId:mediaSiteId});}
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
-    if(req.method==='POST'&&p[3]==='remote-image'&&p[4]==='fetch'){assertWriteRole(scope);const body=await readJson(req,{limit:64*1024}),remote=await fetchRemoteImage01396(body?.url);const bytes=remote.bytes;res.__stTrafficOutboundBytes01194=bytes.length;res.writeHead(200,{'content-type':remote.mimeType,'content-length':bytes.length,'content-disposition':`attachment; filename="${remote.fileName.replace(/["\\]/g,'_')}"`,'x-st-remote-final-url':remote.finalUrl,'x-st-remote-source-bytes':String(remote.sizeBytes),'cache-control':'no-store'});return res.end(bytes);}
+    if(req.method==='POST'&&p[3]==='remote-image'&&p[4]==='fetch'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const body=await readJson(req,{limit:64*1024}),remote=await fetchRemoteImage01396(body?.url);const bytes=remote.bytes;res.__stTrafficOutboundBytes01194=bytes.length;res.writeHead(200,{'content-type':remote.mimeType,'content-length':bytes.length,'content-disposition':`attachment; filename="${remote.fileName.replace(/["\\]/g,'_')}"`,'x-st-remote-final-url':remote.finalUrl,'x-st-remote-source-bytes':String(remote.sizeBytes),'cache-control':'no-store'});return res.end(bytes);}
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
-    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertWriteRole(scope);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertWriteRole(scope);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertWriteRole(scope);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
-    if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertWriteRole(scope);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
+    if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }
   if(req.method==='POST'&&p[2]==='deployment'&&p[3]==='import-local-operational'){assertAdminRole(scope);return sendJson(res,200,await importLocalOperationalBundle01080(scope,await readJson(req)));}
@@ -751,26 +752,26 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='network'&&p[3]==='inventory'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedInventory01077(scope));
     if(req.method==='GET'&&p[4]==='reservations')return sendJson(res,200,await listAuthorizedInventoryReservations01077(scope));
-    if(req.method==='POST'&&p[4]==='expire'){assertWriteRole(scope);return sendJson(res,200,await expireAuthorizedInventoryReservations01077(scope));}
-    if(req.method==='PATCH'&&p[4]==='reservations'&&p[5]){assertWriteRole(scope);return sendJson(res,200,await devTransitionInventoryReservation01077(scope,p[5],await readJson(req)));}
+    if(req.method==='POST'&&p[4]==='expire'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await expireAuthorizedInventoryReservations01077(scope));}
+    if(req.method==='PATCH'&&p[4]==='reservations'&&p[5]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await devTransitionInventoryReservation01077(scope,p[5],await readJson(req)));}
     return sendJson(res,404,{error:'Inventory route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='shipping'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedSellerDeliveries01078(scope));
     if(req.method==='GET'&&p[4]==='providers')return sendJson(res,200,await listAuthorizedShippingProviders01078(scope));
-    if(req.method==='PATCH'&&p[4]){assertOrderWriteRole(scope);return sendJson(res,200,await updateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
-    if(req.method==='POST'&&p[4]&&p[5]==='simulate'){assertOrderWriteRole(scope);return sendJson(res,200,await simulateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
+    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[4]&&p[5]==='simulate'){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await simulateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Shipping route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='payments'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedPayments(scope));
-    if(req.method==='POST'&&p[4]==='order'&&p[5]){assertWriteRole(scope);return sendJson(res,201,await ensureAuthorizedPaymentForOrder(scope,p[5]));}
-    if(req.method==='PATCH'&&p[4]){assertWriteRole(scope);return sendJson(res,200,await transitionAuthorizedPayment(scope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[4]==='order'&&p[5]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await ensureAuthorizedPaymentForOrder(scope,p[5]));}
+    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await transitionAuthorizedPayment(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Payment route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='payouts'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedPayouts(scope));
-    if(req.method==='PATCH'&&p[4]){assertWriteRole(scope);return sendJson(res,200,await markAuthorizedPayout(scope,p[4],await readJson(req)));}
+    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await markAuthorizedPayout(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Payout route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='orders'){
@@ -780,9 +781,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='network'){
     if(req.method==='GET'&&p[3]==='context')return sendJson(res,200,await getNetworkView(scope));
-    if(req.method==='POST'&&p[3]==='join'){assertWriteRole(scope);return sendJson(res,200,await ensureSeller(scope,await readJson(req)));}
-    if(req.method==='PATCH'&&p[3]==='seller'){assertWriteRole(scope);return sendJson(res,200,await updateSeller(scope,await readJson(req)));}
-    if(req.method==='PATCH'&&p[3]==='policy'){assertWriteRole(scope);return sendJson(res,200,await updatePolicy(scope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='join'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await ensureSeller(scope,await readJson(req)));}
+    if(req.method==='PATCH'&&p[3]==='seller'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeller(scope,await readJson(req)));}
+    if(req.method==='PATCH'&&p[3]==='policy'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updatePolicy(scope,await readJson(req)));}
     if(req.method==='POST'&&p[3]==='products'&&p[5]==='publish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await publishNetworkProduct(scope,p[4]));}
     if(req.method==='POST'&&p[3]==='products'&&p[5]==='sync'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await syncNetworkProduct(scope,p[4]));}
     if(req.method==='POST'&&p[3]==='listings'&&p[5]==='unpublish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await unpublishListing(scope,p[4]));}
@@ -798,44 +799,44 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[3]==='supplier-sync-schedules'){
     const sourceId=p[4]||'';
     if(req.method==='GET'&&!sourceId)return sendJson(res,200,await listSupplierSyncSchedules01399(scope));
-    if(req.method==='PUT'&&sourceId){assertWriteRole(scope);return sendJson(res,200,await saveSupplierSyncSchedule01399(scope,sourceId,await readJson(req)));}
-    if(req.method==='DELETE'&&sourceId){assertWriteRole(scope);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
-    if(req.method==='POST'&&sourceId&&p[5]==='run'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
+    if(req.method==='PUT'&&sourceId){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await saveSupplierSyncSchedule01399(scope,sourceId,await readJson(req)));}
+    if(req.method==='DELETE'&&sourceId){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
+    if(req.method==='POST'&&sourceId&&p[5]==='run'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
     return sendJson(res,404,{error:'Supplier sync scheduler route not found',stage:'01399',requestId:rid});
   }
   if(p[3]==='supplier-sync-alerts'){
     const alertId=p[4]||'';
     if(req.method==='GET'&&!alertId){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listSupplierSyncAlerts01401(scope,{status:u.searchParams.get('status')||'',kind:u.searchParams.get('kind')||'',severity:u.searchParams.get('severity')||'',sourceId:u.searchParams.get('sourceId')||''}));}
-    if(req.method==='POST'&&alertId&&p[5]==='read'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'read'));}
-    if(req.method==='POST'&&alertId&&p[5]==='dismiss'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'dismissed'));}
+    if(req.method==='POST'&&alertId&&p[5]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'read'));}
+    if(req.method==='POST'&&alertId&&p[5]==='dismiss'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'dismissed'));}
     return sendJson(res,404,{error:'Supplier sync alert route not found',stage:'01401',requestId:rid});
   }
   if(p[3]==='supplier-sync-alert-rules'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getSupplierSyncAlertRules01402(scope));
-    if(req.method==='PUT'&&p.length===4){assertWriteRole(scope);return sendJson(res,200,await saveSupplierSyncAlertRules01402(scope,await readJson(req,{limit:32768})));}
-    if(req.method==='DELETE'&&p.length===4){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await resetSupplierSyncAlertRules01402(scope));}
+    if(req.method==='PUT'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await saveSupplierSyncAlertRules01402(scope,await readJson(req,{limit:32768})));}
+    if(req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await resetSupplierSyncAlertRules01402(scope));}
     return sendJson(res,404,{error:'Supplier sync alert rules route not found',stage:'01402',requestId:rid});
   }
   if(p[3]==='supplier-sync-approvals'){
     const approvalId=p[4]||'';
     if(req.method==='GET'&&!approvalId)return sendJson(res,200,await listSupplierSyncApprovals01400(scope));
     if(req.method==='GET'&&approvalId&&p.length===5)return sendJson(res,200,await getSupplierSyncApprovalDetail01400(scope,approvalId));
-    if(req.method==='POST'&&approvalId&&p[5]==='approve'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await approveSupplierSyncApproval01400(scope,approvalId));}
-    if(req.method==='POST'&&approvalId&&p[5]==='reject'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await rejectAndUpdateSupplierSyncApproval01400(scope,approvalId));}
+    if(req.method==='POST'&&approvalId&&p[5]==='approve'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await approveSupplierSyncApproval01400(scope,approvalId));}
+    if(req.method==='POST'&&approvalId&&p[5]==='reject'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await rejectAndUpdateSupplierSyncApproval01400(scope,approvalId));}
     return sendJson(res,404,{error:'Supplier sync approval route not found',stage:'01400',requestId:rid});
   }
   if(p[3]==='import-rollbacks'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listMarketplaceImportRollbacks01397(scope));
     if(req.method==='GET'&&p[4]&&p[5]==='preview')return sendJson(res,200,await previewMarketplaceImportRollback01397(scope,p[4]));
-    if(req.method==='POST'&&p[4]&&p[5]==='restore'){assertWriteRole(scope);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
+    if(req.method==='POST'&&p[4]&&p[5]==='restore'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
     return sendJson(res,404,{error:'Import rollback route not found',stage:'01397',requestId:rid});
   }
-  if(p[3]==='category-path'&&p[4]==='resolve'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
+  if(p[3]==='category-path'&&p[4]==='resolve'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
   if(p[3]==='category-merge'&&p[4]==='preview'&&req.method==='POST'){return sendJson(res,200,await previewCategoryMerge01490(scope,await readJson(req)));}
-  if(p[3]==='category-merge'&&p[4]==='apply'&&req.method==='POST'){assertWriteRole(scope);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='apply'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
   if(p[3]==='seo'){
     if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
-    if(req.method==='PATCH'){assertWriteRole(scope);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
+    if(req.method==='PATCH'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
   }
   if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
   if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}

@@ -13,7 +13,7 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
     // Existing staff without custom assignment retain the pre-01600 legacy authorizations.
     // Once enrolled, removal of EVERY role cannot restore legacy write privileges.
     if(!enrolled.rowCount){
-      const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','viewer']:['admin','manager','editor','catalog-manager'];
+      const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});
       return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};
     }
