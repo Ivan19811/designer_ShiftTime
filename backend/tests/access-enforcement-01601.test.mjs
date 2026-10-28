@@ -114,7 +114,7 @@ test('01601 backend gate executes after auth and before request parsing and rout
 });
 test('01601 new UI labels are canonical i18n, no text literal in permission definitions',()=>{
  const src=fs.readFileSync(new URL('../../js/i18n/locales/uk-role-center-01598.js',import.meta.url),'utf8');
- for(const group of ['shop.shipping','shop.payments','shop.payouts','shop.inventory','shop.suppliersync','shop.settings','builder.integrations'])assert.ok(src.includes(`'${group}':`),group);
+ for(const group of ['shop.shipping','shop.payments','shop.payouts','shop.inventory','shop.suppliersync','shop.settings','builder.integrations'])assert.ok(src.includes(`'${group.replaceAll('.', '_')}':`),group);
  for(const action of ['simulate','approve'])assert.ok(src.includes(`${action}:`));
 });
 test('01601 navigation gives logistics and accounting roles an appropriate visible menu',()=>{

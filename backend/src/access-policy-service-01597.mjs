@@ -68,8 +68,12 @@ export function createAccessPolicyService01597({run=defaultRun}={}){
     });},
     async assign(scope,actor,input){assertAccessPolicyManager01597(scope);const data=normalizeAccessAssignment01597(input);return run(async c=>{
       await c.query('BEGIN');try{
+        await c.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[scope.accountId,scope.storeId]);
         const role=await ensureRole(c,scope,data.roleId,true);if(role.status!=='active')throw err('ST_ACCESS_ROLE_DISABLED_01597',409);
         const member=await ensureMembership(c,scope,data.membershipId);await assertSiteInStore(c,scope,data.siteId);
+        // 01603: test-enrolled membership must only be changed by the atomic switcher.
+        const protectedWorker=await c.query(`SELECT 1 FROM platform_test_workers_01603 WHERE account_id=$1 AND store_id=$2 AND membership_id=$3`,[scope.accountId,scope.storeId,data.membershipId]);
+        if(protectedWorker.rowCount)throw err('ST_TEST_WORKER_MANAGED_ONLY_01603',409);
         // 01600: persist explicit-access enrollment inside the SAME transaction as assignment.
         // This marker survives role revocation, preventing silent legacy privilege restoration.
         await c.query(`INSERT INTO platform_access_enrollments_01600(account_id,store_id,user_id)
@@ -82,6 +86,9 @@ export function createAccessPolicyService01597({run=defaultRun}={}){
     });},
     async revoke(scope,actor,id){assertAccessPolicyManager01597(scope);if(!ASSIGNMENT_ID.test(id))throw err('ST_ACCESS_ASSIGNMENT_ID_INVALID_01597');return run(async c=>{
       await c.query('BEGIN');try{
+        await c.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[scope.accountId,scope.storeId]);
+        const testWorker=await c.query(`SELECT 1 FROM platform_test_workers_01603 WHERE account_id=$1 AND store_id=$2 AND assignment_id=$3`,[scope.accountId,scope.storeId,id]);
+        if(testWorker.rowCount)throw err('ST_TEST_WORKER_MANAGED_ONLY_01603',409);
         const q=await c.query(`UPDATE platform_role_assignments_01597 SET status='revoked',revoked_at=now() WHERE id=$1 AND account_id=$2 AND store_id=$3 AND status='active' RETURNING id,role_id "roleId",membership_id "membershipId",status`,[id,scope.accountId,scope.storeId]);
         if(!q.rowCount)throw err('ST_ACCESS_ASSIGNMENT_NOT_FOUND_01597',404);
         await audit(c,scope,actor,'access.assignment.revoke',id,{roleId:q.rows[0].roleId,membershipId:q.rows[0].membershipId});await c.query('COMMIT');return q.rows[0];

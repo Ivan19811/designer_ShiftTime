@@ -87,6 +87,7 @@ import {listNotificationRecipientCatalog01416} from './notification-recipient-ro
 import {getNotificationPreferences01417,saveNotificationPreferences01417,notificationPreferenceQueueStats01417,startNotificationPreferencesScheduler01417,stopNotificationPreferencesScheduler01417} from './notification-preferences-01417.mjs';
 import {assertAdminView01087,assertCapability01087,getEffectiveCapabilities01087,getRoleCatalog01087} from './admin-access-01087.mjs';
 import {accessPolicyService01597} from './access-policy-service-01597.mjs';
+import {testWorkerRoleService01603} from './test-worker-role-service-01603.mjs';
 import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitations01087,createInvitation01087,revokeInvitation01087,inspectInvitation01087} from './admin-service-01087.mjs';
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
@@ -670,6 +671,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     // 01597 · Owner-only management of explicit store/site permission roles.
     if(p[3]==='role-center'){
       const action=p[4]||'',id=p[5]||'',u=new URL(req.url,'http://localhost');
+      if(action==='test-worker'){
+        if(req.method==='GET'&&p.length===5)return sendJson(res,200,await testWorkerRoleService01603.current(scope),{'cache-control':'private, no-store'});
+        if(req.method==='POST'&&p[5]==='enroll'&&p.length===6)return sendJson(res,200,await testWorkerRoleService01603.enroll(scope,session.userId,await readJson(req,{limit:4096})));
+        if(req.method==='POST'&&p[5]==='replace'&&p.length===6)return sendJson(res,200,await testWorkerRoleService01603.replace(scope,session.userId,await readJson(req,{limit:4096})));
+      }
       if(req.method==='GET'&&action==='catalog'&&p.length===5)return sendJson(res,200,accessPolicyService01597.catalog(),{'cache-control':'private, no-store'});
       if(req.method==='GET'&&action==='roles'&&p.length===5)return sendJson(res,200,{stage:'01597',roles:await accessPolicyService01597.roles(scope)},{'cache-control':'private, no-store'});
       if(req.method==='POST'&&action==='roles'&&p.length===5)return sendJson(res,201,{stage:'01597',role:await accessPolicyService01597.createRole(scope,session.userId,await readJson(req,{limit:16384}))});
