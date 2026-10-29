@@ -47,7 +47,7 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
         permission:action.permission,allowedSiteIds:allStores?null:allowedSiteIds};
     }
     const result=grantDecision01600({role:scope.role,enrolled:true,permissions,permission:action.permission});
-    return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};
+    return {...requireProtectedAccess01600(result,action.permission),permission:action.permission,permissions};
   });
 }
 export function assertLegacyForUnmanaged01600(scope,decision,kind='write'){

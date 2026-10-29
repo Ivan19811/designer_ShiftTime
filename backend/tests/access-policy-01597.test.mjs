@@ -13,7 +13,7 @@ const qrows=rows=>({rows,rowCount:rows.length});
 test('01597 permission catalog uses stable, unique machine codes and i18n keys',()=>{
   const ids=ACCESS_PERMISSIONS_01597.map(p=>p.code);
   assert.equal(ids.length,new Set(ids).size);
-  for(const p of ACCESS_PERMISSIONS_01597){assert.match(p.labelKey,/^access\.permissions\./);assert.match(p.code,/^[a-z][a-z.]+$/);}
+  for(const p of ACCESS_PERMISSIONS_01597){assert.match(p.labelKey,/^access\.permissions\./);assert.match(p.code,/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/);}
   for(const expected of ['site.pages.view','site.pages.edit','site.publish.execute','shop.orders.view','shop.products.create','shop.products.import','team.members.invite'])assert.ok(ids.includes(expected));
   assert.equal(accessCatalog01597().enforcement,'foundation-only');
 });
@@ -21,7 +21,7 @@ test('01597 unknown grants and malformed permission lists fail closed',()=>{
   assert.deepEqual(normalizeAccessPermissions01597([' shop.orders.view ','shop.orders.view','site.pages.view']),['shop.orders.view','site.pages.view']);
   assert.throws(()=>normalizeAccessPermissions01597(['admin.roles.manage']),{code:'ST_ACCESS_PERMISSION_UNKNOWN_01597'});
   assert.throws(()=>normalizeAccessPermissions01597('shop.orders.view'),{code:'ST_ACCESS_PERMISSIONS_INVALID_01597'});
-  assert.throws(()=>normalizeAccessPermissions01597(Array(101).fill('shop.orders.view')),{code:'ST_ACCESS_PERMISSIONS_INVALID_01597'});
+  assert.throws(()=>normalizeAccessPermissions01597(Array(201).fill('shop.orders.view')),{code:'ST_ACCESS_PERMISSIONS_INVALID_01597'});
 });
 test('01597 role names and descriptions are validated',()=>{
   assert.deepEqual(normalizeAccessRoleInput01597({name:'Products',permissions:['shop.products.create']}),{name:'Products',description:'',permissions:['shop.products.create']});

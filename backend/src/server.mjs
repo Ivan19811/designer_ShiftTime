@@ -37,6 +37,7 @@ import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
+import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
@@ -366,6 +367,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         throw error;
       })
     : null;
+  // 01606B · Base 01600 gate has already passed. Enforce an independent, DB-derived action
+  // grant before any static-route mutations. Dynamic status checks run after JSON parsing.
+  const assertProductGate01606B=async action=>{
+    try{assertProductAction01606B(protectedDecision01600,action);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:action.permission,siteId:''},error.code);}catch{console.warn('[01606B] access audit write unavailable');}
+      throw error;
+    }
+  };
+  await assertProductGate01606B(classifyProductAction01606B(req.method,p));
   // 01599 · Own UI navigation grants, never another member's data.
   if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
     if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_NAVIGATION_METHOD_DENIED_01599',requestId:rid});
@@ -861,13 +872,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
   if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
-  if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await bulkSetProductStatus01523(scope,await readJson(req,{limit:1024*1024})));}
+  if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req,{limit:1024*1024});await assertProductGate01606B(productStatusAction01606B(input,{bulk:true}));return sendJson(res,200,await bulkSetProductStatus01523(scope,input));}
   const key=RESOURCE_PATHS_01071[p[3]];
   if(key){const id=p[4]||'';
     if(req.method==='GET'&&!id&&p.length===4)return sendJson(res,200,await listResource(scope,key));
     if(req.method==='GET'&&id&&p.length===5){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
-    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await createResource(scope,key,await readJson(req)));}
-    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateResource(scope,key,id,await readJson(req)));}
+    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,201,await createResource(scope,key,input));}
+    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,200,await updateResource(scope,key,id,input));}
     if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});

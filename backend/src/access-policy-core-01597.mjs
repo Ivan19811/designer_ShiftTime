@@ -6,6 +6,9 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('site.design','view'),define('site.design','edit'),
   define('site.publish','view'),define('site.publish','execute'),define('site.publish','delete'),
   define('shop.products','view'),define('shop.products','create'),define('shop.products','edit'),define('shop.products','delete'),define('shop.products','import'),define('shop.products','prices'),
+  // 01606B · Opt-in, independent SERVER authorization for high-impact product mutations.
+  define('api.mode','product_actions'),
+  ...['activate','deactivate','archive','variants_create','variants_edit','variants_delete','export','snapshot_replace','replace_apply','rollback_restore'].map(action=>define('shop.products.actions',action)),
   define('shop.orders','view'),define('shop.orders','edit'),define('shop.orders','status'),define('shop.orders','cancel'),define('shop.orders','refund'),
   define('shop.shipping','view'),define('shop.shipping','edit'),define('shop.shipping','simulate'),
   define('shop.payments','view'),define('shop.payments','create'),define('shop.payments','edit'),
@@ -24,13 +27,28 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('crm.orders','view'),define('crm.orders','edit'),
   define('team.members','view'),define('team.members','invite'),define('team.members','manage'),
   define('team.roles','view'),define('team.roles','manage'),
+  // 01606 · Client-only exact visibility gates. Do not treat these as API authority.
+  define('ui.mode','navigation'),define('ui.mode','inspector'),define('ui.mode','controls'),
+  define('ui.nav','site'),define('ui.nav','pages'),define('ui.nav','marketplace'),define('ui.nav','shop'),define('ui.nav','orders'),
+  define('ui.nav','notifications'),define('ui.nav','aiconsultant'),define('ui.nav','aiassistant'),define('ui.nav','modules'),define('ui.nav','tables'),
+  define('ui.nav','design'),define('ui.nav','aidesign'),define('ui.nav','globaldesign'),define('ui.nav','background'),define('ui.nav','blocks'),
+  define('ui.nav','global'),define('ui.nav','constructor'),
+  define('ui.inspector','siteopen'),define('ui.inspector','pageadd'),define('ui.inspector','sectionadd'),define('ui.inspector','pagesave'),
+  define('ui.control','pagecreate'),define('ui.control','pagesave'),define('ui.control','sectioncreate'),define('ui.control','sitetemplate'),define('ui.control','sitepublish'),
+  define('ui.control','siteunpublish'),define('ui.control','shopcreate'),define('ui.control','shopvisibility'),define('ui.control','shopcartoptions'),define('ui.control','shopautopages'),
+  define('ui.control','productcreate'),define('ui.control','productedit'),define('ui.control','productdelete'),define('ui.control','productimport'),define('ui.control','productregenerate'),
+  define('ui.control','productmediaupload'),define('ui.control','deliverysettings'),define('ui.control','categorycreate'),define('ui.control','categoryaddchild'),define('ui.control','categorybulkactivate'),
+  define('ui.control','categorybulkdeactivate'),define('ui.control','categoryreplaceapply'),define('ui.control','categoryreplacemedia'),define('ui.control','variantaddattribute'),define('ui.control','variantremoveattribute'),
+  define('ui.control','variantvisibility'),define('ui.control','variantmediapick'),define('ui.control','variantmediaupload'),define('ui.control','variantmediaremove'),define('ui.control','librarymediaupload'),
+  define('ui.control','pickermediaupload'),define('ui.control','productmediaextra'),define('ui.control','feedcreate'),define('ui.control','feedsave'),define('ui.control','feeddelete'),
+  define('ui.control','feedmappingadd'),define('ui.control','feedmappingremove'),
 ]);
 export const ACCESS_SCOPE_KINDS_01597=Object.freeze(['store','site']);
 const known=new Set(ACCESS_PERMISSIONS_01597.map(p=>p.code));
 const clean=v=>String(v??'').trim();
 const err=(code,statusCode=400)=>Object.assign(new Error(code),{code,statusCode});
 export function normalizeAccessPermissions01597(value){
-  if(!Array.isArray(value)||value.length>100)throw err('ST_ACCESS_PERMISSIONS_INVALID_01597');
+  if(!Array.isArray(value)||value.length>200)throw err('ST_ACCESS_PERMISSIONS_INVALID_01597');
   const out=[...new Set(value.map(clean))].sort();
   if(out.some(v=>!known.has(v)))throw err('ST_ACCESS_PERMISSION_UNKNOWN_01597');
   return out;
