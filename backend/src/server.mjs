@@ -28,6 +28,7 @@ import {renewOrderedShopCart01573} from './orders-direct-reorder-01573.mjs';
 import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
+import {classifyTenantIsolationAction01605D} from './access-audit-core-01605d.mjs';
 import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
 import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
@@ -354,7 +355,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
-  const protectedAction01600=classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
+  const protectedAction01600=classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
     ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{

@@ -7,20 +7,29 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
   if(!scope?.accountId||!scope?.workspaceId||!scope?.storeId||!clean(userId)||!action?.permission){
     throw Object.assign(new Error('ST_ACCESS_SCOPE_REQUIRED_01600'),{statusCode:403});
   }
-  if(scope.role==='owner')return {allowed:true,mode:'owner',permission:action.permission};
+  const siteId=clean(action.siteId);
+  // 01605D · A site path must belong to the authenticated Account/Workspace/Store
+  // even for owners and non-enrolled legacy roles. No authority comes from the URL alone.
+  if(scope.role==='owner'){
+    if(siteId)await run(async client=>{
+      const valid=await client.query(`SELECT 1 FROM shifttime_builder_sites WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 AND status='active'`,[siteId,scope.accountId,scope.workspaceId,scope.storeId]);
+      if(!valid.rowCount)throw Object.assign(new Error('ST_ACCESS_SITE_SCOPE_DENIED_01600'),{code:'ST_ACCESS_SITE_SCOPE_DENIED_01600',statusCode:403});
+    });
+    return {allowed:true,mode:'owner',permission:action.permission};
+  }
   return run(async client=>{
     const enrolled=await client.query(`SELECT mode FROM platform_access_enrollments_01600 WHERE account_id=$1 AND store_id=$2 AND user_id=$3 AND mode='custom' LIMIT 1`,[scope.accountId,scope.storeId,userId]);
+    // The tenant boundary precedes both legacy and custom authorization decisions.
+    if(siteId){
+      const valid=await client.query(`SELECT 1 FROM shifttime_builder_sites WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 AND status='active'`,[siteId,scope.accountId,scope.workspaceId,scope.storeId]);
+      if(!valid.rowCount)throw Object.assign(new Error('ST_ACCESS_SITE_SCOPE_DENIED_01600'),{code:'ST_ACCESS_SITE_SCOPE_DENIED_01600',statusCode:403});
+    }
     // Existing staff without custom assignment retain the pre-01600 legacy authorizations.
     // Once enrolled, removal of EVERY role cannot restore legacy write privileges.
     if(!enrolled.rowCount){
       const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});
       return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};
-    }
-    const siteId=clean(action.siteId);
-    if(siteId){
-      const valid=await client.query(`SELECT 1 FROM shifttime_builder_sites WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 AND status='active'`,[siteId,scope.accountId,scope.workspaceId,scope.storeId]);
-      if(!valid.rowCount)throw Object.assign(new Error('ST_ACCESS_SITE_SCOPE_DENIED_01600'),{statusCode:403});
     }
     const q=await client.query(`SELECT r.permissions,a.scope_kind "scopeKind",s.id "siteId" FROM platform_role_assignments_01597 a
       JOIN platform_custom_roles_01597 r ON r.id=a.role_id AND r.account_id=a.account_id AND r.status='active'
