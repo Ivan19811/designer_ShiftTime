@@ -29,6 +29,7 @@ import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
 import {classifyTenantIsolationAction01605D} from './access-audit-core-01605d.mjs';
+import {classifyLegacyReadAction01605E} from './access-audit-core-01605e.mjs';
 import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
 import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
@@ -355,7 +356,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
-  const protectedAction01600=classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
+  const protectedAction01600=classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
     ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{
@@ -644,7 +645,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[4]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
     return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
   }
-  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope)});
+  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null)});
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
@@ -811,7 +812,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
   if(p[3]==='snapshot'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await loadSnapshot(scope));
-    if(req.method==='GET'&&p[4]==='export')return sendJson(res,200,await loadSnapshot(scope),{'content-disposition':`attachment; filename="marketplace-${scope.storeId}.json"`});
+    if(req.method==='GET'&&p[4]==='export'&&p.length===5)return sendJson(res,200,await loadSnapshot(scope),{'content-disposition':`attachment; filename="marketplace-${scope.storeId}.json"`});
     if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
     if(req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await resetSnapshot(scope);return sendNoContent(res,204);}
   }

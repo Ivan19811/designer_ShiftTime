@@ -14,8 +14,12 @@ async function assertSite(c,scope,siteId){const q=await c.query(`SELECT s.id,p.p
 function revisionId(){return `rev_${crypto.randomUUID().replaceAll('-','')}`;}
 function smallestFreeSlot(rows){const used=new Set(rows.map(r=>Number(r.slot||0)).filter(n=>n>=1&&n<=MAX_DRAFTS_01231));for(let i=1;i<=MAX_DRAFTS_01231;i++)if(!used.has(i))return i;return 0;}
 
-export async function listSiteRevisions01231(scope,siteId=''){
-  return withClient(async c=>{const params=[scope.accountId,scope.workspaceId,scope.storeId];let where=`s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND r.kind IN ('draft','published')`;if(clean(siteId)){params.push(clean(siteId));where+=` AND s.id=$4`;}
+export async function listSiteRevisions01231(scope,siteId='',allowedSiteIds=null,run=withClient){
+  // 01605E: Store-scoped roles can list revisions normally. Site-scoped roles
+  // must never enumerate revisions belonging to other sites in the same Store.
+  if(Array.isArray(allowedSiteIds)&&allowedSiteIds.length===0)return [];
+  return run(async c=>{const params=[scope.accountId,scope.workspaceId,scope.storeId];let where=`s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND r.kind IN ('draft','published')`;if(clean(siteId)){params.push(clean(siteId));where+=` AND s.id=$${params.length}`;}
+    if(Array.isArray(allowedSiteIds)){params.push([...new Set(allowedSiteIds.filter(v=>typeof v==='string'&&v.length>0))]);where+=` AND s.id=ANY($${params.length}::text[])`;}
     const q=await c.query(`SELECT r.* FROM shifttime_builder_site_revisions r JOIN shifttime_builder_sites s ON s.id=r.site_id WHERE ${where} ORDER BY r.site_id, CASE WHEN r.kind='published' THEN 0 ELSE 1 END, r.slot, r.updated_at DESC`,params);return q.rows.map(r=>mapRow(r));});
 }
 
