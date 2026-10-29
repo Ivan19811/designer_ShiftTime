@@ -28,26 +28,26 @@ export function classifyExtendedAction01601(method,parts){
   }
   if(p[2]==='network'){
     if(p[3]==='inventory'){
-      if(m==='GET')return action('shop.inventory.view','read');
-      if(m==='POST'&&p[4]==='expire')return action('shop.inventory.manage');
-      if(m==='PATCH'&&p[4]==='reservations'&&p[5])return action('shop.inventory.manage');
+      if(m==='GET'&&(p.length===4||(p[4]==='reservations'&&p.length===5)))return action('shop.inventory.view','read');
+      if(m==='POST'&&p[4]==='expire'&&p.length===5)return action('shop.inventory.manage');
+      if(m==='PATCH'&&p[4]==='reservations'&&p[5]&&p.length===6)return action('shop.inventory.manage');
     }
     if(p[3]==='shipping'){
-      if(m==='GET')return action('shop.shipping.view','read');
-      if(m==='PATCH'&&p[4])return action('shop.shipping.edit','order-write');
-      if(m==='POST'&&p[4]&&p[5]==='simulate')return action('shop.shipping.simulate','order-write');
+      if(m==='GET'&&(p.length===4||(p[4]==='providers'&&p.length===5)))return action('shop.shipping.view','read');
+      if(m==='PATCH'&&p[4]&&p.length===5)return action('shop.shipping.edit','order-write');
+      if(m==='POST'&&p[4]&&p[5]==='simulate'&&p.length===6)return action('shop.shipping.simulate','order-write');
     }
     if(p[3]==='payments'){
-      if(m==='GET')return action('shop.payments.view','read');
-      if(m==='POST'&&p[4]==='order'&&p[5])return action('shop.payments.create');
-      if(m==='PATCH'&&p[4])return action('shop.payments.edit');
+      if(m==='GET'&&p.length===4)return action('shop.payments.view','read');
+      if(m==='POST'&&p[4]==='order'&&p[5]&&p.length===6)return action('shop.payments.create');
+      if(m==='PATCH'&&p[4]&&p.length===5)return action('shop.payments.edit');
     }
     if(p[3]==='payouts'){
-      if(m==='GET')return action('shop.payouts.view','read');
-      if(m==='PATCH'&&p[4])return action('shop.payouts.edit');
+      if(m==='GET'&&p.length===4)return action('shop.payouts.view','read');
+      if(m==='PATCH'&&p[4]&&p.length===5)return action('shop.payouts.edit');
     }
-    if(m==='POST'&&p[3]==='join')return action('shop.settings.manage');
-    if(m==='PATCH'&&['seller','policy'].includes(p[3]))return action('shop.settings.manage');
+    if(m==='POST'&&p[3]==='join'&&p.length===4)return action('shop.settings.manage');
+    if(m==='PATCH'&&['seller','policy'].includes(p[3])&&p.length===4)return action('shop.settings.manage');
     return null;
   }
   if(p[2]==='integrations'&&p[3]==='google-sheets'){
@@ -67,25 +67,25 @@ export function classifyExtendedAction01601(method,parts){
       if(m==='PATCH')return action('builder.seo.edit');
     }
     if(p[3]==='supplier-sync-schedules'){
-      if(m==='GET')return action('shop.suppliersync.view','read');
-      if(['PUT','DELETE'].includes(m)&&p[4])return action('shop.suppliersync.manage');
-      if(m==='POST'&&p[4]&&p[5]==='run')return action('shop.suppliersync.manage');
+      if(m==='GET'&&p.length===4)return action('shop.suppliersync.view','read');
+      if(['PUT','DELETE'].includes(m)&&p[4]&&p.length===5)return action('shop.suppliersync.manage');
+      if(m==='POST'&&p[4]&&p[5]==='run'&&p.length===6)return action('shop.suppliersync.manage');
     }
     if(p[3]==='supplier-sync-alerts'){
-      if(m==='GET')return action('shop.suppliersync.view','read');
-      if(m==='POST'&&p[4]&&['read','dismiss'].includes(p[5]))return action('shop.suppliersync.manage');
+      if(m==='GET'&&p.length===4)return action('shop.suppliersync.view','read');
+      if(m==='POST'&&p[4]&&['read','dismiss'].includes(p[5])&&p.length===6)return action('shop.suppliersync.manage');
     }
     if(p[3]==='supplier-sync-alert-rules'){
-      if(m==='GET')return action('shop.suppliersync.view','read');
-      if(['PUT','DELETE'].includes(m))return action('shop.suppliersync.manage');
+      if(m==='GET'&&p.length===4)return action('shop.suppliersync.view','read');
+      if(['PUT','DELETE'].includes(m)&&p.length===4)return action('shop.suppliersync.manage');
     }
     if(p[3]==='supplier-sync-approvals'){
-      if(m==='GET')return action('shop.suppliersync.view','read');
-      if(m==='POST'&&p[4]&&['approve','reject'].includes(p[5]))return action('shop.suppliersync.approve');
+      if(m==='GET'&&(p.length===4||(p.length===5&&p[4])))return action('shop.suppliersync.view','read');
+      if(m==='POST'&&p[4]&&['approve','reject'].includes(p[5])&&p.length===6)return action('shop.suppliersync.approve');
     }
     if(p[3]==='import-rollbacks'){
-      if(m==='GET')return action('shop.products.import','read');
-      if(m==='POST'&&p[4]&&p[5]==='restore')return action('shop.products.import');
+      if(m==='GET'&&(p.length===4||(p[4]&&p[5]==='preview'&&p.length===6)))return action('shop.products.import','read');
+      if(m==='POST'&&p[4]&&p[5]==='restore'&&p.length===6)return action('shop.products.import');
     }
     return null;
   }

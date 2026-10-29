@@ -30,6 +30,7 @@ import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
 import {classifyTenantIsolationAction01605D} from './access-audit-core-01605d.mjs';
 import {classifyLegacyReadAction01605E} from './access-audit-core-01605e.mjs';
+import {classifyLegacyMerchantAction01605F} from './access-audit-core-01605f.mjs';
 import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
 import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
@@ -356,7 +357,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
-  const protectedAction01600=classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
+  const protectedAction01600=classifyLegacyMerchantAction01605F(req.method,p)||classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
     ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{
@@ -771,42 +772,42 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='network'&&p[3]==='inventory'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedInventory01077(scope));
-    if(req.method==='GET'&&p[4]==='reservations')return sendJson(res,200,await listAuthorizedInventoryReservations01077(scope));
-    if(req.method==='POST'&&p[4]==='expire'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await expireAuthorizedInventoryReservations01077(scope));}
-    if(req.method==='PATCH'&&p[4]==='reservations'&&p[5]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await devTransitionInventoryReservation01077(scope,p[5],await readJson(req)));}
+    if(req.method==='GET'&&p[4]==='reservations'&&p.length===5)return sendJson(res,200,await listAuthorizedInventoryReservations01077(scope));
+    if(req.method==='POST'&&p[4]==='expire'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await expireAuthorizedInventoryReservations01077(scope));}
+    if(req.method==='PATCH'&&p[4]==='reservations'&&p[5]&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await devTransitionInventoryReservation01077(scope,p[5],await readJson(req)));}
     return sendJson(res,404,{error:'Inventory route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='shipping'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedSellerDeliveries01078(scope));
-    if(req.method==='GET'&&p[4]==='providers')return sendJson(res,200,await listAuthorizedShippingProviders01078(scope));
-    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
-    if(req.method==='POST'&&p[4]&&p[5]==='simulate'){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await simulateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
+    if(req.method==='GET'&&p[4]==='providers'&&p.length===5)return sendJson(res,200,await listAuthorizedShippingProviders01078(scope));
+    if(req.method==='PATCH'&&p[4]&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[4]&&p[5]==='simulate'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await simulateAuthorizedSellerDelivery01078(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Shipping route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='payments'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedPayments(scope));
-    if(req.method==='POST'&&p[4]==='order'&&p[5]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await ensureAuthorizedPaymentForOrder(scope,p[5]));}
-    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await transitionAuthorizedPayment(scope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[4]==='order'&&p[5]&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await ensureAuthorizedPaymentForOrder(scope,p[5]));}
+    if(req.method==='PATCH'&&p[4]&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await transitionAuthorizedPayment(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Payment route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='payouts'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedPayouts(scope));
-    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await markAuthorizedPayout(scope,p[4],await readJson(req)));}
+    if(req.method==='PATCH'&&p[4]&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await markAuthorizedPayout(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Payout route not found',requestId:rid});
   }
   if(p[2]==='network'&&p[3]==='orders'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listAuthorizedSellerOrders(scope));
-    if(req.method==='PATCH'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerOrder(scope,p[4],await readJson(req)));}
+    if(req.method==='PATCH'&&p[4]&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await updateAuthorizedSellerOrder(scope,p[4],await readJson(req)));}
     return sendJson(res,404,{error:'Seller order route not found',requestId:rid});
   }
   if(p[2]==='network'){
-    if(req.method==='GET'&&p[3]==='context')return sendJson(res,200,await getNetworkView(scope));
-    if(req.method==='POST'&&p[3]==='join'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await ensureSeller(scope,await readJson(req)));}
-    if(req.method==='PATCH'&&p[3]==='seller'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeller(scope,await readJson(req)));}
-    if(req.method==='PATCH'&&p[3]==='policy'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updatePolicy(scope,await readJson(req)));}
-    if(req.method==='POST'&&p[3]==='products'&&p[5]==='publish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await publishNetworkProduct(scope,p[4]));}
-    if(req.method==='POST'&&p[3]==='products'&&p[5]==='sync'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await syncNetworkProduct(scope,p[4]));}
-    if(req.method==='POST'&&p[3]==='listings'&&p[5]==='unpublish'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await unpublishListing(scope,p[4]));}
+    if(req.method==='GET'&&p[3]==='context'&&p.length===4)return sendJson(res,200,await getNetworkView(scope));
+    if(req.method==='POST'&&p[3]==='join'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await ensureSeller(scope,await readJson(req)));}
+    if(req.method==='PATCH'&&p[3]==='seller'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeller(scope,await readJson(req)));}
+    if(req.method==='PATCH'&&p[3]==='policy'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updatePolicy(scope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='products'&&p[4]&&p[5]==='publish'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await publishNetworkProduct(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='products'&&p[4]&&p[5]==='sync'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await syncNetworkProduct(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='listings'&&p[4]&&p[5]==='unpublish'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await unpublishListing(scope,p[4]));}
     return sendJson(res,404,{error:'Network route not found',requestId:rid});
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
@@ -818,17 +819,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[3]==='supplier-sync-schedules'){
     const sourceId=p[4]||'';
-    if(req.method==='GET'&&!sourceId)return sendJson(res,200,await listSupplierSyncSchedules01399(scope));
-    if(req.method==='PUT'&&sourceId){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await saveSupplierSyncSchedule01399(scope,sourceId,await readJson(req)));}
-    if(req.method==='DELETE'&&sourceId){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
-    if(req.method==='POST'&&sourceId&&p[5]==='run'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
+    if(req.method==='GET'&&!sourceId&&p.length===4)return sendJson(res,200,await listSupplierSyncSchedules01399(scope));
+    if(req.method==='PUT'&&sourceId&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await saveSupplierSyncSchedule01399(scope,sourceId,await readJson(req)));}
+    if(req.method==='DELETE'&&sourceId&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteSupplierSyncSchedule01399(scope,sourceId));}
+    if(req.method==='POST'&&sourceId&&p[5]==='run'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await runSupplierSyncNow01399(scope,sourceId));}
     return sendJson(res,404,{error:'Supplier sync scheduler route not found',stage:'01399',requestId:rid});
   }
   if(p[3]==='supplier-sync-alerts'){
     const alertId=p[4]||'';
-    if(req.method==='GET'&&!alertId){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listSupplierSyncAlerts01401(scope,{status:u.searchParams.get('status')||'',kind:u.searchParams.get('kind')||'',severity:u.searchParams.get('severity')||'',sourceId:u.searchParams.get('sourceId')||''}));}
-    if(req.method==='POST'&&alertId&&p[5]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'read'));}
-    if(req.method==='POST'&&alertId&&p[5]==='dismiss'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'dismissed'));}
+    if(req.method==='GET'&&!alertId&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listSupplierSyncAlerts01401(scope,{status:u.searchParams.get('status')||'',kind:u.searchParams.get('kind')||'',severity:u.searchParams.get('severity')||'',sourceId:u.searchParams.get('sourceId')||''}));}
+    if(req.method==='POST'&&alertId&&p[5]==='read'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'read'));}
+    if(req.method==='POST'&&alertId&&p[5]==='dismiss'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req,{limit:4096});return sendJson(res,200,await setSupplierSyncAlertStatus01401(scope,alertId,'dismissed'));}
     return sendJson(res,404,{error:'Supplier sync alert route not found',stage:'01401',requestId:rid});
   }
   if(p[3]==='supplier-sync-alert-rules'){
@@ -839,35 +840,35 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[3]==='supplier-sync-approvals'){
     const approvalId=p[4]||'';
-    if(req.method==='GET'&&!approvalId)return sendJson(res,200,await listSupplierSyncApprovals01400(scope));
+    if(req.method==='GET'&&!approvalId&&p.length===4)return sendJson(res,200,await listSupplierSyncApprovals01400(scope));
     if(req.method==='GET'&&approvalId&&p.length===5)return sendJson(res,200,await getSupplierSyncApprovalDetail01400(scope,approvalId));
-    if(req.method==='POST'&&approvalId&&p[5]==='approve'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await approveSupplierSyncApproval01400(scope,approvalId));}
-    if(req.method==='POST'&&approvalId&&p[5]==='reject'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await rejectAndUpdateSupplierSyncApproval01400(scope,approvalId));}
+    if(req.method==='POST'&&approvalId&&p[5]==='approve'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await approveSupplierSyncApproval01400(scope,approvalId));}
+    if(req.method==='POST'&&approvalId&&p[5]==='reject'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await rejectAndUpdateSupplierSyncApproval01400(scope,approvalId));}
     return sendJson(res,404,{error:'Supplier sync approval route not found',stage:'01400',requestId:rid});
   }
   if(p[3]==='import-rollbacks'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await listMarketplaceImportRollbacks01397(scope));
-    if(req.method==='GET'&&p[4]&&p[5]==='preview')return sendJson(res,200,await previewMarketplaceImportRollback01397(scope,p[4]));
-    if(req.method==='POST'&&p[4]&&p[5]==='restore'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
+    if(req.method==='GET'&&p[4]&&p[5]==='preview'&&p.length===6)return sendJson(res,200,await previewMarketplaceImportRollback01397(scope,p[4]));
+    if(req.method==='POST'&&p[4]&&p[5]==='restore'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
     return sendJson(res,404,{error:'Import rollback route not found',stage:'01397',requestId:rid});
   }
-  if(p[3]==='category-path'&&p[4]==='resolve'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
-  if(p[3]==='category-merge'&&p[4]==='preview'&&req.method==='POST'){return sendJson(res,200,await previewCategoryMerge01490(scope,await readJson(req)));}
-  if(p[3]==='category-merge'&&p[4]==='apply'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
+  if(p[3]==='category-path'&&p[4]==='resolve'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='preview'&&p.length===5&&req.method==='POST'){return sendJson(res,200,await previewCategoryMerge01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
   if(p[3]==='seo'){
-    if(req.method==='GET')return sendJson(res,200,await getSeo(scope));
-    if(req.method==='PATCH'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
+    if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getSeo(scope));
+    if(req.method==='PATCH'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}
   }
   if(p[3]==='products'&&p[4]==='replacement-preview'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await previewProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
   if(p[3]==='products'&&p[4]==='replacement-apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeProductReplacement01528(scope,await readJson(req,{limit:1024*1024})));}
   if(p[3]==='products'&&p[4]==='bulk-status'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await bulkSetProductStatus01523(scope,await readJson(req,{limit:1024*1024})));}
   const key=RESOURCE_PATHS_01071[p[3]];
   if(key){const id=p[4]||'';
-    if(req.method==='GET'&&!id)return sendJson(res,200,await listResource(scope,key));
-    if(req.method==='GET'&&id){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
-    if(req.method==='POST'&&!id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await createResource(scope,key,await readJson(req)));}
-    if(req.method==='PATCH'&&id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateResource(scope,key,id,await readJson(req)));}
-    if(req.method==='DELETE'&&id){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
+    if(req.method==='GET'&&!id&&p.length===4)return sendJson(res,200,await listResource(scope,key));
+    if(req.method==='GET'&&id&&p.length===5){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
+    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await createResource(scope,key,await readJson(req)));}
+    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateResource(scope,key,id,await readJson(req)));}
+    if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }

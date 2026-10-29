@@ -55,7 +55,7 @@ test('01605E store-wide role keeps previous scoped SQL query',async()=>{
 });
 test('01605E server routes apply central gate to both reads and filter site list',()=>{
  const server=fs.readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
- assert.match(server,/classifyLegacyReadAction01605E\(req\.method,p\)\|\|classifyTenantIsolationAction01605D/);
+ assert.match(server,/classifyLegacyMerchantAction01605F\(req\.method,p\)\|\|classifyLegacyReadAction01605E\(req\.method,p\)\|\|classifyTenantIsolationAction01605D/);
  assert.match(server,/listSiteRevisions01231\(scope,'',protectedDecision01600\?\.allowedSiteIds\?\?null\)/);
  assert.match(server,/p\[4\]==='export'&&p\.length===5/);
 });
