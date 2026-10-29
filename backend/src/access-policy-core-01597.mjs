@@ -19,6 +19,8 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('builder.seo','view'),define('builder.seo','edit'),
   define('builder.ai','view'),define('builder.ai','configure'),
   define('crm.contacts','view'),define('crm.contacts','edit'),define('crm.contacts','export'),
+  define('crm.messages','view'),define('crm.messages','reply'),define('crm.messages','manage'),
+  define('shop.notifications','view'),define('shop.notifications','manage'),
   define('crm.orders','view'),define('crm.orders','edit'),
   define('team.members','view'),define('team.members','invite'),define('team.members','manage'),
   define('team.roles','view'),define('team.roles','manage'),

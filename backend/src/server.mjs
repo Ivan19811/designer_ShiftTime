@@ -30,6 +30,7 @@ import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
 import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
+import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
@@ -352,7 +353,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
-  const protectedAction01600=classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
+  const protectedAction01600=classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
     ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605)
@@ -553,37 +554,37 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
 
   if(p[2]==='notifications'){
     if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await listOrderNotifications01404(scope));}
-    if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
+    if(req.method==='GET'&&p[3]==='messages'&&p.length===4){if(protectedDecision01600?.mode==='legacy')assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
     if(req.method==='GET'&&p[3]==='payments'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await listPaymentNotifications01413(scope));}
-    if(req.method==='GET'&&p[3]==='sites'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listSiteNotifications01414(scope));}
-    if(req.method==='GET'&&p[3]==='traffic'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listTrafficNotifications01415(scope));}
+    if(req.method==='GET'&&p[3]==='sites'&&p.length===4){if(protectedDecision01600?.mode==='legacy')assertOrderWriteRole(scope);return sendJson(res,200,await listSiteNotifications01414(scope));}
+    if(req.method==='GET'&&p[3]==='traffic'&&p.length===4){if(protectedDecision01600?.mode==='legacy')assertOrderWriteRole(scope);return sendJson(res,200,await listTrafficNotifications01415(scope));}
     if(p[3]==='messages'&&p[4]==='inbox'){
-      assertOrderWriteRole(scope);
+      if(protectedDecision01600?.mode==='legacy')assertOrderWriteRole(scope);
       if(req.method==='GET'&&p.length===5){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listCustomerMessagesInbox01410(scope,Object.fromEntries(u.searchParams.entries())));}
       if(req.method==='GET'&&p[5]==='managers'&&p.length===6)return sendJson(res,200,await listCustomerMessageManagers01410(scope));
       const messageId=p[5]||'';
       if(req.method==='GET'&&messageId&&p.length===6){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getCustomerMessageThread01410(scope,messageId,{markRead:u.searchParams.get('markRead')==='1',actorUserId:session.userId}));}
-      if(req.method==='PATCH'&&messageId&&p.length===6){assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
-      if(req.method==='POST'&&messageId&&p[6]==='thread'){assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
+      if(req.method==='PATCH'&&messageId&&p.length===6){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
+      if(req.method==='POST'&&messageId&&p[6]==='thread'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
       return sendJson(res,404,{error:'CUSTOMER_MESSAGES_INBOX_ROUTE_NOT_FOUND_01410',stage:'01410',requestId:rid});
     }
     if(req.method==='GET'&&p[3]==='transports'&&p[4]==='status'&&p.length===5)return sendJson(res,200,getNotificationTransportStatus01409());
-    if(req.method==='POST'&&p[3]==='transports'&&p[4]&&p[5]==='test'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await sendNotificationTransportTest01409(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='transports'&&p[4]&&p[5]==='test'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await sendNotificationTransportTest01409(scope,p[4]));}
     if(req.method==='GET'&&p[3]==='deliveries'&&p.length===4){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listNotificationDeliveries01409(scope,Object.fromEntries(u.searchParams.entries())));}
-    if(req.method==='GET'&&p[3]==='recipients'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listNotificationRecipientCatalog01416(scope));}
-    if(p[3]==='preferences'&&p.length===4){if(req.method==='GET')return sendJson(res,200,await getNotificationPreferences01417(scope,session.userId));if(req.method==='PUT'){const body=await readJson(req,{limit:32768});if(String(body?.target||'user')==='store')assertWriteRole(scope);return sendJson(res,200,await saveNotificationPreferences01417(scope,body,session.userId));}}
+    if(req.method==='GET'&&p[3]==='recipients'&&p.length===4){if(protectedDecision01600?.mode==='legacy')assertOrderWriteRole(scope);return sendJson(res,200,await listNotificationRecipientCatalog01416(scope));}
+    if(p[3]==='preferences'&&p.length===4){if(req.method==='GET')return sendJson(res,200,await getNotificationPreferences01417(scope,session.userId));if(req.method==='PUT'){const body=await readJson(req,{limit:32768});if(String(body?.target||'user')==='store'){const storePrefsDecision01605B=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.notifications.manage',siteId:'',legacy:'write'});assertLegacyForUnmanaged01600(scope,storePrefsDecision01605B);}return sendJson(res,200,await saveNotificationPreferences01417(scope,body,session.userId));}}
     if(req.method==='GET'&&p[3]==='preferences'&&p[4]==='stats'&&p.length===5)return sendJson(res,200,await notificationPreferenceQueueStats01417(scope));
-    if(req.method==='POST'&&p[3]==='deliveries'&&p[4]&&p[5]==='retry'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await retryNotificationDelivery01409(scope,p[4]));}
+    if(req.method==='POST'&&p[3]==='deliveries'&&p[4]&&p[5]==='retry'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await retryNotificationDelivery01409(scope,p[4]));}
     if(p[3]==='rules'){
       const ruleId=p[4]||'';
       if(req.method==='GET'&&!ruleId)return sendJson(res,200,await listNotificationRules01408(scope));
-      if(req.method==='POST'&&!ruleId){assertWriteRole(scope);return sendJson(res,201,await createNotificationRule01408(scope,await readJson(req,{limit:32768})));}
-      if(req.method==='PUT'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await updateNotificationRule01408(scope,ruleId,await readJson(req,{limit:32768})));}
-      if(req.method==='DELETE'&&ruleId&&p.length===5){assertWriteRole(scope);return sendJson(res,200,await deleteNotificationRule01408(scope,ruleId));}
-      if(req.method==='POST'&&ruleId&&p[5]==='duplicate'){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,201,await duplicateNotificationRule01408(scope,ruleId));}
+      if(req.method==='POST'&&!ruleId){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,201,await createNotificationRule01408(scope,await readJson(req,{limit:32768})));}
+      if(req.method==='PUT'&&ruleId&&p.length===5){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await updateNotificationRule01408(scope,ruleId,await readJson(req,{limit:32768})));}
+      if(req.method==='DELETE'&&ruleId&&p.length===5){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await deleteNotificationRule01408(scope,ruleId));}
+      if(req.method==='POST'&&ruleId&&p[5]==='duplicate'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,201,await duplicateNotificationRule01408(scope,ruleId));}
       return sendJson(res,404,{error:'NOTIFICATION_RULE_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
     }
-    if(req.method==='POST'&&['orders','messages','payments','sites','traffic'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
+    if(req.method==='POST'&&['orders','messages','payments','sites','traffic'].includes(p[3])&&p[4]&&['read','dismiss'].includes(p[5])){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);await readJson(req,{limit:4096});return sendJson(res,200,await setNotificationReceipt01404(scope,p[3],p[4],p[5]==='read'?'read':'dismissed',session.userId));}
     return sendJson(res,404,{error:'NOTIFICATION_ROUTE_NOT_FOUND_01408',stage:'01408',requestId:rid});
   }
 
@@ -669,8 +670,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,200,{stage:'01170',site});
   }
   if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
+  // 01605B · Prevent enrolled narrow roles inheriting legacy admin capabilities.
   if(p[2]==='admin'){
     assertAdminView01087(scope);
+    await assertUnmanagedAdminOperation01605(scope,session.userId);
     // 01597 · Owner-only management of explicit store/site permission roles.
     if(p[3]==='role-center'){
       const action=p[4]||'',id=p[5]||'',u=new URL(req.url,'http://localhost');
