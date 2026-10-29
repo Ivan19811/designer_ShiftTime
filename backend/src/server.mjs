@@ -32,6 +32,7 @@ import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
 import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
 import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
+import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -356,7 +357,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const protectedAction01600=classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
-    ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605)
+    ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{
+        // Never lose a denial even when persistence fails; no request content is logged.
+        if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,auditedAction01605,error.code||error.message);}catch{console.warn('[01605C] access audit write unavailable');}
+        throw error;
+      })
     : null;
   // 01599 · Own UI navigation grants, never another member's data.
   if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
@@ -682,6 +687,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         if(req.method==='POST'&&p[5]==='enroll'&&p.length===6)return sendJson(res,200,await testWorkerRoleService01603.enroll(scope,session.userId,await readJson(req,{limit:4096})));
         if(req.method==='POST'&&p[5]==='replace'&&p.length===6)return sendJson(res,200,await testWorkerRoleService01603.replace(scope,session.userId,await readJson(req,{limit:4096})));
       }
+      if(req.method==='GET'&&action==='history'&&p.length===5)return sendJson(res,200,await listAccessHistory01605C(scope,Object.fromEntries(u.searchParams.entries())),{'cache-control':'private, no-store'});
       if(req.method==='GET'&&action==='catalog'&&p.length===5)return sendJson(res,200,accessPolicyService01597.catalog(),{'cache-control':'private, no-store'});
       if(req.method==='GET'&&action==='roles'&&p.length===5)return sendJson(res,200,{stage:'01597',roles:await accessPolicyService01597.roles(scope)},{'cache-control':'private, no-store'});
       if(req.method==='POST'&&action==='roles'&&p.length===5)return sendJson(res,201,{stage:'01597',role:await accessPolicyService01597.createRole(scope,session.userId,await readJson(req,{limit:16384}))});
