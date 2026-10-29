@@ -29,6 +29,8 @@ import {provePublishedCart01551} from './shipping-public-cart-01551.mjs';
 import {pool} from './db.mjs';
 import {classifyProtectedAction01600} from './access-enforcement-core-01600.mjs';
 import {classifyExtendedAction01601} from './access-enforcement-core-01601.mjs';
+import {effectiveAuditedAction01605} from './access-audit-core-01605.mjs';
+import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -351,8 +353,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
   const protectedAction01600=classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
-  const protectedDecision01600=protectedAction01600
-    ? await inspectProtectedAccess01600(scope,session.userId,protectedAction01600)
+  const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
+  const protectedDecision01600=auditedAction01605
+    ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605)
     : null;
   // 01599 · Own UI navigation grants, never another member's data.
   if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
@@ -379,13 +382,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[4]==='status'&&p.length===5)return sendJson(res,200,{...shippingHubStatus01543(),requestId:rid});
     if(p[4]==='stores'&&p[5]==='nova-poshta'&&p[6]==='quote-settings'&&p.length===7){
       if(req.method==='GET')return sendJson(res,200,{...(await getQuoteProfile01544(scope.storeId)),requestId:rid});
-      assertAdminRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');
       if(req.method==='PUT')return sendJson(res,200,{...(await saveQuoteProfile01544(scope,await readJson(req,{limit:2048}))),requestId:rid});
       return sendJson(res,405,{error:'NP_QUOTE_METHOD_NOT_ALLOWED_01544',requestId:rid});
     }
     if(p[4]==='stores'&&p[5]==='nova-poshta'&&p[6]==='product-parcels'&&p.length===7){
       if(req.method==='GET')return sendJson(res,200,{...(await listStoreProductParcels01545(scope)),requestId:rid},{'cache-control':'no-store'});
-      assertAdminRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');
       if(req.method==='PUT')return sendJson(res,200,{...(await saveStoreProductParcel01545(scope,await readJson(req,{limit:4096}))),requestId:rid});
       return sendJson(res,405,{error:'NP_PARCEL_METHOD_NOT_ALLOWED_01545',requestId:rid});
     }
@@ -526,7 +529,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
     if(p[4]==='stores'&&p[5]==='nova-poshta'&&p.length===6){
       if(req.method==='GET')return sendJson(res,200,{...(await getStoreShippingConnection01543(scope)),requestId:rid});
-      assertAdminRole(scope);
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');
       if(req.method==='PUT')return sendJson(res,200,{...(await saveStoreShippingConnection01543(scope,await readJson(req,{limit:4096}))),requestId:rid});
       if(req.method==='DELETE')return sendJson(res,200,{...(await deleteStoreShippingConnection01543(scope)),requestId:rid});
     }
@@ -549,9 +552,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
 
   if(p[2]==='notifications'){
-    if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listOrderNotifications01404(scope));}
+    if(req.method==='GET'&&p[3]==='orders'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await listOrderNotifications01404(scope));}
     if(req.method==='GET'&&p[3]==='messages'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listCustomerMessageNotifications01404(scope));}
-    if(req.method==='GET'&&p[3]==='payments'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listPaymentNotifications01413(scope));}
+    if(req.method==='GET'&&p[3]==='payments'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'order');return sendJson(res,200,await listPaymentNotifications01413(scope));}
     if(req.method==='GET'&&p[3]==='sites'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listSiteNotifications01414(scope));}
     if(req.method==='GET'&&p[3]==='traffic'&&p.length===4){assertOrderWriteRole(scope);return sendJson(res,200,await listTrafficNotifications01415(scope));}
     if(p[3]==='messages'&&p[4]==='inbox'){
@@ -733,10 +736,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }
-  if(req.method==='POST'&&p[2]==='deployment'&&p[3]==='import-local-operational'){assertAdminRole(scope);return sendJson(res,200,await importLocalOperationalBundle01080(scope,await readJson(req)));}
+  if(req.method==='POST'&&p[2]==='deployment'&&p[3]==='import-local-operational'){assertAdminRole(scope);await assertUnmanagedAdminOperation01605(scope,session.userId);return sendJson(res,200,await importLocalOperationalBundle01080(scope,await readJson(req)));}
   if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context'){const result=await getAuthorizedPlatformSnapshot(session.userId,scope);await noteServiceUseSafely01592(session.userId,'builder','builder_context');return sendJson(res,200,result);}
-  if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces')return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));
-  if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
+  if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces'){await assertUnmanagedAdminOperation01605(scope,session.userId);return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));}
+  if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){await assertUnmanagedAdminOperation01605(scope,session.userId);const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
   if(p[2]==='tables'){
     const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
     if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,tables:await listAuthorizedTables01092(scope,session.userId)});
