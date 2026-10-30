@@ -18,6 +18,7 @@ export function classifyProtectedAction01600(method,parts){
       if(m==='DELETE')return decision('site.publish.delete',siteId,'admin');
     }
     if(p[4]==='publish-status'&&p.length>=5&&m==='GET')return decision('site.pages.view',siteId,'read');
+    if(p[4]==='canvas'&&p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
     if(p[4]==='metadata'&&p.length===5&&m==='PATCH')return decision('site.pages.edit',siteId);
     if(p[4]==='publish'&&p.length>=5&&m==='POST')return decision('site.publish.execute',siteId);
     if(p[4]==='revisions'){

@@ -8,6 +8,8 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   // 01606E · Exact server gates for site saves, drafts and publish.
   define('api.mode','site_actions'),
   ...['site_create','metadata_edit','project_replace','site_delete','draft_create','draft_replace','draft_details','draft_delete','publish'].map(action=>define('site.design.actions',action)),
+  // 01606F · Atomic Canvas Main node operations (not entire project snapshots).
+  ...['create','update','move','delete'].map(action=>define('site.design.canvas',action)),
   define('shop.products','view'),define('shop.products','create'),define('shop.products','edit'),define('shop.products','delete'),define('shop.products','import'),define('shop.products','prices'),
   // 01606B · Opt-in, independent SERVER authorization for high-impact product mutations.
   define('api.mode','product_actions'),define('api.mode','table_actions'),define('api.mode','catalog_actions'),

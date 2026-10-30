@@ -38,6 +38,9 @@ import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.m
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {classifySiteAction01606E,assertSiteAction01606E,isPreciseSiteMode01606E} from './access-site-actions-core-01606e.mjs';
+import {classifyCanvasRoute01606F,assertCanvasActions01606F} from './access-canvas-actions-core-01606f.mjs';
+import {normalizeCanvasAtomicInput01606F} from './site-canvas-atomic-core-01606f.mjs';
+import {applySiteCanvas01606F} from './site-canvas-atomic-service-01606f.mjs';
 import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
 import {catalogAction01606D,classifyCatalogAction01606D,assertCatalogAction01606D} from './access-catalog-actions-core-01606d.mjs';
 import {normalizeCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
@@ -693,6 +696,18 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null)});
+  // 01606F · Atomic Main Canvas edits. 01600 checks site.pages.edit and tenant
+  // membership before reading payload; this secondary gate checks each action.
+  if(classifyCanvasRoute01606F(req.method,p)){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    const input=normalizeCanvasAtomicInput01606F(await readJson(req,{limit:512*1024}));
+    try{assertCanvasActions01606F(protectedDecision01600,input.operations);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:error.permission,siteId:p[3]},error.code);}catch{console.warn('[01606F] canvas denial journal unavailable');}
+      throw error;
+    }
+    return sendJson(res,200,await applySiteCanvas01606F(scope,session.userId,p[3],input),{'cache-control':'private, no-store'});
+  }
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
