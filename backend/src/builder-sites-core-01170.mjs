@@ -11,7 +11,7 @@ export function createBuilderSitesService01170({repo,netlify}={}){
   return {
     async list(scope){return repo.list(scope);},
     async get(scope,id){const row=await repo.get(scope,clean(id));if(!row)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');return row;},
-    async create(scope,userId,input){return repo.create(scope,userId,normalizeBuilderSiteInput01170(input));},
+    async create(scope,userId,input,options={}){return repo.create(scope,userId,normalizeBuilderSiteInput01170(input),options);},
     async save(scope,userId,id,input){const row=await repo.save(scope,userId,clean(id),normalizeBuilderSiteInput01170(input,id));if(!row)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');return row;},
     async delete(scope,userId,id){
       const siteId=clean(id);if(!siteId)throw httpError('Builder site id is required');

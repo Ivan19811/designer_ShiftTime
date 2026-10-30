@@ -5,6 +5,9 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('site.pages','view'),define('site.pages','create'),define('site.pages','edit'),define('site.pages','delete'),
   define('site.design','view'),define('site.design','edit'),
   define('site.publish','view'),define('site.publish','execute'),define('site.publish','delete'),
+  // 01606E · Exact server gates for site saves, drafts and publish.
+  define('api.mode','site_actions'),
+  ...['site_create','metadata_edit','project_replace','site_delete','draft_create','draft_replace','draft_details','draft_delete','publish'].map(action=>define('site.design.actions',action)),
   define('shop.products','view'),define('shop.products','create'),define('shop.products','edit'),define('shop.products','delete'),define('shop.products','import'),define('shop.products','prices'),
   // 01606B · Opt-in, independent SERVER authorization for high-impact product mutations.
   define('api.mode','product_actions'),define('api.mode','table_actions'),define('api.mode','catalog_actions'),

@@ -38,9 +38,9 @@ export function createBuilderSitesRepository01170(){
       return q.rows.map(r=>summarizeBuilderSite01476(mapRow(r)));
     });},
     async get(scope,id){return withClient(async c=>{const q=await c.query(`${select} WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.id=$4 LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,id]);return mapRow(q.rows[0]);});},
-    async create(scope,userId,input){const data=normalizeBuilderSiteInput01170(input);return withClient(async c=>{await c.query('BEGIN');try{
+    async create(scope,userId,input,{createOnly=false}={}){const data=normalizeBuilderSiteInput01170(input);return withClient(async c=>{await c.query('BEGIN');try{
       const existing=await c.query('SELECT account_id,workspace_id,store_id FROM shifttime_builder_sites WHERE id=$1 LIMIT 1',[data.id]);
-      if(existing.rowCount){const r=existing.rows[0];if(r.account_id!==scope.accountId||r.workspace_id!==scope.workspaceId||r.store_id!==scope.storeId)throw httpError('Builder site id already belongs to another scope',409,'ST_BUILDER_SITE_ID_CONFLICT');
+      if(existing.rowCount){if(createOnly)throw httpError('Builder site already exists',409,'ST_BUILDER_SITE_CREATE_CONFLICT_01606E');const r=existing.rows[0];if(r.account_id!==scope.accountId||r.workspace_id!==scope.workspaceId||r.store_id!==scope.storeId)throw httpError('Builder site id already belongs to another scope',409,'ST_BUILDER_SITE_ID_CONFLICT');
         await c.query(`UPDATE shifttime_builder_sites SET name=$1,slug=$2,description=$3,status='active',updated_at=now() WHERE id=$4`,[data.name,data.slug,data.description,data.id]);
         await c.query(`INSERT INTO shifttime_builder_site_projects(site_id,schema_version,revision,project_json,updated_by_user_id) VALUES($1,$2,1,$3::jsonb,$4)
           ON CONFLICT(site_id) DO UPDATE SET schema_version=EXCLUDED.schema_version,project_json=EXCLUDED.project_json,updated_by_user_id=EXCLUDED.updated_by_user_id,updated_at=now()`,[data.id,data.schemaVersion,JSON.stringify(data.project),userId]);
@@ -74,7 +74,7 @@ const defaultService=createBuilderSitesService01170({repo:defaultRepo,netlify:cr
 export const listBuilderSites01170=scope=>defaultService.list(scope);
 export const listBuilderSiteSummaries01476=scope=>defaultRepo.listSummary(scope);
 export const getBuilderSite01170=(scope,id)=>defaultService.get(scope,id);
-export const createBuilderSite01170=(scope,userId,input)=>defaultService.create(scope,userId,input);
+export const createBuilderSite01170=(scope,userId,input,options={})=>defaultService.create(scope,userId,input,options);
 export const saveBuilderSite01170=(scope,userId,id,input)=>defaultService.save(scope,userId,id,input);
 export const saveBuilderSiteMetadata01231=async(scope,id,input)=>{const row=await defaultRepo.saveMetadata(scope,clean(id),input);if(!row)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');return row;};
 export const deleteBuilderSite01170=(scope,userId,id)=>defaultService.delete(scope,userId,id);

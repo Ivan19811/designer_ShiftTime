@@ -37,6 +37,7 @@ import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
+import {classifySiteAction01606E,assertSiteAction01606E,isPreciseSiteMode01606E} from './access-site-actions-core-01606e.mjs';
 import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
 import {catalogAction01606D,classifyCatalogAction01606D,assertCatalogAction01606D} from './access-catalog-actions-core-01606d.mjs';
 import {normalizeCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
@@ -370,6 +371,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         throw error;
       })
     : null;
+  // 01606E · For site mutation routes the original site-scoped 01600 check
+  // has already completed (including tenant and membership verification).
+  // Do not parse or persist a caller-supplied project before this action gate.
+  const siteAction01606E=classifySiteAction01606E(req.method,p);
+  if(siteAction01606E){
+    try{assertSiteAction01606E(protectedDecision01600,siteAction01606E);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:error.permission||siteAction01606E.permission,siteId:p[3]&&p[3]!=='sites'?p[3]:''},error.code);}catch{console.warn('[01606E] site action audit write unavailable');}
+      throw error;
+    }
+  }
   // 01606B · Base 01600 gate has already passed. Enforce an independent, DB-derived action
   // grant before any static-route mutations. Dynamic status checks run after JSON parsing.
   const assertProductGate01606B=async action=>{
@@ -702,7 +714,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,200,{stage:'01476',sites:Array.isArray(onlySites)&&Array.isArray(sites)?sites.filter(s=>onlySites.includes(s.id)):sites});
   }
   if(p[2]==='sites'&&p[3]&&req.method==='GET'&&p.length===4)return sendJson(res,200,{stage:'01170',site:await getBuilderSite01170(scope,p[3])});
-  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}))});}
+  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}),{createOnly:isPreciseSiteMode01606E(protectedDecision01600)})});}
   if(p[2]==='sites'&&p[3]&&p[4]==='metadata'&&req.method==='PATCH'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',site:await saveBuilderSiteMetadata01231(scope,p[3],await readJson(req,{limit:1024*1024}))});}
   if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){
     assertLegacyForUnmanaged01600(scope,protectedDecision01600);
