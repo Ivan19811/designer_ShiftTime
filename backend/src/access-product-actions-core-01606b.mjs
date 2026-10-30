@@ -31,7 +31,7 @@ export function assertProductAction01606B(decision,action){
   if(!action||decision?.mode!=='custom')return true;
   const grants=new Set(Array.isArray(decision.permissions)?decision.permissions:[]);
   const uiRestricted=grants.has('ui.mode.controls');
-  if(!grants.has(PRODUCT_ACTION_MODE_01606B)&&!uiRestricted)return true;
+  if(!grants.has(PRODUCT_ACTION_MODE_01606B)&&!grants.has('api.mode.catalog_actions')&&!uiRestricted)return true;
   if(!grants.has(action.permission))throw denied(action.permission);
   if(uiRestricted&&action.uiControl&&!grants.has(action.uiControl))throw denied(action.uiControl);
   return true;

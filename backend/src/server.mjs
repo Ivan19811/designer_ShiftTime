@@ -38,6 +38,8 @@ import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.m
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
+import {catalogAction01606D,classifyCatalogAction01606D,assertCatalogAction01606D} from './access-catalog-actions-core-01606d.mjs';
+import {normalizeCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
 import {classifyTableAction01606C,assertTableAction01606C} from './access-table-actions-core-01606c.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
@@ -52,7 +54,7 @@ import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validSta
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
-import {loadSnapshot,replaceSnapshot,resetSnapshot,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
+import {loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
@@ -378,6 +380,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
   };
   await assertProductGate01606B(classifyProductAction01606B(req.method,p));
+  // 01606D · Resource APIs must honor the same fine-grained grants as atomic batch APIs.
+  const assertCatalogGate01606D=async (action,decision=protectedDecision01600)=>{
+    if(!action)return;
+    try{assertCatalogAction01606D(decision,action);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:action.permission,siteId:''},error.code);}catch{console.warn('[01606D] access audit write unavailable');}
+      throw error;
+    }
+  };
+  await assertCatalogGate01606D(classifyCatalogAction01606D(req.method,p));
+
   // 01606C · After the original 01601 base authorization, independently protect actual table CRUD endpoints.
   const tableAction01606C=classifyTableAction01606C(req.method,p);
   if(tableAction01606C){
@@ -832,11 +845,29 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Network route not found',requestId:rid});
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
+  if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
+    const input=await readJson(req,{limit:1024*1024});
+    const plan=normalizeCatalogOperations01606D(input);
+    // Inspect each distinct base permission from the authenticated DB. The initial read
+    // permission for this endpoint does not authorize any mutations by itself.
+    const checked=new Map();
+    for(const op of plan.operations){
+      const basePermission=op.action==='delete'?'shop.products.delete':'shop.products.edit';
+      if(!checked.has(basePermission)){
+        let result;
+        try{result=await inspectProtectedAccess01600(scope,session.userId,{permission:basePermission,siteId:'',legacy:'write'});}
+        catch(error){if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:basePermission,siteId:''},error.code||error.message);}catch{}throw error;}
+        checked.set(basePermission,result);
+      }
+      await assertCatalogGate01606D(catalogAction01606D(op.collection,op.action==='update'?'edit':op.action),checked.get(basePermission));
+    }
+    return sendJson(res,200,await atomicCatalogEdit01606D(scope,input));
+  }
   if(p[3]==='snapshot'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await loadSnapshot(scope));
     if(req.method==='GET'&&p[4]==='export'&&p.length===5)return sendJson(res,200,await loadSnapshot(scope),{'content-disposition':`attachment; filename="marketplace-${scope.storeId}.json"`});
     if(req.method==='PUT'&&p.length===4){const sourceKind=sanitizeImportSource01080(req.headers['x-st-import-source']),rollbackJobId=String(req.headers['x-st-rollback-job-id']||'').trim().replace(/[^a-z0-9._:-]/gi,'-').slice(0,140);if(sourceKind==='studio-local-migration-01080')assertAdminRole(scope);else assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await replaceSnapshot(scope,await readJson(req),{sourceKind,rollbackJobId}));}
-    if(req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await resetSnapshot(scope);return sendNoContent(res,204);}
+    if(req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await assertProductGate01606B({permission:'shop.products.actions.snapshot_replace'});await resetSnapshot(scope);return sendNoContent(res,204);}
   }
   if(p[3]==='supplier-sync-schedules'){
     const sourceId=p[4]||'';
@@ -873,9 +904,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[4]&&p[5]==='restore'&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await readJson(req);return sendJson(res,200,await restoreMarketplaceImportRollback01397(scope,p[4]));}
     return sendJson(res,404,{error:'Import rollback route not found',stage:'01397',requestId:rid});
   }
-  if(p[3]==='category-path'&&p[4]==='resolve'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
+  if(p[3]==='category-path'&&p[4]==='resolve'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await assertCatalogGate01606D(catalogAction01606D('categories','create'));return sendJson(res,200,await resolveCategoryPath01490(scope,await readJson(req)));}
   if(p[3]==='category-merge'&&p[4]==='preview'&&p.length===5&&req.method==='POST'){return sendJson(res,200,await previewCategoryMerge01490(scope,await readJson(req)));}
-  if(p[3]==='category-merge'&&p[4]==='apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
+  if(p[3]==='category-merge'&&p[4]==='apply'&&p.length===5&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);await assertCatalogGate01606D(catalogAction01606D('categories','edit'));const deleteDecision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.delete',siteId:'',legacy:'write'});await assertCatalogGate01606D(catalogAction01606D('categories','delete'),deleteDecision);return sendJson(res,200,await executeCategoryMerge01490(scope,await readJson(req)));}
   if(p[3]==='seo'){
     if(req.method==='GET'&&p.length===4)return sendJson(res,200,await getSeo(scope));
     if(req.method==='PATCH'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await updateSeo(scope,await readJson(req)));}

@@ -7,8 +7,10 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('site.publish','view'),define('site.publish','execute'),define('site.publish','delete'),
   define('shop.products','view'),define('shop.products','create'),define('shop.products','edit'),define('shop.products','delete'),define('shop.products','import'),define('shop.products','prices'),
   // 01606B · Opt-in, independent SERVER authorization for high-impact product mutations.
-  define('api.mode','product_actions'),define('api.mode','table_actions'),
+  define('api.mode','product_actions'),define('api.mode','table_actions'),define('api.mode','catalog_actions'),
   ...['activate','deactivate','archive','variants_create','variants_edit','variants_delete','export','snapshot_replace','replace_apply','rollback_restore'].map(action=>define('shop.products.actions',action)),
+  // 01606D · Categories, attributes and attribute values, each with independent server actions.
+  ...['categories','attributes','attribute_values'].flatMap(kind=>['create','edit','delete'].map(action=>define('shop.products.catalog',kind+'_'+action))),
   // 01606C · Precise table CRUD boundaries, enforced after the original builder.tables base permission.
   ...['create','settings_edit','archive','fields_create','fields_edit','fields_delete','records_create','records_edit','records_delete','views_create','views_edit','views_delete'].map(action=>define('builder.tables.actions',action)),
   define('shop.orders','view'),define('shop.orders','edit'),define('shop.orders','status'),define('shop.orders','cancel'),define('shop.orders','refund'),

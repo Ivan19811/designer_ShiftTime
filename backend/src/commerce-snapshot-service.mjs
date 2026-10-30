@@ -1,3 +1,4 @@
+import {normalizeCatalogOperations01606D,applyAtomicCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
 import {planProductReplacement01528,applyProductReplacement01528} from './marketplace-product-replacement-core-01528.mjs';
 import {planBulkProductStatus01523} from './marketplace-bulk-status-core-01523.mjs';
 import {assignProductGroup01512,assignSnapshotProductGroups01512} from './marketplace-product-group-01512.mjs';
@@ -19,6 +20,19 @@ function importCounts01080(s={}){const out={};for(const key of Object.keys(COLLE
 function stable01080(v){if(Array.isArray(v))return v.map(stable01080);if(v&&typeof v==='object'){const o={};for(const k of Object.keys(v).sort())o[k]=stable01080(v[k]);return o;}return v;}
 function importHash01080(s={}){const c=clone(s||{});delete c.revision;delete c.updatedAt;return crypto.createHash('sha256').update(JSON.stringify(stable01080(c))).digest('hex');}
 export async function replaceSnapshot(scope,input,{sourceKind='api-snapshot-replace',rollbackJobId='',expectedRevision=null}={}){return withTransaction(async client=>{const previous=await ensureRow(client,scope.storeId);if(expectedRevision!==null&&expectedRevision!==undefined&&Number(previous.revision)!==Number(expectedRevision)){const e=new Error('MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400');e.code='MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400';e.statusCode=409;e.expectedRevision=Number(expectedRevision);e.actualRevision=Number(previous.revision)||0;throw e;}const normalized=assignSnapshotProductGroups01512(normalizeSnapshot(input));const next=await persist(client,scope,normalized,'commerce.snapshot.replaced',{revision:Number(input?.revision)||0,sourceKind,rollbackJobId:String(rollbackJobId||'')});if(String(rollbackJobId||'').trim())await persistMarketplaceImportRollback01397(client,scope,{historyId:String(rollbackJobId||'').trim(),sourceKind,before:previous,after:next,preRevision:Number(previous.revision)||0,postRevision:Number(next.revision)||0});try{await client.query(`INSERT INTO commerce_store_imports(id,account_id,workspace_id,store_id,imported_by_user_id,source_kind,source_revision,imported_revision,snapshot_sha256,entity_counts) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)`,[uid('import'),scope.accountId,scope.workspaceId,scope.storeId,scope.userId||null,String(sourceKind||'api-snapshot-replace').slice(0,80),Number(normalized.revision)||0,Number(next.revision)||0,importHash01080(next),JSON.stringify(importCounts01080(next))]);await client.query(`UPDATE platform_deployment_state SET last_import_at=now(),updated_at=now() WHERE id='primary'`);}catch(e){if(e?.code!=='42P01')throw e;}return next;});}
+// 01606D: one revision-checked, store-scoped transaction with allowlisted catalog operations.
+// Caller MUST enforce both the base permission and per-operation action permission.
+export async function atomicCatalogEdit01606D(scope,input={}){
+ const plan=normalizeCatalogOperations01606D(input);
+ return withTransaction(async client=>{
+  const before=await ensureRow(client,scope.storeId);
+  const modified=applyAtomicCatalogOperations01606D(before,plan);
+  const next=await persist(client,scope,modified,'commerce.catalog.atomic-edit-01606D',{
+   count:plan.operations.length,operations:plan.operations.map(({collection,action,id})=>({collection,action,id}))
+  });
+  return {stage:'01606D',revision:next.revision,changed:plan.operations.length};
+ });
+}
 export async function bulkSetProductStatus01523(scope,input={}){
   const expectedRevision=Number(input.expectedRevision);
   if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)throw Object.assign(new Error('MARKETPLACE_BULK_EXPECTED_REVISION_REQUIRED_01523'),{statusCode:400});

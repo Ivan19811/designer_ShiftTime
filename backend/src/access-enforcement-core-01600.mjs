@@ -39,6 +39,7 @@ export function classifyProtectedAction01600(method,parts){
       if(m==='PUT')return decision('shop.products.import');
       if(m==='DELETE')return decision('shop.products.delete');
     }
+    if(resource==='atomic-catalog'&&m==='POST'&&p.length===4)return decision('shop.products.view','','read');
     if(resource==='products'){
       if(id==='replacement-apply'&&m==='POST')return decision('shop.products.import');
       if(id==='bulk-status'&&m==='POST')return decision('shop.products.edit');
