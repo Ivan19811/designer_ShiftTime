@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
+import {draftFingerprint01606G} from './site-canvas-draft-service-01606g.mjs';
 
 const clean=v=>String(v??'').trim();
 const clone=v=>v==null?v:structuredClone(v);
@@ -9,7 +10,7 @@ function projectValue(value){return value&&typeof value==='object'&&!Array.isArr
 function mapRow(row,{includeProject=false}={}){if(!row)return null;const out={
   id:clean(row.id),siteId:clean(row.site_id),kind:clean(row.kind),slot:Number(row.slot||0),label:clean(row.label),comment:String(row.comment??''),schemaVersion:clean(row.schema_version)||'01231',dirty:row.dirty===true,sourceRevisionId:clean(row.source_revision_id),
   createdAt:row.created_at?new Date(row.created_at).toISOString():null,updatedAt:row.updated_at?new Date(row.updated_at).toISOString():null,publishedAt:row.published_at?new Date(row.published_at).toISOString():null,
-};if(includeProject)out.project=projectValue(row.project_json);return out;}
+};if(includeProject){out.project=projectValue(row.project_json);out.fingerprint=draftFingerprint01606G(out.project);}return out;}
 async function assertSite(c,scope,siteId){const q=await c.query(`SELECT s.id,p.project_json,p.schema_version FROM shifttime_builder_sites s LEFT JOIN shifttime_builder_site_projects p ON p.site_id=s.id WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.id=$4 AND s.status<>'archived' LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,siteId]);if(!q.rowCount)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');return q.rows[0];}
 function revisionId(){return `rev_${crypto.randomUUID().replaceAll('-','')}`;}
 function smallestFreeSlot(rows){const used=new Set(rows.map(r=>Number(r.slot||0)).filter(n=>n>=1&&n<=MAX_DRAFTS_01231));for(let i=1;i<=MAX_DRAFTS_01231;i++)if(!used.has(i))return i;return 0;}

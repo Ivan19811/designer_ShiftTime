@@ -41,6 +41,7 @@ import {classifySiteAction01606E,assertSiteAction01606E,isPreciseSiteMode01606E}
 import {classifyCanvasRoute01606F,assertCanvasActions01606F} from './access-canvas-actions-core-01606f.mjs';
 import {normalizeCanvasAtomicInput01606F} from './site-canvas-atomic-core-01606f.mjs';
 import {applySiteCanvas01606F} from './site-canvas-atomic-service-01606f.mjs';
+import {applyDraftCanvas01606G,normalizeDraftCanvasInput01606G} from './site-canvas-draft-service-01606g.mjs';
 import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
 import {catalogAction01606D,classifyCatalogAction01606D,assertCatalogAction01606D} from './access-catalog-actions-core-01606d.mjs';
 import {normalizeCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
@@ -707,6 +708,29 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       throw error;
     }
     return sendJson(res,200,await applySiteCanvas01606F(scope,session.userId,p[3],input),{'cache-control':'private, no-store'});
+  }
+  // 01606G: draft-specific atomic Main operation; no full-project bypass.
+  // The 01600 site.pages.edit + tenant gate ran before parsing the request.
+  if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]&&p[6]==='canvas'&&p.length===7){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    const input=normalizeDraftCanvasInput01606G(await readJson(req,{limit:512*1024}));
+    try{assertCanvasActions01606F(protectedDecision01600,input.operations);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:error.permission,siteId:p[3]},error.code);}catch{console.warn('[01606G] draft canvas denial journal unavailable');}
+      throw error;
+    }
+    return sendJson(res,200,await applyDraftCanvas01606G(scope,session.userId,p[3],p[5],input),{'cache-control':'private, no-store'});
+  }
+  // 01606G: create a draft from an existing same-site revision without accepting
+  // a caller-supplied project. The precise draft_create gate applies above.
+  if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]==='from-source'&&p.length===6){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    const input=await readJson(req,{limit:4096});
+    if(!input||typeof input!=='object'||Array.isArray(input)||
+      Object.keys(input).some(k=>!['sourceRevisionId','label'].includes(k))||
+      typeof input.sourceRevisionId!=='string'||!input.sourceRevisionId.trim())
+      return sendJson(res,400,{error:'ST_DRAFT_SOURCE_INVALID_01606G',stage:'01606G',requestId:rid});
+    return sendJson(res,201,{stage:'01606G',revision:await createSiteDraft01231(scope,session.userId,p[3],{sourceRevisionId:input.sourceRevisionId,label:input.label,dirty:false})});
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';

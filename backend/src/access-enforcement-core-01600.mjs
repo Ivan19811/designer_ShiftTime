@@ -24,10 +24,12 @@ export function classifyProtectedAction01600(method,parts){
     if(p[4]==='revisions'){
       if(match(m,'GET')&&[5,6].includes(p.length))return decision('site.pages.view',siteId,'read');
       if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===6&&p[5]==='from-source'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===6){
         if(m==='PUT')return decision('site.pages.edit',siteId);
         if(m==='DELETE')return decision('site.pages.delete',siteId);
       }
+      if(p.length===7&&p[6]==='canvas'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='details'&&m==='PATCH')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='publish'&&m==='POST')return decision('site.publish.execute',siteId);
     }

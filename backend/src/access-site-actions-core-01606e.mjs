@@ -14,6 +14,7 @@ const ACTIONS=Object.freeze({
   project:action('project_replace',{uiControl:'ui.control.pagesave'}),
   remove:action('site_delete'),
   revisionCreate:action('draft_create',{also:['site.design.actions.project_replace']}),
+  revisionFromSource:action('draft_create'),
   revisionReplace:action('draft_replace',{also:['site.design.actions.project_replace']}),
   revisionDetails:action('draft_details'),
   revisionDelete:action('draft_delete'),
@@ -38,6 +39,7 @@ export function classifySiteAction01606E(method,parts){
     return null;
   }
   if(p[4]!=='revisions'||!p[5])return null;
+  if(p.length===6&&p[5]==='from-source'&&m==='POST')return ACTIONS.revisionFromSource;
   if(p.length===6){if(m==='PUT')return ACTIONS.revisionReplace;if(m==='DELETE')return ACTIONS.revisionDelete;return null;}
   if(p.length===7&&p[6]==='details'&&m==='PATCH')return ACTIONS.revisionDetails;
   if(p.length===7&&p[6]==='publish'&&m==='POST')return ACTIONS.publishRevision;
