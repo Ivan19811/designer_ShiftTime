@@ -38,6 +38,7 @@ import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.m
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
 import {classifyProductAction01606B,assertProductAction01606B,productStatusAction01606B} from './access-product-actions-core-01606b.mjs';
+import {classifyTableAction01606C,assertTableAction01606C} from './access-table-actions-core-01606c.mjs';
 import {authenticateRequest,resolveAuthorizedStore,assertWriteRole,assertAdminRole,assertOrderWriteRole} from './auth.mjs';
 import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs';
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
@@ -377,6 +378,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     }
   };
   await assertProductGate01606B(classifyProductAction01606B(req.method,p));
+  // 01606C · After the original 01601 base authorization, independently protect actual table CRUD endpoints.
+  const tableAction01606C=classifyTableAction01606C(req.method,p);
+  if(tableAction01606C){
+    try{assertTableAction01606C(protectedDecision01600,tableAction01606C);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:tableAction01606C.permission,siteId:''},error.code);}catch{console.warn('[01606C] access audit write unavailable');}
+      throw error;
+    }
+  }
   // 01599 · Own UI navigation grants, never another member's data.
   if(p[2]==='access'&&p[3]==='my-navigation'&&p.length===4){
     if(req.method!=='GET')return sendJson(res,405,{error:'ST_ACCESS_NAVIGATION_METHOD_DENIED_01599',requestId:rid});

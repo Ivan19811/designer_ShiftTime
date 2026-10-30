@@ -7,8 +7,10 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('site.publish','view'),define('site.publish','execute'),define('site.publish','delete'),
   define('shop.products','view'),define('shop.products','create'),define('shop.products','edit'),define('shop.products','delete'),define('shop.products','import'),define('shop.products','prices'),
   // 01606B · Opt-in, independent SERVER authorization for high-impact product mutations.
-  define('api.mode','product_actions'),
+  define('api.mode','product_actions'),define('api.mode','table_actions'),
   ...['activate','deactivate','archive','variants_create','variants_edit','variants_delete','export','snapshot_replace','replace_apply','rollback_restore'].map(action=>define('shop.products.actions',action)),
+  // 01606C · Precise table CRUD boundaries, enforced after the original builder.tables base permission.
+  ...['create','settings_edit','archive','fields_create','fields_edit','fields_delete','records_create','records_edit','records_delete','views_create','views_edit','views_delete'].map(action=>define('builder.tables.actions',action)),
   define('shop.orders','view'),define('shop.orders','edit'),define('shop.orders','status'),define('shop.orders','cancel'),define('shop.orders','refund'),
   define('shop.shipping','view'),define('shop.shipping','edit'),define('shop.shipping','simulate'),
   define('shop.payments','view'),define('shop.payments','create'),define('shop.payments','edit'),
@@ -42,6 +44,9 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('ui.control','variantvisibility'),define('ui.control','variantmediapick'),define('ui.control','variantmediaupload'),define('ui.control','variantmediaremove'),define('ui.control','librarymediaupload'),
   define('ui.control','pickermediaupload'),define('ui.control','productmediaextra'),define('ui.control','feedcreate'),define('ui.control','feedsave'),define('ui.control','feeddelete'),
   define('ui.control','feedmappingadd'),define('ui.control','feedmappingremove'),
+  ...['canvasaddsection','canvasaddblock','canvasaddline','canvasaddtext','canvasaddarticle','canvasundo','canvasredo','canvaspagetree',
+      'tablecreateopen','tablecreatesubmit','tablearchive','tableaddrow','tabledeleterow','tableaddcolumn','tablecreatecolumn',
+      'tabledeletecolumn','tablesettingssave','tableaddview','tableviewapply','tablethemeapply','tableinsertmain'].map(action=>define('ui.control',action)),
 ]);
 export const ACCESS_SCOPE_KINDS_01597=Object.freeze(['store','site']);
 const known=new Set(ACCESS_PERMISSIONS_01597.map(p=>p.code));
