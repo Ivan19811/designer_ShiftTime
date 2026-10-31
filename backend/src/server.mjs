@@ -467,10 +467,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='orders-production'&&p.length===5){
       if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_PRODUCTION_METHOD_01566',requestId:rid});
       const u=new URL(req.url,'http://localhost');const limit=u.searchParams.has('limit')?Number(u.searchParams.get('limit')):20,offset=u.searchParams.has('offset')?Number(u.searchParams.get('offset')):0;
-      return sendJson(res,200,{...(await listProductionOrders01566(scope,{limit,offset})),requestId:rid},{'cache-control':'private, no-store'});
+      return sendJson(res,200,{...(await listProductionOrders01566(scope,{limit,offset},{authorization:protectedDecision01600})),requestId:rid},{'cache-control':'private, no-store'});
     }
     if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='production-order'){
-      if(req.method==='GET')return sendJson(res,200,{...(await getProductionOrderForDraft01566(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+      if(req.method==='GET')return sendJson(res,200,{...(await getProductionOrderForDraft01566(scope,p[5],{authorization:protectedDecision01600})),requestId:rid},{'cache-control':'private, no-store'});
       if(req.method==='POST'){
         const body=await readJson(req,{limit:1024});
         const data=await createProductionOrder01566(scope,p[5],body);

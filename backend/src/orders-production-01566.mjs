@@ -11,6 +11,7 @@ const DRAFT=/^orderdraft_[a-f0-9]{32}$/i;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const validCents=n=>Number.isSafeInteger(Number(n))&&Number(n)>0&&Number(n)<1000000000;
 function assertManager(scope){if(!scope?.storeId||!scope?.workspaceId||!scope?.accountId||!scope?.userId||!isReviewManager01560(scope))throw fail('ORDERS_PRODUCTION_FORBIDDEN_01566',403);}
+function assertRead01607D(scope,authorization){if(!scope?.storeId||!scope?.workspaceId||!scope?.accountId||!scope?.userId||!(isReviewManager01560(scope)||(authorization?.allowed===true&&authorization?.permission==='shop.orders.view')))throw fail('ORDERS_PRODUCTION_FORBIDDEN_01566',403);}
 function assertDraft(draftId){if(!DRAFT.test(String(draftId||'')))throw fail('ORDERS_PRODUCTION_DRAFT_INVALID_01566',400);}
 export function validateCreateOrder01566(input){
  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['requestId','confirmCreation','acceptEstimatedShipping'].includes(k))||!UUID.test(String(input.requestId||''))||input.confirmCreation!==true||input.acceptEstimatedShipping!==true)throw fail('ORDERS_PRODUCTION_EXPLICIT_CONFIRMATION_REQUIRED_01566',400);
@@ -61,12 +62,12 @@ export async function createProductionOrder01566(scope,draftId,input,{transactio
   return safeOrder(created.rows[0]);
  });
 }
-export async function getProductionOrderForDraft01566(scope,draftId,{lookup=withClient}={}){
- assertManager(scope);assertDraft(draftId);
+export async function getProductionOrderForDraft01566(scope,draftId,{lookup=withClient,authorization=null}={}){
+ assertRead01607D(scope,authorization);assertDraft(draftId);
  return lookup(async db=>{const r=await db.query(selectExisting,[scope.storeId,scope.accountId,scope.workspaceId,draftId]);return {stage:'01566',draftId,found:Boolean(r.rowCount),order:r.rowCount?safeOrder(r.rows[0]):null};});
 }
-export async function listProductionOrders01566(scope,{limit=20,offset=0}={}, {lookup=withClient}={}){
- assertManager(scope);if(!Number.isInteger(limit)||limit<1||limit>50||!Number.isInteger(offset)||offset<0||offset>1000000)throw fail('ORDERS_PRODUCTION_LIST_INVALID_01566',400);
+export async function listProductionOrders01566(scope,{limit=20,offset=0}={}, {lookup=withClient,authorization=null}={}){
+ assertRead01607D(scope,authorization);if(!Number.isInteger(limit)||limit<1||limit>50||!Number.isInteger(offset)||offset<0||offset>1000000)throw fail('ORDERS_PRODUCTION_LIST_INVALID_01566',400);
  return lookup(async db=>{const rows=await db.query(`SELECT ${showColumns} FROM shifttime_production_orders_01566 o ${fromScope} ORDER BY o.created_at DESC,o.order_number DESC LIMIT $4 OFFSET $5`,[scope.storeId,scope.accountId,scope.workspaceId,limit,offset]);const cnt=await db.query(`SELECT count(*)::int AS n FROM shifttime_production_orders_01566 o ${fromScope}`,[scope.storeId,scope.accountId,scope.workspaceId]);return {stage:'01566',total:Number(cnt.rows[0]?.n||0),limit,offset,items:rows.rows.map(r=>safeOrder(r))};});
 }
 
