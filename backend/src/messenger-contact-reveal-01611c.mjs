@@ -26,7 +26,7 @@ export async function revealMessengerPhone01611C(scope,actorUserId,messageId,inp
         FROM shifttime_messenger_verified_channels_01611 vc
         JOIN shifttime_messenger_contacts_01611a contact ON contact.id=vc.contact_id
         WHERE vc.contact_id=$1 AND vc.store_id=$2 AND vc.account_id=$3 AND vc.workspace_id=$4
-          AND vc.builder_site_id=$5 AND vc.channel=$6 AND vc.consent_fallback=TRUE
+          AND vc.builder_site_id=$5 AND vc.channel=$6 AND vc.consent_fallback=TRUE AND vc.verified_at IS NOT NULL
           AND contact.store_id=vc.store_id AND contact.account_id=vc.account_id
           AND contact.workspace_id=vc.workspace_id AND contact.builder_site_id=vc.builder_site_id
           AND contact.visitor_hash=vc.visitor_hash
