@@ -60,6 +60,7 @@ import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validSta
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
+import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
@@ -758,7 +759,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
-  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
+  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readSitePublishingJson01609C(req)));}
   if(p[2]==='sites'&&req.method==='GET'&&p.length===3){
     const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
     const sites=await (summary?listBuilderSiteSummaries01476(scope):listBuilderSites01170(scope));
