@@ -54,6 +54,7 @@ import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} fr
 import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
 import {listVerifiedMessengerChannels01611,startMessengerVerification01611,verifyMessengerChannel01611,assertMessengerChannelProof01611} from './messenger-verification-service-01611.mjs';
 import {getVisitorContact01611A,linkVisitorContactToAuthenticatedUser01611A} from './messenger-contact-profiles-01611a.mjs';
+import {listMessengerAccountThreads01611E,getMessengerAccountThread01611E,replyMessengerAccountThread01611E} from './messenger-account-sync-01611e.mjs';
 import {revealMessengerPhone01611C} from './messenger-contact-reveal-01611c.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
 import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
@@ -323,6 +324,17 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const bearer=String(req.headers['x-st-customer-session']||'');
     const user=bearer?(await customerSession01595(publishedTrafficIdentity,bearer,{updateSeen:false})).user:null;
     const meta={remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||'',customerUserId:user?.id||null,customerName:user?.name||'',customerEmail:user?.email||''};
+    // 01611E: only a valid site-customer session can read linked history across devices.
+    // Never fall through to guest-capability routes, and never infer identity from a phone number.
+    if(p[5]==='account'){
+      if(!user?.id)return sendJson(res,401,{error:'MESSENGER_ACCOUNT_LOGIN_REQUIRED_01611E',requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p.length===7&&req.method==='GET')return sendJson(res,200,{...(await listMessengerAccountThreads01611E(publishedTrafficIdentity,user.id)),requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p[7]&&p.length===8&&req.method==='GET')return sendJson(res,200,{...(await getMessengerAccountThread01611E(publishedTrafficIdentity,user.id,p[7])),requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p[7]&&p[8]==='turns'&&p.length===9&&req.method==='POST'){
+        const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyMessengerAccountThread01611E(publishedTrafficIdentity,user.id,p[7],input.body)),requestId:rid},{'cache-control':'no-store'});
+      }
+      return sendJson(res,404,{error:'MESSENGER_ACCOUNT_ROUTE_NOT_FOUND_01611E',requestId:rid},{'cache-control':'no-store'});
+    }
     if(req.method==='GET'&&p[5]==='contact'&&p.length===6)return sendJson(res,200,{...(await getVisitorContact01611A(publishedTrafficIdentity,guest)),requestId:rid},{'cache-control':'no-store'});
     if(req.method==='POST'&&p[5]==='contact'&&p[6]==='link'&&p.length===7){await readJson(req,{limit:512});return sendJson(res,200,{...(await linkVisitorContactToAuthenticatedUser01611A(publishedTrafficIdentity,guest,user?.id||null)),requestId:rid},{'cache-control':'no-store'});}
     if(req.method==='GET'&&p[5]==='channels'&&p.length===6)return sendJson(res,200,{...(await listVerifiedMessengerChannels01611(publishedTrafficIdentity,guest)),requestId:rid},{'cache-control':'no-store'});
