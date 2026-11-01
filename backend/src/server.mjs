@@ -52,6 +52,7 @@ import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
 import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} from './site-customer-account-service-01595.mjs';
 import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
+import {listVerifiedMessengerChannels01611,startMessengerVerification01611,verifyMessengerChannel01611,assertMessengerChannelProof01611} from './messenger-verification-service-01611.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
 import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
@@ -320,9 +321,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const bearer=String(req.headers['x-st-customer-session']||'');
     const user=bearer?(await customerSession01595(publishedTrafficIdentity,bearer,{updateSeen:false})).user:null;
     const meta={remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||'',customerUserId:user?.id||null,customerName:user?.name||'',customerEmail:user?.email||''};
-    if(req.method==='POST'&&p.length===5){const input=await readJson(req,{limit:16384});return sendJson(res,201,{...(await createPublicMessengerChat01609(publishedTrafficIdentity,{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='GET'&&p[5]==='channels'&&p.length===6)return sendJson(res,200,{...(await listVerifiedMessengerChannels01611(publishedTrafficIdentity,guest)),requestId:rid},{'cache-control':'no-store'});
+    if(req.method==='POST'&&p[5]==='verification'&&p[6]==='start'&&p.length===7){const input=await readJson(req,{limit:2048});return sendJson(res,201,{...(await startMessengerVerification01611(publishedTrafficIdentity,guest,input,meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='POST'&&p[5]==='verification'&&p[6]==='verify'&&p.length===7){const input=await readJson(req,{limit:2048});return sendJson(res,200,{...(await verifyMessengerChannel01611(publishedTrafficIdentity,guest,input)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='POST'&&p.length===5){await assertMessengerChannelProof01611(publishedTrafficIdentity,guest);const input=await readJson(req,{limit:16384});return sendJson(res,201,{...(await createPublicMessengerChat01609(publishedTrafficIdentity,{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
     if(req.method==='GET'&&p[5]&&p.length===6)return sendJson(res,200,{...(await getPublicMessengerChat01609(publishedTrafficIdentity,p[5],guest,meta)),requestId:rid},{'cache-control':'no-store'});
-    if(req.method==='POST'&&p[5]&&p[6]==='turns'&&p.length===7){const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyPublicMessengerChat01609(publishedTrafficIdentity,p[5],{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='POST'&&p[5]&&p[6]==='turns'&&p.length===7){await assertMessengerChannelProof01611(publishedTrafficIdentity,guest);const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyPublicMessengerChat01609(publishedTrafficIdentity,p[5],{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
     return sendJson(res,404,{error:'MESSENGER_ROUTE_NOT_FOUND_01609',requestId:rid});
   }
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='site'&&p[4]==='messages'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01404',stage:'01404',requestId:rid});const out=await createPublicCustomerMessage01404(publishedTrafficIdentity,await readJson(req,{limit:32*1024}),{remoteAddress:req.socket?.remoteAddress||'',userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
