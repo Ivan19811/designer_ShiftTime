@@ -62,6 +62,7 @@ import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592
 import {createSsoHandoff01581,establishSso01581,authorizeSso01581,ssoUserFromCookie01611F,exchangeSso01581} from './sso-service-01581.mjs';
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
+import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
@@ -159,10 +160,31 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
 
 
+  // 01612A · Dedicated first-party reset page. Tokens are in the URL fragment,
+  // never in the HTTP request, server logs or referrer.
+  if(req.method==='GET'&&p[0]==='identity'&&p[1]==='reset'&&p.length<=3){
+    const asset=p[2]||'index.html',files={'index.html':['password-reset-01612a.html','text/html; charset=utf-8'],'script.js':['password-reset-01612a.js','text/javascript; charset=utf-8']};
+    if(!files[asset])return sendJson(res,404,{error:'PASSWORD_RESET_ASSET_01612A'});
+    const [name,type]=files[asset],bytes=await readFile(new URL('../public/'+name,import.meta.url));
+    res.writeHead(200,{'content-type':type,'cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff','x-frame-options':'DENY','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'content-length':bytes.length});return res.end(bytes);
+  }
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01612A · Public password reset endpoints. No user/tenant privileges are granted.
+  if(p[2]==='auth'&&p[3]==='password-reset'&&p.length===5){
+    if(req.method!=='POST')return sendJson(res,405,{error:'PASSWORD_RESET_METHOD_01612A'});
+    if(!['request','complete'].includes(p[4]))return sendJson(res,404,{error:'PASSWORD_RESET_ROUTE_01612A'});
+    const input=await readJson(req,{limit:1536});
+    if(p[4]==='request'){
+      limitResetRequest01612A(requestClientAddress01414(req));
+      const output=await requestPasswordReset01612A(input.email);
+      return sendJson(res,200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+    }
+    const output=await completePasswordReset01612A(input);
+    return sendJson(res,200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   // 01595 · Customer sessions are NOT Builder/CRM sessions. Credentials live only on trusted Render.
   if(p[2]==='public'&&p[3]==='site'&&p[4]==='account'&&p.length===6){
     const action=p[5],site=publishedTrafficIdentity;
