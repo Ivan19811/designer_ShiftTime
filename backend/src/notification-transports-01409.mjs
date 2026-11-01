@@ -1,6 +1,7 @@
 import {config} from './config.mjs';
 import {buildNotificationTransportMessage01409,notificationWebhookSignature01409,notificationTransportStatus01409,NOTIFICATION_DELIVERY_STAGE_01409} from './notification-delivery-core-01409.mjs';
 import {sendSmtpMail01409} from './smtp-send-01409.mjs';
+import {sendPlatformEmail01612B,emailTransportOptions01612B,emailTransportConfigured01612B} from './email-transport-01612b.mjs';
 const str=value=>String(value??'').trim();
 const withTimeout=async(promise,timeoutMs,code)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(new Error(code),{code})),timeoutMs);})]);}finally{clearTimeout(timer);}};
 function settingsFromConfig(){return config;}
@@ -24,10 +25,10 @@ export async function sendWebhookNotification01409(scope,event,{fetchImpl=global
   return {ok:true,channel:'webhook',responseCode:response.status,externalId:str(response.headers?.get?.('x-request-id')),stage:NOTIFICATION_DELIVERY_STAGE_01409};
 }
 
-export async function sendEmailNotification01409(scope,event,{smtpSendImpl=sendSmtpMail01409,settings=settingsFromConfig(),recipient=null}={}){
+export async function sendEmailNotification01409(scope,event,{smtpSendImpl=sendSmtpMail01409,fetchImpl=globalThis.fetch,settings=settingsFromConfig(),recipient=null}={}){
   const to=str(recipient?.email)||str(settings.notificationEmailTo);
-  if(!str(settings.notificationSmtpHost)||!str(settings.notificationEmailFrom)||!to)throw Object.assign(new Error('NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'),{code:'NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'});
-  const message=buildNotificationTransportMessage01409(event,scope),result=await smtpSendImpl({host:settings.notificationSmtpHost,port:settings.notificationSmtpPort,secure:settings.notificationSmtpSecure,startTls:settings.notificationSmtpStartTls,user:settings.notificationSmtpUser,pass:settings.notificationSmtpPass,timeoutMs:settings.notificationDeliveryTimeoutMs,helloName:settings.notificationSmtpHelloName},{from:settings.notificationEmailFrom,to,subject:message.subject,text:message.text});
+  if(!emailTransportConfigured01612B(settings)||!to)throw Object.assign(new Error('NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'),{code:'NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'});
+  const message=buildNotificationTransportMessage01409(event,scope),result=await sendPlatformEmail01612B(emailTransportOptions01612B(settings),{from:settings.notificationEmailFrom,to,subject:message.subject,text:message.text},{smtpSendImpl,fetchImpl});
   return {ok:true,channel:'email',responseCode:Number(result?.responseCode)||250,externalId:str(result?.externalId),stage:NOTIFICATION_DELIVERY_STAGE_01409};
 }
 

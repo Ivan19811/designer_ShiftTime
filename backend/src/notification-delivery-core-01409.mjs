@@ -42,7 +42,7 @@ export function maskNotificationDestination01409(value=''){
 }
 
 export function notificationTransportStatus01409(settings={}){
-  const emailConfigured=Boolean(str(settings.notificationSmtpHost)&&str(settings.notificationEmailFrom)&&str(settings.notificationEmailTo));
+  const emailConfigured=Boolean(str(settings.notificationEmailFrom)&&str(settings.notificationEmailTo)&&(Boolean(str(settings.brevoApiKey))||Boolean(str(settings.notificationSmtpHost))));
   const telegramConfigured=Boolean(str(settings.notificationTelegramBotToken)&&str(settings.notificationTelegramChatId));
   const webhookConfigured=Boolean(str(settings.notificationWebhookUrl));
   return Object.freeze({stage:NOTIFICATION_DELIVERY_STAGE_01409,channels:Object.freeze({

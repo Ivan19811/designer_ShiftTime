@@ -8,7 +8,7 @@ test('01410 migration adds assignee activity and durable message thread with saf
 });
 
 test('01410 backend service scopes inbox by Store and supports list detail assignment status reply note and history',()=>{
-  const svc=read('src/customer-messages-inbox-01410.mjs');assert.match(svc,/m\.store_id=\$1/);assert.match(svc,/listCustomerMessagesInbox01410/);assert.match(svc,/getCustomerMessageThread01410/);assert.match(svc,/updateCustomerMessage01410/);assert.match(svc,/addCustomerMessageThreadEntry01410/);assert.match(svc,/listCustomerMessageManagers01410/);assert.match(svc,/sendSmtpMail01409/);assert.match(svc,/kind==='note'/);assert.match(svc,/visibility/);assert.match(svc,/shifttime_notification_receipts/);assert.doesNotMatch(svc,/[А-Яа-яІіЇїЄєҐґ]/);
+  const svc=read('src/customer-messages-inbox-01410.mjs');assert.match(svc,/m\.store_id=\$1/);assert.match(svc,/listCustomerMessagesInbox01410/);assert.match(svc,/getCustomerMessageThread01410/);assert.match(svc,/updateCustomerMessage01410/);assert.match(svc,/addCustomerMessageThreadEntry01410/);assert.match(svc,/listCustomerMessageManagers01410/);assert.match(svc,/sendPlatformEmail01612B/);assert.match(svc,/kind==='note'/);assert.match(svc,/visibility/);assert.match(svc,/shifttime_notification_receipts/);assert.doesNotMatch(svc,/[А-Яа-яІіЇїЄєҐґ]/);
 });
 
 test('01410 server exposes protected Inbox routes without changing public message intake contract',()=>{

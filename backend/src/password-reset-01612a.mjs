@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
 import {config} from './config.mjs';
 import {hashPassword01084} from './auth-service-01084.mjs';
-import {sendSmtpMail01409} from './smtp-send-01409.mjs';
+import {sendPlatformEmail01612B,emailTransportOptions01612B} from './email-transport-01612b.mjs';
 import uk from './locales/password-reset-01612a.uk.mjs';
 const clean=v=>String(v??'').trim();
 const fail=(code,statusCode=400)=>Object.assign(new Error(code),{statusCode,code});
@@ -26,15 +26,14 @@ function origin01612A(env=process.env){
  if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw fail('PASSWORD_RESET_NOT_CONFIGURED_01612A',503);
  return url.origin;
 }
-function smtp01612A(settings=config){
- if(!settings.notificationSmtpHost||!settings.notificationEmailFrom||!(settings.notificationSmtpSecure||settings.notificationSmtpStartTls))throw fail('PASSWORD_RESET_NOT_CONFIGURED_01612A',503);
- return {host:settings.notificationSmtpHost,port:settings.notificationSmtpPort,secure:settings.notificationSmtpSecure,startTls:settings.notificationSmtpStartTls,user:settings.notificationSmtpUser,pass:settings.notificationSmtpPass,timeoutMs:settings.notificationDeliveryTimeoutMs||10000,helloName:settings.notificationSmtpHelloName};
+function transport01612B(settings=config){
+ try{return emailTransportOptions01612B(settings);}catch{throw fail('PASSWORD_RESET_NOT_CONFIGURED_01612A',503);}
 }
-export async function requestPasswordReset01612A(email,{query=withClient,send=sendSmtpMail01409,settings=config,env=process.env}={}){
+export async function requestPasswordReset01612A(email,{query=withClient,send=sendPlatformEmail01612B,settings=config,env=process.env}={}){
  const e=normalizeResetEmail01612A(email);
  if(!e||e.length>254||!/^\S+@\S+\.\S+$/.test(e))throw fail('PASSWORD_RESET_EMAIL_01612A');
  // Fail closed if email cannot actually be sent. Never claim delivery without SMTP.
- const emailOptions=smtp01612A(settings),base=origin01612A(env);
+ const emailOptions=transport01612B(settings),base=origin01612A(env);
  const token=crypto.randomBytes(32).toString('base64url');
  const row=await query(async db=>{
   await db.query('BEGIN');

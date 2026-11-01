@@ -2,7 +2,7 @@
 // Code delivery uses existing configured TLS SMTP. No browser/dev-mode OTP bypass.
 import {createDecipheriv,createHmac,randomInt,randomUUID,timingSafeEqual} from 'node:crypto';
 import {config} from './config.mjs';
-import {sendSmtpMail01409} from './smtp-send-01409.mjs';
+import {sendPlatformEmail01612B,emailTransportOptions01612B,emailTransportConfigured01612B} from './email-transport-01612b.mjs';
 import {BUYER_EMAIL_UK_01565} from './locales/orders-buyer-email-01565.uk.mjs';
 import {contactEncryptionKey01555} from './shipping-checkout-contacts-01555.mjs';
 import {isReviewManager01560} from './orders-review-workflow-01560.mjs';
@@ -27,10 +27,12 @@ export function openBoundContactEmail01565(row,key){
  try{const obj=JSON.parse(decrypted.toString('utf8'));const email=String(obj?.email||'').trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>180)throw fail('ORDERS_IDENTITY_EMAIL_REQUIRED_01565',409);return email;}finally{decrypted.fill(0);}
 }
 export const hashEmailCode01565=(key,id,code)=>createHmac('sha256',key).update('ST-ORDERS-BUYER-EMAIL-01565:').update(id).update(':').update(code).digest('hex');
-const flags=(challenge,offer,now)=>({stage:'01565',verified:Boolean(challenge?.verified_at),verifiedAt:challenge?.verified_at||null,hasChallenge:Boolean(challenge),expiresAt:challenge?.expires_at||null,attemptsRemaining:challenge?Math.max(0,5-Number(challenge.attempt_count||0)):5,offerAcknowledged:Boolean(offer?.accepted_at),emailDelivery:'configured-smtp-only',emailPossessionOnly:true,identityDocumentVerified:false,orderCreated:false,previewOnly:true,canCreateOrder:false,canPay:false,canCreateWaybill:false,canSyncCrm:false});
-const smtpConfigured=s=>Boolean(s.notificationSmtpHost&&s.notificationEmailFrom&&(s.notificationSmtpSecure===true||s.notificationSmtpStartTls===true));
-function otpEmailSettings(settings=config){if(!smtpConfigured(settings))throw fail('ORDERS_IDENTITY_SMTP_NOT_CONFIGURED_01565',503);return {host:settings.notificationSmtpHost,port:settings.notificationSmtpPort,secure:settings.notificationSmtpSecure,startTls:settings.notificationSmtpStartTls,user:settings.notificationSmtpUser,pass:settings.notificationSmtpPass,timeoutMs:settings.notificationDeliveryTimeoutMs,helloName:settings.notificationSmtpHelloName};}
-export async function startBuyerEmailProof01565(token,{transaction=withTransaction,clock=()=>Date.now(),keyProvider=contactEncryptionKey01555,sender=sendSmtpMail01409,settings=config,newCode=()=>String(randomInt(0,1000000)).padStart(6,'0')}={}){
+const flags=(challenge,offer,now)=>({stage:'01565',verified:Boolean(challenge?.verified_at),verifiedAt:challenge?.verified_at||null,hasChallenge:Boolean(challenge),expiresAt:challenge?.expires_at||null,attemptsRemaining:challenge?Math.max(0,5-Number(challenge.attempt_count||0)):5,offerAcknowledged:Boolean(offer?.accepted_at),emailDelivery:'configured-transactional-email',emailPossessionOnly:true,identityDocumentVerified:false,orderCreated:false,previewOnly:true,canCreateOrder:false,canPay:false,canCreateWaybill:false,canSyncCrm:false});
+function otpEmailSettings(settings=config){
+ if(!emailTransportConfigured01612B(settings))throw fail('ORDERS_IDENTITY_SMTP_NOT_CONFIGURED_01565',503);
+ return emailTransportOptions01612B(settings);
+}
+export async function startBuyerEmailProof01565(token,{transaction=withTransaction,clock=()=>Date.now(),keyProvider=contactEncryptionKey01555,sender=sendPlatformEmail01612B,settings=config,newCode=()=>String(randomInt(0,1000000)).padStart(6,'0')}={}){
  const digest=tokenHash(token),options=otpEmailSettings(settings),key=keyProvider();
  return transaction(async db=>{
   const q=await db.query(contactSelect+' WHERE o.token_hash=$1 LIMIT 1 FOR UPDATE OF o,d,r,q,c',[digest]);

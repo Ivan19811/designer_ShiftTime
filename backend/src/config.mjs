@@ -68,6 +68,7 @@ export const config=Object.freeze({
   notificationSmtpPass:String(process.env.NOTIFICATION_SMTP_PASS||''),
   notificationSmtpHelloName:String(process.env.NOTIFICATION_SMTP_HELO||'shifttime.local').trim()||'shifttime.local',
   notificationEmailFrom:String(process.env.NOTIFICATION_EMAIL_FROM||'').trim(),
+  brevoApiKey:String(process.env.BREVO_API_KEY||''),
   notificationEmailTo:String(process.env.NOTIFICATION_EMAIL_TO||'').trim(),
   notificationPreferencesSchedulerEnabled:bool(process.env.NOTIFICATION_PREFERENCES_SCHEDULER_ENABLED,true),
   notificationPreferencesPollSeconds:int(process.env.NOTIFICATION_PREFERENCES_POLL_SECONDS,60,15,3600),
