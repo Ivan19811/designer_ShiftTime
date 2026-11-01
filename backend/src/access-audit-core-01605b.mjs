@@ -17,6 +17,7 @@ export function classifyNotificationAccess01605B(method,parts){
     if(m==='GET'&&(p.length===5||p.length===6))return decision('crm.messages.view','order-write');
     if(m==='PATCH'&&p.length===6&&p[5])return decision('crm.messages.manage');
     if(m==='POST'&&p.length===7&&p[5]&&p[6]==='thread')return decision('crm.messages.reply');
+    if(m==='POST'&&p.length===7&&p[5]&&p[6]==='reveal-phone')return decision('crm.messages.reply'); // plus 01611C strict assigned/owner gate
   }
   if(resource==='transports'&&p[4]==='status'&&m==='GET'&&p.length===5)return decision('builder.integrations.view','read');
   if(resource==='transports'&&m==='POST'&&p[4]&&op==='test'&&p.length===6)return decision('builder.integrations.manage');

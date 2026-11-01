@@ -54,6 +54,7 @@ import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} fr
 import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
 import {listVerifiedMessengerChannels01611,startMessengerVerification01611,verifyMessengerChannel01611,assertMessengerChannelProof01611} from './messenger-verification-service-01611.mjs';
 import {getVisitorContact01611A,linkVisitorContactToAuthenticatedUser01611A} from './messenger-contact-profiles-01611a.mjs';
+import {revealMessengerPhone01611C} from './messenger-contact-reveal-01611c.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
 import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
@@ -644,6 +645,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       const messageId=p[5]||'';
       if(req.method==='GET'&&messageId&&p.length===6){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getCustomerMessageThread01410(scope,messageId,{markRead:u.searchParams.get('markRead')==='1',actorUserId:session.userId}));}
       if(req.method==='PATCH'&&messageId&&p.length===6){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
+      if(req.method==='POST'&&messageId&&p[6]==='reveal-phone'&&p.length===7){const input=await readJson(req,{limit:1024});return sendJson(res,200,await revealMessengerPhone01611C(scope,session.userId,messageId,input),{'cache-control':'private, no-store, max-age=0','referrer-policy':'no-referrer','pragma':'no-cache'});}
       if(req.method==='POST'&&messageId&&p[6]==='order-link'&&p.length===7){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);const input=await readJson(req,{limit:4096});return sendJson(res,200,await linkMessengerProductionOrder01609(scope,messageId,input.orderId));}
       if(req.method==='POST'&&messageId&&p[6]==='thread'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
       return sendJson(res,404,{error:'CUSTOMER_MESSAGES_INBOX_ROUTE_NOT_FOUND_01410',stage:'01410',requestId:rid});

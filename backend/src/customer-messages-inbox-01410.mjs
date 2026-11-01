@@ -3,6 +3,7 @@ import {withClient} from './db.mjs';
 import {config} from './config.mjs';
 import {sendSmtpMail01409} from './smtp-send-01409.mjs';
 import {verificationKey01611,openPhone01611,maskPhone01611} from './messenger-verification-core-01611.mjs';
+import {canRevealMessengerPhone01611C} from './messenger-phone-access-core-01611c.mjs';
 
 export const CUSTOMER_MESSAGES_INBOX_STAGE_01410='01410';
 const str=v=>String(v??'').trim();
@@ -45,7 +46,7 @@ export async function getCustomerMessageThread01410(scope,messageId,{markRead=fa
         contact={id:c.rows[0].id,linkedUserId:c.rows[0].customerUserId||null,channels:ch.rows.map(x=>({channel:x.channel,maskedPhone:maskPhone01611(openPhone01611(key,x.sealed)),verifiedAt:x.verifiedAt,fallbackAllowed:x.fallbackAllowed}))};
       }
     }
-    await client.query('COMMIT');return {stage:CUSTOMER_MESSAGES_INBOX_STAGE_01410,item:{...rowView(row),messengerContact:contact},thread};}catch(e){await client.query('ROLLBACK');throw e;}});}
+    await client.query('COMMIT');return {stage:CUSTOMER_MESSAGES_INBOX_STAGE_01410,item:{...rowView(row),messengerContact:contact,canRevealContactPhone:canRevealMessengerPhone01611C(scope,actorUserId,row.assignedUserId)},thread};}catch(e){await client.query('ROLLBACK');throw e;}});}
 
 async function assertAssignee(client,scope,userId){if(!userId)return null;const q=await client.query(`SELECT u.id,u.name,u.email,m.role FROM platform_memberships m JOIN platform_users u ON u.id=m.user_id WHERE m.user_id=$4 AND ${memberScopeSql()} LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,userId]);if(!q.rowCount||!MANAGER_ROLES.has(str(q.rows[0].role)))throw fail('CUSTOMER_MESSAGE_ASSIGNEE_INVALID_01410',400);return q.rows[0];}
 async function insertHistory(client,scope,messageId,kind,body,actorUserId,actorName,metadata={}){await client.query(`INSERT INTO shifttime_customer_message_thread(id,message_id,store_id,kind,body,actor_user_id,actor_name,visibility,metadata) VALUES($1,$2,$3,$4,$5,$6,$7,'internal',$8::jsonb)`,[uid('msgthread'),messageId,scope.storeId,kind,body,str(actorUserId)||null,cleanText(actorName,160),JSON.stringify(metadata)]);}
@@ -60,7 +61,7 @@ export async function updateCustomerMessage01410(scope,messageId,input={},actor=
         contact={id:c.rows[0].id,linkedUserId:c.rows[0].customerUserId||null,channels:ch.rows.map(x=>({channel:x.channel,maskedPhone:maskPhone01611(openPhone01611(key,x.sealed)),verifiedAt:x.verifiedAt,fallbackAllowed:x.fallbackAllowed}))};
       }
     }
-    await client.query('COMMIT');return {stage:CUSTOMER_MESSAGES_INBOX_STAGE_01410,item:{...rowView(row),messengerContact:contact},thread};}catch(e){await client.query('ROLLBACK');throw e;}});}
+    await client.query('COMMIT');return {stage:CUSTOMER_MESSAGES_INBOX_STAGE_01410,item:{...rowView(row),messengerContact:contact,canRevealContactPhone:canRevealMessengerPhone01611C(scope,actorUserId,row.assignedUserId)},thread};}catch(e){await client.query('ROLLBACK');throw e;}});}
 
 async function deliverReplyEmail(message,body){if(message.channel==='chat')return {deliveryStatus:'none',deliveryError:''};const customer=customerObject(message.customer),to=str(customer.email);if(!to)return {deliveryStatus:'none',deliveryError:''};if(!str(config.notificationSmtpHost)||!str(config.notificationEmailFrom))return {deliveryStatus:'failed',deliveryError:'CUSTOMER_REPLY_EMAIL_NOT_CONFIGURED_01410'};try{const result=await sendSmtpMail01409({host:config.notificationSmtpHost,port:config.notificationSmtpPort,secure:config.notificationSmtpSecure,startTls:config.notificationSmtpStartTls,user:config.notificationSmtpUser,pass:config.notificationSmtpPass,timeoutMs:config.notificationDeliveryTimeoutMs,helloName:config.notificationSmtpHelloName},{from:config.notificationEmailFrom,to,subject:message.subject||undefined,text:body});return {deliveryStatus:'sent',deliveryError:'',sentAt:new Date().toISOString(),responseCode:Number(result?.responseCode)||250};}catch(error){return {deliveryStatus:'failed',deliveryError:str(error?.code||error?.message||'CUSTOMER_REPLY_EMAIL_FAILED_01410').slice(0,300)};}}
 
