@@ -33,6 +33,22 @@ export async function createCustomerSession01595(db,userId,scope){
   return {token,expiresAt:q.rows[0]?.expiresAt||null};
 }
 
+// 01611F · A previously authenticated platform user can become a customer
+// of a specific site. Never grant owner/manager permissions by this route.
+export async function linkExistingSiteCustomer01611F(site,userId,{query=withClient}={}){
+  const scope=scopeOf(site),uid=String(userId||'').trim();
+  if(!/^usr_[A-Za-z0-9_-]{8,100}$/.test(uid))throw siteAccountFault01595('SITE_ACCOUNT_LOGIN_REQUIRED_01595',401);
+  return query(async db=>{
+    await db.query('BEGIN');
+    try{
+      const users=await db.query(`SELECT id,name,email,email_verified_at FROM platform_users WHERE id=$1 AND status='active' LIMIT 1`,[uid]);
+      if(!users.rowCount)throw siteAccountFault01595('SITE_ACCOUNT_LOGIN_REQUIRED_01595',401);
+      await linkCustomer01595(db,uid,scope);
+      await db.query('COMMIT');
+      return customerPublicUser01595(users.rows[0]);
+    }catch(error){await db.query('ROLLBACK').catch(()=>{});throw error;}
+  });
+}
 export async function registerSiteCustomer01595(site,input,{query=withClient,issueSession=false}={}){
   const scope=scopeOf(site);
   if(!ENABLED())throw siteAccountFault01595('SITE_ACCOUNT_REGISTRATION_DISABLED_01595',403);

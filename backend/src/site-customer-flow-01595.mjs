@@ -1,7 +1,7 @@
 // 01595 · Secure hosted-identity flow. Passwords exist only on Render-owned origin.
 import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
-import {registerSiteCustomer01595,loginSiteCustomer01595,createCustomerSession01595} from './site-customer-account-service-01595.mjs';
+import {registerSiteCustomer01595,loginSiteCustomer01595,createCustomerSession01595,linkExistingSiteCustomer01611F} from './site-customer-account-service-01595.mjs';
 import {customerSessionHash01595,customerSiteScope01595,siteAccountFault01595} from './site-customer-account-core-01595.mjs';
 const clean=v=>String(v??'').trim();
 const safeB64=/^[A-Za-z0-9_-]{32,128}$/;
@@ -77,7 +77,18 @@ export async function finishHostedIdentity01595(flowId,action,data,{query=withCl
     if(!changed.rowCount)throw siteAccountFault01595('SITE_ACCOUNT_FLOW_USED_01595',409);
     const url=new URL(row.redirect_path,row.redirect_origin);
     url.hash=new URLSearchParams({st_site_code:code,st_site_state:row.client_state}).toString();
-    return {stage:'01595',redirectUrl:url.toString()};
+    return {stage:'01595',redirectUrl:url.toString(),_ssoUserId:auth.user.id};
+  });
+}
+// 01611F · A user who already authenticated at the first-party ShiftTime ID
+// origin may enter the specific published site without entering a password
+// again. The trusted user ID is resolved from a valid signed SSO cookie and
+// live api_sessions record by the server, not from URL input.
+export async function finishHostedIdentityFromSso01611F(flowId,verifiedUserId,{query=withClient}={}){
+  if(!/^usr_[A-Za-z0-9_-]{8,100}$/.test(clean(verifiedUserId)))throw siteAccountFault01595('SITE_ACCOUNT_LOGIN_REQUIRED_01595',401);
+  return finishHostedIdentity01595(flowId,'login',{}, {
+    query,
+    authenticate:async(scope)=>({user:await linkExistingSiteCustomer01611F(scope,verifiedUserId,{query})})
   });
 }
 export async function exchangeSiteCustomerCode01595(site,code,verifier,{query=withClient}={}){

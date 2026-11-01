@@ -57,12 +57,12 @@ import {getVisitorContact01611A,linkVisitorContactToAuthenticatedUser01611A} fro
 import {listMessengerAccountThreads01611E,getMessengerAccountThread01611E,replyMessengerAccountThread01611E} from './messenger-account-sync-01611e.mjs';
 import {revealMessengerPhone01611C} from './messenger-contact-reveal-01611c.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
-import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
+import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,finishHostedIdentityFromSso01611F,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
-import {createSsoHandoff01581,establishSso01581,authorizeSso01581,exchangeSso01581} from './sso-service-01581.mjs';
+import {createSsoHandoff01581,establishSso01581,authorizeSso01581,ssoUserFromCookie01611F,exchangeSso01581} from './sso-service-01581.mjs';
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
-import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
+import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
@@ -186,7 +186,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const input=await readJson(req,{limit:2048});
     limitCustomerAuth01595(String(input.tx||'').slice(0,120),requestClientAddress01414(req));
     const output=await finishHostedIdentity01595(input.tx,action,input);
-    return sendJson(res,200,{...output,requestId:rid},siteAccountHeaders01595);
+    // 01611F: a password entered only on the Render-owned identity host also
+    // establishes the shared, first-party ShiftTime SSO session. Never expose
+    // the shared Bearer or session ID to the published site or its JavaScript.
+    const {_ssoUserId,...publicOutput}=output;
+    let cookie={};
+    if(String(process.env.SSO_COOKIE_SECRET||'').length>=32){
+      const sso=await createSessionForUser01581(_ssoUserId);
+      cookie=ssoLoginCookie01581(req,sso.sessionId);
+    }
+    return sendJson(res,200,{...publicOutput,requestId:rid},{...siteAccountHeaders01595,...cookie});
   }
   // 01570: buyer's own published cart + site identity, no manager involvement.
   if(p[2]==='public'&&p[3]==='shop'&&p[4]==='direct-checkout'&&p.length===6){
@@ -285,6 +294,18 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const client=String(req.headers['x-st-shipping-client']||'crm').replace(/[^a-zA-Z0-9:_-]/g,'').slice(0,80);
     const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'crm',clientId:client});
     return sendJson(res,200,out,{'cache-control':'private, max-age=30'});
+  }
+  // 01611F · Continue an already authenticated ShiftTime session into a
+  // verified published site. Only the user-specific, first-party SSO cookie
+  // is read; no phone number, email match or CRM role is accepted as proof.
+  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='sso'&&p[4]==='site-continue'&&p.length===5){
+    const tx=new URL(req.url,'http://localhost').searchParams.get('tx')||'';
+    // Validate flow before returning even to the hosted fallback page.
+    await flowPublicInfo01595(tx);
+    const userId=await ssoUserFromCookie01611F(req);
+    if(!userId)return ssoRedirect01581(res,'/identity/site/?tx='+encodeURIComponent(tx)+'&sso=login_required');
+    const out=await finishHostedIdentityFromSso01611F(tx,userId);
+    return ssoRedirect01581(res,out.redirectUrl);
   }
   // 01581 · Central first-party SSO broker. Redirects must match explicit SSO_ALLOWED_CALLBACKS.
   if(p[2]==='auth'&&p[3]==='sso'&&p[4]==='authorize'&&req.method==='GET'){

@@ -13,6 +13,12 @@
     const data=await result.json().catch(()=>({}));if(!result.ok)throw Object.assign(new Error('AUTH_REQUEST_01595'),{code:data.error||'unknown'});return data;
   };
   let info;try{info=await call('flow');}catch(e){showError(e?.code);return;}
+  // 01611F · A top-level navigation sends the HttpOnly SameSite cookie to
+  // Render without exposing it to JS. If no session exists, the server returns
+  // here once with ?sso=login_required and we show the regular login form.
+  if(!new URLSearchParams(location.search).has('sso') && info.requestedMode!=='register'){
+    location.replace('/api/v1/auth/sso/site-continue?tx='+encodeURIComponent(tx));return;
+  }
   let mode=info.registrationEnabled&&info.requestedMode==='register'?'register':'login',busy=false;
   if(info.requestedMode==='register'&&!info.registrationEnabled)showError('SITE_ACCOUNT_REGISTRATION_DISABLED_01595');
   function paint(){
@@ -25,9 +31,13 @@
       if(mode==='register'&&pw!==String(d.get('confirm')||'')){showError('passwordMismatch');return;}
       const input={email:String(d.get('email')||'').trim(),password:pw};
       if(mode==='register'){input.name=String(d.get('name')||'').trim();input.acceptTerms=d.get('acceptTerms')==='on';input.website=String(d.get('website')||'');}
-      busy=true;alert.textContent='';paint();
+      // Keep the real form inputs mounted so password managers can recognize
+      // a successful credential submission for this one HTTPS origin.
+      busy=true;alert.textContent='';
+      const submit=event.currentTarget.querySelector('button[type=submit]');
+      if(submit){submit.disabled=true;submit.textContent=tr.busy;}
       try{const result=await call(mode,input);location.replace(result.redirectUrl);}
-      catch(e){busy=false;showError(e?.code);paint();}
+      catch(e){busy=false;showError(e?.code);if(submit){submit.disabled=false;submit.textContent=mode==='register'?tr.submitRegister:tr.submitLogin;}}
     });
   }
   paint();

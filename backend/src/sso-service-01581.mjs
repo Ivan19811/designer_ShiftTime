@@ -40,6 +40,13 @@ export async function establishSso01581(ticket,{clientId,redirectUri}={}){
  const result=await consumeCode(ticket,'handoff',{clientId,redirectUri});
  return {sessionId:result.session.id,redirectUri};
 }
+// 01611F · A customer site sees only a one-time site-scoped code, not
+// this first-party shared SSO session or the Bearer token behind it.
+export async function ssoUserFromCookie01611F(req,{query=withClient,secret=process.env.SSO_COOKIE_SECRET}={}){
+  const id=readSsoCookie01581(ssoCookieFromRequest01581(req),secret);
+  if(!id)return '';
+  return query(async db=>(await validSession(db,id))?.user_id||'');
+}
 export async function authorizeSso01581(req,{clientId,redirectUri,codeChallenge}={}){
  allowed(clientId,redirectUri);
  if(!validChallenge01581(codeChallenge))throw failure('SSO_CHALLENGE_INVALID_01581');
