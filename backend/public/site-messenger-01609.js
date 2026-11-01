@@ -11,7 +11,7 @@
   const threadName='st.messenger.thread.01609.'+siteId;
   const customerSessionName='st_site_customer_01595_'+siteId;
   const randomKey=()=>{const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);return 'stmv_'+btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replace(/=+$/g,'');};
-  let visitorKey='',chatId='',turns=[],busy=false,stopped=false,errorMessage='',verified=false,loadingProof=true,challengeId='',providers={};
+  let visitorKey='',chatId='',turns=[],busy=false,stopped=false,errorMessage='',verified=false,loadingProof=true,challengeId='',providers={},contactLinked=false;
   try{visitorKey=localStorage.getItem(keyName)||'';chatId=localStorage.getItem(threadName)||'';}catch{}
   if(!/^stmv_[A-Za-z0-9_-]{40,120}$/.test(visitorKey)){visitorKey=randomKey();chatId='';try{localStorage.setItem(keyName,visitorKey);localStorage.removeItem(threadName);}catch{}}
   const text=name=>blocks[0].dataset['stMessenger'+name]||'';
@@ -25,7 +25,8 @@
     phone:block.querySelector('[data-st-messenger-verify-phone]'),consent:block.querySelector('[data-st-messenger-verify-consent]'),
     notice:block.querySelector('[data-st-messenger-verify-notice]'),codeBox:block.querySelector('[data-st-messenger-verify-code-box]'),
     code:block.querySelector('[data-st-messenger-verify-code]'),start:block.querySelector('[data-st-messenger-verify-start]'),
-    check:block.querySelector('[data-st-messenger-verify-check]'),reset:block.querySelector('[data-st-messenger-verify-reset]'),status:block.querySelector('[data-st-messenger-verify-status]')
+    check:block.querySelector('[data-st-messenger-verify-check]'),reset:block.querySelector('[data-st-messenger-verify-reset]'),status:block.querySelector('[data-st-messenger-verify-status]'),
+    profileBox:block.querySelector('[data-st-messenger-profile-box]'),profileLabel:block.querySelector('[data-st-messenger-profile-label]'),profileLink:block.querySelector('[data-st-messenger-profile-link]')
   })).filter(x=>x.form&&x.turns&&x.send&&x.body);
   const headers=()=>{
     const h={accept:'application/json','content-type':'application/json','x-st-messenger-visitor':visitorKey};
@@ -48,6 +49,10 @@
   function draw(){
     for(const ref of refs){
       ref.form.hidden=!verified;ref.form.style.display=verified?'grid':'none';
+      let hasSession=false;try{hasSession=Boolean(sessionStorage.getItem(customerSessionName));}catch{}
+      if(ref.profileBox){ref.profileBox.hidden=!verified||!hasSession;ref.profileBox.style.display=verified&&hasSession?'grid':'none';}
+      if(ref.profileLink)ref.profileLink.hidden=contactLinked;
+      if(ref.profileLabel)ref.profileLabel.textContent=contactLinked?text('ProfileLinked'):text('ProfilePrompt');
       if(ref.box){ref.box.hidden=verified;ref.box.style.display=verified?'none':'grid';}
       ref.send.disabled=busy||stopped||!verified;
       if(ref.newChat)ref.newChat.hidden=!stopped;
@@ -76,6 +81,7 @@
     try{
       const status=await call('/channels');
       providers=status.providers||{};verified=Array.isArray(status.verified)&&status.verified.length>0;
+      if(verified){try{const result=await call('/contact');contactLinked=Boolean(result?.contact?.linked);}catch{contactLinked=false;}}
       for(const ref of refs){
         if(ref.channel&&!providers[ref.channel.value])ref.channel.value=['sms','telegram','viber','whatsapp'].find(c=>providers[c])||'sms';
         updateChannel(ref);
@@ -108,7 +114,7 @@
     try{
       const result=await call('/verification/verify','POST',{challengeId,code:String(ref.code?.value||'').trim()});
       if(!result.verified)throw new Error('unverified');
-      verified=true;message(ref,text('VerifyVerified'));draw();
+      verified=true;contactLinked=false;message(ref,text('VerifyVerified'));draw();
     }catch(e){message(ref,['MESSENGER_CODE_INCORRECT_01611','MESSENGER_CHALLENGE_EXPIRED_01611'].includes(e.code)?text('VerifyInvalid'):text('VerifyError'));}
     finally{busy=false;updateChannel(ref);draw();}
   }
@@ -143,6 +149,12 @@
     ref.channel?.addEventListener('change',()=>updateChannel(ref));
     ref.start?.addEventListener('click',()=>startVerification(ref));
     ref.check?.addEventListener('click',()=>checkVerification(ref));
+    ref.profileLink?.addEventListener('click',async()=>{
+      if(busy||contactLinked||!verified)return;busy=true;ref.profileLink.disabled=true;
+      try{const result=await call('/contact/link','POST',{});contactLinked=Boolean(result.linked);if(!contactLinked)throw new Error('not-linked');}
+      catch{if(ref.profileLabel)ref.profileLabel.textContent=text('ProfileFailed');}
+      finally{busy=false;ref.profileLink.disabled=false;if(contactLinked)draw();}
+    });
     ref.reset?.addEventListener('click',()=>{if(busy)return;challengeId='';if(ref.channel)ref.channel.disabled=false;if(ref.phone)ref.phone.disabled=false;if(ref.code)ref.code.value='';if(ref.codeBox){ref.codeBox.hidden=true;ref.codeBox.style.display='none';}if(ref.start)ref.start.hidden=false;if(ref.check)ref.check.hidden=true;if(ref.reset)ref.reset.hidden=true;updateChannel(ref);message(ref,'');});
     if(ref.box)ref.box.hidden=false;
     if(ref.codeBox){ref.codeBox.hidden=true;ref.codeBox.style.display='none';}

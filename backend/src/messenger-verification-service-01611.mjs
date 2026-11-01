@@ -4,6 +4,7 @@ import {withClient} from './db.mjs';
 import {messengerError01609} from './messenger-core-01609.mjs';
 import {verificationScope01611,verificationKey01611,normalizePhone01611,normalizeChannel01611,hmac01611,sealPhone01611,openPhone01611,maskPhone01611,assertCode01611,verificationEnforced01611} from './messenger-verification-core-01611.mjs';
 import {providerStatus01611,startProviderVerification01611,checkProviderVerification01611} from './messenger-verification-providers-01611.mjs';
+import {ensureVerifiedContact01611A,attachExistingMessengerMessages01611A} from './messenger-contact-profiles-01611a.mjs';
 const limits={perIp:12,perVisitor:6,perPhone:5};
 const columns='account_id,workspace_id,store_id,builder_site_id,visitor_hash';
 const scopeArgs=s=>[s.accountId,s.workspaceId,s.storeId,s.siteId,s.visitorHash];
@@ -75,11 +76,13 @@ export async function verifyMessengerChannel01611(identity,visitorKey,input={}){
     try{
       const consumed=await db.query(`UPDATE shifttime_messenger_verification_challenges_01611 SET status='verified',verified_at=now() WHERE id=$1 AND status='sent' AND expires_at>now() RETURNING id`,[id]);
       if(!consumed.rowCount)throw messengerError01609('MESSENGER_CHALLENGE_EXPIRED_01611',400);
-      await db.query(`INSERT INTO shifttime_messenger_verified_channels_01611(id,account_id,workspace_id,store_id,builder_site_id,visitor_hash,channel,phone_hash,phone_sealed,consent_fallback)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      const contact=await ensureVerifiedContact01611A(db,s);
+      await db.query(`INSERT INTO shifttime_messenger_verified_channels_01611(id,account_id,workspace_id,store_id,builder_site_id,visitor_hash,channel,phone_hash,phone_sealed,consent_fallback,contact_id)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         ON CONFLICT (store_id,builder_site_id,visitor_hash,channel,phone_hash)
-        DO UPDATE SET consent_fallback=EXCLUDED.consent_fallback,verified_at=now(),updated_at=now(),phone_sealed=EXCLUDED.phone_sealed`,
-      [crypto.randomUUID(),...scopeArgs(s),record.channel,record.phone_hash,record.phone_sealed,record.consent_fallback]);
+        DO UPDATE SET consent_fallback=EXCLUDED.consent_fallback,verified_at=now(),updated_at=now(),phone_sealed=EXCLUDED.phone_sealed,contact_id=EXCLUDED.contact_id`,
+      [crypto.randomUUID(),...scopeArgs(s),record.channel,record.phone_hash,record.phone_sealed,record.consent_fallback,contact.id]);
+      await attachExistingMessengerMessages01611A(db,s,contact.id);
       await db.query('COMMIT');
     }catch(e){await db.query('ROLLBACK');throw e;}
   });

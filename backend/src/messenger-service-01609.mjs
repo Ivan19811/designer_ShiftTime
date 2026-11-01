@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
 import {createPublicCustomerMessage01404} from './notification-inbox-01404.mjs';
 import {hashMessengerVisitor01609,cleanMessengerBody01609,messengerError01609,publicMessengerThread01609} from './messenger-core-01609.mjs';
+import {associateChatContact01611A} from './messenger-contact-profiles-01611a.mjs';
 const str=value=>String(value??'').trim();
 const guestScope=(identity,visitorKey)=>{
   if(!identity?.siteId||!identity?.storeId||!identity?.accountId||!identity?.workspaceId)throw messengerError01609('MESSENGER_SITE_REQUIRED_01609',401);
@@ -21,13 +22,15 @@ async function getTurns(db,identity,messageId){
 export async function createPublicMessengerChat01609(identity,input={},meta={}){
   const scope=guestScope(identity,input.visitorKey),body=cleanMessengerBody01609(input.body);
   const item=await createPublicCustomerMessage01404(identity,{channel:'chat',body,subject:input.subject,customer:meta.customerUserId?{name:meta.customerName,email:meta.customerEmail}:input.customer,context:input.context},{remoteAddress:meta.remoteAddress,userAgent:meta.userAgent,visitorHash:scope.hash,customerUserId:meta.customerUserId||null});
+  await associateChatContact01611A(identity,input.visitorKey,item.id);
   return {stage:'01609',id:item.id,customerUserId:meta.customerUserId||null,turns:[],created:true};
 }
 export async function getPublicMessengerChat01609(identity,messageId,visitorKey,{customerUserId=null}={}){
   const scope=guestScope(identity,visitorKey);
   return withClient(async db=>{
     const chat=await findChat(db,scope,messageId,scope.hash);
-    if(customerUserId&&!chat.customerUserId){await db.query(`UPDATE shifttime_customer_messages SET customer_user_id=$3,updated_at=now() WHERE id=$1 AND store_id=$2 AND customer_user_id IS NULL`,[messageId,scope.storeId,customerUserId]);chat.customerUserId=customerUserId;}
+    // Viewing a guest conversation never silently claims it for a logged-in user.
+    // 01611A requires the explicit authenticated /contact/link action.
     return {stage:'01609',id:chat.id,status:chat.status,customerUserId:chat.customerUserId||null,productionOrderId:chat.productionOrderId||null,turns:await getTurns(db,scope,chat.id)};
   });
 }

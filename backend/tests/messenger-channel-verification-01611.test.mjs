@@ -15,7 +15,7 @@ test('01611 E.164 strict validation and country normalization',()=>{
 test('01611 phone sealed via authenticated AES-256-GCM and private keyed contact hash',()=>{
   const key=verificationKey01611(env),v='+380671234567',a=sealPhone01611(key,v),b=sealPhone01611(key,v);
   assert.notEqual(a,b);assert.equal(openPhone01611(key,a),v);assert.match(hmac01611(key,'phone:'+v),/^[a-f0-9]{64}$/);
-  assert.equal(maskPhone01611(v),'+38•••567');assert.throws(()=>openPhone01611(key,a.slice(0,-1)+'Z'));
+  assert.equal(maskPhone01611(v),'+38•••567');const parts=a.split('.');const bytes=Buffer.from(parts[2],'base64url');bytes[0]^=1;assert.throws(()=>openPhone01611(key,[parts[0],parts[1],bytes.toString('base64url')].join('.')));
   assert.throws(()=>verificationKey01611({MESSENGER_CONTACT_SECRET_01611:'short'}));
 });
 test('01611 tenant/site/visitor scope is required',()=>{
