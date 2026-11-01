@@ -51,6 +51,7 @@ import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
 import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} from './site-customer-account-service-01595.mjs';
+import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
 import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
@@ -311,6 +312,18 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='media'&&p[4]){const out=await getPublicCloudMediaDelivery01081(p[4]);res.statusCode=302;res.setHeader('location',out.url);res.setHeader('cache-control',out.public?'public, max-age=300':'private, no-store');return res.end();}
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='search'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await searchPublicMarketplace(Object.fromEntries(u.searchParams.entries())));}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='orders'){const token=String(req.headers['x-st-cart-id']||'');const out=await checkoutPublicCart(token,await readJson(req),{siteId:publishedTrafficIdentity?.siteId||'',siteName:publishedTrafficIdentity?.siteName||''});return sendJson(res,201,out,{'x-st-cart-id':out.nextCartId});}
+  // 01609: Public messenger requires published site identity + unguessable visitor capability.
+  if(p[2]==='public'&&p[3]==='site'&&p[4]==='messenger'){
+    if(!publishedTrafficIdentity)return sendJson(res,401,{error:'MESSENGER_SITE_REQUIRED_01609',requestId:rid});
+    const guest=String(req.headers['x-st-messenger-visitor']||'');
+    const bearer=String(req.headers['x-st-customer-session']||'');
+    const user=bearer?(await customerSession01595(publishedTrafficIdentity,bearer,{updateSeen:false})).user:null;
+    const meta={remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||'',customerUserId:user?.id||null,customerName:user?.name||'',customerEmail:user?.email||''};
+    if(req.method==='POST'&&p.length===5){const input=await readJson(req,{limit:16384});return sendJson(res,201,{...(await createPublicMessengerChat01609(publishedTrafficIdentity,{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='GET'&&p[5]&&p.length===6)return sendJson(res,200,{...(await getPublicMessengerChat01609(publishedTrafficIdentity,p[5],guest,meta)),requestId:rid},{'cache-control':'no-store'});
+    if(req.method==='POST'&&p[5]&&p[6]==='turns'&&p.length===7){const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyPublicMessengerChat01609(publishedTrafficIdentity,p[5],{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    return sendJson(res,404,{error:'MESSENGER_ROUTE_NOT_FOUND_01609',requestId:rid});
+  }
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='site'&&p[4]==='messages'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01404',stage:'01404',requestId:rid});const out=await createPublicCustomerMessage01404(publishedTrafficIdentity,await readJson(req,{limit:32*1024}),{remoteAddress:req.socket?.remoteAddress||'',userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
   if(p[2]==='public'&&p[3]==='ai-consultant'){
     if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01414',stage:'01414',requestId:rid});
@@ -623,6 +636,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       const messageId=p[5]||'';
       if(req.method==='GET'&&messageId&&p.length===6){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getCustomerMessageThread01410(scope,messageId,{markRead:u.searchParams.get('markRead')==='1',actorUserId:session.userId}));}
       if(req.method==='PATCH'&&messageId&&p.length===6){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
+      if(req.method==='POST'&&messageId&&p[6]==='order-link'&&p.length===7){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);const input=await readJson(req,{limit:4096});return sendJson(res,200,await linkMessengerProductionOrder01609(scope,messageId,input.orderId));}
       if(req.method==='POST'&&messageId&&p[6]==='thread'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
       return sendJson(res,404,{error:'CUSTOMER_MESSAGES_INBOX_ROUTE_NOT_FOUND_01410',stage:'01410',requestId:rid});
     }
