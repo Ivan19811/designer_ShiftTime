@@ -47,7 +47,7 @@ export async function startBuyerEmailProof01565(token,{transaction=withTransacti
   if(expires.getTime()<=now+30_000)throw fail('ORDERS_IDENTITY_OFFER_TOO_OLD_01565',409);
   // SMTP in transaction: failure rolls back challenge; avoid issuing a usable code that was not delivered.
   // No OTP, email or offer token in logs, URLs or responses.
-  const delivery=await sender(options,{from:settings.notificationEmailFrom,to:email,subject:BUYER_EMAIL_UK_01565.subject,text:BUYER_EMAIL_UK_01565.body(code)});
+  const delivery=await sender(options,{from:settings.notificationEmailFrom,to:email,subject:BUYER_EMAIL_UK_01565.subject,text:BUYER_EMAIL_UK_01565.body(code),module:'buyer-email-code',priority:'critical'});
   if(delivery?.ok!==true)throw fail('ORDERS_IDENTITY_DELIVERY_FAILED_01565',503);
   const codeHash=hashEmailCode01565(key,id,code);
   const saved=await db.query(`INSERT INTO shifttime_order_buyer_email_challenges_01565 (id,offer_id,draft_id,store_id,code_hash,expires_at,sent_at,send_count,attempt_count)

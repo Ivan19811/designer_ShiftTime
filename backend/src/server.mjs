@@ -63,6 +63,7 @@ import {createSsoHandoff01581,establishSso01581,authorizeSso01581,ssoUserFromCoo
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
+import {getEmailUsage01612C} from './email-usage-01612c.mjs';
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
@@ -870,6 +871,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');
       const u=new URL(req.url,'http://localhost'),params=Object.fromEntries(u.searchParams.entries());
       return sendJson(res,200,await (p[5]==='details'?getTrafficHistogramDetails01474(scope,params):listTrafficHistogram01474(scope,params)));
+    }
+    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='email-usage'){
+      assertPlatformSuperadmin01592(session.userId);
+      return sendJson(res,200,await getEmailUsage01612C(),{'cache-control':'private, no-store'});
     }
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='summary'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');return sendJson(res,200,await getTrafficSummary01194(scope));}
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='events'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficEvents01194(scope,{limit:u.searchParams.get('limit')}));} 

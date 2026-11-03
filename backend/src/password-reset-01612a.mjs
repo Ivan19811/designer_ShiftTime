@@ -55,7 +55,7 @@ export async function requestPasswordReset01612A(email,{query=withClient,send=se
  if(!row)return {...genericResetResponse01612A};
  const link=base+'/identity/reset/#token='+encodeURIComponent(token);
  try{
-  await send(emailOptions,{from:settings.notificationEmailFrom,to:row.email,subject:uk.subject,text:uk.body.replace('{link}',link)});
+  await send(emailOptions,{from:settings.notificationEmailFrom,to:row.email,subject:uk.subject,text:uk.body.replace('{link}',link),module:'password-reset',priority:'critical'});
   await query(db=>db.query('UPDATE platform_password_resets_01612a SET sent_at=now() WHERE id=$1',[row.id]));
  }catch(error){
   // Avoid falsely counting a delivery failure as successful; no secret in errors.

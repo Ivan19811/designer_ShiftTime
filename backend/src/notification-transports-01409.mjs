@@ -28,7 +28,7 @@ export async function sendWebhookNotification01409(scope,event,{fetchImpl=global
 export async function sendEmailNotification01409(scope,event,{smtpSendImpl=sendSmtpMail01409,fetchImpl=globalThis.fetch,settings=settingsFromConfig(),recipient=null}={}){
   const to=str(recipient?.email)||str(settings.notificationEmailTo);
   if(!emailTransportConfigured01612B(settings)||!to)throw Object.assign(new Error('NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'),{code:'NOTIFICATION_EMAIL_NOT_CONFIGURED_01409'});
-  const message=buildNotificationTransportMessage01409(event,scope),result=await sendPlatformEmail01612B(emailTransportOptions01612B(settings),{from:settings.notificationEmailFrom,to,subject:message.subject,text:message.text},{smtpSendImpl,fetchImpl});
+  const message=buildNotificationTransportMessage01409(event,scope),result=await sendPlatformEmail01612B(emailTransportOptions01612B(settings),{from:settings.notificationEmailFrom,to,subject:message.subject,text:message.text,module:'notification',siteId:scope?.siteId||scope?.storeId||'',priority:'normal'},{smtpSendImpl,fetchImpl});
   return {ok:true,channel:'email',responseCode:Number(result?.responseCode)||250,externalId:str(result?.externalId),stage:NOTIFICATION_DELIVERY_STAGE_01409};
 }
 
