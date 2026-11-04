@@ -65,6 +65,7 @@ import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validSta
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
 import {getEmailUsage01612C} from './email-usage-01612c.mjs';
+import {listSiteInvites01613C,createSiteInvite01613C,revokeSiteInvite01613C,acceptSiteInvite01613C,assertSiteOnlyBoundary01613C} from './site-collaboration-01613c.mjs';
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
@@ -442,7 +443,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       return sendJson(res,200,{...out,requestId:rid},{'cache-control':'private, max-age=30'});
     }
   }
-  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);await assertSiteOnlyBoundary01613C(scope,session.userId,p);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
   const protectedAction01600=classifyLegacyMerchantAction01605F(req.method,p)||classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
@@ -876,6 +877,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       if(req.method==='GET'&&action==='assignments'&&p.length===5)return sendJson(res,200,{stage:'01597',assignments:await accessPolicyService01597.assignments(scope)},{'cache-control':'private, no-store'});
       if(req.method==='POST'&&action==='assignments'&&p.length===5)return sendJson(res,201,{stage:'01597',assignment:await accessPolicyService01597.assign(scope,session.userId,await readJson(req,{limit:4096}))});
       if(req.method==='POST'&&action==='assignments'&&id&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,{stage:'01597',assignment:await accessPolicyService01597.revoke(scope,session.userId,id)});
+      if(action==='site-invites'){
+        if(req.method==='GET'&&p.length===5)return sendJson(res,200,await listSiteInvites01613C(scope),{'cache-control':'private, no-store'});
+        if(req.method==='POST'&&p.length===5)return sendJson(res,201,await createSiteInvite01613C(scope,session.userId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
+        if(req.method==='POST'&&p[5]&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,await revokeSiteInvite01613C(scope,session.userId,p[5]),{'cache-control':'private, no-store'});
+      }
       if(req.method==='GET'&&action==='preview'&&p.length===5)return sendJson(res,200,await accessPolicyService01597.preview(scope,u.searchParams.get('userId')||'',u.searchParams.get('siteId')||''),{'cache-control':'private, no-store'});
       return sendJson(res,404,{error:'ST_ACCESS_ROUTE_NOT_FOUND_01597',requestId:rid});
     }
@@ -915,6 +921,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Admin route not found',stage:'01087',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='deployment'&&p[3]==='status')return sendJson(res,200,await getDeploymentStatus01080(scope));
+  // 01613C · invitation acceptance is authenticated, but must not require membership
+  // in the inviting tenant. The invite token never grants authority without email match.
+  if(p[2]==='collaboration'&&p[3]==='accept'&&req.method==='POST'&&p.length===4){
+    const input=await readJson(req,{limit:2048});
+    return sendJson(res,200,await acceptSiteInvite01613C(session.userId,input.token),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
+  }
   if(p[2]==='media'){
     const candidateSiteId=String(req.headers['x-st-site-id']||'').trim();
     const verifiedSiteId=candidateSiteId?await resolveAuthorizedMediaTrafficSite01206(scope,candidateSiteId):'';
