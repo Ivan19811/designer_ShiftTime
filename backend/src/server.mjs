@@ -37,6 +37,7 @@ import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
+import {assertOnlineSiteAccess01613B,isOnlineSiteRoute01613B} from './secure-online-site-01613b.mjs';
 import {classifySiteAction01606E,assertSiteAction01606E,isPreciseSiteMode01606E} from './access-site-actions-core-01606e.mjs';
 import {classifyCanvasRoute01606F,assertCanvasActions01606F} from './access-canvas-actions-core-01606f.mjs';
 import {normalizeCanvasAtomicInput01606F} from './site-canvas-atomic-core-01606f.mjs';
@@ -453,6 +454,18 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         throw error;
       })
     : null;
+  // 01613B · Dedicated multi-user online site boundary. Denials happen before
+  // project JSON, Canvas actions or Netlify publishing packages are read.
+  if(isOnlineSiteRoute01613B(p)){
+    try{assertOnlineSiteAccess01613B(scope,protectedDecision01600,req.method,p);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{
+        permission:error.permission||auditedAction01605?.permission||'site.pages.view',
+        siteId:p[2]==='sites'&&p[3]?p[3]:''
+      },error.code);}catch{console.warn('[01613B] site denial journal unavailable');}
+      throw error;
+    }
+  }
   // 01606E · For site mutation routes the original site-scoped 01600 check
   // has already completed (including tenant and membership verification).
   // Do not parse or persist a caller-supplied project before this action gate.

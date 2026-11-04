@@ -24,8 +24,15 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
       const valid=await client.query(`SELECT 1 FROM shifttime_builder_sites WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 AND status='active'`,[siteId,scope.accountId,scope.workspaceId,scope.storeId]);
       if(!valid.rowCount)throw Object.assign(new Error('ST_ACCESS_SITE_SCOPE_DENIED_01600'),{code:'ST_ACCESS_SITE_SCOPE_DENIED_01600',statusCode:403});
     }
-    // Existing staff without custom assignment retain the pre-01600 legacy authorizations.
-    // Once enrolled, removal of EVERY role cannot restore legacy write privileges.
+    // 01613B: publishing a browser Builder requires explicit role assignments
+    // for EVERY non-owner site operation, including listings and reads.
+    // This gate cannot be disabled by old manager/editor legacy role names.
+    if(!enrolled.rowCount&&(action.permission.startsWith('site.')||action.siteList)){
+      throw Object.assign(new Error('ST_ONLINE_SITE_EXPLICIT_GRANT_REQUIRED_01613B'),{
+        code:'ST_ONLINE_SITE_EXPLICIT_GRANT_REQUIRED_01613B',statusCode:403,permission:action.permission
+      });
+    }
+    // Other pre-01600 merchant modules retain their existing legacy behavior.
     if(!enrolled.rowCount){
       const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});

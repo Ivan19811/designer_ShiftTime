@@ -37,10 +37,11 @@ test('01605D legacy manager cannot use foreign site even with broad old permissi
   assert.equal(db.calls.length,2);
   assert.deepEqual(db.calls[1].params,['site_other',scope.accountId,scope.workspaceId,scope.storeId]);
 });
-test('01605D legacy manager retains authorized same-store site edit',async()=>{
+test('01613B legacy manager loses same-store site edit until explicitly enrolled',async()=>{
   const db=recordDb({enrolled:false,valid:true});
-  const result=await inspectProtectedAccess01600({...scope,role:'manager'},actor,siteAction('site_mine'),db);
-  assert.equal(result.mode,'legacy');assert.equal(result.allowed,true);
+  await assert.rejects(()=>inspectProtectedAccess01600({...scope,role:'manager'},actor,siteAction('site_mine'),db),
+    e=>e.statusCode===403&&e.code==='ST_ONLINE_SITE_EXPLICIT_GRANT_REQUIRED_01613B');
+  assert.equal(db.calls.length,2,'check enrollment and same-tenant site before refusing legacy');
 });
 test('01605D custom store role may not use a site belonging to another Store',async()=>{
   const db=recordDb({enrolled:true,valid:false,assignments:[{permissions:['site.pages.edit'],scopeKind:'store',siteId:null}]});
