@@ -38,7 +38,7 @@ export const ACCESS_PERMISSIONS_01597=Object.freeze([
   define('team.roles','view'),define('team.roles','manage'),
   // 01606 · Client-only exact visibility gates. Do not treat these as API authority.
   define('ui.mode','navigation'),define('ui.mode','inspector'),define('ui.mode','controls'),
-  define('ui.nav','site'),define('ui.nav','pages'),define('ui.nav','marketplace'),define('ui.nav','shop'),define('ui.nav','orders'),
+  define('ui.nav','site'),define('ui.nav','pages'),define('ui.nav','marketplace'),define('ui.nav','messenger'),define('ui.nav','shop'),define('ui.nav','orders'),
   define('ui.nav','notifications'),define('ui.nav','aiconsultant'),define('ui.nav','aiassistant'),define('ui.nav','modules'),define('ui.nav','tables'),
   define('ui.nav','design'),define('ui.nav','aidesign'),define('ui.nav','globaldesign'),define('ui.nav','background'),define('ui.nav','blocks'),
   define('ui.nav','global'),define('ui.nav','constructor'),

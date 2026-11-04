@@ -1,6 +1,7 @@
 // 01600 · Server-side checks for scoped custom roles and sticky enrollment.
 // Every write is authorized before request content is parsed or any mutation begins.
 import {grantDecision01600,requireProtectedAccess01600} from './access-enforcement-core-01600.mjs';
+import {currentDelegatedModules01613C4,modulePermissions01613C4} from './delegated-modules-01613c4.mjs';
 const clean=v=>String(v??'').trim();
 const defaultRun=async fn=>(await import('./db.mjs')).withClient(fn);
 export async function inspectProtectedAccess01600(scope,userId,action,{run=defaultRun}={}){
@@ -46,7 +47,11 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
         AND (m.workspace_id IS NULL OR m.workspace_id=$2) AND (m.store_id IS NULL OR m.store_id=$3)
         AND (a.scope_kind='store' OR (($5::text IS NOT NULL OR $6::boolean) AND a.scope_kind='site' AND s.id IS NOT NULL AND ($6::boolean OR s.id=$5)))`,
     [scope.accountId,scope.workspaceId,scope.storeId,userId,siteId||null,!!action.siteList]);
-    const permissions=[...new Set(q.rows.flatMap(r=>Array.isArray(r.permissions)?r.permissions:[]))];
+    // 01613C4 · Synthetic store-level grants are separate from site editing
+    // and never contain publish, delete, admin, import or phone-reveal rights.
+    const extra=(action.delegatedModuleRoute===true&&!siteId&&/^(shop\.products|crm\.messages)\./.test(action.permission))
+      ?modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(client)})):[];
+    const permissions=[...new Set([...q.rows.flatMap(r=>Array.isArray(r.permissions)?r.permissions:[]),...extra])];
     if(action.siteList){
       const allStores=q.rows.filter(r=>r.scopeKind==='store').some(r=>Array.isArray(r.permissions)&&r.permissions.includes(action.permission));
       const allowedSiteIds=[...new Set(q.rows.filter(r=>r.scopeKind==='site'&&r.siteId&&Array.isArray(r.permissions)&&r.permissions.includes(action.permission)).map(r=>r.siteId))];

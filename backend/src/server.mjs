@@ -66,6 +66,7 @@ import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
 import {getEmailUsage01612C} from './email-usage-01612c.mjs';
 import {listSiteInvites01613C,createSiteInvite01613C,revokeSiteInvite01613C,acceptSiteInvite01613C,assertSiteOnlyBoundary01613C} from './site-collaboration-01613c.mjs';
+import {listModuleDelegations01613C4,setModuleDelegation01613C4,moduleRoutePermission01613C4} from './delegated-modules-01613c4.mjs';
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
@@ -443,13 +444,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       return sendJson(res,200,{...out,requestId:rid},{'cache-control':'private, max-age=30'});
     }
   }
-  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);await assertSiteOnlyBoundary01613C(scope,session.userId,p);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);await assertSiteOnlyBoundary01613C(scope,session.userId,p,{method:req.method});setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
   const protectedAction01600=classifyLegacyMerchantAction01605F(req.method,p)||classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
   const protectedDecision01600=auditedAction01605
-    ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{
+    ? await inspectProtectedAccess01600(scope,session.userId,{...auditedAction01605,delegatedModuleRoute:moduleRoutePermission01613C4(req.method,p)===auditedAction01605.permission}).catch(async error=>{
         // Never lose a denial even when persistence fails; no request content is logged.
         if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,auditedAction01605,error.code||error.message);}catch{console.warn('[01605C] access audit write unavailable');}
         throw error;
@@ -879,6 +880,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       if(req.method==='POST'&&action==='assignments'&&id&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,{stage:'01597',assignment:await accessPolicyService01597.revoke(scope,session.userId,id)});
       if(action==='site-invites'){
         if(req.method==='GET'&&p.length===5)return sendJson(res,200,await listSiteInvites01613C(scope),{'cache-control':'private, no-store'});
+        if(req.method==='GET'&&p[5]==='module-grants'&&p.length===6)return sendJson(res,200,await listModuleDelegations01613C4(scope),{'cache-control':'private, no-store'});
+        if(req.method==='PUT'&&p[5]&&p[6]==='modules'&&p.length===7)return sendJson(res,200,await setModuleDelegation01613C4(scope,session.userId,p[5],await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
         if(req.method==='POST'&&p.length===5)return sendJson(res,201,await createSiteInvite01613C(scope,session.userId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
         if(req.method==='POST'&&p[5]&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,await revokeSiteInvite01613C(scope,session.userId,p[5]),{'cache-control':'private, no-store'});
       }

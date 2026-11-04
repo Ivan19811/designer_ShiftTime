@@ -1,3 +1,4 @@
+import {currentDelegatedModules01613C4,modulePermissions01613C4} from './delegated-modules-01613c4.mjs';
 // 01597 · Site/store-scoped role catalog, management, and read-only grant projection.
 // Not yet wired into legacy write endpoints (01600); do not represent the preview as enforcement.
 import crypto from 'node:crypto';
@@ -112,7 +113,9 @@ export function createAccessPolicyService01597({run=defaultRun}={}){
             AND (m.store_id IS NULL OR m.store_id=$3)
             AND (a.scope_kind='store' OR (a.scope_kind='site' AND s.id IS NOT NULL))
           ORDER BY a.id LIMIT 500`,[scope.accountId,scope.workspaceId,scope.storeId,userId]);
-        return projectOwnNavigation01599(q.rows,{accountId:scope.accountId,storeId:scope.storeId,userId});
+        const delegated=modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(c)}));
+        const rows=delegated.length?[...q.rows,{scopeKind:'store',status:'active',roleStatus:'active',permissions:delegated}]:q.rows;
+        return projectOwnNavigation01599(rows,{accountId:scope.accountId,storeId:scope.storeId,userId});
       });
     },
     async myAccess(scope,userId,siteId=''){

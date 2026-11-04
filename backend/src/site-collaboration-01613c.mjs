@@ -1,6 +1,7 @@
 // 01613C · Site collaboration: explicit invite acceptance, always site-scoped.
 // No shared passwords or email-based auto-grants; token hashes stored in PostgreSQL.
 import crypto from 'node:crypto';
+import {currentDelegatedModules01613C4,moduleRouteAllowed01613C4} from './delegated-modules-01613c4.mjs';
 
 const clean=v=>String(v??'').trim();
 const fail=(code,statusCode=400)=>Object.assign(new Error(code),{code,statusCode});
@@ -35,7 +36,7 @@ const defaultRun=async fn=>(await import('./db.mjs')).withClient(fn);
 
 export async function listSiteInvites01613C(scope,{run=defaultRun}={}){
  owner(scope);return run(async c=>{
-  const q=await c.query(`SELECT i.id,i.site_id "siteId",s.name "siteName",i.recipient_email "email",i.access_level "accessLevel",i.status,i.created_at "createdAt",i.expires_at "expiresAt",i.accepted_at "acceptedAt",i.assignment_id "assignmentId" FROM platform_site_collaboration_invites_01613c i JOIN shifttime_builder_sites s ON s.id=i.site_id AND s.account_id=i.account_id AND s.store_id=i.store_id WHERE i.account_id=$1 AND i.workspace_id=$2 AND i.store_id=$3 ORDER BY i.created_at DESC LIMIT 100`,[scope.accountId,scope.workspaceId,scope.storeId]);
+  const q=await c.query(`SELECT i.id,i.site_id "siteId",s.name "siteName",i.recipient_email "email",i.access_level "accessLevel",i.status,i.created_at "createdAt",i.expires_at "expiresAt",i.accepted_at "acceptedAt",i.assignment_id "assignmentId",i.accepted_by_user_id "acceptedByUserId" FROM platform_site_collaboration_invites_01613c i JOIN shifttime_builder_sites s ON s.id=i.site_id AND s.account_id=i.account_id AND s.store_id=i.store_id WHERE i.account_id=$1 AND i.workspace_id=$2 AND i.store_id=$3 ORDER BY i.created_at DESC LIMIT 100`,[scope.accountId,scope.workspaceId,scope.storeId]);
   return {stage:'01613C',invitations:q.rows};
  });
 }
@@ -66,11 +67,19 @@ export async function createSiteInvite01613C(scope,actor,input,{run=defaultRun}=
 export async function revokeSiteInvite01613C(scope,actor,id,{run=defaultRun}={}){
  owner(scope);if(!/^scinv_[a-f0-9]{20}$/.test(clean(id)))throw fail('ST_SITE_INVITE_ID_INVALID_01613C');
  return transaction(run,async c=>{
-  const q=await c.query(`SELECT id,status,assignment_id,site_id FROM platform_site_collaboration_invites_01613c WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 FOR UPDATE`,[id,scope.accountId,scope.workspaceId,scope.storeId]);
+  const q=await c.query(`SELECT id,status,assignment_id,site_id,accepted_by_user_id FROM platform_site_collaboration_invites_01613c WHERE id=$1 AND account_id=$2 AND workspace_id=$3 AND store_id=$4 FOR UPDATE`,[id,scope.accountId,scope.workspaceId,scope.storeId]);
   if(!q.rowCount||q.rows[0].status==='revoked')throw fail('ST_SITE_INVITE_NOT_FOUND_01613C',404);
   const row=q.rows[0];
   if(row.assignment_id)await c.query(`UPDATE platform_role_assignments_01597 SET status='revoked',revoked_at=now() WHERE id=$1 AND account_id=$2 AND store_id=$3 AND site_id=$4 AND status='active'`,[row.assignment_id,scope.accountId,scope.storeId,row.site_id]);
   await c.query(`UPDATE platform_site_collaboration_invites_01613c SET status='revoked',revoked_at=now() WHERE id=$1`,[id]);
+  // 01613C4: revoke store-scoped module privileges when the collaborator has
+  // no remaining active, accepted invitations in this store.
+  if(row.accepted_by_user_id){
+   const remaining=await c.query(`SELECT 1 FROM platform_site_collaboration_invites_01613c i
+      JOIN shifttime_builder_sites s ON s.id=i.site_id AND s.account_id=i.account_id AND s.store_id=i.store_id AND s.status='active'
+      WHERE i.account_id=$1 AND i.store_id=$2 AND i.accepted_by_user_id=$3 AND i.status='accepted' LIMIT 1`,[scope.accountId,scope.storeId,row.accepted_by_user_id]);
+   if(!remaining.rowCount)await c.query(`UPDATE platform_delegated_module_grants_01613c4 SET marketplace_tier='none',messenger_tier='none',updated_at=now() WHERE account_id=$1 AND store_id=$2 AND user_id=$3`,[scope.accountId,scope.storeId,row.accepted_by_user_id]);
+  }
   await audit(c,scope,actor,'site.invite.revoke',id,{siteId:row.site_id});
   return {ok:true,stage:'01613C'};
  });
@@ -117,11 +126,20 @@ export async function acceptSiteInvite01613C(userId,token,{run=defaultRun}={}){
 
 // Strict per-store boundary for memberships created solely by a site invitation.
 // This blocks all legacy Marketplace/CRM/Admin/Media APIs until separately audited.
-export async function assertSiteOnlyBoundary01613C(scope,userId,parts,{run=defaultRun}={}){
+export async function assertSiteOnlyBoundary01613C(scope,userId,parts,{run=defaultRun,method='GET'}={}){
  if(!scope?.accountId||!scope.storeId||!clean(userId)||scope.role==='owner')return;
  const isSite=['sites','site-revisions'].includes(parts?.[2]);
+ // Self-scoped session/permission reads are required to render a delegated editor.
+ const selfRead=method==='GET'&&parts?.length===4&&((parts[2]==='access'&&['my-navigation','my-permissions'].includes(parts[3]))||(parts[2]==='auth'&&parts[3]==='session'));
  const isCollab=parts?.[2]==='collaboration'&&parts?.[3]==='accept';
- if(isSite||isCollab)return;
+ if(isSite||isCollab||selfRead)return;
  const marked=await run(c=>c.query(`SELECT 1 FROM platform_site_collaboration_only_01613c WHERE account_id=$1 AND store_id=$2 AND user_id=$3`,[scope.accountId,scope.storeId,userId]));
- if(marked.rowCount)throw fail('ST_SITE_COLLAB_RESOURCE_DENIED_01613C',403);
+ if(!marked.rowCount)return;
+ // 01613C4 · Only expressly delegated, classified Marketplace/Inbox actions
+ // can cross the site-only fence. All other APIs stay denied.
+ if(['marketplace','notifications'].includes(parts?.[2])){
+  const levels=await currentDelegatedModules01613C4(scope,userId,{run});
+  if(moduleRouteAllowed01613C4(method,parts,levels))return;
+ }
+ throw fail('ST_SITE_COLLAB_RESOURCE_DENIED_01613C',403);
 }
