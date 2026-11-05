@@ -29,6 +29,13 @@ export function assertOnlineSiteAccess01613B(scope,decision,method,parts){
   // cannot be delegated by a generic editor role. Personal-site owners operate
   // with role=owner in their own tenant/workspace, not a borrowed store.
   const action=classifySiteAction01606E(verb,parts);
+  if(parts[4]==='test'){
+    const allowed=verb==='POST'&&(
+      parts.length===5 || (parts.length===7&&['preview','submit'].includes(parts[6])));
+    if(!allowed)throw deny('ST_TEST_ACTION_DENIED_01613D','site.publish.execute');
+    if(!permissions.has('site.pages.edit'))throw deny('ST_TEST_EDIT_REQUIRED_01613D','site.pages.edit');
+    return true;
+  }
   if(parts.length===3||verb==='DELETE'&&parts.length===4||
      parts[4]==='publish'&&verb==='POST'||
      parts[4]==='revisions'&&parts[6]==='publish'&&verb==='POST'){

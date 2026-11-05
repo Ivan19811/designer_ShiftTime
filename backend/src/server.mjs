@@ -120,6 +120,7 @@ import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema0
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
+import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
@@ -459,7 +460,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   // 01613B · Dedicated multi-user online site boundary. Denials happen before
   // project JSON, Canvas actions or Netlify publishing packages are read.
   if(isOnlineSiteRoute01613B(p)){
-    try{assertOnlineSiteAccess01613B(scope,protectedDecision01600,req.method,p);}
+    try{assertOnlineSiteAccess01613B(scope,protectedDecision01600,req.method,p);
+      assertNoOriginalWrite01613D(scope,p,req.method);}
     catch(error){
       if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{
         permission:error.permission||auditedAction01605?.permission||'site.pages.view',
@@ -791,7 +793,24 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[4]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
     return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
   }
-  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null)});
+  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null,undefined,scope.role==='owner'?'':session.userId)});
+  // 01613D: all test branches are server scoped; the manager cannot see
+  // or change another manager's revision, nor edit original site project JSON.
+  if(p[2]==='sites'&&p[3]&&p[4]==='test'){
+    const siteId=p[3],testId=p[5]||'',action=p[6]||'';
+    if(req.method==='GET'&&p.length===5)return sendJson(res,200,await listSiteTests01613D(scope,session.userId,siteId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===5)return sendJson(res,201,await createSiteTest01613D(scope,session.userId,siteId));
+    if(req.method==='POST'&&p.length===7&&action==='preview')return sendJson(res,202,await previewSiteTest01613D(scope,session.userId,siteId,testId,await readSitePublishingJson01609C(req)));
+    if(req.method==='POST'&&p.length===7&&action==='submit')return sendJson(res,200,await submitSiteTest01613D(scope,session.userId,siteId,testId));
+    if(req.method==='POST'&&p.length===7&&action==='promote')return sendJson(res,200,await promoteSiteTest01613D(scope,session.userId,siteId,testId));
+    return sendJson(res,404,{error:'ST_TEST_ROUTE_NOT_FOUND_01613D'});
+  }
+  if(scope.role!=='owner'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'){
+    // Only dedicated POST /test creates a delegated editable copy.
+    if(req.method==='POST'&&(p.length===5||(p.length===6&&p[5]==='from-source')))
+      throw Object.assign(new Error('ST_TEST_DRAFT_CREATE_ONLY_01613D'),{code:'ST_TEST_DRAFT_CREATE_ONLY_01613D',statusCode:403});
+    if(p[5]&&p[5]!=='from-source')await requireSiteTestRevisionAccess01613D(scope,session.userId,p[3],p[5],{write:req.method!=='GET'});
+  }
   // 01606F · Atomic Main Canvas edits. 01600 checks site.pages.edit and tenant
   // membership before reading payload; this secondary gate checks each action.
   if(classifyCanvasRoute01606F(req.method,p)){
@@ -829,7 +848,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
-    if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
+    if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId,null,undefined,scope.role==='owner'?'':session.userId)});
     if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId)});
     if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}

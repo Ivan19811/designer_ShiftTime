@@ -74,11 +74,11 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     throw lastError;
   }
   async function deployZip({siteId,zip}={}){if(!clean(siteId))throw Object.assign(new Error('Netlify site id is required'),{statusCode:400});if(!Buffer.isBuffer(zip))throw Object.assign(new Error('ZIP buffer is required'),{statusCode:400});return request(`/sites/${encodeURIComponent(clean(siteId))}/deploys`,{method:'POST',headers:{'content-type':'application/zip'},body:zip});}
-  async function deployFiles({siteId,files}={}){
+  async function deployFiles({siteId,files,draft=false}={}){
     const sid=clean(siteId);if(!sid)throw Object.assign(new Error('Netlify site id is required'),{statusCode:400});
     const entries=normalizeDeployFiles(files),manifest={};
     for(const entry of entries)manifest[`/${entry.path}`]=entry.sha;
-    const deploy=await request(`/sites/${encodeURIComponent(sid)}/deploys`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({files:manifest})});
+    const deploy=await request(`/sites/${encodeURIComponent(sid)}/deploys`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({files:manifest,...(draft===true?{draft:true}:{})})});
     const deployId=clean(deploy?.id);if(!deployId)throw Object.assign(new Error('Netlify deploy id is missing'),{statusCode:502,code:'ST_NETLIFY_DEPLOY_INVALID'});
     const required=new Set(Array.isArray(deploy?.required)?deploy.required.map(clean).filter(Boolean):[]);
     if(required.size){
@@ -89,6 +89,10 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     return deploy;
   }
   async function getDeploy({deployId}={}){if(!clean(deployId))throw Object.assign(new Error('Netlify deploy id is required'),{statusCode:400});return request(`/deploys/${encodeURIComponent(clean(deployId))}`,{method:'GET'});}
+  async function restoreSiteDeploy({siteId,deployId}={}){
+    const sid=clean(siteId),did=clean(deployId);if(!sid||!did)throw Object.assign(new Error('Netlify deploy identifiers are required'),{statusCode:400});
+    return request(`/sites/${encodeURIComponent(sid)}/deploys/${encodeURIComponent(did)}/restore`,{method:'POST'});
+  }
   async function deleteSite({siteId}={}){
     const sid=clean(siteId);if(!sid)throw Object.assign(new Error('Netlify site id is required'),{statusCode:400});
     try{await request(`/sites/${encodeURIComponent(sid)}`,{method:'DELETE'});return {deleted:true,alreadyMissing:false};}
@@ -100,5 +104,5 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     if(!filePath||filePath.includes('?')||filePath.includes('#'))throw Object.assign(new Error('Netlify file path is required'),{statusCode:400});
     return request(`/sites/${encodeURIComponent(sid)}/files/${encodeURIComponent(filePath)}`,{method:'GET'});
   }
-  return {createSite,createSiteWithSafeName,deployZip,deployFiles,getDeploy,getSiteFile,deleteSite};
+  return {createSite,createSiteWithSafeName,deployZip,deployFiles,getDeploy,restoreSiteDeploy,getSiteFile,deleteSite};
 }

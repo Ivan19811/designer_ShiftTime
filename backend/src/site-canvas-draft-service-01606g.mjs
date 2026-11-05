@@ -35,6 +35,8 @@ export function createDraftCanvasService01606G({run=null}={}){
            WHERE site_id=$3 AND id=$4 AND kind='draft' RETURNING id`,
            [JSON.stringify(applied.project),userId,siteId,revisionId]);
         if(!updated.rowCount)throw err('ST_CANVAS_DRAFT_NOT_FOUND_01606G',404);
+        await client.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
+          WHERE revision_id=$1 AND site_id=$2`,[revisionId,siteId]);
         await client.query('COMMIT');
         return {stage:'01606G',siteId,revisionId,pageId:applied.pageId,
           fingerprint:draftFingerprint01606G(applied.project),snapshot:applied.snapshot,

@@ -15,12 +15,18 @@ async function assertSite(c,scope,siteId){const q=await c.query(`SELECT s.id,p.p
 function revisionId(){return `rev_${crypto.randomUUID().replaceAll('-','')}`;}
 function smallestFreeSlot(rows){const used=new Set(rows.map(r=>Number(r.slot||0)).filter(n=>n>=1&&n<=MAX_DRAFTS_01231));for(let i=1;i<=MAX_DRAFTS_01231;i++)if(!used.has(i))return i;return 0;}
 
-export async function listSiteRevisions01231(scope,siteId='',allowedSiteIds=null,run=withClient){
+export async function listSiteRevisions01231(scope,siteId='',allowedSiteIds=null,run=withClient,userId=''){
   // 01605E: Store-scoped roles can list revisions normally. Site-scoped roles
   // must never enumerate revisions belonging to other sites in the same Store.
   if(Array.isArray(allowedSiteIds)&&allowedSiteIds.length===0)return [];
   return run(async c=>{const params=[scope.accountId,scope.workspaceId,scope.storeId];let where=`s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND r.kind IN ('draft','published')`;if(clean(siteId)){params.push(clean(siteId));where+=` AND s.id=$${params.length}`;}
     if(Array.isArray(allowedSiteIds)){params.push([...new Set(allowedSiteIds.filter(v=>typeof v==='string'&&v.length>0))]);where+=` AND s.id=ANY($${params.length}::text[])`;}
+    if(clean(userId)){
+      params.push(clean(userId));
+      where+=` AND (r.kind='published' OR (r.created_by_user_id=$${params.length} AND EXISTS (
+        SELECT 1 FROM shifttime_site_test_branches_01613d b WHERE b.revision_id=r.id AND b.author_user_id=$${params.length}
+          AND b.account_id=s.account_id AND b.store_id=s.store_id)))`;
+    }
     const q=await c.query(`SELECT r.* FROM shifttime_builder_site_revisions r JOIN shifttime_builder_sites s ON s.id=r.site_id WHERE ${where} ORDER BY r.site_id, CASE WHEN r.kind='published' THEN 0 ELSE 1 END, r.slot, r.updated_at DESC`,params);return q.rows.map(r=>mapRow(r));});
 }
 
@@ -37,7 +43,10 @@ export async function createSiteDraft01231(scope,userId,siteId,input={}){
 }
 
 export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,input={}){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+      await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
+        WHERE revision_id=$1 AND site_id=$2`,[rid,sid]);
+      await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 
