@@ -4,23 +4,27 @@ import fs from 'node:fs';
 
 const read=(path)=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const migration=read('sql/022_site_revision_workspaces.sql');
+const expansion=read('sql/073_unlimited_drafts_01613d3.sql');
 const service=read('src/site-revisions-01231.mjs');
 const server=read('src/server.mjs');
 const builderSites=read('src/builder-sites-service-01170.mjs');
 
-test('01231 revision schema has one published row and five isolated draft slots per site',()=>{
+test('01613D3 retains published isolation and expands draft slots',()=>{
   assert.match(migration,/kind IN \('draft','published','archived'\)/);
-  assert.match(migration,/slot BETWEEN 0 AND 5/);
+  assert.match(migration,/slot BETWEEN 0 AND 5/); // historical schema remains immutable
+  assert.match(expansion,/DROP CONSTRAINT IF EXISTS shifttime_builder_site_revisions_slot_check/);
+  assert.match(expansion,/ALTER COLUMN slot TYPE integer/);
+  assert.match(expansion,/CHECK \(slot >= 0\)/);
   assert.match(migration,/uq_shifttime_site_revision_draft_slot_01231/);
   assert.match(migration,/WHERE kind='draft'/);
   assert.match(migration,/uq_shifttime_site_revision_published_01231/);
   assert.match(migration,/WHERE kind='published'/);
 });
 
-test('01231 revision service enforces the five-draft limit server-side and promotes atomically',()=>{
-  assert.match(service,/MAX_DRAFTS_01231=5/);
+test('01613D3 revision service allocates unlimited positive slots and promotes atomically',()=>{
+  assert.match(service,/nextFreeDraftSlot01613D3/);
   assert.match(service,/pg_advisory_xact_lock/);
-  assert.match(service,/ST_SITE_REVISION_LIMIT/);
+  assert.doesNotMatch(service,/ST_SITE_REVISION_LIMIT/);
   assert.match(service,/UPDATE shifttime_builder_site_revisions SET kind='archived'/);
   assert.match(service,/SET kind='published',slot=0,dirty=false/);
 });

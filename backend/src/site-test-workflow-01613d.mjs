@@ -2,6 +2,7 @@
 // No manager operation writes to the primary site project or published deploy record.
 import {withClient} from './db.mjs';
 import {chooseOriginalSource01613D2} from './site-test-source-01613d2.mjs';
+import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {config} from './config.mjs';
 import {createNetlifyClient01143} from './netlify-client-01143.mjs';
 import {buildProductionFiles01143} from './site-production-build-01143.mjs';
@@ -57,19 +58,46 @@ export async function createSiteTest01613D(scope,userId,siteId){
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
   const source=await loadOriginalSource01613D2(c,site);
   if(source.sourceKind!=='published')throw siteTestError01613D('ST_TEST_CANONICAL_PUBLISHED_REQUIRED_01613D2',409);
-  const drafts=await c.query(`SELECT slot FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='draft' FOR UPDATE`,[siteId]);
-  const used=new Set(drafts.rows.map(x=>Number(x.slot)));
-  let slot=0;for(let n=1;n<=5;n++)if(!used.has(n)){slot=n;break;}
-  if(!slot)throw siteTestError01613D('ST_TEST_DRAFT_LIMIT_01613D',409);
-  const rid=newRevisionId01613D(),bid=newTestId01613D();
+  // Replacing a manager's existing editable copy is atomic: preserve the old
+  // revision as an archive and reuse the same test branch + slot. This is NOT
+  // allowed for copies submitted for review or already published.
+  const reusable=await c.query(`SELECT b.id,b.revision_id,r.slot
+    FROM shifttime_site_test_branches_01613d b
+    JOIN shifttime_builder_site_revisions r ON r.id=b.revision_id AND r.site_id=b.site_id
+    WHERE b.site_id=$1 AND b.account_id=$2 AND b.workspace_id=$3 AND b.store_id=$4
+      AND b.author_user_id=$5 AND b.state IN ('editing','preview') AND r.kind='draft'
+    ORDER BY b.updated_at DESC,b.id DESC LIMIT 1 FOR UPDATE OF b,r`,
+    [siteId,scope.accountId,scope.workspaceId,scope.storeId,userId]);
+  const previous=reusable.rows[0]||null;
+  let slot;
+  if(previous){
+    slot=Number(previous.slot);
+    if(!Number.isInteger(slot)||slot<1)throw siteTestError01613D('ST_TEST_RESET_SLOT_INVALID_01613D2',409);
+    await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now()
+      WHERE id=$1 AND site_id=$2 AND kind='draft'`,[previous.revision_id,siteId]);
+  }else{
+    const drafts=await c.query(`SELECT slot FROM shifttime_builder_site_revisions
+      WHERE site_id=$1 AND kind='draft' FOR UPDATE`,[siteId]);
+    slot=nextFreeDraftSlot01613D3(drafts.rows);
+  }
+  const rid=newRevisionId01613D(),bid=previous?.id||newTestId01613D();
   const revision=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id)
    VALUES($1,$2,'draft',$3,$4,$5,$6::jsonb,false,$7,$8,$8) RETURNING id`,
    [rid,siteId,slot,`ShiftTime Test · ${site.name}`,source.schemaVersion||'01170',JSON.stringify(source.project),source.sourceRevisionId||null,userId]);
   if(!revision.rowCount)throw siteTestError01613D('ST_TEST_CREATE_FAILED_01613D',500);
-  const q=await c.query(`INSERT INTO shifttime_site_test_branches_01613d(id,account_id,workspace_id,store_id,site_id,revision_id,author_user_id,base_project_revision)
-   VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-   [bid,scope.accountId,scope.workspaceId,scope.storeId,siteId,rid,userId,site.revision]);
-  return {stage:'01613D2',test:publicBranch(q.rows[0]),source:{kind:source.sourceKind,summary:source.summary}};
+  const q=previous
+   ?await c.query(`UPDATE shifttime_site_test_branches_01613d
+       SET revision_id=$2,base_project_revision=$3,state='editing',
+         preview_deploy_id=NULL,candidate_deploy_id=NULL,preview_url=NULL,preview_snapshot_sha=NULL,
+         preview_created_at=NULL,submitted_at=NULL,approved_at=NULL,approved_by_user_id=NULL,
+         updated_at=now() WHERE id=$1 AND site_id=$4 AND author_user_id=$5 RETURNING *`,
+       [bid,rid,site.revision,siteId,userId])
+   :await c.query(`INSERT INTO shifttime_site_test_branches_01613d(id,account_id,workspace_id,store_id,site_id,revision_id,author_user_id,base_project_revision)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+       [bid,scope.accountId,scope.workspaceId,scope.storeId,siteId,rid,userId,site.revision]);
+  if(!q.rowCount)throw siteTestError01613D('ST_TEST_CREATE_FAILED_01613D',500);
+  return {stage:'01613D3',test:publicBranch(q.rows[0]),source:{kind:source.sourceKind,summary:source.summary},
+    replacedRevisionId:previous?.revision_id||null};
  });
 }
 // An existing copy can be safely restarted from the canonical source. The old
@@ -84,7 +112,7 @@ export async function resetSiteTest01613D2(scope,userId,siteId,branchId){
   const source=await loadOriginalSource01613D2(c,site);
   if(source.sourceKind!=='published')throw siteTestError01613D('ST_TEST_CANONICAL_PUBLISHED_REQUIRED_01613D2',409);
   const slot=Number(b.slot);
-  if(!Number.isInteger(slot)||slot<1||slot>5)throw siteTestError01613D('ST_TEST_RESET_SLOT_INVALID_01613D2',409);
+  if(!Number.isInteger(slot)||slot<1)throw siteTestError01613D('ST_TEST_RESET_SLOT_INVALID_01613D2',409);
   await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE id=$1 AND site_id=$2 AND kind='draft'`,[b.revision_id,siteId]);
   const rid=newRevisionId01613D();
   await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id)
