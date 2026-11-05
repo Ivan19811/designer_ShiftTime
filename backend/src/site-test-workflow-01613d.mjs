@@ -1,6 +1,7 @@
 // 01613D · Server-owned test copies, visual-only Netlify draft previews and owner promotion.
 // No manager operation writes to the primary site project or published deploy record.
 import {withClient} from './db.mjs';
+import {chooseOriginalSource01613D2} from './site-test-source-01613d2.mjs';
 import {config} from './config.mjs';
 import {createNetlifyClient01143} from './netlify-client-01143.mjs';
 import {buildProductionFiles01143} from './site-production-build-01143.mjs';
@@ -19,7 +20,7 @@ const existing=async(c,scope,siteId)=>{
  return q.rows[0];
 };
 const queryBranch=async(c,scope,siteId,branchId,{lock=false}={})=>{
- const q=await c.query(`SELECT b.*,r.project_json,r.schema_version,r.kind revision_kind
+ const q=await c.query(`SELECT b.*,r.project_json,r.schema_version,r.kind revision_kind,r.slot
  FROM shifttime_site_test_branches_01613d b
  JOIN shifttime_builder_site_revisions r ON r.id=b.revision_id AND r.site_id=b.site_id
  WHERE b.id=$1 AND b.site_id=$2 AND b.account_id=$3 AND b.workspace_id=$4 AND b.store_id=$5 ${lock?'FOR UPDATE OF b,r':''}`,
@@ -37,36 +38,63 @@ export async function listSiteTests01613D(scope,userId,siteId){
    WHERE account_id=$1 AND workspace_id=$2 AND store_id=$3 AND site_id=$4
    AND ($5::boolean OR author_user_id=$6) ORDER BY created_at DESC LIMIT 30`,
    [scope.accountId,scope.workspaceId,scope.storeId,siteId,scope.role==='owner',userId]);
-  return {stage:'01613D',tests:q.rows.map(publicBranch)};
+  const source=await loadOriginalSource01613D2(c,await existing(c,scope,siteId)).catch(()=>null);
+  return {stage:'01613D2',tests:q.rows.map(publicBranch),source:source?{kind:source.sourceKind,summary:source.summary}:null};
  });
+}
+async function loadOriginalSource01613D2(c,site){
+ const published=await c.query(`SELECT id,project_json,schema_version FROM shifttime_builder_site_revisions
+   WHERE site_id=$1 AND kind='published' ORDER BY published_at DESC NULLS LAST,updated_at DESC LIMIT 1`,[site.id]);
+ const row=published.rows[0]||{};
+ const selected=chooseOriginalSource01613D2({siteProject:site.project_json,publishedProject:row.project_json,
+   siteId:site.id,siteSchema:site.schema_version,publishedSchema:row.schema_version,publishedRevisionId:row.id});
+ if(!selected)throw siteTestError01613D('ST_TEST_ORIGINAL_CONTENT_MISSING_01613D',409);
+ return selected;
 }
 export async function createSiteTest01613D(scope,userId,siteId){
  return tx(async c=>{
   const site=await existing(c,scope,siteId);
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
-  // A published revision may hold the complete Canvas when the legacy main
-  // project record is only metadata. Never create a blank delegated clone.
-  const published=await c.query(`SELECT project_json,schema_version FROM shifttime_builder_site_revisions
-    WHERE site_id=$1 AND kind='published' ORDER BY published_at DESC NULLS LAST,updated_at DESC LIMIT 1`,[siteId]);
-  const fullProject=value=>value&&typeof value==='object'&&!Array.isArray(value)&&
-    value.site&&typeof value.site==='object'&&Array.isArray(value.site.pages)&&value.site.pages.length>0;
-  const original=fullProject(site.project_json)?site.project_json:
-    (fullProject(published.rows[0]?.project_json)?published.rows[0].project_json:null);
-  if(!original)throw siteTestError01613D('ST_TEST_ORIGINAL_CONTENT_MISSING_01613D',409);
-  const originalSchema=original===site.project_json?site.schema_version:published.rows[0]?.schema_version;
+  const source=await loadOriginalSource01613D2(c,site);
+  if(source.sourceKind!=='published')throw siteTestError01613D('ST_TEST_CANONICAL_PUBLISHED_REQUIRED_01613D2',409);
   const drafts=await c.query(`SELECT slot FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='draft' FOR UPDATE`,[siteId]);
   const used=new Set(drafts.rows.map(x=>Number(x.slot)));
   let slot=0;for(let n=1;n<=5;n++)if(!used.has(n)){slot=n;break;}
   if(!slot)throw siteTestError01613D('ST_TEST_DRAFT_LIMIT_01613D',409);
   const rid=newRevisionId01613D(),bid=newTestId01613D();
-  const revision=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,schema_version,project_json,dirty,created_by_user_id,updated_by_user_id)
-   VALUES($1,$2,'draft',$3,$4,$5,$6::jsonb,false,$7,$7) RETURNING id`,
-   [rid,siteId,slot,`ShiftTime Test · ${site.name}`,originalSchema||'01170',JSON.stringify(original),userId]);
+  const revision=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id)
+   VALUES($1,$2,'draft',$3,$4,$5,$6::jsonb,false,$7,$8,$8) RETURNING id`,
+   [rid,siteId,slot,`ShiftTime Test · ${site.name}`,source.schemaVersion||'01170',JSON.stringify(source.project),source.sourceRevisionId||null,userId]);
   if(!revision.rowCount)throw siteTestError01613D('ST_TEST_CREATE_FAILED_01613D',500);
   const q=await c.query(`INSERT INTO shifttime_site_test_branches_01613d(id,account_id,workspace_id,store_id,site_id,revision_id,author_user_id,base_project_revision)
    VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
    [bid,scope.accountId,scope.workspaceId,scope.storeId,siteId,rid,userId,site.revision]);
-  return {stage:'01613D',test:publicBranch(q.rows[0])};
+  return {stage:'01613D2',test:publicBranch(q.rows[0]),source:{kind:source.sourceKind,summary:source.summary}};
+ });
+}
+// An existing copy can be safely restarted from the canonical source. The old
+// draft is ARCHIVED, not overwritten or deleted, for forensic recovery.
+export async function resetSiteTest01613D2(scope,userId,siteId,branchId){
+ return tx(async c=>{
+  await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
+  const site=await existing(c,scope,siteId);
+  const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
+  assertTestActor01613D(scope,userId,b,{write:true});
+  if(!['editing','preview'].includes(b.state))throw siteTestError01613D('ST_TEST_RESET_STATE_DENIED_01613D2',409);
+  const source=await loadOriginalSource01613D2(c,site);
+  if(source.sourceKind!=='published')throw siteTestError01613D('ST_TEST_CANONICAL_PUBLISHED_REQUIRED_01613D2',409);
+  const slot=Number(b.slot);
+  if(!Number.isInteger(slot)||slot<1||slot>5)throw siteTestError01613D('ST_TEST_RESET_SLOT_INVALID_01613D2',409);
+  await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE id=$1 AND site_id=$2 AND kind='draft'`,[b.revision_id,siteId]);
+  const rid=newRevisionId01613D();
+  await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id)
+    VALUES($1,$2,'draft',$3,$4,$5,$6::jsonb,false,$7,$8,$8)`,
+    [rid,siteId,slot,`ShiftTime Test · ${site.name}`,source.schemaVersion||'01170',JSON.stringify(source.project),source.sourceRevisionId,userId]);
+  const q=await c.query(`UPDATE shifttime_site_test_branches_01613d SET revision_id=$2,base_project_revision=$3,state='editing',
+   preview_deploy_id=NULL,candidate_deploy_id=NULL,preview_url=NULL,preview_snapshot_sha=NULL,preview_created_at=NULL,
+   submitted_at=NULL,approved_at=NULL,approved_by_user_id=NULL,updated_at=now() WHERE id=$1 RETURNING *`,
+   [branchId,rid,site.revision]);
+  return {stage:'01613D2',test:publicBranch(q.rows[0]),source:{kind:source.sourceKind,summary:source.summary},archivedRevisionId:b.revision_id};
  });
 }
 export async function requireSiteTestRevisionAccess01613D(scope,userId,siteId,revisionId,{write=false}={}){
