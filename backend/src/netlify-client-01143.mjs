@@ -80,6 +80,12 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     for(const entry of entries)manifest[`/${entry.path}`]=entry.sha;
     const deploy=await request(`/sites/${encodeURIComponent(sid)}/deploys`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({files:manifest,...(draft===true?{draft:true}:{})})});
     const deployId=clean(deploy?.id);if(!deployId)throw Object.assign(new Error('Netlify deploy id is missing'),{statusCode:502,code:'ST_NETLIFY_DEPLOY_INVALID'});
+    // 01614B: NEVER upload files into the original Netlify site until the API
+    // confirms a deploy is a draft. A missing flag is not proof of a draft.
+    if(draft===true){
+      const checked=deploy.draft===true?deploy:await getDeploy({deployId});
+      if(checked.draft!==true)throw Object.assign(new Error('NETLIFY_DRAFT_NOT_CONFIRMED_01614B'),{code:'ST_TEST_NETLIFY_NOT_DRAFT_01613D',statusCode:502,netlifyDraft:checked.draft});
+    }
     const required=new Set(Array.isArray(deploy?.required)?deploy.required.map(clean).filter(Boolean):[]);
     if(required.size){
       const firstBySha=new Map();for(const entry of entries)if(!firstBySha.has(entry.sha))firstBySha.set(entry.sha,entry);

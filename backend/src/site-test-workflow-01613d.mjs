@@ -1,6 +1,7 @@
 // 01613D · Server-owned test copies, visual-only Netlify draft previews and owner promotion.
 // No manager operation writes to the primary site project or published deploy record.
 import {withClient} from './db.mjs';
+import {compareSiteTestProjects01614B} from './site-test-compare-01614b.mjs';
 import {chooseOriginalSource01613D2} from './site-test-source-01613d2.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {config} from './config.mjs';
@@ -29,7 +30,7 @@ const queryBranch=async(c,scope,siteId,branchId,{lock=false}={})=>{
  if(!q.rowCount)throw siteTestError01613D('ST_TEST_NOT_FOUND_01613D',404);
  return q.rows[0];
 };
-const publicBranch=b=>({id:b.id,siteId:b.site_id,revisionId:b.revision_id,authorUserId:b.author_user_id,baseProjectRevision:Number(b.base_project_revision),state:b.state,previewUrl:b.preview_url||'',previewDeployId:b.preview_deploy_id||'',previewCreatedAt:b.preview_created_at||null,submittedAt:b.submitted_at||null,approvedAt:b.approved_at||null,publishedAt:b.published_at||null,createdAt:b.created_at||null,updatedAt:b.updated_at||null});
+const publicBranch=b=>({id:b.id,siteId:b.site_id,revisionId:b.revision_id,authorUserId:b.author_user_id,baseProjectRevision:Number(b.base_project_revision),state:b.state,previewUrl:b.preview_url||'',previewDeployId:b.preview_deploy_id||'',previewCreatedAt:b.preview_created_at||null,previewMode:b.preview_netlify_site_id?'isolated':'draft',candidateReady:Boolean(b.candidate_deploy_id),submittedAt:b.submitted_at||null,approvedAt:b.approved_at||null,publishedAt:b.published_at||null,createdAt:b.created_at||null,updatedAt:b.updated_at||null});
 const tx=async fn=>withClient(async c=>{await c.query('BEGIN');try{const r=await fn(c);await c.query('COMMIT');return r;}catch(e){await c.query('ROLLBACK').catch(()=>{});throw e;}});
 
 export async function listSiteTests01613D(scope,userId,siteId){
@@ -51,6 +52,15 @@ async function loadOriginalSource01613D2(c,site){
    siteId:site.id,siteSchema:site.schema_version,publishedSchema:row.schema_version,publishedRevisionId:row.id});
  if(!selected)throw siteTestError01613D('ST_TEST_ORIGINAL_CONTENT_MISSING_01613D',409);
  return selected;
+}
+export async function compareSiteTest01614B(scope,userId,siteId,branchId){
+ return withClient(async c=>{
+  const site=await existing(c,scope,siteId),b=await queryBranch(c,scope,siteId,branchId);
+  assertTestActor01613D(scope,userId,b);
+  if(b.revision_kind!=='draft'&&b.state!=='published')throw siteTestError01613D('ST_TEST_REVISION_INVALID_01613D',409);
+  const source=await loadOriginalSource01613D2(c,site);
+  return {testId:branchId,...compareSiteTestProjects01614B(source.project,b.project_json)};
+ });
 }
 export async function createSiteTest01613D(scope,userId,siteId){
  return tx(async c=>{
@@ -155,7 +165,7 @@ export async function previewSiteTest01613D(scope,userId,siteId,branchId,input,{
  const entry=await tx(async c=>{
   const site=await existing(c,scope,siteId),b=await queryBranch(c,scope,siteId,branchId,{lock:true});
   assertTestActor01613D(scope,userId,b,{write:true});
-  if(!['editing','preview','in_review'].includes(b.state))throw siteTestError01613D('ST_TEST_BUSY_01613D',409);
+  if(!['editing','preview'].includes(b.state))throw siteTestError01613D('ST_TEST_BUSY_01613D',409);
   if(!clean(site.netlify_site_id))throw siteTestError01613D('ST_TEST_PUBLISH_ORIGINAL_FIRST_01613D',409);
   if(b.revision_kind!=='draft')throw siteTestError01613D('ST_TEST_REVISION_INVALID_01613D',409);
   if(projectSha01613D(project)!==projectSha01613D(b.project_json))throw siteTestError01613D('ST_TEST_UNSAVED_OR_CHANGED_01613D',409);
@@ -169,17 +179,43 @@ export async function previewSiteTest01613D(scope,userId,siteId,branchId,input,{
   const files=buildFiles(pkg,{canonicalBaseUrl:origin,apiProxyTarget:config.publicApiBaseUrl,
     publishedSiteIdentity:{siteId,token:entry.site.traffic_identity_token||''},aiConsultantPublicConfig:aiConfig});
   if(!(files instanceof Map)||!files.has('index.html'))throw siteTestError01613D('ST_TEST_BUILD_INVALID_01613D',400);
-  // Prepare two draft deploys, NEVER a production deploy:
-  // (1) safe visual preview (API disabled), (2) unchanged production candidate,
-  // whose unshared deploy id is only used after owner approval.
-  const preview=assertDraftDeploy01613D(await netlify.deployFiles({siteId:entry.site.netlify_site_id,files:previewModeFiles01613D(files),draft:true}));
-  const candidate=assertDraftDeploy01613D(await netlify.deployFiles({siteId:entry.site.netlify_site_id,files,draft:true}));
-  const link=previewPermalink01613D(preview);
+  // 01614B: visual previews go to an entirely SEPARATE Netlify site.
+  // Even if Netlify ignores a draft flag, the original LIVE site cannot change.
+  const found=await withClient(c=>queryBranch(c,scope,siteId,branchId));
+  let isolatedId=clean(found.preview_netlify_site_id);
+  if(!isolatedId){
+    const created=await netlify.createSiteWithSafeName({preferredName:`shifttime-test-${siteId.slice(-12)}-${branchId.slice(-8)}`});
+    isolatedId=clean(created?.id);
+    if(!isolatedId||isolatedId===clean(entry.site.netlify_site_id))throw siteTestError01613D('ST_TEST_ISOLATED_SITE_REQUIRED_01614B',502);
+    await withClient(c=>c.query(`UPDATE shifttime_site_test_branches_01613d SET preview_netlify_site_id=$2 WHERE id=$1 AND preview_netlify_site_id IS NULL`,[branchId,isolatedId]));
+  }
+  if(isolatedId===clean(entry.site.netlify_site_id))throw siteTestError01613D('ST_TEST_ISOLATED_SITE_REQUIRED_01614B',502);
+  // Never put a production site's telemetry identity into a public test origin.
+  const isolatedFiles=buildFiles(pkg,{canonicalBaseUrl:origin,apiProxyTarget:config.publicApiBaseUrl,
+    publishedSiteIdentity:{siteId,token:''},aiConsultantPublicConfig:null});
+  const preview=await netlify.deployFiles({siteId:isolatedId,files:previewModeFiles01613D(isolatedFiles),draft:false});
+  if(!clean(preview?.id))throw siteTestError01613D('ST_TEST_PREVIEW_LINK_MISSING_01613D',502);
+  // Netlify can return 'prepared' / 'uploading' before a deploy is publicly ready.
+  let verifiedPreview;
+  for(let attempt=0;attempt<14;attempt++){
+    verifiedPreview=await netlify.getDeploy({deployId:preview.id});
+    if(clean(verifiedPreview?.state)==='ready')break;
+    if(['error','failed'].includes(clean(verifiedPreview?.state)))throw siteTestError01613D('ST_TEST_PREVIEW_NOT_READY_01614B',502);
+    if(attempt<13)await new Promise(resolve=>setTimeout(resolve,1100));
+  }
+  if(clean(verifiedPreview?.state)!=='ready')throw siteTestError01613D('ST_TEST_PREVIEW_NOT_READY_01614B',503);
+  if(clean(verifiedPreview.site_id)!==isolatedId)throw siteTestError01613D('ST_TEST_ISOLATED_SITE_REQUIRED_01614B',502);
+  const link=clean(verifiedPreview.deploy_ssl_url||verifiedPreview.deploy_url||verifiedPreview.ssl_url||verifiedPreview.url);
+  if(!/^https:\/\//i.test(link))throw siteTestError01613D('ST_TEST_PREVIEW_LINK_MISSING_01613D',502);
+  // 01614B intentionally does not create ANY deploy on the production Netlify site.
+  // Owner promotion remains blocked (candidate_deploy_id=NULL) until 01614C
+  // can generate a trusted candidate from the server-side saved project.
+  const candidateId=null;
   const result=await tx(async c=>{
    const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
    if(b.state!=='processing'||projectSha01613D(b.project_json)!==entry.sha)throw siteTestError01613D('ST_TEST_CONCURRENT_EDIT_01613D',409);
    const q=await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='preview',preview_deploy_id=$2,candidate_deploy_id=$3,preview_url=$4,preview_snapshot_sha=$5,preview_created_at=now(),submitted_at=NULL,approved_at=NULL,approved_by_user_id=NULL,updated_at=now() WHERE id=$1 RETURNING *`,
-     [branchId,preview.id,candidate.id,link,entry.sha]);
+     [branchId,preview.id,candidateId,link,entry.sha]);
    return publicBranch(q.rows[0]);
   });
   return {stage:'01613D',test:result};
@@ -192,7 +228,7 @@ export async function submitSiteTest01613D(scope,userId,siteId,branchId){
  return tx(async c=>{
   const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
   assertTestActor01613D(scope,userId,b,{write:true});
-  if(b.state!=='preview'||!b.preview_deploy_id||!b.candidate_deploy_id||projectSha01613D(b.project_json)!==b.preview_snapshot_sha)
+  if(b.state!=='preview'||!b.preview_deploy_id||projectSha01613D(b.project_json)!==b.preview_snapshot_sha)
    throw siteTestError01613D('ST_TEST_PREVIEW_REQUIRED_01613D',409);
   const q=await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='in_review',submitted_at=now(),updated_at=now() WHERE id=$1 RETURNING *`,[branchId]);
   return {stage:'01613D',test:publicBranch(q.rows[0])};

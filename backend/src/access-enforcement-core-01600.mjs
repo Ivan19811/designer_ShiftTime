@@ -20,6 +20,7 @@ export function classifyProtectedAction01600(method,parts){
     // 01613D: explicit test workflow routes; no permission to alter the original.
     if(p[4]==='test'){
       if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===7&&p[6]==='compare'&&m==='GET')return decision('site.pages.view',siteId,'read');
       if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='reset'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='preview'&&m==='POST')return decision('site.pages.edit',siteId);
