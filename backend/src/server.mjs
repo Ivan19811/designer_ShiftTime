@@ -120,6 +120,7 @@ import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema0
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
+import {saveSiteTestShell01614A} from './site-test-shell-01614a.mjs';
 import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
@@ -811,6 +812,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&(p.length===5||(p.length===6&&p[5]==='from-source')))
       throw Object.assign(new Error('ST_TEST_DRAFT_CREATE_ONLY_01613D'),{code:'ST_TEST_DRAFT_CREATE_ONLY_01613D',statusCode:403});
     if(p[5]&&p[5]!=='from-source')await requireSiteTestRevisionAccess01613D(scope,session.userId,p[3],p[5],{write:req.method!=='GET'});
+  }
+  // 01614A: strictly scoped Header/Footer edits on the actor's own test draft.
+  if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]&&p[6]==='test-shell'&&p.length===7){
+    return sendJson(res,200,await saveSiteTestShell01614A(scope,session.userId,p[3],p[5],
+      await readJson(req,{limit:3*1024*1024})),{'cache-control':'private, no-store'});
   }
   // 01606F · Atomic Main Canvas edits. 01600 checks site.pages.edit and tenant
   // membership before reading payload; this secondary gate checks each action.

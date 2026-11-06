@@ -138,7 +138,7 @@ export async function requireSiteTestRevisionAccess01613D(scope,userId,siteId,re
    return;
   }
   assertTestActor01613D(scope,userId,q.rows[0],{write});
-  if(write&&!['editing','preview','in_review'].includes(q.rows[0].state))throw siteTestError01613D('ST_TEST_DRAFT_LOCKED_01613D',409);
+  if(write&&!['editing','preview'].includes(q.rows[0].state))throw siteTestError01613D('ST_TEST_DRAFT_LOCKED_01613D',409);
  });
 }
 export function assertNoOriginalWrite01613D(scope,p,method){

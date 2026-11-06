@@ -53,6 +53,8 @@ export function assertOnlineSiteAccess01613B(scope,decision,method,parts){
   // they are the only mutating site endpoints not classified by 01606E.
   const canvas=verb==='POST'&&parts.length===5&&parts[4]==='canvas';
   const draftCanvas=verb==='POST'&&parts.length===7&&parts[4]==='revisions'&&parts[6]==='canvas';
-  if(!canvas&&!draftCanvas)throw deny('ST_ONLINE_SITE_ACTION_UNCLASSIFIED_01613B');
+  // 01614A: per-author branch + fingerprint + shell-key checks are server-enforced.
+  const testShell=verb==='POST'&&parts.length===7&&parts[4]==='revisions'&&parts[6]==='test-shell'&&permissions.has('site.pages.edit');
+  if(!canvas&&!draftCanvas&&!testShell)throw deny('ST_ONLINE_SITE_ACTION_UNCLASSIFIED_01613B');
   return true;
 }
