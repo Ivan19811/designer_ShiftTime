@@ -5,7 +5,7 @@ const make=(text)=>({site:{id:'site_a',pages:[{id:'home',title:'Головна'}
 test('01614B1: shows actual before and after text from saved Main',()=>{
  const d=compareSiteTestProjects01614B(make('СКОВОРІДКИ'),make('СКОВОРІДКИ ТЕСТОВА — Копія'));
  assert.equal(d.changedPages,1);
- assert.deepEqual(d.pageChanges[0].textChanges,[{before:'СКОВОРІДКИ',after:'СКОВОРІДКИ ТЕСТОВА — Копія'}]);
+ assert.deepEqual(d.pageChanges[0].textChanges,[{before:'СКОВОРІДКИ',after:'СКОВОРІДКИ ТЕСТОВА — Копія',nodeId:'r'}]);
 });
 test('01614B1: unchanged and non-visual source data never enter diff output',()=>{
  const original=make('OK');const edited=structuredClone(original);edited.orders=[{email:'private@example.org'}];

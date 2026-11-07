@@ -25,7 +25,7 @@ function changedTextBlocks(before,after){
  const unique=new Set();
  return out.sort((x,y)=>Math.max(x.before.length,x.after.length)-Math.max(y.before.length,y.after.length))
   .filter(x=>{const key=x.before+'\u241e'+x.after;if(unique.has(key))return false;unique.add(key);return true;})
-  .slice(0,12).map(({before,after})=>({before,after}));
+  .slice(0,12).map(({before,after,nodeId})=>({before,after,nodeId}));
 }
 function pageMap(project){const out=new Map();for(const p of project?.site?.pages||[])if(clean(p?.id))out.set(clean(p.id),p);return out;}
 export function compareSiteTestProjects01614B(original,draft){
