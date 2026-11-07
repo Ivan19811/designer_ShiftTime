@@ -30,6 +30,8 @@ export function assertOnlineSiteAccess01613B(scope,decision,method,parts){
   // with role=owner in their own tenant/workspace, not a borrowed store.
   const action=classifySiteAction01606E(verb,parts);
   if(parts[4]==='test'){
+    // 01615A: owner-only review decisions; never delegate via a site-edit grant.
+    if(parts.length===7&&parts[6]==='review')throw deny('ST_TEST_OWNER_REQUIRED_01613D','site.publish.execute');
     const allowed=verb==='POST'&&(
       parts.length===5 || (parts.length===7&&['preview','submit','reset'].includes(parts[6])));
     if(!allowed)throw deny('ST_TEST_ACTION_DENIED_01613D','site.publish.execute');
