@@ -3,6 +3,7 @@
 import {withClient} from './db.mjs';
 import {assertReviewSubmission01615A,assertReviewSubmissionAuthor01615A,assertReviewDecision01615A,reviewNote01615A} from './site-test-review-core-01615a.mjs';
 import {compareSiteTestProjects01614B} from './site-test-compare-01614b.mjs';
+import {composeSiteTestApply01615B,assertApprovedForApply01615B,siteTestApplyPlanToken01615B,assertCanRollbackSiteTest01615B} from './site-test-apply-core-01615b.mjs';
 import {chooseOriginalSource01613D2} from './site-test-source-01613d2.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {config} from './config.mjs';
@@ -23,7 +24,7 @@ const existing=async(c,scope,siteId)=>{
  return q.rows[0];
 };
 const queryBranch=async(c,scope,siteId,branchId,{lock=false}={})=>{
- const q=await c.query(`SELECT b.*,r.project_json,r.schema_version,r.kind revision_kind,r.slot
+ const q=await c.query(`SELECT b.*,r.project_json,r.schema_version,r.kind revision_kind,r.slot,r.source_revision_id
  FROM shifttime_site_test_branches_01613d b
  JOIN shifttime_builder_site_revisions r ON r.id=b.revision_id AND r.site_id=b.site_id
  WHERE b.id=$1 AND b.site_id=$2 AND b.account_id=$3 AND b.workspace_id=$4 AND b.store_id=$5 ${lock?'FOR UPDATE OF b,r':''}`,
@@ -31,7 +32,7 @@ const queryBranch=async(c,scope,siteId,branchId,{lock=false}={})=>{
  if(!q.rowCount)throw siteTestError01613D('ST_TEST_NOT_FOUND_01613D',404);
  return q.rows[0];
 };
-const publicBranch=b=>({id:b.id,siteId:b.site_id,revisionId:b.revision_id,authorUserId:b.author_user_id,baseProjectRevision:Number(b.base_project_revision),state:b.state,previewUrl:b.preview_url||'',previewDeployId:b.preview_deploy_id||'',previewCreatedAt:b.preview_created_at||null,previewMode:b.preview_netlify_site_id?'isolated':'draft',candidateReady:Boolean(b.candidate_deploy_id),submittedAt:b.submitted_at||null,approvedAt:b.approved_at||null,publishedAt:b.published_at||null,createdAt:b.created_at||null,updatedAt:b.updated_at||null,reviewCycle:Number(b.review_cycle||0),reviewSnapshotSha:b.review_snapshot_sha||''});
+const publicBranch=b=>({id:b.id,siteId:b.site_id,revisionId:b.revision_id,authorUserId:b.author_user_id,baseProjectRevision:Number(b.base_project_revision),state:b.state,previewUrl:b.preview_url||'',previewDeployId:b.preview_deploy_id||'',previewCreatedAt:b.preview_created_at||null,previewMode:b.preview_netlify_site_id?'isolated':'draft',candidateReady:Boolean(b.candidate_deploy_id),submittedAt:b.submitted_at||null,approvedAt:b.approved_at||null,publishedAt:b.published_at||null,createdAt:b.created_at||null,updatedAt:b.updated_at||null,reviewCycle:Number(b.review_cycle||0),reviewSnapshotSha:b.review_snapshot_sha||'',appliedAt:b.applied_at||null,rolledBackAt:b.rolled_back_at||null,appliedProjectRevision:b.applied_project_revision==null?null:Number(b.applied_project_revision),backupRevisionId:b.backup_revision_id||''});
 const tx=async fn=>withClient(async c=>{await c.query('BEGIN');try{const r=await fn(c);await c.query('COMMIT');return r;}catch(e){await c.query('ROLLBACK').catch(()=>{});throw e;}});
 
 // Compact owner inbox counter for the Builder badge; no project JSON is fetched.
@@ -62,7 +63,9 @@ export async function listSiteTests01613D(scope,userId,siteId){
       ORDER BY e.created_at DESC,e.id DESC LIMIT 300`,[siteId,branches.map(b=>b.id)]):{rows:[]};
   const events=new Map(branches.map(b=>[b.id,[]]));
   for(const e of history.rows)events.get(e.test_id)?.push({actorUserId:e.actor_user_id,revisionId:e.revision_id,cycle:Number(e.review_cycle),action:e.action,note:e.note,createdAt:e.created_at});
-  return {stage:'01615A',tests:branches.map(b=>({...b,reviewHistory:events.get(b.id)||[]})),source:source?{kind:source.sourceKind,summary:source.summary}:null};
+  const applyRows=branches.length?await c.query(`SELECT e.test_id,e.actor_user_id,e.action,e.created_at FROM shifttime_site_test_apply_events_01615b e WHERE e.site_id=$1 AND e.test_id=ANY($2::text[]) ORDER BY e.created_at DESC LIMIT 150`,[siteId,branches.map(b=>b.id)]):{rows:[]};
+  for(const e of applyRows.rows)events.get(e.test_id)?.push({actorUserId:e.actor_user_id,action:e.action,createdAt:e.created_at,note:''});
+  return {stage:'01615B',tests:branches.map(b=>({...b,reviewHistory:events.get(b.id)||[]})),source:source?{kind:source.sourceKind,summary:source.summary}:null};
  });
 }
 async function loadOriginalSource01613D2(c,site){
@@ -307,30 +310,111 @@ export async function decideSiteTest01615A(scope,userId,siteId,branchId,input={}
   return {stage:'01615A',test:publicBranch(q.rows[0])};
  });
 }
-export async function promoteSiteTest01613D(scope,userId,siteId,branchId,{netlify=client}={}){
- throw siteTestError01613D('ST_TEST_PROMOTION_DISABLED_01615A',403); // 01615A: approval never mutates LIVE
+// 01615B: preview is read-only. The fingerprint binds the selection and BOTH
+// server snapshots, so an old UI confirmation cannot be replayed after edits.
+// Returned-for-rework copies reference the preceding archived test revision, not
+// the original published one. Follow the immutable ancestry to prevent a
+// false conflict after a normal review cycle AND detect a replaced original.
+async function assertOriginalLineage01615B(c,siteId,sourceId,expectedPublishedId){
+ const visited=new Set();let pointer=sourceId;
+ for(let depth=0;pointer&&depth<128;depth++){
+  if(visited.has(pointer))break;
+  visited.add(pointer);
+  if(pointer===expectedPublishedId)return;
+  const q=await c.query(`SELECT id,source_revision_id FROM shifttime_builder_site_revisions
+   WHERE id=$1 AND site_id=$2`,[pointer,siteId]);
+  if(!q.rowCount)break;
+  pointer=q.rows[0].source_revision_id;
+ }
+ throw siteTestError01613D('ST_TEST_APPLY_SOURCE_CHANGED_01615B',409);
+}
+async function prepareSelectiveApply01615B(c,scope,siteId,branchId,input){
+ const site=await existing(c,scope,siteId);
+ const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
+ assertApprovedForApply01615B({row:b,role:scope.role,currentRevision:site.revision});
+ const source=await loadOriginalSource01613D2(c,site);
+ if(source.sourceKind!=='published'||!source.sourceRevisionId)
+  throw siteTestError01613D('ST_TEST_APPLY_SOURCE_CHANGED_01615B',409);
+ await assertOriginalLineage01615B(c,siteId,b.source_revision_id,source.sourceRevisionId);
+ const composed=composeSiteTestApply01615B({baseline:source.project,current:site.project_json,approved:b.project_json,siteId,selection:input?.selection});
+ const planToken=siteTestApplyPlanToken01615B({testId:branchId,projectRevision:Number(site.revision),beforeSha:composed.beforeSha,draftSha:b.review_snapshot_sha,selection:composed.selection,afterSha:composed.afterSha});
+ return {site,b,composed,planToken};
+}
+export async function previewSelectiveSiteTestApply01615B(scope,userId,siteId,branchId,input={}){
  if(scope.role!=='owner')throw siteTestError01613D('ST_TEST_OWNER_REQUIRED_01613D',403);
  return tx(async c=>{
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
-  const site=await existing(c,scope,siteId),b=await queryBranch(c,scope,siteId,branchId,{lock:true});
-  if(b.state!=='in_review')throw siteTestError01613D('ST_TEST_REVIEW_REQUIRED_01613D',409);
-  assertProductionUnchanged01613D(b.base_project_revision,site.revision);
-  if(!b.candidate_deploy_id||!b.preview_deploy_id||projectSha01613D(b.project_json)!==b.preview_snapshot_sha)
-   throw siteTestError01613D('ST_TEST_PREVIEW_OUTDATED_01613D',409);
-  const candidate=await netlify.getDeploy({deployId:b.candidate_deploy_id});
-  if(candidate.site_id!==site.netlify_site_id||candidate.draft!==true||candidate.state!=='ready')
-   throw siteTestError01613D('ST_TEST_CANDIDATE_NOT_READY_01613D',409);
-  // Owner-only transition. Netlify publishes the EXACT unchanged production candidate,
-  // not the read-only preview. The previous production deploy remains restorable.
-  const restored=await netlify.restoreSiteDeploy({siteId:site.netlify_site_id,deployId:b.candidate_deploy_id});
-  const id=clean(restored?.id||b.candidate_deploy_id);
-  await c.query(`UPDATE shifttime_builder_site_projects SET project_json=$1::jsonb,schema_version=$2,revision=revision+1,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4`,
-   [JSON.stringify(b.project_json),b.schema_version||'01170',userId,siteId]);
-  await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'`,[siteId]);
-  await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$2,updated_at=now() WHERE id=$1 AND site_id=$3 AND kind='draft'`,[b.revision_id,userId,siteId]);
-  await c.query(`UPDATE shifttime_published_sites SET last_deploy_id=$1,last_deploy_state='ready',requested_revision=$2,published_revision=$2,last_publish_error='',last_published_at=now(),updated_at=now() WHERE account_id=$3 AND workspace_id=$4 AND store_id=$5 AND builder_site_id=$6`,
-   [id,b.preview_snapshot_sha,scope.accountId,scope.workspaceId,scope.storeId,siteId]);
-  const updated=await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='published',approved_by_user_id=$2,approved_at=now(),published_at=now(),updated_at=now() WHERE id=$1 RETURNING *`,[branchId,userId]);
-  return {stage:'01613D',test:publicBranch(updated.rows[0]),productionUrl:clean(site.netlify_ssl_url||site.netlify_url)};
+  const {site,composed,planToken}=await prepareSelectiveApply01615B(c,scope,siteId,branchId,input);
+  return {stage:'01615B',testId:branchId,selection:composed.selection,projectRevision:Number(site.revision),
+   beforeSha:composed.beforeSha,afterSha:composed.afterSha,planToken,changedPages:composed.changes.changedPages,
+   netlifyPublished:false,warning:'ST_TEST_APPLY_RENDER_ONLY_01615B'};
  });
+}
+// Owner-only atomic merge into the editable ORIGINAL Render project. This NEVER
+// invokes Netlify and never changes shifttime_published_sites or live orders.
+export async function applyApprovedSiteTest01615B(scope,userId,siteId,branchId,input={}){
+ if(scope.role!=='owner')throw siteTestError01613D('ST_TEST_OWNER_REQUIRED_01613D',403);
+ if(input?.confirm!==true||typeof input.planToken!=='string'||!/^[a-f0-9]{64}$/.test(input.planToken))throw siteTestError01613D('ST_TEST_APPLY_CONFIRM_REQUIRED_01615B',400);
+ return tx(async c=>{
+  await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
+  await c.query('SELECT revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[siteId]);
+  const {site,b,composed,planToken}=await prepareSelectiveApply01615B(c,scope,siteId,branchId,input);
+  if(planToken!==input.planToken)throw siteTestError01613D('ST_TEST_APPLY_PLAN_STALE_01615B',409);
+  const backupId=newRevisionId01613D();
+  await c.query(`INSERT INTO shifttime_builder_site_revisions
+   (id,site_id,kind,slot,label,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id)
+   VALUES($1,$2,'archived',0,$3,$4,$5::jsonb,false,$6,$7,$7)`,
+   [backupId,siteId,`01615B backup · ${branchId}`,site.schema_version||'01170',JSON.stringify(site.project_json),b.revision_id,userId]);
+  const changed=await c.query(`UPDATE shifttime_builder_site_projects
+   SET project_json=$1::jsonb,revision=revision+1,updated_by_user_id=$2,updated_at=now()
+   WHERE site_id=$3 AND revision=$4 RETURNING revision`,
+   [JSON.stringify(composed.project),userId,siteId,site.revision]);
+  if(!changed.rowCount)throw siteTestError01613D('ST_TEST_APPLY_CONFLICT_01615B',409);
+  const nextRevision=Number(changed.rows[0].revision);
+  const q=await c.query(`UPDATE shifttime_site_test_branches_01613d
+   SET state='applied',backup_revision_id=$2,applied_project_revision=$3,applied_project_sha=$4,applied_at=now(),updated_at=now()
+   WHERE id=$1 AND state='approved' AND review_snapshot_sha=$5 RETURNING *`,[branchId,backupId,nextRevision,composed.afterSha,b.review_snapshot_sha]);
+  if(!q.rowCount)throw siteTestError01613D('ST_TEST_APPLY_CONFLICT_01615B',409);
+  await c.query(`INSERT INTO shifttime_site_test_apply_events_01615b
+   (test_id,site_id,actor_user_id,action,backup_revision_id,selected_json,before_sha,after_sha,original_revision_before,original_revision_after)
+   VALUES($1,$2,$3,'applied',$4,$5::jsonb,$6,$7,$8,$9)`,
+   [branchId,siteId,userId,backupId,JSON.stringify(composed.selection),composed.beforeSha,composed.afterSha,site.revision,nextRevision]);
+  return {stage:'01615B',test:publicBranch(q.rows[0]),backupRevisionId:backupId,originalProjectRevision:nextRevision,netlifyPublished:false};
+ });
+}
+export async function rollbackAppliedSiteTest01615B(scope,userId,siteId,branchId){
+ if(scope.role!=='owner')throw siteTestError01613D('ST_TEST_OWNER_REQUIRED_01613D',403);
+ return tx(async c=>{
+  await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
+  await c.query('SELECT revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[siteId]);
+  const site=await existing(c,scope,siteId);
+  const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
+  const currentSha=projectSha01613D(site.project_json);
+  assertCanRollbackSiteTest01615B({row:b,role:scope.role,revision:site.revision,sha:currentSha});
+  const saved=await c.query(`SELECT project_json,schema_version FROM shifttime_builder_site_revisions
+    WHERE id=$1 AND site_id=$2 AND kind='archived'`,[b.backup_revision_id,siteId]);
+  if(!saved.rowCount)throw siteTestError01613D('ST_TEST_ROLLBACK_BACKUP_MISSING_01615B',409);
+  const backup=saved.rows[0],beforeSha=projectSha01613D(backup.project_json);
+  const changed=await c.query(`UPDATE shifttime_builder_site_projects
+    SET project_json=$1::jsonb,schema_version=$2,revision=revision+1,updated_by_user_id=$3,updated_at=now()
+    WHERE site_id=$4 AND revision=$5 RETURNING revision`,
+    [JSON.stringify(backup.project_json),backup.schema_version,userId,siteId,site.revision]);
+  if(!changed.rowCount)throw siteTestError01613D('ST_TEST_ROLLBACK_CONFLICT_01615B',409);
+  const nextRevision=Number(changed.rows[0].revision);
+  const q=await c.query(`UPDATE shifttime_site_test_branches_01613d
+   SET state='rolled_back',rolled_back_at=now(),updated_at=now()
+   WHERE id=$1 AND state='applied' RETURNING *`,[branchId]);
+  if(!q.rowCount)throw siteTestError01613D('ST_TEST_ROLLBACK_CONFLICT_01615B',409);
+  await c.query(`INSERT INTO shifttime_site_test_apply_events_01615b
+   (test_id,site_id,actor_user_id,action,backup_revision_id,selected_json,before_sha,after_sha,original_revision_before,original_revision_after)
+   VALUES($1,$2,$3,'rolled_back',$4,'{}'::jsonb,$5,$6,$7,$8)`,
+   [branchId,siteId,userId,b.backup_revision_id,currentSha,beforeSha,site.revision,nextRevision]);
+  return {stage:'01615B',test:publicBranch(q.rows[0]),originalProjectRevision:nextRevision,netlifyPublished:false};
+ });
+}
+// Explicitly disabled legacy direct Netlify promotion. Owner-approved content
+// can only enter the original Render project via 01615B two-step apply; actual
+// LIVE publication is a separate owner decision in the regular publisher.
+export async function promoteSiteTest01613D(){
+ throw siteTestError01613D('ST_TEST_PROMOTION_DISABLED_01615A',403);
 }

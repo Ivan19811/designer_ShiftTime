@@ -77,6 +77,7 @@ test('01613D main-project and draft writes are separately guarded in routes',()=
  assert.ok(src.indexOf('assertNoOriginalWrite01613D(scope,p,req.method)')<src.indexOf("if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'"));
  assert.match(src,/requireSiteTestRevisionAccess01613D\(scope,session\.userId/);
  assert.match(service,/state='processing'/);
- assert.match(service,/candidate\.draft!==true/);
- assert.match(service,/assertProductionUnchanged01613D\(b\.base_project_revision,site\.revision\)/);
+ assert.match(service,/ST_TEST_PROMOTION_DISABLED_01615A/);
+ assert.doesNotMatch(service,/netlify\.restoreSiteDeploy\(/);
+ assert.match(service,/assertApprovedForApply01615B/);
 });

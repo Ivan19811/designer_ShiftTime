@@ -27,6 +27,7 @@ export function classifyProtectedAction01600(method,parts){
       if(p.length===7&&p[6]==='preview'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='submit'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='review'&&m==='POST')return decision('site.publish.execute',siteId);
+      if(p.length===7&&['apply-plan','apply','rollback'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
       if(p.length===7&&p[6]==='promote'&&m==='POST')return decision('site.publish.execute',siteId);
     }
     if(p[4]==='publish-status'&&p.length>=5&&m==='GET')return decision('site.pages.view',siteId,'read');

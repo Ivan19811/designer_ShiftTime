@@ -39,5 +39,6 @@ test('01614B isolated preview deploys never target the production Netlify site',
  assert.doesNotMatch(code,/netlify\.deployFiles\(\{siteId:entry\.site\.netlify_site_id/);
  assert.match(code,/const candidateId=null/);
  assert.match(code,/preview_netlify_site_id/);
- assert.match(code,/ST_TEST_CANDIDATE_NOT_READY_01613D/);
+ assert.match(code,/ST_TEST_PROMOTION_DISABLED_01615A/);
+ assert.doesNotMatch(code,/netlify\.restoreSiteDeploy\(/);
 });

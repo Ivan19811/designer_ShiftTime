@@ -27,6 +27,12 @@ export function createDraftCanvasService01606G({run=null}={}){
             AND s.account_id=$3 AND s.workspace_id=$4 AND s.store_id=$5 AND s.status<>'archived'
           FOR UPDATE OF r`,[siteId,revisionId,scope.accountId,scope.workspaceId,scope.storeId]);
         if(!found.rowCount)throw err('ST_CANVAS_DRAFT_NOT_FOUND_01606G',404);
+        // 01615B: the owner must not mutate an in-review/approved or applied
+        // test revision through the generic draft Canvas route.
+        const activeTest=await client.query(`SELECT state FROM shifttime_site_test_branches_01613d
+          WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[siteId,revisionId]);
+        if(activeTest.rowCount&&!['editing','preview'].includes(activeTest.rows[0].state))
+          throw err('ST_TEST_DRAFT_LOCKED_01614A',409);
         const before=found.rows[0].project_json;
         if(draftFingerprint01606G(before)!==request.expectedFingerprint)throw err('ST_CANVAS_DRAFT_CONFLICT_01606G',409);
         const applied=applyCanvasAtomic01606F(before,siteId,request);

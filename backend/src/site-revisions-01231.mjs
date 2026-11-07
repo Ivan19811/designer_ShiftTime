@@ -41,8 +41,16 @@ export async function createSiteDraft01231(scope,userId,siteId,input={}){
     }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
+// 01615B: protect immutable Test submissions from generic owner revision tools.
+async function assertEditableSiteTestRevision01615B(client,siteId,revisionId,{operation='write'}={}){
+ const q=await client.query(`SELECT state FROM shifttime_site_test_branches_01613d
+   WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[siteId,revisionId]);
+ if(!q.rowCount)return;
+ if(operation==='write'&&['editing','preview'].includes(q.rows[0].state))return;
+ throw httpError('ShiftTime Test revision is protected',409,'ST_TEST_DRAFT_LOCKED_01614A');
+}
 export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,input={}){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
       await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
         WHERE revision_id=$1 AND site_id=$2`,[rid,sid]);
       await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
@@ -55,11 +63,11 @@ export async function updateSiteDraftDetails01232(scope,userId,siteId,revisionId
 }
 
 export async function deleteSiteDraft01231(scope,siteId,revisionIdValue){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const q=await c.query(`DELETE FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id,slot`,[sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return {deleted:true,id:clean(q.rows[0].id),slot:Number(q.rows[0].slot||0)};}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{operation:'delete'});const q=await c.query(`DELETE FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id,slot`,[sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return {deleted:true,id:clean(q.rows[0].id),slot:Number(q.rows[0].slot||0)};}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 export async function publishSiteRevision01231(scope,userId,siteId,revisionIdValue){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const d=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' FOR UPDATE`,[sid,rid]);if(!d.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'`,[sid]);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$1,updated_at=now() WHERE site_id=$2 AND id=$3 RETURNING *`,[userId,sid,rid]);await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{operation:'publish'});const d=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' FOR UPDATE`,[sid,rid]);if(!d.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'`,[sid]);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$1,updated_at=now() WHERE site_id=$2 AND id=$3 RETURNING *`,[userId,sid,rid]);await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 // No application-level maximum number of draft revisions per site (01613D3).

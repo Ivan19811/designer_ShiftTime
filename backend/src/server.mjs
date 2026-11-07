@@ -121,7 +121,7 @@ import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable0
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
 import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
 import {saveSiteTestShell01614A} from './site-test-shell-01614a.mjs';
-import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,decideSiteTest01615A,getSiteTestReviewInbox01615A,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
+import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,decideSiteTest01615A,getSiteTestReviewInbox01615A,previewSelectiveSiteTestApply01615B,applyApprovedSiteTest01615B,rollbackAppliedSiteTest01615B,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
@@ -807,6 +807,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p.length===7&&action==='reset')return sendJson(res,200,await resetSiteTest01613D2(scope,session.userId,siteId,testId));
     if(req.method==='POST'&&p.length===7&&action==='submit')return sendJson(res,200,await submitSiteTest01613D(scope,session.userId,siteId,testId,await readJson(req,{limit:4096})));
     if(req.method==='POST'&&p.length===7&&action==='review')return sendJson(res,200,await decideSiteTest01615A(scope,session.userId,siteId,testId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='apply-plan')return sendJson(res,200,await previewSelectiveSiteTestApply01615B(scope,session.userId,siteId,testId,await readJson(req,{limit:32768})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='apply')return sendJson(res,200,await applyApprovedSiteTest01615B(scope,session.userId,siteId,testId,await readJson(req,{limit:32768})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='rollback')return sendJson(res,200,await rollbackAppliedSiteTest01615B(scope,session.userId,siteId,testId),{'cache-control':'private, no-store'});
     if(req.method==='POST'&&p.length===7&&action==='promote')return sendJson(res,200,await promoteSiteTest01613D(scope,session.userId,siteId,testId));
     return sendJson(res,404,{error:'ST_TEST_ROUTE_NOT_FOUND_01613D'});
   }
