@@ -4,6 +4,7 @@ import {withClient} from './db.mjs';
 import {assertReviewSubmission01615A,assertReviewSubmissionAuthor01615A,assertReviewDecision01615A,reviewNote01615A} from './site-test-review-core-01615a.mjs';
 import {compareSiteTestProjects01614B} from './site-test-compare-01614b.mjs';
 import {composeSiteTestApply01615B,assertApprovedForApply01615B,siteTestApplyPlanToken01615B,assertCanRollbackSiteTest01615B} from './site-test-apply-core-01615b.mjs';
+import {composeSafeSiteTestApply01616,siteTestConflictPlanToken01616} from './site-test-conflict-01616.mjs';
 import {chooseOriginalSource01613D2} from './site-test-source-01613d2.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {config} from './config.mjs';
@@ -331,13 +332,13 @@ async function assertOriginalLineage01615B(c,siteId,sourceId,expectedPublishedId
 async function prepareSelectiveApply01615B(c,scope,siteId,branchId,input){
  const site=await existing(c,scope,siteId);
  const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
- assertApprovedForApply01615B({row:b,role:scope.role,currentRevision:site.revision});
+ assertApprovedForApply01615B({row:b,role:scope.role,currentRevision:site.revision,allowSafeRebase:true});
  const source=await loadOriginalSource01613D2(c,site);
  if(source.sourceKind!=='published'||!source.sourceRevisionId)
   throw siteTestError01613D('ST_TEST_APPLY_SOURCE_CHANGED_01615B',409);
  await assertOriginalLineage01615B(c,siteId,b.source_revision_id,source.sourceRevisionId);
- const composed=composeSiteTestApply01615B({baseline:source.project,current:site.project_json,approved:b.project_json,siteId,selection:input?.selection});
- const planToken=siteTestApplyPlanToken01615B({testId:branchId,projectRevision:Number(site.revision),beforeSha:composed.beforeSha,draftSha:b.review_snapshot_sha,selection:composed.selection,afterSha:composed.afterSha});
+ const composed=composeSafeSiteTestApply01616({baseline:source.project,current:site.project_json,approved:b.project_json,siteId,selection:input?.selection,overrides:input?.overrides,acknowledgeConflicts:input?.acknowledgeConflicts});
+ const planToken=composed.status==='ready'?siteTestConflictPlanToken01616({testId:branchId,projectRevision:Number(site.revision),sourceSha:projectSha01613D(source.project),beforeSha:composed.beforeSha,draftSha:b.review_snapshot_sha,selection:composed.selection,overrides:composed.overrides,afterSha:composed.afterSha}):null;
  return {site,b,composed,planToken};
 }
 export async function previewSelectiveSiteTestApply01615B(scope,userId,siteId,branchId,input={}){
@@ -345,8 +346,9 @@ export async function previewSelectiveSiteTestApply01615B(scope,userId,siteId,br
  return tx(async c=>{
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
   const {site,composed,planToken}=await prepareSelectiveApply01615B(c,scope,siteId,branchId,input);
-  return {stage:'01615B',testId:branchId,selection:composed.selection,projectRevision:Number(site.revision),
-   beforeSha:composed.beforeSha,afterSha:composed.afterSha,planToken,changedPages:composed.changes.changedPages,
+  if(composed.status==='conflict')return {stage:'01616',status:'conflict',testId:branchId,projectRevision:Number(site.revision),selection:composed.selection,overrides:composed.overrides,conflicts:composed.conflicts,conflictAreas:composed.conflictAreas,preservedAreas:composed.preservedAreas,canApply:false,netlifyPublished:false};
+  return {stage:'01616',status:'ready',testId:branchId,selection:composed.selection,overrides:composed.overrides,projectRevision:Number(site.revision),
+   beforeSha:composed.beforeSha,afterSha:composed.afterSha,planToken,changedPages:composed.changes.changedPages,preservedAreas:composed.preservedAreas,
    netlifyPublished:false,warning:'ST_TEST_APPLY_RENDER_ONLY_01615B'};
  });
 }
@@ -359,6 +361,7 @@ export async function applyApprovedSiteTest01615B(scope,userId,siteId,branchId,i
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
   await c.query('SELECT revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[siteId]);
   const {site,b,composed,planToken}=await prepareSelectiveApply01615B(c,scope,siteId,branchId,input);
+  if(composed.status!=='ready')throw siteTestError01613D('ST_TEST_APPLY_CONFLICT_01615B',409);
   if(planToken!==input.planToken)throw siteTestError01613D('ST_TEST_APPLY_PLAN_STALE_01615B',409);
   const backupId=newRevisionId01613D();
   await c.query(`INSERT INTO shifttime_builder_site_revisions
@@ -378,7 +381,7 @@ export async function applyApprovedSiteTest01615B(scope,userId,siteId,branchId,i
   await c.query(`INSERT INTO shifttime_site_test_apply_events_01615b
    (test_id,site_id,actor_user_id,action,backup_revision_id,selected_json,before_sha,after_sha,original_revision_before,original_revision_after)
    VALUES($1,$2,$3,'applied',$4,$5::jsonb,$6,$7,$8,$9)`,
-   [branchId,siteId,userId,backupId,JSON.stringify(composed.selection),composed.beforeSha,composed.afterSha,site.revision,nextRevision]);
+   [branchId,siteId,userId,backupId,JSON.stringify({...composed.selection,conflictOverrides:composed.overrides}),composed.beforeSha,composed.afterSha,site.revision,nextRevision]);
   return {stage:'01615B',test:publicBranch(q.rows[0]),backupRevisionId:backupId,originalProjectRevision:nextRevision,netlifyPublished:false};
  });
 }

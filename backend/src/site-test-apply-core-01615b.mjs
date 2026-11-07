@@ -57,11 +57,12 @@ export function composeSiteTestApply01615B({baseline,current,approved,siteId,sel
  if(same(merged,current))fail('ST_TEST_APPLY_EMPTY_01615B',400);
  return {project:merged,selection:chosen,changes:diff,beforeSha:projectSha01613D(current),afterSha:projectSha01613D(merged)};
 }
-export function assertApprovedForApply01615B({row,role,currentRevision}){
+export function assertApprovedForApply01615B({row,role,currentRevision,allowSafeRebase=false}){
  if(role!=='owner')fail('ST_TEST_OWNER_REQUIRED_01613D',403);
  if(row?.state!=='approved'||row?.revision_kind!=='draft')fail('ST_TEST_APPLY_NOT_APPROVED_01615B');
  if(!row.review_snapshot_sha||projectSha01613D(row.project_json)!==row.review_snapshot_sha)fail('ST_TEST_REVIEW_CONTENT_CHANGED_01615A');
- assertProductionUnchanged01613D(row.base_project_revision,currentRevision);
+ if(!allowSafeRebase)assertProductionUnchanged01613D(row.base_project_revision,currentRevision);
+ else if(Number(currentRevision)<Number(row.base_project_revision))fail('ST_TEST_ORIGINAL_CHANGED_01613D');
  return true;
 }
 export function siteTestApplyPlanToken01615B({testId,projectRevision,beforeSha,draftSha,selection,afterSha}){
