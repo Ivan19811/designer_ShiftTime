@@ -19,6 +19,15 @@ export function classifyProtectedAction01600(method,parts){
     }
     // 01613D: explicit test workflow routes; no permission to alter the original.
     if(p[4]==='test'){
+      // 01618B: classify owner-only per-node review endpoints *before* the
+      // fail-closed 01613B online-site boundary. The 01618 workflow still
+      // checks role=owner and tenant/site scope on every request.
+      if(p[5]==='changes'){
+        if(p.length===6&&m==='GET')return decision('site.pages.view',siteId,'read');
+        if(p.length===7&&['plan','apply'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
+        if(p.length===8&&p[6]==='rollback'&&m==='POST'&&p[7])return decision('site.publish.execute',siteId);
+        return null;
+      }
       if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
       if(p.length===6&&p[5]==='inbox'&&m==='GET')return decision('site.pages.view',siteId,'read');
       if(p.length===7&&p[6]==='compare'&&m==='GET')return decision('site.pages.view',siteId,'read');
