@@ -22,7 +22,9 @@ async function submitted(c,scope,siteId,branchIds=[]){
    b.updated_at,r.project_json,s.project_json AS baseline
    FROM shifttime_site_test_branches_01613d b
    JOIN shifttime_builder_site_revisions r ON r.id=b.revision_id AND r.site_id=b.site_id
-   JOIN shifttime_builder_site_revisions s ON s.id=b.source_revision_id AND s.site_id=b.site_id
+   -- The immutable source revision is recorded on the draft revision (r),
+   -- not on the manager branch (b); the latter has no source_revision_id column.
+   JOIN shifttime_builder_site_revisions s ON s.id=r.source_revision_id AND s.site_id=b.site_id
    WHERE b.site_id=$1 AND b.account_id=$2 AND b.workspace_id=$3 AND b.store_id=$4
    AND b.state IN ('in_review','approved')${chosen} ORDER BY b.updated_at DESC,b.id DESC LIMIT 80`,params);
  const rows=[];
