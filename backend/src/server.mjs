@@ -863,7 +863,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId,null,undefined,scope.role==='owner'?'':session.userId)});
     if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
-    if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId)});
+    if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId,session.userId)});
     if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
     if(req.method==='DELETE'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}

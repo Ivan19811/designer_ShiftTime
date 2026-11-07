@@ -11,7 +11,10 @@ export const newTestId01613D=()=>`sttest_${crypto.randomUUID().replaceAll('-',''
 export const newRevisionId01613D=()=>`rev_${crypto.randomUUID().replaceAll('-','')}`;
 export function assertTestActor01613D(scope,userId,row,{write=false,promote=false}={}){
  if(!row||!clean(userId))throw siteTestError01613D('ST_TEST_NOT_FOUND_01613D',404);
- if(scope?.role==='owner')return true;
+ if(scope?.role==='owner'){
+  if(write&&clean(row.author_user_id)!==clean(userId))throw siteTestError01613D('ST_TEST_AUTHOR_REQUIRED_01613D',403);
+  return true;
+ }
  if(promote)throw siteTestError01613D('ST_TEST_OWNER_REQUIRED_01613D',403);
  if(clean(row.author_user_id)!==clean(userId))throw siteTestError01613D('ST_TEST_AUTHOR_REQUIRED_01613D',403);
  if(write&&row.state==='published')throw siteTestError01613D('ST_TEST_ALREADY_PUBLISHED_01613D',409);

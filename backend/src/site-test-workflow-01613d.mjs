@@ -1,6 +1,7 @@
 // 01613D · Server-owned test copies, visual-only Netlify draft previews and owner promotion.
 // No manager operation writes to the primary site project or published deploy record.
 import {withClient} from './db.mjs';
+import {summarizeSiteTestCollaborators01617} from './site-test-collaboration-01617.mjs';
 import {assertReviewSubmission01615A,assertReviewSubmissionAuthor01615A,assertReviewDecision01615A,reviewNote01615A} from './site-test-review-core-01615a.mjs';
 import {compareSiteTestProjects01614B} from './site-test-compare-01614b.mjs';
 import {composeSiteTestApply01615B,assertApprovedForApply01615B,siteTestApplyPlanToken01615B,assertCanRollbackSiteTest01615B} from './site-test-apply-core-01615b.mjs';
@@ -55,7 +56,7 @@ export async function listSiteTests01613D(scope,userId,siteId){
   await existing(c,scope,siteId);
   const q=await c.query(`SELECT b.* FROM shifttime_site_test_branches_01613d b
    WHERE account_id=$1 AND workspace_id=$2 AND store_id=$3 AND site_id=$4
-   AND ($5::boolean OR author_user_id=$6) ORDER BY created_at DESC LIMIT 30`,
+   AND ($5::boolean OR author_user_id=$6) ORDER BY created_at DESC LIMIT 100`,
    [scope.accountId,scope.workspaceId,scope.storeId,siteId,scope.role==='owner',userId]);
   const source=await loadOriginalSource01613D2(c,await existing(c,scope,siteId)).catch(()=>null);
   const branches=q.rows.map(publicBranch);
@@ -66,7 +67,10 @@ export async function listSiteTests01613D(scope,userId,siteId){
   for(const e of history.rows)events.get(e.test_id)?.push({actorUserId:e.actor_user_id,revisionId:e.revision_id,cycle:Number(e.review_cycle),action:e.action,note:e.note,createdAt:e.created_at});
   const applyRows=branches.length?await c.query(`SELECT e.test_id,e.actor_user_id,e.action,e.created_at FROM shifttime_site_test_apply_events_01615b e WHERE e.site_id=$1 AND e.test_id=ANY($2::text[]) ORDER BY e.created_at DESC LIMIT 150`,[siteId,branches.map(b=>b.id)]):{rows:[]};
   for(const e of applyRows.rows)events.get(e.test_id)?.push({actorUserId:e.actor_user_id,action:e.action,createdAt:e.created_at,note:''});
-  return {stage:'01615B',tests:branches.map(b=>({...b,reviewHistory:events.get(b.id)||[]})),source:source?{kind:source.sourceKind,summary:source.summary}:null};
+  const original=await existing(c,scope,siteId);
+  return {stage:'01617',tests:branches.map(b=>({...b,reviewHistory:events.get(b.id)||[]})),
+   collaboration:summarizeSiteTestCollaborators01617(q.rows,{owner:scope.role==='owner',userId,originalRevision:original.revision}),
+   source:source?{kind:source.sourceKind,summary:source.summary}:null};
  });
 }
 async function loadOriginalSource01613D2(c,site){
@@ -172,7 +176,7 @@ export async function requireSiteTestRevisionAccess01613D(scope,userId,siteId,re
    if(!published.rowCount)throw siteTestError01613D('ST_TEST_REVISION_ACCESS_DENIED_01613D',403);
    return;
   }
-  if(scope.role!=='owner')assertTestActor01613D(scope,userId,q.rows[0],{write});
+  if(write||scope.role!=='owner')assertTestActor01613D(scope,userId,q.rows[0],{write});
   if(write&&!['editing','preview'].includes(q.rows[0].state))throw siteTestError01613D('ST_TEST_DRAFT_LOCKED_01613D',409);
  });
 }

@@ -18,7 +18,7 @@ test('01613D only manager who authored copy can edit it',()=>{
  const row={author_user_id:'user_a',state:'editing'};
  assert.equal(assertTestActor01613D(manager,'user_a',row,{write:true}),true);
  deny(()=>assertTestActor01613D(manager,'user_b',row,{write:true}),'ST_TEST_AUTHOR_REQUIRED_01613D');
- assert.equal(assertTestActor01613D(owner,'user_b',row,{write:true}),true);
+ deny(()=>assertTestActor01613D(owner,'user_b',row,{write:true}),'ST_TEST_AUTHOR_REQUIRED_01613D');
  assert.throws(()=>assertTestActor01613D(manager,'user_a',{...row,state:'published'},{write:true}),{code:'ST_TEST_ALREADY_PUBLISHED_01613D'});
  deny(()=>assertTestActor01613D(manager,'user_a',row,{promote:true}),'ST_TEST_OWNER_REQUIRED_01613D');
 });

@@ -1,6 +1,6 @@
 // 01615A · Fail-closed, independent review decision rules.
 // Review is not promotion: no production project or Netlify operations here.
-import {siteTestError01613D,projectSha01613D,assertProductionUnchanged01613D} from './site-test-core-01613d.mjs';
+import {siteTestError01613D,projectSha01613D} from './site-test-core-01613d.mjs';
 export const REVIEW_EVENTS_01615A=Object.freeze(['submitted','approved','changes_requested','rejected']);
 export const REVIEW_DECISIONS_01615A=Object.freeze(['approved','changes_requested','rejected']);
 export function reviewNote01615A(value,{required=false}={}){
@@ -26,6 +26,9 @@ export function assertReviewDecision01615A({row,role,decision,currentRevision}){
  if(row?.state!=='in_review'||row.revision_kind!=='draft')throw siteTestError01613D('ST_TEST_REVIEW_STATE_DENIED_01615A',409);
  if(!row.review_snapshot_sha||row.review_snapshot_sha!==projectSha01613D(row.project_json))
   throw siteTestError01613D('ST_TEST_REVIEW_CONTENT_CHANGED_01615A',409);
- if(decision==='approved')assertProductionUnchanged01613D(row.base_project_revision,currentRevision);
- return {newState:decision==='changes_requested'?'editing':decision};
+ // 01617: other managers may already have applied independent changes.
+ // Approval freezes this branch's SHA but NEVER writes the original.
+ // The mandatory three-way apply-plan later checks conflicts against LIVE Render.
+ return {newState:decision==='changes_requested'?'editing':decision,
+  requiresMergeCheck:decision==='approved'&&Number(row.base_project_revision)!==Number(currentRevision)};
 }

@@ -23,10 +23,10 @@ test('01615A owner cannot impersonate manager during submission',()=>{
  assert.equal(assertReviewSubmissionAuthor01615A({author_user_id:'manager_a'},'manager_a'),true);
  fail(()=>assertReviewSubmissionAuthor01615A({author_user_id:'manager_a'},'owner'),'ST_TEST_AUTHOR_REQUIRED_01613D');
 });
-test('01615A approval is owner-only, locked SHA, and rejects stale original',()=>{
- assert.deepEqual(assertReviewDecision01615A({row:reviewed,role:'owner',decision:'approved',currentRevision:2}),{newState:'approved'});
+test('01617 approval is owner-only, locks SHA, and defers parallel changes to apply-plan',()=>{
+ assert.deepEqual(assertReviewDecision01615A({row:reviewed,role:'owner',decision:'approved',currentRevision:2}),{newState:'approved',requiresMergeCheck:false});
  fail(()=>assertReviewDecision01615A({row:reviewed,role:'manager',decision:'approved',currentRevision:2}),'ST_TEST_OWNER_REQUIRED_01613D');
- fail(()=>assertReviewDecision01615A({row:reviewed,role:'owner',decision:'approved',currentRevision:3}),'ST_TEST_ORIGINAL_CHANGED_01613D');
+ assert.deepEqual(assertReviewDecision01615A({row:reviewed,role:'owner',decision:'approved',currentRevision:3}),{newState:'approved',requiresMergeCheck:true});
  fail(()=>assertReviewDecision01615A({row:{...reviewed,project_json:{site:{id:'changed'}}},role:'owner',decision:'approved',currentRevision:2}),'ST_TEST_REVIEW_CONTENT_CHANGED_01615A');
  for(const state of ['editing','preview','approved','rejected','published'])fail(()=>assertReviewDecision01615A({row:{...reviewed,state},role:'owner',decision:'approved',currentRevision:2}),'ST_TEST_REVIEW_STATE_DENIED_01615A');
 });

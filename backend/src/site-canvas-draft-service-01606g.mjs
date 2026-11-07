@@ -29,8 +29,10 @@ export function createDraftCanvasService01606G({run=null}={}){
         if(!found.rowCount)throw err('ST_CANVAS_DRAFT_NOT_FOUND_01606G',404);
         // 01615B: the owner must not mutate an in-review/approved or applied
         // test revision through the generic draft Canvas route.
-        const activeTest=await client.query(`SELECT state FROM shifttime_site_test_branches_01613d
+        const activeTest=await client.query(`SELECT state,author_user_id FROM shifttime_site_test_branches_01613d
           WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[siteId,revisionId]);
+        if(activeTest.rowCount&&activeTest.rows[0].author_user_id!==userId)
+          throw err('ST_TEST_AUTHOR_REQUIRED_01613D',403);
         if(activeTest.rowCount&&!['editing','preview'].includes(activeTest.rows[0].state))
           throw err('ST_TEST_DRAFT_LOCKED_01614A',409);
         const before=found.rows[0].project_json;

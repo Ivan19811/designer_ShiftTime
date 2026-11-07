@@ -29,28 +29,34 @@ export async function listSiteRevisions01231(scope,siteId='',allowedSiteIds=null
     const q=await c.query(`SELECT r.* FROM shifttime_builder_site_revisions r JOIN shifttime_builder_sites s ON s.id=r.site_id WHERE ${where} ORDER BY r.site_id, CASE WHEN r.kind='published' THEN 0 ELSE 1 END, r.slot, r.updated_at DESC`,params);return q.rows.map(r=>mapRow(r));});
 }
 
-export async function getSiteRevision01231(scope,siteId,revisionIdValue){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await assertSite(c,scope,sid);const q=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind IN ('draft','published') LIMIT 1`,[sid,rid]);if(!q.rowCount)throw httpError('Site revision not found',404,'ST_SITE_REVISION_NOT_FOUND');return mapRow(q.rows[0],{includeProject:true});});
+export async function getSiteRevision01231(scope,siteId,revisionIdValue,userId=''){
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await assertSite(c,scope,sid);const q=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind IN ('draft','published') LIMIT 1`,[sid,rid]);if(!q.rowCount)throw httpError('Site revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+   if(scope.role!=='owner'&&q.rows[0].kind==='draft'){
+    const branch=await c.query(`SELECT author_user_id FROM shifttime_site_test_branches_01613d WHERE site_id=$1 AND revision_id=$2`,[sid,rid]);
+    if(!branch.rowCount||branch.rows[0].author_user_id!==userId)throw httpError('Other manager revision is private',403,'ST_TEST_AUTHOR_REQUIRED_01613D');
+   }
+   return mapRow(q.rows[0],{includeProject:true});});
 }
 
 export async function createSiteDraft01231(scope,userId,siteId,input={}){
   const sid=clean(siteId);return withClient(async c=>{await c.query('BEGIN');try{await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[sid]);const site=await assertSite(c,scope,sid);const drafts=await c.query(`SELECT id,slot FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='draft' ORDER BY slot FOR UPDATE`,[sid]);const slot=nextFreeDraftSlot01613D3(drafts.rows);
-      let sourceProject=null,sourceRevisionId='';const requestedSource=clean(input.sourceRevisionId);if(requestedSource){const q=await c.query(`SELECT id,project_json FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind IN ('draft','published') LIMIT 1`,[sid,requestedSource]);if(!q.rowCount)throw httpError('Source revision not found',404,'ST_SITE_REVISION_SOURCE_NOT_FOUND');sourceProject=projectValue(q.rows[0].project_json);sourceRevisionId=clean(q.rows[0].id);}else if(input.project&&typeof input.project==='object'){sourceProject=projectValue(input.project);}else{sourceProject=projectValue(site.project_json);}
+      let sourceProject=null,sourceRevisionId='';const requestedSource=clean(input.sourceRevisionId);if(requestedSource){const q=await c.query(`SELECT id,project_json,kind,created_by_user_id FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind IN ('draft','published') LIMIT 1`,[sid,requestedSource]);if(!q.rowCount)throw httpError('Source revision not found',404,'ST_SITE_REVISION_SOURCE_NOT_FOUND');if(scope.role!=='owner'&&q.rows[0].kind==='draft'&&q.rows[0].created_by_user_id!==userId)throw httpError('Other manager revision is private',403,'ST_TEST_AUTHOR_REQUIRED_01613D');sourceProject=projectValue(q.rows[0].project_json);sourceRevisionId=clean(q.rows[0].id);}else if(input.project&&typeof input.project==='object'){sourceProject=projectValue(input.project);}else{sourceProject=projectValue(site.project_json);}
       const id=revisionId(),schemaVersion=clean(input.schemaVersion||sourceProject?.version||site.schema_version)||'01231',label=clean(input.label),comment=String(input.comment??'').slice(0,4000),dirty=input.dirty===true;
       const q=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,comment,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id) VALUES($1,$2,'draft',$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$10) RETURNING *`,[id,sid,slot,label,comment,schemaVersion,JSON.stringify(sourceProject),dirty,sourceRevisionId||null,userId]);await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});
     }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 // 01615B: protect immutable Test submissions from generic owner revision tools.
-async function assertEditableSiteTestRevision01615B(client,siteId,revisionId,{operation='write'}={}){
- const q=await client.query(`SELECT state FROM shifttime_site_test_branches_01613d
+async function assertEditableSiteTestRevision01615B(client,siteId,revisionId,{operation='write',userId='',role='owner'}={}){
+ const q=await client.query(`SELECT state,author_user_id FROM shifttime_site_test_branches_01613d
    WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[siteId,revisionId]);
- if(!q.rowCount)return;
+ if(!q.rowCount){if(role!=='owner')throw httpError('Draft is not a personal ShiftTime Test copy',403,'ST_TEST_DRAFT_REQUIRED_01613D');return;}
+ if(userId&&q.rows[0].author_user_id!==userId)throw httpError('Other manager revision is protected',403,'ST_TEST_AUTHOR_REQUIRED_01613D');
  if(operation==='write'&&['editing','preview'].includes(q.rows[0].state))return;
  throw httpError('ShiftTime Test revision is protected',409,'ST_TEST_DRAFT_LOCKED_01614A');
 }
 export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,input={}){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
       await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
         WHERE revision_id=$1 AND site_id=$2`,[rid,sid]);
       await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
@@ -59,7 +65,7 @@ export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,inp
 
 export async function updateSiteDraftDetails01232(scope,userId,siteId,revisionIdValue,input={}){
   const sid=clean(siteId),rid=clean(revisionIdValue),label=clean(input.label),comment=String(input.comment??'').slice(0,4000);
-  return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET label=CASE WHEN $1<>'' THEN $1 ELSE label END,comment=$2,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4 AND id=$5 AND kind='draft' RETURNING *`,[label,comment,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+  return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET label=CASE WHEN $1<>'' THEN $1 ELSE label END,comment=$2,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4 AND id=$5 AND kind='draft' RETURNING *`,[label,comment,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 export async function deleteSiteDraft01231(scope,siteId,revisionIdValue){
