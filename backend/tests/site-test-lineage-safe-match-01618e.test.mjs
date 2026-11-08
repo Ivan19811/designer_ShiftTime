@@ -48,10 +48,10 @@ test('01618E: same node ids allow sequential manager choices on changed current 
  assert.equal(plan(base,draft,current).project.storage.pageSnapshots[key].siteFrameMain01040.nodes['old-hero'].content.text,'СКОВОРІДКИ-2');
 });
 
-test('01618E: a new sibling in current is not equivalent structure',()=>{
+test('01618F: insertion of an unrelated sibling does not block a uniquely anchored heading',()=>{
  const base=project(),edited=structuredClone(base),current=project('new','СКОВОРІДКИ',{addSibling:true});
  edited.storage.pageSnapshots[key].siteFrameMain01040.nodes['old-hero'].content.text='СКОВОРІДКИ-1';
- assert.throws(()=>plan(base,edited,current),/ST_TEST_CHANGE_REMAP_UNSAFE_01618E/);
+ assert.equal(plan(base,edited,current).project.storage.pageSnapshots[key].siteFrameMain01040.nodes['new-hero'].content.text,'СКОВОРІДКИ-1');
 });
 
 test('01618E: user-modified current text cannot be remapped using a stale source anchor',()=>{

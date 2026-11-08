@@ -40,7 +40,7 @@ function enrich(list,baseline,original,submittedProject,siteId){return list.map(
   try{
    const match=resolveSiteTestChangeTarget01618E({baseline,current:original,submitted:submittedProject,siteId,change});
    return {...change,current:valueSummary(match.node?.[change.field]),matchStatus:match.method,matchedNodeId:match.nodeId};
-  }catch(error){return {...change,current:'',matchStatus:'blocked',matchError:clean(error.code||error.message)};}
+  }catch(error){return {...change,current:'',matchStatus:'blocked',matchError:clean(error.code||error.message),matchReason01618F:clean(error.matchReason01618F)};}
  });}
 async function collect(c,scope,siteId,ids=[]){
  const original=await findSite(c,scope,siteId),branches=await submitted(c,scope,siteId,ids);
