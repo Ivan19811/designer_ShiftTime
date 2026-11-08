@@ -1,6 +1,7 @@
 // 01618 · Owner-only, audited, atomic application of chosen changes across
 // multiple submitted manager branches. Does NOT publish LIVE or update commerce.
 import {randomUUID} from 'node:crypto';
+import {assertUnusedAcceptances01619B,acceptanceAudit01619B} from './site-test-approval-ledger-01619b.mjs';
 import {inspectSiteTestOriginalDrift01618H,composeSiteTestOriginalRepair01618H,siteTestOriginalRepairToken01618H} from './site-test-original-repair-01618h.mjs';
 import {withClient} from './db.mjs';
 import {siteTestError01613D,projectSha01613D} from './site-test-core-01613d.mjs';
@@ -54,29 +55,51 @@ async function collect(c,scope,siteId,ids=[]){
  const originalDrifts=[...pages].map(pageId=>inspectSiteTestOriginalDrift01618H({current:original.project_json,published:published?.project_json,siteId,pageId,publishedRevisionId:published?.id||''})).filter(d=>d.stale);
  const stalePages=new Set(originalDrifts.map(x=>x.pageId));
  const recovery={available:sourceAligned&&originalDrifts.length>0,sourceAligned,originalDrifts};
- const changesByTest=new Map(),projectsByTest=new Map(),baselinesByTest=new Map(),sourceShas=[];
+ const changesByTest=new Map(),projectsByTest=new Map(),baselinesByTest=new Map(),revisionByTest=new Map(),sourceShas=[];
  const items=branches.map(b=>{
   const out=listSelectableSiteTestChanges01618({baseline:b.baseline,submitted:b.project_json,siteId,testId:b.id,authorUserId:b.author_user_id});
-  changesByTest.set(b.id,out.changes);projectsByTest.set(b.id,b.project_json);baselinesByTest.set(b.id,b.baseline);sourceShas.push([b.id,b.review_snapshot_sha]);
+  changesByTest.set(b.id,out.changes);projectsByTest.set(b.id,b.project_json);baselinesByTest.set(b.id,b.baseline);revisionByTest.set(b.id,b.revision_id);sourceShas.push([b.id,b.review_snapshot_sha]);
   return {testId:b.id,authorUserId:b.author_user_id,state:b.state,changes:enrich(out.changes,b.baseline,original.project_json,b.project_json,siteId,stalePages),structuralChanges:out.structuralChanges};
  });
- return {original,items,changesByTest,projectsByTest,baselinesByTest,sourceShas,recovery};
+ return {original,items,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery};
 }
 export async function getSiteTestChangeChoices01618(scope,userId,siteId){
- owner(scope);return withClient(async c=>{const {original,items,recovery}=await collect(c,scope,siteId);
-  const history=await c.query(`SELECT id,choices_json,status,created_at,original_revision_after FROM shifttime_site_test_change_batches_01618
-    WHERE site_id=$1 ORDER BY created_at DESC LIMIT 20`,[siteId]);
-  return {stage:'01618',projectRevision:Number(original.revision),originalRepair01618H:recovery,managers:items,batches:history.rows.map(r=>({id:r.id,choices:r.choices_json,status:r.status,createdAt:r.created_at,originalRevisionAfter:Number(r.original_revision_after)}))};
+ owner(scope);return withClient(async c=>{const {original,items,recovery,revisionByTest}=await collect(c,scope,siteId);
+  const revisions=[...new Set(revisionByTest.values())];
+  const ledger=revisions.length?await c.query(`SELECT revision_id,change_id,batch_id,actor_user_id,applied_at,status,rolled_back_at
+    FROM shifttime_site_test_change_ledger_01619b WHERE site_id=$1 AND revision_id=ANY($2::text[])`,[siteId,revisions]):{rows:[]};
+  const byKey=new Map(ledger.rows.map(row=>[`${row.revision_id}\u241f${row.change_id}`,row]));
+  for(const manager of items){const revisionId=revisionByTest.get(manager.testId);
+   for(const change of manager.changes){const history=byKey.get(`${revisionId}\u241f${change.id}`);
+    if(history)change.alreadyAccepted01619B={batchId:history.batch_id,actorUserId:history.actor_user_id,
+      appliedAt:history.applied_at,status:history.status,rolledBackAt:history.rolled_back_at};
+   }
+  }
+  const history=await c.query(`SELECT b.id,b.choices_json,b.status,b.created_at,b.original_revision_after,b.actor_user_id,
+    COALESCE(jsonb_agg(jsonb_build_object('testId',l.test_id,'changeId',l.change_id,
+     'revisionId',l.revision_id,'pageId',l.page_id,'nodeId',l.node_id,'field',l.field,
+     'before',l.before_preview,'after',l.after_preview,'status',l.status)
+     ORDER BY l.applied_at) FILTER(WHERE l.change_id IS NOT NULL),'[]'::jsonb) AS applied_items
+    FROM shifttime_site_test_change_batches_01618 b
+    LEFT JOIN shifttime_site_test_change_ledger_01619b l ON l.batch_id=b.id
+    WHERE b.site_id=$1 GROUP BY b.id ORDER BY b.created_at DESC LIMIT 20`,[siteId]);
+  return {stage:'01619B',projectRevision:Number(original.revision),originalRepair01618H:recovery,managers:items,
+   batches:history.rows.map(r=>({id:r.id,choices:r.choices_json,status:r.status,createdAt:r.created_at,
+    actorUserId:r.actor_user_id,appliedItems:r.applied_items,originalRevisionAfter:Number(r.original_revision_after)}))};
  });
 }
 async function prepare(c,scope,siteId,choices){
  const decisions=validateSiteTestChangeDecisions01618(choices);
  const ids=[...new Set(decisions.map(x=>x.testId))];
- const {original,changesByTest,projectsByTest,baselinesByTest,sourceShas,recovery}=await collect(c,scope,siteId,ids);
+ const {original,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery}=await collect(c,scope,siteId,ids);
+ const revisions=[...new Set(revisionByTest.values())];
+ const ledger=revisions.length?await c.query(`SELECT revision_id,change_id FROM shifttime_site_test_change_ledger_01619b
+  WHERE site_id=$1 AND revision_id=ANY($2::text[])`,[siteId,revisions]):{rows:[]};
+ assertUnusedAcceptances01619B(decisions,revisionByTest,ledger.rows);
  if(decisions.some(d=>d.decision==='accept'&&recovery.originalDrifts.some(x=>x.pageId===(changesByTest.get(d.testId)||[]).find(ch=>ch.id===d.changeId)?.pageId)))fail('ST_TEST_ORIGINAL_PAGE_NOT_SYNCED_01618H',409);
  const composition=composeSelectedSiteTestChanges01618({current:original.project_json,siteId,decisions,changesByTest,projectsByTest,baselinesByTest});
  const planToken=siteTestSelectionPlanToken01618({siteId,revision:Number(original.revision),beforeSha:composition.beforeSha,afterSha:composition.afterSha,decisions,sourceShas});
- return {decisions,composition,original,planToken};
+ return {decisions,composition,original,planToken,revisionByTest};
 }
 export async function planSiteTestSelectedChanges01618(scope,userId,siteId,input={}){
  owner(scope);return tx(async c=>{
@@ -94,7 +117,7 @@ export async function applySiteTestSelectedChanges01618(scope,userId,siteId,inpu
  return tx(async c=>{
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
   await c.query('SELECT revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[siteId]);
-  const {decisions,composition,original,planToken}=await prepare(c,scope,siteId,input.choices);
+  const {decisions,composition,original,planToken,revisionByTest}=await prepare(c,scope,siteId,input.choices);
   if(input.planToken!==planToken)fail('ST_TEST_CHANGE_PLAN_STALE_01618');
   const bid='rev_'+randomUUID().replaceAll('-',''),batchId='batch_'+randomUUID().replaceAll('-','');
   await c.query(`INSERT INTO shifttime_builder_site_revisions
@@ -110,7 +133,22 @@ export async function applySiteTestSelectedChanges01618(scope,userId,siteId,inpu
     before_sha,after_sha,original_revision_before,original_revision_after)
     VALUES($1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9)`,
     [batchId,siteId,userId,bid,JSON.stringify(decisions),composition.beforeSha,composition.afterSha,original.revision,revision]);
-  return {stage:'01618',batchId,originalProjectRevision:revision,accepted:composition.applied,rejected:composition.rejected,netlifyPublished:false};
+  // This INSERT is part of the SAME transaction as the original update and
+  // the backup. The unique primary key fails closed if an accepted revision's
+  // item is submitted a second time, without mutating the original.
+  const audit=acceptanceAudit01619B({siteId,applied:composition.applied,before:original.project_json,after:composition.project,revisionByTest});
+  for(const entry of audit){
+   const saved=await c.query(`INSERT INTO shifttime_site_test_change_ledger_01619b
+    (site_id,test_id,revision_id,change_id,batch_id,actor_user_id,page_id,node_id,field,match_method,
+     before_preview,after_preview,before_field_sha,after_field_sha,original_revision_after)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+    ON CONFLICT(site_id,revision_id,change_id) DO NOTHING`,
+    [siteId,entry.testId,entry.revisionId,entry.changeId,batchId,userId,entry.pageId,entry.nodeId,
+     entry.field,entry.matchMethod,entry.beforePreview,entry.afterPreview,entry.beforeFieldSha,entry.afterFieldSha,revision]);
+   if(saved.rowCount!==1)fail('ST_TEST_CHANGE_ALREADY_ACCEPTED_01619B',409);
+  }
+  return {stage:'01619B',batchId,originalProjectRevision:revision,accepted:composition.applied,rejected:composition.rejected,
+   auditCount:audit.length,netlifyPublished:false};
  });
 }
 export async function rollbackSiteTestSelectedChanges01618(scope,userId,siteId,batchId){
@@ -130,6 +168,7 @@ export async function rollbackSiteTestSelectedChanges01618(scope,userId,siteId,b
     WHERE site_id=$4 AND revision=$5 RETURNING revision`,[JSON.stringify(backup.project_json),backup.schema_version,userId,siteId,original.revision]);
   if(!updated.rowCount)fail('ST_TEST_CHANGE_ROLLBACK_STALE_01618');
   await c.query(`UPDATE shifttime_site_test_change_batches_01618 SET status='rolled_back',rolled_back_at=now() WHERE id=$1`,[batchId]);
+  await c.query(`UPDATE shifttime_site_test_change_ledger_01619b SET status='rolled_back',rolled_back_at=now() WHERE batch_id=$1`,[batchId]);
   return {stage:'01618',batchId,originalProjectRevision:Number(updated.rows[0].revision),netlifyPublished:false};
  });
 }

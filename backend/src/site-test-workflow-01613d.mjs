@@ -337,6 +337,12 @@ async function prepareSelectiveApply01615B(c,scope,siteId,branchId,input){
  const site=await existing(c,scope,siteId);
  const b=await queryBranch(c,scope,siteId,branchId,{lock:true});
  assertApprovedForApply01615B({row:b,role:scope.role,currentRevision:site.revision,allowSafeRebase:true});
+ // Do not allow the older whole-branch apply path to replay any already
+ // accepted item from the same immutable manager revision. Remaining items
+ // can still be reviewed via the itemized 01618/01619B path.
+ const accepted=await c.query(`SELECT 1 FROM shifttime_site_test_change_ledger_01619b
+  WHERE site_id=$1 AND revision_id=$2 LIMIT 1`,[siteId,b.revision_id]);
+ if(accepted.rowCount)throw siteTestError01613D('ST_TEST_CHANGE_ALREADY_ACCEPTED_01619B',409);
  const source=await loadOriginalSource01613D2(c,site);
  if(source.sourceKind!=='published'||!source.sourceRevisionId)
   throw siteTestError01613D('ST_TEST_APPLY_SOURCE_CHANGED_01615B',409);
