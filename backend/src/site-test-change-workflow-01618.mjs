@@ -3,7 +3,7 @@
 import {randomUUID} from 'node:crypto';
 import {withClient} from './db.mjs';
 import {siteTestError01613D,projectSha01613D} from './site-test-core-01613d.mjs';
-import {listSelectableSiteTestChanges01618,composeSelectedSiteTestChanges01618,validateSiteTestChangeDecisions01618,siteTestSelectionPlanToken01618} from './site-test-change-select-01618.mjs';
+import {listSelectableSiteTestChanges01618,composeSelectedSiteTestChanges01618,validateSiteTestChangeDecisions01618,siteTestSelectionPlanToken01618,resolveSiteTestChangeTarget01618E} from './site-test-change-select-01618.mjs';
 const fail=(code,status=409)=>{throw siteTestError01613D(code,status);};
 const clean=s=>String(s??'').trim();
 function owner(scope){if(scope?.role!=='owner')fail('ST_TEST_OWNER_REQUIRED_01613D',403);}
@@ -36,16 +36,21 @@ async function submitted(c,scope,siteId,branchIds=[]){
  return rows;
 }
 function valueSummary(value){let raw=typeof value==='string'?value:JSON.stringify(value??'');return raw.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,180);}
-function enrich(list,original,siteId){return list.map(c=>{const node=original?.storage?.pageSnapshots?.[`${siteId}:${c.pageId}`]?.siteFrameMain01040?.nodes?.[c.nodeId];return {...c,current:valueSummary(node?.[c.field])};});}
+function enrich(list,baseline,original,submittedProject,siteId){return list.map(change=>{
+  try{
+   const match=resolveSiteTestChangeTarget01618E({baseline,current:original,submitted:submittedProject,siteId,change});
+   return {...change,current:valueSummary(match.node?.[change.field]),matchStatus:match.method,matchedNodeId:match.nodeId};
+  }catch(error){return {...change,current:'',matchStatus:'blocked',matchError:clean(error.code||error.message)};}
+ });}
 async function collect(c,scope,siteId,ids=[]){
  const original=await findSite(c,scope,siteId),branches=await submitted(c,scope,siteId,ids);
- const changesByTest=new Map(),projectsByTest=new Map(),sourceShas=[];
+ const changesByTest=new Map(),projectsByTest=new Map(),baselinesByTest=new Map(),sourceShas=[];
  const items=branches.map(b=>{
   const out=listSelectableSiteTestChanges01618({baseline:b.baseline,submitted:b.project_json,siteId,testId:b.id,authorUserId:b.author_user_id});
-  changesByTest.set(b.id,out.changes);projectsByTest.set(b.id,b.project_json);sourceShas.push([b.id,b.review_snapshot_sha]);
-  return {testId:b.id,authorUserId:b.author_user_id,state:b.state,changes:enrich(out.changes,original.project_json,siteId),structuralChanges:out.structuralChanges};
+  changesByTest.set(b.id,out.changes);projectsByTest.set(b.id,b.project_json);baselinesByTest.set(b.id,b.baseline);sourceShas.push([b.id,b.review_snapshot_sha]);
+  return {testId:b.id,authorUserId:b.author_user_id,state:b.state,changes:enrich(out.changes,b.baseline,original.project_json,b.project_json,siteId),structuralChanges:out.structuralChanges};
  });
- return {original,items,changesByTest,projectsByTest,sourceShas};
+ return {original,items,changesByTest,projectsByTest,baselinesByTest,sourceShas};
 }
 export async function getSiteTestChangeChoices01618(scope,userId,siteId){
  owner(scope);return withClient(async c=>{const {original,items}=await collect(c,scope,siteId);
@@ -57,8 +62,8 @@ export async function getSiteTestChangeChoices01618(scope,userId,siteId){
 async function prepare(c,scope,siteId,choices){
  const decisions=validateSiteTestChangeDecisions01618(choices);
  const ids=[...new Set(decisions.map(x=>x.testId))];
- const {original,changesByTest,projectsByTest,sourceShas}=await collect(c,scope,siteId,ids);
- const composition=composeSelectedSiteTestChanges01618({current:original.project_json,siteId,decisions,changesByTest,projectsByTest});
+ const {original,changesByTest,projectsByTest,baselinesByTest,sourceShas}=await collect(c,scope,siteId,ids);
+ const composition=composeSelectedSiteTestChanges01618({current:original.project_json,siteId,decisions,changesByTest,projectsByTest,baselinesByTest});
  const planToken=siteTestSelectionPlanToken01618({siteId,revision:Number(original.revision),beforeSha:composition.beforeSha,afterSha:composition.afterSha,decisions,sourceShas});
  return {decisions,composition,original,planToken};
 }
