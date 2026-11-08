@@ -52,16 +52,16 @@ async function collect(c,scope,siteId,ids=[]){
  const published=publishedRows.rows[0]||null;
  const sourceAligned=Boolean(published&&branches.some(b=>b.source_revision_id===published.id));
  const pages=new Set(branches.flatMap(b=>(b.project_json?.site?.pages||[]).map(p=>p.id)).filter(Boolean));
- const originalDrifts=[...pages].map(pageId=>inspectSiteTestOriginalDrift01618H({current:original.project_json,published:published?.project_json,siteId,pageId,publishedRevisionId:published?.id||''})).filter(d=>d.stale);
+ const originalDrifts=sourceAligned?[...pages].map(pageId=>inspectSiteTestOriginalDrift01618H({current:original.project_json,published:published?.project_json,siteId,pageId,publishedRevisionId:published?.id||''})).filter(d=>d.stale):[];
  const stalePages=new Set(originalDrifts.map(x=>x.pageId));
  const recovery={available:sourceAligned&&originalDrifts.length>0,sourceAligned,originalDrifts};
- const changesByTest=new Map(),projectsByTest=new Map(),baselinesByTest=new Map(),revisionByTest=new Map(),sourceShas=[];
+ const changesByTest=new Map(),projectsByTest=new Map(),baselinesByTest=new Map(),revisionByTest=new Map(),sourceShas=[],publishedBasedTests=new Set(branches.filter(row=>row.source_revision_id===published?.id).map(row=>row.id));
  const items=branches.map(b=>{
   const out=listSelectableSiteTestChanges01618({baseline:b.baseline,submitted:b.project_json,siteId,testId:b.id,authorUserId:b.author_user_id});
   changesByTest.set(b.id,out.changes);projectsByTest.set(b.id,b.project_json);baselinesByTest.set(b.id,b.baseline);revisionByTest.set(b.id,b.revision_id);sourceShas.push([b.id,b.review_snapshot_sha]);
-  return {testId:b.id,authorUserId:b.author_user_id,state:b.state,changes:enrich(out.changes,b.baseline,original.project_json,b.project_json,siteId,stalePages),structuralChanges:out.structuralChanges};
+  return {testId:b.id,authorUserId:b.author_user_id,state:b.state,changes:enrich(out.changes,b.baseline,original.project_json,b.project_json,siteId,publishedBasedTests.has(b.id)?stalePages:new Set()),structuralChanges:out.structuralChanges};
  });
- return {original,items,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery};
+ return {original,items,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery,publishedBasedTests};
 }
 export async function getSiteTestChangeChoices01618(scope,userId,siteId){
  owner(scope);return withClient(async c=>{const {original,items,recovery,revisionByTest}=await collect(c,scope,siteId);
@@ -91,12 +91,12 @@ export async function getSiteTestChangeChoices01618(scope,userId,siteId){
 async function prepare(c,scope,siteId,choices){
  const decisions=validateSiteTestChangeDecisions01618(choices);
  const ids=[...new Set(decisions.map(x=>x.testId))];
- const {original,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery}=await collect(c,scope,siteId,ids);
+ const {original,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery,publishedBasedTests}=await collect(c,scope,siteId,ids);
  const revisions=[...new Set(revisionByTest.values())];
  const ledger=revisions.length?await c.query(`SELECT revision_id,change_id FROM shifttime_site_test_change_ledger_01619b
   WHERE site_id=$1 AND revision_id=ANY($2::text[])`,[siteId,revisions]):{rows:[]};
  assertUnusedAcceptances01619B(decisions,revisionByTest,ledger.rows);
- if(decisions.some(d=>d.decision==='accept'&&recovery.originalDrifts.some(x=>x.pageId===(changesByTest.get(d.testId)||[]).find(ch=>ch.id===d.changeId)?.pageId)))fail('ST_TEST_ORIGINAL_PAGE_NOT_SYNCED_01618H',409);
+ if(decisions.some(d=>d.decision==='accept'&&publishedBasedTests.has(d.testId)&&recovery.originalDrifts.some(x=>x.pageId===(changesByTest.get(d.testId)||[]).find(ch=>ch.id===d.changeId)?.pageId)))fail('ST_TEST_ORIGINAL_PAGE_NOT_SYNCED_01618H',409);
  const composition=composeSelectedSiteTestChanges01618({current:original.project_json,siteId,decisions,changesByTest,projectsByTest,baselinesByTest});
  const planToken=siteTestSelectionPlanToken01618({siteId,revision:Number(original.revision),beforeSha:composition.beforeSha,afterSha:composition.afterSha,decisions,sourceShas});
  return {decisions,composition,original,planToken,revisionByTest};

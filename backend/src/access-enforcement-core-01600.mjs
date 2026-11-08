@@ -36,7 +36,7 @@ export function classifyProtectedAction01600(method,parts){
       }
       if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
       if(p.length===6&&p[5]==='inbox'&&m==='GET')return decision('site.pages.view',siteId,'read');
-      if(p.length===7&&p[6]==='compare'&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===7&&['compare','baseline'].includes(p[6])&&m==='GET')return decision('site.pages.view',siteId,'read');
       if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='reset'&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===7&&p[6]==='preview'&&m==='POST')return decision('site.pages.edit',siteId);

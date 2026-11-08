@@ -10,24 +10,23 @@ test('01613D3 free-slot allocation works beyond five without recycling another d
  assert.equal(nextFreeDraftSlot01613D3([1,3,6].map(slot=>({slot}))),2);
  assert.equal(nextFreeDraftSlot01613D3(Array.from({length:30},(_,i)=>({slot:i+1}))),31);
 });
-test('01613D3 create test copy archives only author-owned editable draft, not reviewed or original',()=>{
+test('01619E create uses a fresh slot and never changes older manager draft',()=>{
  const workflow=read('../src/site-test-workflow-01613d.mjs');
+ const create=workflow.slice(workflow.indexOf('export async function createSiteTest01613D'),workflow.indexOf('// An existing copy can be safely restarted'));
+ assert.match(create,/source\.sourceKind!=='canonical'/);
+ assert.match(create,/nextFreeDraftSlot01613D3\(drafts\.rows\)/);
+ assert.match(create,/captureCanonicalBaseline01619E\(c,site,userId,source\)/);
+ assert.match(create,/SELECT revision FROM shifttime_builder_site_projects WHERE site_id=\$1 FOR UPDATE/);
+ assert.doesNotMatch(create,/UPDATE shifttime_builder_site_revisions|UPDATE shifttime_site_test_branches_01613d/);
+ assert.match(create,/replacedRevisionId:null/);
  const source=read('../src/site-test-source-01613d2.mjs');
- const route=read('../src/server.mjs');
- assert.match(workflow,/b\.author_user_id=\$5 AND b\.state IN \('editing','preview'\)/);
- assert.match(workflow,/AND r\.kind='draft'/);
- assert.match(workflow,/ORDER BY b\.updated_at DESC,b\.id DESC LIMIT 1 FOR UPDATE OF b,r/);
- assert.match(workflow,/UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0/);
- assert.match(workflow,/UPDATE shifttime_site_test_branches_01613d[\s\S]*?revision_id=\$2/);
- assert.match(workflow,/replacedRevisionId:previous\?\.revision_id\|\|null/);
- assert.match(workflow,/source\.sourceKind!=='published'/);
- assert.match(source,/published\.valid/);
- assert.match(route,/requireSiteTestRevisionAccess01613D/);
+ assert.match(source,/if\(cloud\.valid\)/);
+ assert.match(source,/sourceKind:'canonical'/);
 });
 test('01613D3 UI asks before replacing and keeps original publication owner-only',()=>{
  const ui=read('../../js/sites/site-test-workflow-01613d.js');
  const i18n=read('../../js/i18n/locales/uk-site-test-01613d.js');
- assert.match(ui,/window\.confirm\(T\('confirmCreateReplace'\)\)/);
- assert.match(i18n,/confirmCreateReplace:/);
+ assert.match(ui,/window\.confirm\(T\('confirmCreateNew01619E'\)\)/);
+ assert.match(i18n,/confirmCreateNew01619E:/);
  assert.match(ui,/action==='promote'[\s\S]*?if\(!isOwner\(\)\)/);
 });

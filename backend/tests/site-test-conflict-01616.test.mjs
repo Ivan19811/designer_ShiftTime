@@ -64,7 +64,7 @@ test('01616 owner-only workflow retains preflight token, CAS, database backup an
  assert.match(active,/composeSafeSiteTestApply01616/);
  assert.match(active,/composed.status==='conflict'/);
  assert.match(active,/siteTestConflictPlanToken01616/);
- assert.match(active,/sourceSha:projectSha01613D\(source.project\)/);
+ assert.match(active,/sourceSha:projectSha01613D\(baseline.project_json\)/);
  assert.match(active,/if\(planToken!==input.planToken\)/);
  assert.match(active,/FOR UPDATE/);assert.match(active,/backupId=newRevisionId01613D/);
  assert.match(active,/UPDATE shifttime_builder_site_projects/);

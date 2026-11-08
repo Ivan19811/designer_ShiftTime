@@ -20,9 +20,12 @@ export function inspectOriginalProject01613D2(project,siteId=''){
 }
 export function chooseOriginalSource01613D2({siteProject,publishedProject,siteId='',siteSchema='01170',publishedSchema='01170',publishedRevisionId=''}={}){
  const published=inspectOriginalProject01613D2(publishedProject,siteId),cloud=inspectOriginalProject01613D2(siteProject,siteId);
- // The published revision is the only server-side editable snapshot associated
- // with a production publish. The cloud project may contain an older template.
- if(published.valid)return {project:publishedProject,schemaVersion:publishedSchema,sourceRevisionId:publishedRevisionId,sourceKind:'published',summary:published,cloudSummary:cloud};
- if(cloud.valid)return {project:siteProject,schemaVersion:siteSchema,sourceRevisionId:'',sourceKind:'cloud_unverified',summary:cloud,cloudSummary:cloud};
+ // 01619E: the *editable* project in Render owns the newest accepted changes.
+ // Published is a historical LIVE snapshot only, never silently the seed for
+ // a new test. Its ID remains available for immutable ancestry verification.
+ if(cloud.valid)return {project:siteProject,schemaVersion:siteSchema,sourceRevisionId:'',sourceKind:'canonical',summary:cloud,cloudSummary:cloud,publishedRevisionId:published.valid?publishedRevisionId:''};
+ // Retain an explicit published-only fallback for READ-ONLY legacy comparison;
+ // create/reset reject it, rather than producing a stale manager test.
+ if(published.valid)return {project:publishedProject,schemaVersion:publishedSchema,sourceRevisionId:publishedRevisionId,sourceKind:'published_fallback',summary:published,cloudSummary:cloud,publishedRevisionId};
  return null;
 }
