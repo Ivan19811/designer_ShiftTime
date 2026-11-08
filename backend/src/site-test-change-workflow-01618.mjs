@@ -3,7 +3,7 @@
 import {randomUUID} from 'node:crypto';
 import {withClient} from './db.mjs';
 import {siteTestError01613D,projectSha01613D} from './site-test-core-01613d.mjs';
-import {listSelectableSiteTestChanges01618,composeSelectedSiteTestChanges01618,validateSiteTestChangeDecisions01618,siteTestSelectionPlanToken01618,resolveSiteTestChangeTarget01618E} from './site-test-change-select-01618.mjs';
+import {listSelectableSiteTestChanges01618,composeSelectedSiteTestChanges01618,validateSiteTestChangeDecisions01618,siteTestSelectionPlanToken01618,resolveSiteTestChangeTarget01618E,listManualSiteTestTargets01618G} from './site-test-change-select-01618.mjs';
 const fail=(code,status=409)=>{throw siteTestError01613D(code,status);};
 const clean=s=>String(s??'').trim();
 function owner(scope){if(scope?.role!=='owner')fail('ST_TEST_OWNER_REQUIRED_01613D',403);}
@@ -40,7 +40,8 @@ function enrich(list,baseline,original,submittedProject,siteId){return list.map(
   try{
    const match=resolveSiteTestChangeTarget01618E({baseline,current:original,submitted:submittedProject,siteId,change});
    return {...change,current:valueSummary(match.node?.[change.field]),matchStatus:match.method,matchedNodeId:match.nodeId};
-  }catch(error){return {...change,current:'',matchStatus:'blocked',matchError:clean(error.code||error.message),matchReason01618F:clean(error.matchReason01618F)};}
+  }catch(error){return {...change,current:'',matchStatus:'blocked',matchError:clean(error.code||error.message),matchReason01618F:clean(error.matchReason01618F),
+    manualTargets01618G:listManualSiteTestTargets01618G({baseline,current:original,submitted:submittedProject,siteId,change})};}
  });}
 async function collect(c,scope,siteId,ids=[]){
  const original=await findSite(c,scope,siteId),branches=await submitted(c,scope,siteId,ids);

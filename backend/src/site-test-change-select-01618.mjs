@@ -197,6 +197,70 @@ export function resolveSiteTestChangeTarget01618E({baseline,current,submitted,si
  }
  return lineageCandidate01618F({sourceMain,currentMain,baseNode,nodeId,marker,anchorKey});
 }
+
+// 01618G · The owner may explicitly map an old revision to one live Render node.
+// This is not fuzzy/automatic matching: every proposed target comes from the
+// *current* server project, and the choice is checked again inside the write
+// transaction against a SHA of the complete original node.
+function manualRole01618G(node){return !obj(node)?null:{kind:clean(node.kind),componentType:clean(node.componentType),tag:clean(node.meta?.dom?.tag)};}
+function manualSource01618G({baseline,current,submitted,siteId,change}){
+ const {pageId,nodeId}=change;
+ const source=main01618E(baseline,siteId,pageId),original=main01618E(current,siteId,pageId);
+ const base=source?.nodes?.[nodeId],proposal=nodeMap(submitted,siteId,pageId)?.[nodeId];
+ if(!source||!original||!obj(base)||!obj(proposal)||!shapeSame01618E(base,proposal))return null;
+ if(Object.keys(source.nodes).length>4000||Object.keys(original.nodes).length>4000)return null;
+ const srcParents=parentIndex01618F(source),curParents=parentIndex01618F(original);
+ const srcTree=rootedPaths01618E(source),curTree=rootedPaths01618E(original);
+ if(!srcParents||!curParents||!srcTree||!curTree||!srcTree.paths.has(nodeId))return null;
+ return {source,original,base,srcParents,curParents,curTree};
+}
+function validManualTarget01618G(ctx,sourceNodeId,targetNodeId){
+ const {source,original,base,srcParents,curParents,curTree}=ctx;
+ if(!safeId(targetNodeId)||!obj(original.nodes[targetNodeId])||!curTree.paths.has(targetNodeId))return false;
+ const candidate=original.nodes[targetNodeId];
+ if(!same(manualRole01618G(base),manualRole01618G(candidate)))return false;
+ if(!clean(base.kind)&&!clean(base.componentType)&&!clean(base.meta?.dom?.tag))return false;
+ const fromParent=srcParents.get(sourceNodeId),toParent=curParents.get(targetNodeId);
+ if(Boolean(fromParent)!==Boolean(toParent))return false;
+ if(fromParent&&!same(manualRole01618G(source.nodes[fromParent]),manualRole01618G(original.nodes[toParent])))return false;
+ return true;
+}
+export function listManualSiteTestTargets01618G({baseline,current,submitted,siteId,change}){
+ const ctx=manualSource01618G({baseline,current,submitted,siteId,change});
+ if(!ctx)return [];
+ const output=[];
+ const {original,curParents}=ctx;
+ for(const [targetNodeId,node] of Object.entries(original.nodes)){
+  if(!validManualTarget01618G(ctx,change.nodeId,targetNodeId))continue;
+  const label=clean(typeof node.content==='string'?node.content:node.content?.text||node.content?.html||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,110);
+  const parentId=curParents.get(targetNodeId);
+  output.push({nodeId:targetNodeId,expectedTargetHash:projectSha01613D(node),
+   currentText:label||'—',currentValue:sample(node[change.field]),parentClass:semanticClass01618F(original.nodes[parentId]?.meta?.dom?.className).slice(0,110),
+   className:semanticClass01618F(node.meta?.dom?.className).slice(0,110),role:clean(node.componentType||node.kind).slice(0,60)});
+  if(output.length>120)return []; // too many indistinguishable candidates: no unsafe enormous list
+ }
+ // Prefer intact authored semantic classes; allow broader structural choices only
+ // when every candidate has a changed class (then the owner must decide).
+ const sourceClass=semanticClass01618F(ctx.base.meta?.dom?.className);
+ const sameClass=sourceClass?output.filter(row=>row.className===sourceClass):[];
+ return sameClass.length?sameClass:output;
+}
+function ownerMatch01618G({baseline,initial,current,submitted,siteId,change,selection}){
+ // A manually supplied id is valid only for a genuinely blocked automatic match.
+ try{
+  resolveSiteTestChangeTarget01618E({baseline,current:initial,submitted,siteId,change});
+  fail('ST_TEST_MANUAL_TARGET_NOT_NEEDED_01618G',409);
+ }catch(err){if(err?.code==='ST_TEST_MANUAL_TARGET_NOT_NEEDED_01618G')throw err;}
+ const candidates=listManualSiteTestTargets01618G({baseline,current:initial,submitted,siteId,change});
+ const chosen=candidates.find(row=>row.nodeId===selection.targetNodeId);
+ if(!chosen||chosen.expectedTargetHash!==selection.expectedTargetHash)fail('ST_TEST_MANUAL_TARGET_STALE_01618G',409);
+ const node=main01618E(current,siteId,change.pageId)?.nodes?.[chosen.nodeId];
+ if(!obj(node))fail('ST_TEST_MANUAL_TARGET_STALE_01618G',409);
+ const source=main01618E(baseline,siteId,change.pageId),base=source?.nodes?.[change.nodeId];
+ const marker=source?lineageKey01618E(baseline,siteId,change.pageId,change.nodeId):'';
+ const anchor=source&&base?lineageAnchorKey01618F(source,base,siteId,change.pageId):'';
+ return {node,nodeId:chosen.nodeId,method:'owner-confirmed-01618G',lineageKeys:[marker,anchor]};
+}
 function sample(v){const s=typeof v==='string'?v:typeof v==='object'&&v!==null?(typeof v.text==='string'?v.text:JSON.stringify(v)):String(v??'');return s.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180);}
 export function listSelectableSiteTestChanges01618({baseline,submitted,siteId,testId,authorUserId=''}){
  if(!obj(baseline)||!obj(submitted)||clean(submitted.site?.id)!==siteId||clean(baseline.site?.id)!==siteId)fail('ST_TEST_CHANGE_PROJECT_INVALID_01618');
@@ -230,7 +294,10 @@ export function validateSiteTestChangeDecisions01618(input){
  return input.map((x,index)=>{
   if(!obj(x)||!safeId(x.testId)||!safeId(x.changeId)||!['accept','reject'].includes(x.decision)||set.has(x.testId+'\u241f'+x.changeId))fail('ST_TEST_CHANGE_SELECTION_INVALID_01618');
   set.add(x.testId+'\u241f'+x.changeId);
-  return {testId:x.testId,changeId:x.changeId,decision:x.decision,index};
+  const hasTarget=x.targetNodeId!==undefined||x.expectedTargetHash!==undefined;
+  if(hasTarget&&!(x.decision==='accept'&&safeId(x.targetNodeId)&&typeof x.expectedTargetHash==='string'&&/^[a-f0-9]{64}$/.test(x.expectedTargetHash)))fail('ST_TEST_MANUAL_TARGET_INVALID_01618G',400);
+  return {testId:x.testId,changeId:x.changeId,decision:x.decision,index,
+   ...(hasTarget?{targetNodeId:x.targetNodeId,expectedTargetHash:x.expectedTargetHash}:{})};
  });
 }
 export function composeSelectedSiteTestChanges01618({current,siteId,decisions,changesByTest,projectsByTest,baselinesByTest=new Map()}){
@@ -242,7 +309,9 @@ export function composeSelectedSiteTestChanges01618({current,siteId,decisions,ch
   if(!info)fail('ST_TEST_CHANGE_SELECTION_STALE_01618',409);
   if(selection.decision==='reject'){rejected.push({testId:selection.testId,changeId:selection.changeId});continue;}
   const submitted=projectsByTest.get(selection.testId);
-  const match=resolveSiteTestChangeTarget01618E({baseline:baselinesByTest.get(selection.testId),current:out,submitted,siteId,change:info});
+  const baseline=baselinesByTest.get(selection.testId);
+  const match=selection.targetNodeId?ownerMatch01618G({baseline,initial:current,current:out,submitted,siteId,change:info,selection}):
+   resolveSiteTestChangeTarget01618E({baseline,current:out,submitted,siteId,change:info});
   const originalNode=match.node,submittedNode=nodeMap(submitted,siteId,info.pageId)?.[info.nodeId];
   const key=`${info.pageId}\u241f${match.nodeId}\u241f${info.field}`;
   if(touched.has(key))overwrites.push({pageId:info.pageId,nodeId:info.nodeId,field:info.field,previousTestId:touched.get(key),nextTestId:selection.testId});
