@@ -26,6 +26,12 @@ export function classifyProtectedAction01600(method,parts){
         if(p.length===6&&m==='GET')return decision('site.pages.view',siteId,'read');
         if(p.length===7&&['plan','apply'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
         if(p.length===8&&p[6]==='rollback'&&m==='POST'&&p[7])return decision('site.publish.execute',siteId);
+        // 01618J: the owner-only original-Home repair API added in 01618H
+        // must be explicitly classified *before* the 01613B fail-closed gate.
+        // Both preflight and apply require the same site-scoped owner permission;
+        // the workflow verifies role=owner, immutable source and confirmation.
+        if(p.length===8&&p[6]==='repair'&&['plan','apply'].includes(p[7])&&m==='POST')
+          return decision('site.publish.execute',siteId);
         return null;
       }
       if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
