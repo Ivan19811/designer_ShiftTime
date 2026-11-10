@@ -22,7 +22,7 @@ test('01606G rejects full projects and arbitrary paths',()=>{
 });
 test('01606G transaction locks draft row and checks CAS fingerprint; no other project field changes',async()=>{
  let state=project(),commits=0,rollbacks=0,queries=[];
- const run=async fn=>fn({async query(sql,params=[]){queries.push([sql,params]);if(sql==='BEGIN')return {rowCount:1};if(sql==='COMMIT'){commits++;return {rowCount:1};}if(sql==='ROLLBACK'){rollbacks++;return {rowCount:1};}if(sql.includes('SELECT r.project_json'))return {rowCount:1,rows:[{project_json:structuredClone(state)}]};if(sql.includes('UPDATE shifttime_builder_site_revisions')){state=JSON.parse(params[0]);return {rowCount:1,rows:[{id:'rev1'}]};}throw Error('unrecognized mock SQL');}});
+ const run=async fn=>fn({async query(sql,params=[]){queries.push([sql,params]);if(sql==='BEGIN')return {rowCount:1};if(sql==='COMMIT'){commits++;return {rowCount:1};}if(sql==='ROLLBACK'){rollbacks++;return {rowCount:1};}if(sql.includes('SELECT r.project_json'))return {rowCount:1,rows:[{project_json:structuredClone(state)}]};if(sql.includes('FROM shifttime_site_test_branches_01613d'))return {rowCount:0,rows:[]};if(sql.includes('UPDATE shifttime_site_test_branches_01613d'))return {rowCount:0,rows:[]};if(sql.includes('UPDATE shifttime_builder_site_revisions')){state=JSON.parse(params[0]);return {rowCount:1,rows:[{id:'rev1'}]};}throw Error('unrecognized mock SQL');}});
  const apply=createDraftCanvasService01606G({run});const first=input(state,[{type:'update',id:'b',patch:{content:{text:'updated'}}}]);
  const out=await apply(scope,'actor','site1','rev1',first);
  assert.equal(out.operationsApplied,1);assert.equal(commits,1);
@@ -35,7 +35,8 @@ test('01606G transaction locks draft row and checks CAS fingerprint; no other pr
 });
 test('01606G route uses base and precise gates before DB work',()=>{
  const server=fs.readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
- assert.match(server,/normalizeDraftCanvasInput01606G\(await readJson/);
+ assert.match(server,/const rawInput01619L=await readJson\(req,\{limit:512\*1024\}\)/);
+ assert.match(server,/normalizeDraftCanvasInput01606G\(rawInput01619L\)/);
  assert.match(server,/assertCanvasActions01606F\(protectedDecision01600,input.operations\)/);
- assert.match(server,/applyDraftCanvas01606G\(scope,session.userId/);
+ assert.match(server,/applyDraftCanvas01606G\(scope,session.userId,p\[3\],p\[5\],rawInput01619L\)/);
 });

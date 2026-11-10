@@ -848,13 +848,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   // The 01600 site.pages.edit + tenant gate ran before parsing the request.
   if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]&&p[6]==='canvas'&&p.length===7){
     assertLegacyForUnmanaged01600(scope,protectedDecision01600);
-    const input=normalizeDraftCanvasInput01606G(await readJson(req,{limit:512*1024}));
+    // 01619L: the service validates the raw request again inside its scoped
+    // transaction. Passing the normalized value would smuggle the internal
+    // expectedRevision=1 back into its external-input validator, which correctly
+    // rejects that field with ST_CANVAS_DRAFT_INVALID_01606G (HTTP 400).
+    // Keep both independent validation steps and authorization checks intact.
+    const rawInput01619L=await readJson(req,{limit:512*1024});
+    const input=normalizeDraftCanvasInput01606G(rawInput01619L);
     try{assertCanvasActions01606F(protectedDecision01600,input.operations);}
     catch(error){
       if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:error.permission,siteId:p[3]},error.code);}catch{console.warn('[01606G] draft canvas denial journal unavailable');}
       throw error;
     }
-    return sendJson(res,200,await applyDraftCanvas01606G(scope,session.userId,p[3],p[5],input),{'cache-control':'private, no-store'});
+    return sendJson(res,200,await applyDraftCanvas01606G(scope,session.userId,p[3],p[5],rawInput01619L),{'cache-control':'private, no-store'});
   }
   // 01606G: create a draft from an existing same-site revision without accepting
   // a caller-supplied project. The precise draft_create gate applies above.
