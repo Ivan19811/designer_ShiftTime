@@ -2,6 +2,7 @@
 // multiple submitted manager branches. Does NOT publish LIVE or update commerce.
 import {randomUUID} from 'node:crypto';
 import {assertUnusedAcceptances01619B,acceptanceAudit01619B} from './site-test-approval-ledger-01619b.mjs';
+import {assertSelectedMainScope01619Q,assertRepairPageScope01619Q} from './site-test-scope-guard-01619q.mjs';
 import {inspectSiteTestOriginalDrift01618H,composeSiteTestOriginalRepair01618H,siteTestOriginalRepairToken01618H} from './site-test-original-repair-01618h.mjs';
 import {withClient} from './db.mjs';
 import {siteTestError01613D,projectSha01613D} from './site-test-core-01613d.mjs';
@@ -88,7 +89,8 @@ export async function getSiteTestChangeChoices01618(scope,userId,siteId){
     actorUserId:r.actor_user_id,appliedItems:r.applied_items,originalRevisionAfter:Number(r.original_revision_after)}))};
  });
 }
-async function prepare(c,scope,siteId,choices){
+async function prepare(c,scope,siteId,choices,{allowOverwrite01619Q=false}={}){
+ if(typeof allowOverwrite01619Q!=='boolean')fail('ST_TEST_CHANGE_OVERWRITE_INVALID_01619Q',400);
  const decisions=validateSiteTestChangeDecisions01618(choices);
  const ids=[...new Set(decisions.map(x=>x.testId))];
  const {original,changesByTest,projectsByTest,baselinesByTest,revisionByTest,sourceShas,recovery,publishedBasedTests}=await collect(c,scope,siteId,ids);
@@ -98,15 +100,24 @@ async function prepare(c,scope,siteId,choices){
  assertUnusedAcceptances01619B(decisions,revisionByTest,ledger.rows);
  if(decisions.some(d=>d.decision==='accept'&&publishedBasedTests.has(d.testId)&&recovery.originalDrifts.some(x=>x.pageId===(changesByTest.get(d.testId)||[]).find(ch=>ch.id===d.changeId)?.pageId)))fail('ST_TEST_ORIGINAL_PAGE_NOT_SYNCED_01618H',409);
  const composition=composeSelectedSiteTestChanges01618({current:original.project_json,siteId,decisions,changesByTest,projectsByTest,baselinesByTest});
- const planToken=siteTestSelectionPlanToken01618({siteId,revision:Number(original.revision),beforeSha:composition.beforeSha,afterSha:composition.afterSha,decisions,sourceShas});
- return {decisions,composition,original,planToken,revisionByTest};
+ assertSelectedMainScope01619Q({before:original.project_json,after:composition.project,siteId,applied:composition.applied});
+ const collisions=[...composition.overwrites,...composition.concurrentConflicts01619Q];
+ const needsOverwriteConfirmation01619Q=collisions.length>0;
+ const planToken=siteTestSelectionPlanToken01618({siteId,revision:Number(original.revision),beforeSha:composition.beforeSha,afterSha:composition.afterSha,decisions,sourceShas,allowOverwrite01619Q});
+ return {decisions,composition,original,planToken,revisionByTest,needsOverwriteConfirmation01619Q};
 }
 export async function planSiteTestSelectedChanges01618(scope,userId,siteId,input={}){
  owner(scope);return tx(async c=>{
   // Advisory lock gives an unambiguous original snapshot for this plan.
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
-  const {decisions,composition,original,planToken}=await prepare(c,scope,siteId,input.choices);
-  return {stage:'01618',status:'ready',projectRevision:Number(original.revision),planToken,
+  const {decisions,composition,original,planToken,needsOverwriteConfirmation01619Q}=await prepare(c,scope,siteId,input.choices,{allowOverwrite01619Q:input.allowOverwrite01619Q??false});
+  if(needsOverwriteConfirmation01619Q&&input.allowOverwrite01619Q!==true)
+   return {stage:'01619Q',status:'conflict',canApply:false,projectRevision:Number(original.revision),
+    accepted:composition.applied,rejected:composition.rejected,overwrites:composition.overwrites,
+    concurrentConflicts01619Q:composition.concurrentConflicts01619Q,netlifyPublished:false};
+  return {stage:'01619Q',status:'ready',projectRevision:Number(original.revision),planToken,
+   allowOverwrite01619Q:input.allowOverwrite01619Q===true,needsOverwriteConfirmation01619Q,
+   concurrentConflicts01619Q:composition.concurrentConflicts01619Q,
    accepted:composition.applied,rejected:composition.rejected,overwrites:composition.overwrites,
    beforeSha:composition.beforeSha,afterSha:composition.afterSha,netlifyPublished:false};
  });
@@ -117,7 +128,8 @@ export async function applySiteTestSelectedChanges01618(scope,userId,siteId,inpu
  return tx(async c=>{
   await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[siteId]);
   await c.query('SELECT revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[siteId]);
-  const {decisions,composition,original,planToken,revisionByTest}=await prepare(c,scope,siteId,input.choices);
+  const {decisions,composition,original,planToken,revisionByTest,needsOverwriteConfirmation01619Q}=await prepare(c,scope,siteId,input.choices,{allowOverwrite01619Q:input.allowOverwrite01619Q??false});
+  if(needsOverwriteConfirmation01619Q&&input.allowOverwrite01619Q!==true)fail('ST_TEST_CHANGE_CONFLICT_CONFIRM_REQUIRED_01619Q',409);
   if(input.planToken!==planToken)fail('ST_TEST_CHANGE_PLAN_STALE_01618');
   const bid='rev_'+randomUUID().replaceAll('-',''),batchId='batch_'+randomUUID().replaceAll('-','');
   await c.query(`INSERT INTO shifttime_builder_site_revisions
@@ -193,6 +205,7 @@ async function prepareOriginalRepair01618H(c,scope,siteId,pageId){
  if(!source.rowCount)fail('ST_TEST_ORIGINAL_REPAIR_SOURCE_UNVERIFIED_01618H',409);
  let composition;try{composition=composeSiteTestOriginalRepair01618H({current:original.project_json,published:published.project_json,siteId,pageId,publishedRevisionId:published.id});}
  catch(e){fail(e.code||'ST_TEST_ORIGINAL_REPAIR_NOT_NEEDED_01618H',409);}
+ assertRepairPageScope01619Q({before:original.project_json,after:composition.project,siteId,pageId});
  const planToken=siteTestOriginalRepairToken01618H({siteId,pageId,projectRevision:Number(original.revision),revisionId:published.id,beforeSha:composition.beforeSha,afterSha:composition.afterSha});
  return {original,published,composition,planToken,pageId};
 }

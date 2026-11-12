@@ -302,7 +302,7 @@ export function validateSiteTestChangeDecisions01618(input){
 }
 export function composeSelectedSiteTestChanges01618({current,siteId,decisions,changesByTest,projectsByTest,baselinesByTest=new Map()}){
  if(!obj(current)||clean(current.site?.id)!==siteId)fail('ST_TEST_CHANGE_PROJECT_INVALID_01618');
- const selected=validateSiteTestChangeDecisions01618(decisions),out=clone(current),applied=[],rejected=[],overwrites=[];
+ const selected=validateSiteTestChangeDecisions01618(decisions),out=clone(current),applied=[],rejected=[],overwrites=[],concurrentConflicts01619Q=[];
  const touched=new Map();
  for(const selection of selected){
   const info=(changesByTest.get(selection.testId)||[]).find(x=>x.id===selection.changeId);
@@ -314,7 +314,19 @@ export function composeSelectedSiteTestChanges01618({current,siteId,decisions,ch
    resolveSiteTestChangeTarget01618E({baseline,current:out,submitted,siteId,change:info});
   const originalNode=match.node,submittedNode=nodeMap(submitted,siteId,info.pageId)?.[info.nodeId];
   const key=`${info.pageId}\u241f${match.nodeId}\u241f${info.field}`;
-  if(touched.has(key))overwrites.push({pageId:info.pageId,nodeId:info.nodeId,field:info.field,previousTestId:touched.get(key),nextTestId:selection.testId});
+  if(touched.has(key))overwrites.push({pageId:info.pageId,nodeId:match.nodeId,field:info.field,previousTestId:touched.get(key),nextTestId:selection.testId});
+  // Compare with this manager's IMMUTABLE source field before overwriting.
+  // A different previously applied manager or owner edit must be called out
+  // explicitly, even when lineage correctly locates the node.
+  else {
+   const baseNode=nodeMap(baseline,siteId,info.pageId)?.[info.nodeId];
+   const currentValue=originalNode[info.field],proposalValue=submittedNode[info.field];
+   if(baseNode&&!same(baseNode[info.field],currentValue)&&!same(currentValue,proposalValue)){
+    concurrentConflicts01619Q.push({testId:selection.testId,changeId:selection.changeId,
+     pageId:info.pageId,nodeId:match.nodeId,field:info.field,
+     baseline:sample(baseNode[info.field]),current:sample(currentValue),proposed:sample(proposalValue)});
+   }
+  }
   touched.set(key,selection.testId);
   if(Object.hasOwn(submittedNode,info.field))originalNode[info.field]=clone(submittedNode[info.field]);
   else delete originalNode[info.field];
@@ -323,8 +335,8 @@ export function composeSelectedSiteTestChanges01618({current,siteId,decisions,ch
  }
  if(!applied.length)fail('ST_TEST_CHANGE_NO_ACCEPTED_01618');
  if(same(out,current))fail('ST_TEST_CHANGE_NO_DIFFERENCE_01618',409);
- return {project:out,applied,rejected,overwrites,beforeSha:projectSha01613D(current),afterSha:projectSha01613D(out)};
+ return {project:out,applied,rejected,overwrites,concurrentConflicts01619Q,beforeSha:projectSha01613D(current),afterSha:projectSha01613D(out)};
 }
-export function siteTestSelectionPlanToken01618({siteId,revision,beforeSha,afterSha,decisions,sourceShas}){
- return projectSha01613D({stage:'01618',siteId,revision,beforeSha,afterSha,decisions,sourceShas});
+export function siteTestSelectionPlanToken01618({siteId,revision,beforeSha,afterSha,decisions,sourceShas,allowOverwrite01619Q=false}){
+ return projectSha01613D({stage:'01619Q',siteId,revision,beforeSha,afterSha,decisions,sourceShas,allowOverwrite01619Q});
 }

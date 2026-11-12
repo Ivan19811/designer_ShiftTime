@@ -6,6 +6,7 @@ import {assertReviewSubmission01615A,assertReviewSubmissionAuthor01615A,assertRe
 import {compareSiteTestProjects01614B} from './site-test-compare-01614b.mjs';
 import {composeSiteTestApply01615B,assertApprovedForApply01615B,siteTestApplyPlanToken01615B,assertCanRollbackSiteTest01615B} from './site-test-apply-core-01615b.mjs';
 import {composeSafeSiteTestApply01616,siteTestConflictPlanToken01616} from './site-test-conflict-01616.mjs';
+import {assertSelectiveApplyScope01619Q} from './site-test-scope-guard-01619q.mjs';
 import {chooseOriginalSource01613D2,inspectOriginalProject01613D2} from './site-test-source-01613d2.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {config} from './config.mjs';
@@ -366,6 +367,7 @@ async function prepareSelectiveApply01615B(c,scope,siteId,branchId,input){
  if(!currentPublished.rowCount)throw siteTestError01613D('ST_TEST_APPLY_SOURCE_CHANGED_01615B',409);
  await assertOriginalLineage01615B(c,siteId,b.source_revision_id,currentPublished.rows[0].id);
  const composed=composeSafeSiteTestApply01616({baseline:baseline.project_json,current:site.project_json,approved:b.project_json,siteId,selection:input?.selection,overrides:input?.overrides,acknowledgeConflicts:input?.acknowledgeConflicts});
+ if(composed.status==='ready')assertSelectiveApplyScope01619Q({before:site.project_json,after:composed.project,siteId,selection:composed.selection});
  const planToken=composed.status==='ready'?siteTestConflictPlanToken01616({testId:branchId,projectRevision:Number(site.revision),sourceSha:projectSha01613D(baseline.project_json),beforeSha:composed.beforeSha,draftSha:b.review_snapshot_sha,selection:composed.selection,overrides:composed.overrides,afterSha:composed.afterSha}):null;
  return {site,b,composed,planToken};
 }
