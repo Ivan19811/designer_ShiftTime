@@ -50,7 +50,8 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
       }
       const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});
-      return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};
+      try{return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};}
+      catch(error){if(error?.code==='ST_ACCESS_ACTION_DENIED_01600')error.denialReason=delegatedModule?'delegated-store-grant-not-effective':'missing-legacy-permission';throw error;}
     }
     const q=await client.query(`SELECT r.permissions,a.scope_kind "scopeKind",s.id "siteId" FROM platform_role_assignments_01597 a
       JOIN platform_custom_roles_01597 r ON r.id=a.role_id AND r.account_id=a.account_id AND r.status='active'
@@ -72,7 +73,8 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
         permission:action.permission,allowedSiteIds:allStores?null:allowedSiteIds};
     }
     const result=grantDecision01600({role:scope.role,enrolled:true,permissions,permission:action.permission});
-    return {...requireProtectedAccess01600(result,action.permission),permission:action.permission,permissions};
+    try{return {...requireProtectedAccess01600(result,action.permission),permission:action.permission,permissions};}
+    catch(error){if(error?.code==='ST_ACCESS_ACTION_DENIED_01600')error.denialReason=delegatedModule?'delegated-store-grant-not-effective':'missing-effective-permission';throw error;}
   });
 }
 export function assertLegacyForUnmanaged01600(scope,decision,kind='write'){
