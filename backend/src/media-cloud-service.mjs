@@ -1,5 +1,6 @@
 // 01081 · Store-scoped cloud media orchestration. PostgreSQL stores metadata only; bytes live in R2/S3.
 import crypto from 'node:crypto';
+import {mediaObjectKey01622} from './media-object-key-01622.mjs';
 import {withClient,withTransaction} from './db.mjs';
 import {config} from './config.mjs';
 import {assertStorageProvider01081} from './storage-provider-contract.mjs';
@@ -17,7 +18,7 @@ function storageProvider(){const type=config.mediaStorageProvider;if(!['r2','s3'
 const provider=storageProvider();
 function requireProvider(){if(!provider||!provider.isConfigured())throw Object.assign(new Error('Cloud media storage is not configured. Set MEDIA_STORAGE_PROVIDER + S3/R2 credentials on backend.'),{statusCode:503});return provider;}
 function deliveryPath(assetId){return `/api/v1/public/media/${encodeURIComponent(assetId)}`;}
-function objectKey(scope,{assetId,fileName,folder='',productId=''}={}){const base=`accounts/${safeSegment(scope.accountId)}/workspaces/${safeSegment(scope.workspaceId)}/stores/${safeSegment(scope.storeId)}`;const branch=productId?`products/${safeSegment(productId)}`:`media/${safeSegment(folder||'uploads')}`;return `${base}/${branch}/${safeSegment(assetId)}/${safeName(fileName)}`;}
+const objectKey=mediaObjectKey01622;
 function mapAsset(row){if(!row)return null;return {id:row.id,accountId:row.accountId,workspaceId:row.workspaceId,storeId:row.storeId,provider:row.provider,bucket:row.bucket,objectKey:row.objectKey,kind:row.kind,fileName:row.fileName,mimeType:row.mimeType,sizeBytes:n(row.sizeBytes),width:n(row.width),height:n(row.height),sha256:row.sha256||'',etag:row.etag||'',status:row.status,publicUrl:row.publicUrl||'',url:deliveryPath(row.id),metadata:row.metadata||{},createdAt:row.createdAt,updatedAt:row.updatedAt,completedAt:row.completedAt,deletedAt:row.deletedAt};}
 const ASSET_SELECT=`SELECT id,account_id "accountId",workspace_id "workspaceId",store_id "storeId",provider,bucket,object_key "objectKey",kind,file_name "fileName",mime_type "mimeType",size_bytes "sizeBytes",width,height,sha256,etag,status,public_url "publicUrl",metadata,created_at "createdAt",updated_at "updatedAt",completed_at "completedAt",deleted_at "deletedAt" FROM media_cloud_assets`;
 async function event(client,assetId,storeId,type,payload={}){await client.query(`INSERT INTO media_asset_events(media_asset_id,store_id,event_type,payload) VALUES($1,$2,$3,$4::jsonb)`,[assetId,storeId,type,JSON.stringify(payload||{})]);}

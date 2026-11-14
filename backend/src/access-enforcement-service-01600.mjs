@@ -33,8 +33,15 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
         code:'ST_ONLINE_SITE_EXPLICIT_GRANT_REQUIRED_01613B',statusCode:403,permission:action.permission
       });
     }
+    // 01622 · Approved photo editors can upload only through the exact safe media
+    // routes marked by the server. A plain legacy viewer never gets this access.
+    const delegatedMedia=action.delegatedMediaRoute===true&&['builder.media.view','builder.media.upload'].includes(action.permission)&&!siteId;
     // Other pre-01600 merchant modules retain their existing legacy behavior.
     if(!enrolled.rowCount){
+      if(delegatedMedia){
+        const mediaGrants=modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(client)}));
+        if(mediaGrants.includes(action.permission))return {allowed:true,mode:'delegated',permission:action.permission,permissions:mediaGrants};
+      }
       const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});
       return {...requireProtectedAccess01600(result,action.permission),permission:action.permission};
@@ -49,7 +56,7 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
     [scope.accountId,scope.workspaceId,scope.storeId,userId,siteId||null,!!action.siteList]);
     // 01613C4 · Synthetic store-level grants are separate from site editing
     // and never contain publish, delete, admin, import or phone-reveal rights.
-    const extra=(action.delegatedModuleRoute===true&&!siteId&&/^(shop\.products|crm\.messages)\./.test(action.permission))
+    const extra=((action.delegatedModuleRoute===true&&!siteId&&/^(shop\.products|crm\.messages)\./.test(action.permission))||delegatedMedia)
       ?modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(client)})):[];
     const permissions=[...new Set([...q.rows.flatMap(r=>Array.isArray(r.permissions)?r.permissions:[]),...extra])];
     if(action.siteList){

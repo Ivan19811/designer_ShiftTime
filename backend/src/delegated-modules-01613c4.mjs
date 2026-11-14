@@ -19,6 +19,9 @@ export function modulePermissions01613C4({marketplace='none',messenger='none',pr
  if(hasProductPermission01621(tiers,'products_create'))p.push('shop.products.create');
  if(['photos','texts','prices','attributes','categories_create','categories_edit'].some(x=>hasProductPermission01621(tiers,x)))p.push('shop.products.edit');
  if(hasProductPermission01621(tiers,'products_delete'))p.push('shop.products.delete');
+ // 01622 · A photo grant also unlocks the existing Cloud Media picker/upload UI.
+ // No delete/proxy/external fetch rights are delegated.
+ if(hasProductPermission01621(tiers,'photos'))p.push('builder.media.view','builder.media.upload','ui.control.productmediaupload','ui.control.pickermediaupload','ui.control.productmediaextra','ui.control.librarymediaupload');
  if(['categories_create','categories_edit','attributes'].some(x=>hasProductPermission01621(tiers,x))){
   p.push('api.mode.catalog_actions');
   if(hasProductPermission01621(tiers,'categories_create'))p.push('shop.products.catalog.categories_create');

@@ -454,8 +454,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
   const protectedAction01600=classifyLegacyMerchantAction01605F(req.method,p)||classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
+  // 01622 · Route-shape whitelist only. The authenticated user's accepted, store-scoped
+  // photo grant is resolved independently by inspectProtectedAccess01600.
+  const delegatedMediaRoute01622=scope.role!=='owner'&&allowedDelegatedCloudMedia01621(req.method,p,{marketplace:'edit',productPermissions:['photos']});
   const protectedDecision01600=auditedAction01605
-    ? await inspectProtectedAccess01600(scope,session.userId,{...auditedAction01605,delegatedModuleRoute:moduleRoutePermission01613C4(req.method,p)===auditedAction01605.permission}).catch(async error=>{
+    ? await inspectProtectedAccess01600(scope,session.userId,{...auditedAction01605,delegatedModuleRoute:moduleRoutePermission01613C4(req.method,p)===auditedAction01605.permission,delegatedMediaRoute:delegatedMediaRoute01622&&['builder.media.view','builder.media.upload'].includes(auditedAction01605.permission)}).catch(async error=>{
         // Never lose a denial even when persistence fails; no request content is logged.
         if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,auditedAction01605,error.code||error.message);}catch{console.warn('[01605C] access audit write unavailable');}
         throw error;
