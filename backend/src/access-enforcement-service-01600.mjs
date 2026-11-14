@@ -36,11 +36,17 @@ export async function inspectProtectedAccess01600(scope,userId,action,{run=defau
     // 01622 · Approved photo editors can upload only through the exact safe media
     // routes marked by the server. A plain legacy viewer never gets this access.
     const delegatedMedia=action.delegatedMediaRoute===true&&['builder.media.view','builder.media.upload'].includes(action.permission)&&!siteId;
+    // 01622A · A site-collaboration manager can have an accepted, store-scoped
+    // module grant without being enrolled in the custom-role system. This is
+    // the normal invited-viewer case. The route must already be in the strict
+    // delegated route whitelist (set by server.mjs); the store-scoped grant is
+    // independently loaded from PostgreSQL, never from request input.
+    const delegatedModule=action.delegatedModuleRoute===true&&!siteId&&/^(shop\.products|crm\.messages)\./.test(action.permission);
     // Other pre-01600 merchant modules retain their existing legacy behavior.
     if(!enrolled.rowCount){
-      if(delegatedMedia){
-        const mediaGrants=modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(client)}));
-        if(mediaGrants.includes(action.permission))return {allowed:true,mode:'delegated',permission:action.permission,permissions:mediaGrants};
+      if(delegatedMedia||delegatedModule){
+        const moduleGrants=modulePermissions01613C4(await currentDelegatedModules01613C4(scope,userId,{run:cb=>cb(client)}));
+        if(moduleGrants.includes(action.permission))return {allowed:true,mode:delegatedModule?'custom':'delegated',source:'accepted-site-delegation-01622A',permission:action.permission,permissions:moduleGrants};
       }
       const roles=action.legacy==='admin'?['admin']:action.legacy==='order-write'?['admin','manager','editor','order-manager']:action.legacy==='order-read'?['admin','manager','editor','order-manager','viewer']:action.legacy==='read'?['admin','manager','editor','catalog-manager','order-manager','viewer']:['admin','manager','editor','catalog-manager'];
       const result=grantDecision01600({role:scope.role,enrolled:false,permission:action.permission,legacyAllowed:roles.includes(scope.role)});
