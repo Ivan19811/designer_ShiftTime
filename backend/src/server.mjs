@@ -66,7 +66,9 @@ import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
 import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
 import {getEmailUsage01612C} from './email-usage-01612c.mjs';
 import {listSiteInvites01613C,createSiteInvite01613C,revokeSiteInvite01613C,acceptSiteInvite01613C,assertSiteOnlyBoundary01613C} from './site-collaboration-01613c.mjs';
-import {listModuleDelegations01613C4,setModuleDelegation01613C4,moduleRoutePermission01613C4} from './delegated-modules-01613c4.mjs';
+import {listModuleDelegations01613C4,setModuleDelegation01613C4,moduleRoutePermission01613C4,currentDelegatedModules01613C4,allowedDelegatedCloudMedia01621} from './delegated-modules-01613c4.mjs';
+import {assertProductMutation01621,assertDelegatedCatalogOperation01621,assertDelegatedImageInput01621} from './delegated-product-fields-01621.mjs';
+import {verifyDelegatedUploadOwner01621} from './delegated-media-owner-01621.mjs';
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
@@ -977,6 +979,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,200,await acceptSiteInvite01613C(session.userId,input.token),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
   }
   if(p[2]==='media'){
+    const delegatedMediaLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
+    const delegatedImageAllowed01621=allowedDelegatedCloudMedia01621(req.method,p,delegatedMediaLevels01621);
     const candidateSiteId=String(req.headers['x-st-site-id']||'').trim();
     const verifiedSiteId=candidateSiteId?await resolveAuthorizedMediaTrafficSite01206(scope,candidateSiteId):'';
     const mediaSiteId=verifiedSiteId||publishedSiteId;
@@ -985,9 +989,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
     if(req.method==='POST'&&p[3]==='remote-image'&&p[4]==='fetch'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const body=await readJson(req,{limit:64*1024}),remote=await fetchRemoteImage01396(body?.url);const bytes=remote.bytes;res.__stTrafficOutboundBytes01194=bytes.length;res.writeHead(200,{'content-type':remote.mimeType,'content-length':bytes.length,'content-disposition':`attachment; filename="${remote.fileName.replace(/["\\]/g,'_')}"`,'x-st-remote-final-url':remote.finalUrl,'x-st-remote-source-bytes':String(remote.sizeBytes),'cache-control':'no-store'});return res.end(bytes);}
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
-    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){if(!delegatedImageAllowed01621)assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedImageAllowed01621)assertDelegatedImageInput01621(input);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,input));}
     if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){if(!delegatedImageAllowed01621)assertLegacyForUnmanaged01600(scope,protectedDecision01600);if(delegatedImageAllowed01621)await verifyDelegatedUploadOwner01621(mediaScope,session.userId,p[4]);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
     if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }
@@ -1054,6 +1058,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Network route not found',requestId:rid});
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
+  const delegatedProductLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
   if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
     const input=await readJson(req,{limit:1024*1024});
     const plan=normalizeCatalogOperations01606D(input);
@@ -1061,10 +1066,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     // permission for this endpoint does not authorize any mutations by itself.
     const checked=new Map();
     for(const op of plan.operations){
+      if(delegatedProductLevels01621?.marketplace==='edit')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,op.collection,op.action,op.value);
       const basePermission=op.action==='delete'?'shop.products.delete':'shop.products.edit';
       if(!checked.has(basePermission)){
         let result;
-        try{result=await inspectProtectedAccess01600(scope,session.userId,{permission:basePermission,siteId:'',legacy:'write'});}
+        try{result=await inspectProtectedAccess01600(scope,session.userId,{permission:basePermission,siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace});}
         catch(error){if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:basePermission,siteId:''},error.code||error.message);}catch{}throw error;}
         checked.set(basePermission,result);
       }
@@ -1127,9 +1133,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(key){const id=p[4]||'';
     if(req.method==='GET'&&!id&&p.length===4)return sendJson(res,200,await listResource(scope,key));
     if(req.method==='GET'&&id&&p.length===5){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
-    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,201,await createResource(scope,key,input));}
-    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,200,await updateResource(scope,key,id,input));}
-    if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
+    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedProductLevels01621?.marketplace==='edit'){if(key==='products')assertProductMutation01621(delegatedProductLevels01621,input,{creating:true});else assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'create',input);}if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));if(key==='products'&&delegatedProductLevels01621?.marketplace==='edit'){delete input.createdAt;delete input.updatedAt;}return sendJson(res,201,await createResource(scope,key,input,{actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''}));}
+    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedProductLevels01621?.marketplace==='edit'&&key!=='products')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'update',input);if(key==='products'&&delegatedProductLevels01621?.marketplace!=='edit')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,200,await updateResource(scope,key,id,input,{validateUpdate:delegatedProductLevels01621?.marketplace==='edit'&&key==='products'?(current,patch)=>assertProductMutation01621(delegatedProductLevels01621,patch,{before:current}):null,actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''}));}
+    if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);if(delegatedProductLevels01621?.marketplace==='edit'&&key!=='products')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'delete');const removed=await deleteResource(scope,key,id,{actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''});return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }

@@ -1,7 +1,7 @@
 // 01613C · Site collaboration: explicit invite acceptance, always site-scoped.
 // No shared passwords or email-based auto-grants; token hashes stored in PostgreSQL.
 import crypto from 'node:crypto';
-import {currentDelegatedModules01613C4,moduleRouteAllowed01613C4} from './delegated-modules-01613c4.mjs';
+import {currentDelegatedModules01613C4,moduleRouteAllowed01613C4,allowedDelegatedCloudMedia01621} from './delegated-modules-01613c4.mjs';
 
 const clean=v=>String(v??'').trim();
 const fail=(code,statusCode=400)=>Object.assign(new Error(code),{code,statusCode});
@@ -137,9 +137,9 @@ export async function assertSiteOnlyBoundary01613C(scope,userId,parts,{run=defau
  if(!marked.rowCount)return;
  // 01613C4 · Only expressly delegated, classified Marketplace/Inbox actions
  // can cross the site-only fence. All other APIs stay denied.
- if(['marketplace','notifications'].includes(parts?.[2])){
+ if(['marketplace','notifications','media'].includes(parts?.[2])){
   const levels=await currentDelegatedModules01613C4(scope,userId,{run});
-  if(moduleRouteAllowed01613C4(method,parts,levels))return;
+  if(moduleRouteAllowed01613C4(method,parts,levels)||allowedDelegatedCloudMedia01621(method,parts,levels))return;
  }
  throw fail('ST_SITE_COLLAB_RESOURCE_DENIED_01613C',403);
 }
