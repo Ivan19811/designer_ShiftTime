@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
 import {draftFingerprint01606G} from './site-canvas-draft-service-01606g.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
+import {classifyTestDraftDelete01623D} from './site-revision-delete-policy-01623d.mjs';
 
 const clean=v=>String(v??'').trim();
 const clone=v=>v==null?v:structuredClone(v);
@@ -68,8 +69,61 @@ export async function updateSiteDraftDetails01232(scope,userId,siteId,revisionId
   return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET label=CASE WHEN $1<>'' THEN $1 ELSE label END,comment=$2,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4 AND id=$5 AND kind='draft' RETURNING *`,[label,comment,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
-export async function deleteSiteDraft01231(scope,siteId,revisionIdValue){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{operation:'delete'});const q=await c.query(`DELETE FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id,slot`,[sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return {deleted:true,id:clean(q.rows[0].id),slot:Number(q.rows[0].slot||0)};}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+// 01623D: authoritatively authorize deletion, with history/approval protection.
+
+export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId=''){
+  const sid=clean(siteId),rid=clean(revisionIdValue);
+  return withClient(async c=>{
+    await c.query('BEGIN');
+    try{
+      await assertSite(c,scope,sid);
+      const existing=await c.query(`SELECT id,slot,kind FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 FOR UPDATE`,[sid,rid]);
+      if(!existing.rowCount||existing.rows[0].kind!=='draft')throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+      const test=await c.query(`SELECT id,state,author_user_id,review_cycle,review_snapshot_sha FROM shifttime_site_test_branches_01613d WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[sid,rid]);
+      if(test.rowCount){
+        const branch=test.rows[0];
+        const history=await c.query(`SELECT EXISTS(SELECT 1 FROM shifttime_site_test_review_events_01615a WHERE test_id=$1) AS has_review,
+          EXISTS(SELECT 1 FROM shifttime_site_test_apply_events_01615b WHERE test_id=$1) AS has_apply`,[branch.id]);
+        const decision=classifyTestDraftDelete01623D({role:scope.role,userId,authorUserId:branch.author_user_id,state:branch.state,
+          hasHistory:!!history.rows[0]?.has_review||!!history.rows[0]?.has_apply});
+        if(decision&&decision!=='archive')throw httpError('Protected test revision cannot be deleted',decision==='ST_TEST_AUTHOR_REQUIRED_01613D'?403:409,decision);
+        if(decision==='archive'){
+          // Preserve review events and snapshot lineage. Removing an in-review
+          // version is a rejection by the site owner, never an implicit approval.
+          if(['in_review','approved'].includes(branch.state)){
+            if(scope.role!=='owner')throw httpError('Owner must finish review first',403,'ST_TEST_REVIEW_DELETE_BLOCKED_01623D');
+            await c.query(`UPDATE shifttime_site_test_branches_01613d
+              SET state='rejected',approved_at=NULL,approved_by_user_id=NULL,updated_at=now()
+              WHERE id=$1`,[branch.id]);
+            await c.query(`INSERT INTO shifttime_site_test_review_events_01615a
+              (test_id,site_id,actor_user_id,revision_id,review_cycle,action,project_sha,note)
+              VALUES($1,$2,$3,$4,$5,'rejected',$6,$7)`,
+              [branch.id,sid,userId,rid,Number(branch.review_cycle)||0,clean(branch.review_snapshot_sha),'Archived by site owner via revision deletion']);
+          }
+          if(['editing','preview'].includes(branch.state)){
+            // A rework draft can already have prior review history. Closing its
+            // branch prevents a dangling editable TEST pointing to an archive.
+            await c.query(`UPDATE shifttime_site_test_branches_01613d
+              SET state='rejected',preview_deploy_id=NULL,candidate_deploy_id=NULL,
+                preview_url=NULL,approved_at=NULL,approved_by_user_id=NULL,updated_at=now()
+              WHERE id=$1`,[branch.id]);
+          }
+          const archived=await c.query(`UPDATE shifttime_builder_site_revisions
+            SET kind='archived',slot=0,updated_at=now()
+            WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id`,[sid,rid]);
+          if(!archived.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+          await c.query('COMMIT');
+          return {deleted:true,archived:true,id:rid,slot:Number(existing.rows[0].slot||0)};
+        }
+      }else if(scope.role!=='owner')throw httpError('Not an owned test draft',403,'ST_TEST_DRAFT_REQUIRED_01613D');
+      // Hard delete only private, unreviewed drafts; cascades their unreviewed
+      // test branch without removing any immutable review or publication audit.
+      const q=await c.query(`DELETE FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id,slot`,[sid,rid]);
+      if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+      await c.query('COMMIT');
+      return {deleted:true,archived:false,id:clean(q.rows[0].id),slot:Number(q.rows[0].slot||0)};
+    }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}
+  });
 }
 
 export async function publishSiteRevision01231(scope,userId,siteId,revisionIdValue){
