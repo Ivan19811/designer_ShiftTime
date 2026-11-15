@@ -12,7 +12,7 @@ export function installPublishedCustomerAccount01595(files){
     if(!/data-st-published-traffic\s*=\s*["']01203["']/.test(html))continue;
     if(!/data-shop-page-role-01532\s*=\s*["']account["']/.test(html))continue;
     if(/data-st-site-customer-account\s*=\s*["']01595["']/.test(html))continue;
-    const tag='<script type="module" data-st-site-customer-account="01595" src="/'+scriptPath+'"></script>';
+    const tag='<script type="module" data-st-site-customer-account="01595" src="/'+scriptPath+'?v=01623B"></script>';
     files.set(path,Buffer.from(/<\/body\s*>/i.test(html)?html.replace(/<\/body\s*>/i,tag+'</body>'):html+tag));
     enabled=true;
   }

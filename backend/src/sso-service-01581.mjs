@@ -63,8 +63,9 @@ export async function exchangeSso01581({code,codeVerifier,clientId,redirectUri}=
  if(!validVerifier01581(codeVerifier))throw failure('SSO_VERIFIER_INVALID_01581',400);
  const {row,session}=await consumeCode(code,'authorization',{clientId,redirectUri});
  if(ssoChallenge01581(codeVerifier)!==row.code_challenge)throw failure('SSO_PKCE_MISMATCH_01581',401);
- const fresh=await createSessionForUser01581(session.user_id);
+ // Never mint a Builder bearer for a customer without a valid platform Store membership.
  const scope=await resolveAuthorizedStore(session.user_id,'');
+ const fresh=await createSessionForUser01581(session.user_id);
  if(clientId==='crm')await noteServiceUseSafely01592(session.user_id,'crm','crm_sso_exchange');
  return {token:fresh.token,user:{id:fresh.userId,email:fresh.email,name:fresh.name},scope,expiresAt:fresh.expiresAt};
 }

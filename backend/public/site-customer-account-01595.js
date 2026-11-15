@@ -4,11 +4,11 @@
   const section=document.querySelector('[data-shop-page-role-01532="account"]');
   if(!identity?.siteId||!section||globalThis.__ST_SITE_CUSTOMER_ACCOUNT_01595__)return;
   globalThis.__ST_SITE_CUSTOMER_ACCOUNT_01595__=true;
-  let tr;try{const response=await fetch('/assets/site-customer-account-01595.uk.json');if(!response.ok)return;tr=await response.json();}catch{return;}
+  let tr;try{const response=await fetch('/assets/site-customer-account-01595.uk.json?v=01623B');if(!response.ok)return;tr=await response.json();}catch{return;}
   const storageKey='st_site_customer_01595_'+identity.siteId,flowKey='st_site_flow_01595_'+identity.siteId;
   const html=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const errorMessage=code=>tr.errors?.[code]||tr.errors?.unknown||'';
-  let bearer='',user=null,loading=false,error='';try{bearer=sessionStorage.getItem(storageKey)||'';}catch{}
+  let bearer='',user=null,siteAccess=null,loading=false,error='';try{bearer=sessionStorage.getItem(storageKey)||'';}catch{}
   const host=document.createElement('section');host.className='st-site-account-01595';
   const style=document.createElement('style');style.textContent=`
     .st-site-account-01595{width:min(770px,100%);margin:28px auto;padding:24px;border:1px solid #d9e4ef;border-radius:24px;background:white;box-shadow:0 20px 52px #132b4820;color:#182d45;font:500 15px/1.55 system-ui,sans-serif;box-sizing:border-box}
@@ -40,14 +40,25 @@
       location.assign(next.loginUrl);
     }catch(e){error=errorMessage(e?.code);loading=false;render();}
   }
+  async function refreshSiteAccess01623(){
+    siteAccess=null;if(!user||!bearer)return;
+    try{const result=await api('admin-access');siteAccess=result||null;}catch{siteAccess=null;}
+  }
   function render(){
     if(user){
-      host.innerHTML=`<h2>${html(tr.welcome)}</h2><div class="detail"><strong data-site-customer-name></strong><div data-site-customer-email></div><div>${html(tr.userId)}: <span data-site-customer-id></span></div><div data-site-customer-verified></div></div><p>${html(tr.notice)}</p><button type="button" class="secondary" data-site-customer-logout>${html(tr.logout)}</button>`;
+      const elevated=Boolean(siteAccess?.canAdmin),roleKey=elevated?(siteAccess.role==='owner'?'owner':siteAccess.role==='site_admin'?'siteAdmin':'manager'):'customer';
+      host.innerHTML=`<h2>${html(tr.welcome)}</h2><div class="detail"><strong data-site-customer-name></strong><div data-site-customer-email></div><div>${html(tr.userId)}: <span data-site-customer-id></span></div><div data-site-customer-verified></div><div>${html(tr.accountRole01623)}: <strong data-site-role-01623></strong></div></div>${elevated&&siteAccess?.builderUrl?`<button type="button" data-site-admin-open-01623>${html(tr.siteAdminPanel01623)}</button>`:''}<p>${html(elevated?(siteAccess?.builderUrl?tr.adminNotice01623:tr.adminUnavailable01623):tr.notice)}</p><button type="button" class="secondary" data-site-customer-logout>${html(tr.logout)}</button>`;
       host.querySelector('[data-site-customer-name]').textContent=user.name||'';
       host.querySelector('[data-site-customer-email]').textContent=user.email||'';
       host.querySelector('[data-site-customer-id]').textContent=user.id||'';
       host.querySelector('[data-site-customer-verified]').textContent=user.emailVerified?tr.emailVerified:tr.emailUnverified;
-      host.querySelector('[data-site-customer-logout]').addEventListener('click',async()=>{if(loading)return;loading=true;const existing=bearer;saveToken(null);user=null;render();try{bearer=existing;await api('logout',{});}catch{}finally{bearer='';loading=false;render();}});
+      host.querySelector('[data-site-role-01623]').textContent=tr.accountRoles01623?.[roleKey]||tr.accountRoles01623?.customer||'';
+      host.querySelector('[data-site-admin-open-01623]')?.addEventListener('click',()=>{
+        if(!siteAccess?.canAdmin||!siteAccess?.builderUrl)return;
+        const url=new URL(siteAccess.builderUrl);if(url.protocol!=='https:'&&!['localhost','127.0.0.1'].includes(url.hostname))return;
+        location.assign(url.href);
+      });
+      host.querySelector('[data-site-customer-logout]').addEventListener('click',async()=>{if(loading)return;loading=true;const existing=bearer;saveToken(null);user=null;siteAccess=null;render();try{bearer=existing;await api('logout',{});}catch{}finally{bearer='';loading=false;render();}});
       return;
     }
     host.innerHTML=`<h2>${html(tr.title)}</h2><p>${html(tr.intro)}</p>${error?`<p class="error" role="alert">${html(error)}</p>`:''}<button data-site-customer-login type="button" ${loading?'disabled':''}>${html(loading?tr.busy:tr.login)}</button><button data-site-customer-register type="button" class="secondary" ${loading?'disabled':''}>${html(tr.register)}</button><p>${html(tr.notice)}</p>`;
@@ -62,9 +73,9 @@
     let saved=null;try{saved=JSON.parse(sessionStorage.getItem(flowKey)||'null');sessionStorage.removeItem(flowKey);}catch{}
     if(code&&state&&saved?.state===state&&saved?.verifier){
       loading=true;render();
-      try{const result=await api('exchange',{code,verifier:saved.verifier});saveToken(result);user=result.user||null;}
+      try{const result=await api('exchange',{code,verifier:saved.verifier});saveToken(result);user=result.user||null;await refreshSiteAccess01623();}
       catch(e){error=errorMessage(e?.code);saveToken(null);}
       finally{loading=false;render();}
     }else{error=errorMessage('SITE_ACCOUNT_EXCHANGE_INVALID_01595');render();}
-  }else if(bearer){try{const result=await api('me');user=result.user||null;}catch{saveToken(null);}render();}
+  }else if(bearer){try{const result=await api('me');user=result.user||null;await refreshSiteAccess01623();}catch{saveToken(null);siteAccess=null;}render();}
 })();

@@ -52,6 +52,7 @@ import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
 import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} from './site-customer-account-service-01595.mjs';
+import {getPublishedSiteAdminAccess01623} from './site-admin-access-01623.mjs';
 import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
 import {listVerifiedMessengerChannels01611,startMessengerVerification01611,verifyMessengerChannel01611,assertMessengerChannelProof01611} from './messenger-verification-service-01611.mjs';
 import {getVisitorContact01611A,linkVisitorContactToAuthenticatedUser01611A} from './messenger-contact-profiles-01611a.mjs';
@@ -198,9 +199,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='public'&&p[3]==='site'&&p[4]==='account'&&p.length===6){
     const action=p[5],site=publishedTrafficIdentity;
     if(!site)return sendJson(res,401,{error:'SITE_ACCOUNT_SITE_REQUIRED_01595',stage:'01595',requestId:rid},siteAccountHeaders01595);
-    if(!['start','exchange','me','logout'].includes(action))return sendJson(res,404,{error:'SITE_ACCOUNT_ROUTE_01595',requestId:rid},siteAccountHeaders01595);
+    if(!['start','exchange','me','logout','admin-access'].includes(action))return sendJson(res,404,{error:'SITE_ACCOUNT_ROUTE_01595',requestId:rid},siteAccountHeaders01595);
     if(action==='me'&&req.method==='GET')return sendJson(res,200,{...(await customerSession01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
-    if(req.method!=='POST'||action==='me')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
+    if(action==='admin-access'&&req.method==='GET'){
+      const identity=await customerSession01595(site,String(req.headers['x-st-customer-session']||''),{updateSeen:false});
+      return sendJson(res,200,{...(await getPublishedSiteAdminAccess01623(site,identity.user.id)),requestId:rid},siteAccountHeaders01595);
+    }
+    if(req.method!=='POST'||action==='me'||action==='admin-access')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
     if(action==='logout')return sendJson(res,200,{...(await logoutSiteCustomer01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
     limitCustomerAuth01595(site.siteId,requestClientAddress01414(req));
     const input=await readJson(req,{limit:2048});
