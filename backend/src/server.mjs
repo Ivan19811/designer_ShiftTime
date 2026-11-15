@@ -122,7 +122,7 @@ import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitat
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
-import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
+import {publishSite01143,getSitePublishStatus01143,publishSiteDemo01623E,getSiteDemoStatus01623E} from './site-publishing-service-01143.mjs';
 import {saveSiteTestShell01614A} from './site-test-shell-01614a.mjs';
 import {getSiteTestChangeChoices01618,planSiteTestSelectedChanges01618,applySiteTestSelectedChanges01618,rollbackSiteTestSelectedChanges01618,planSiteTestOriginalRepair01618H,applySiteTestOriginalRepair01618H} from './site-test-change-workflow-01618.mjs';
 import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,getSiteTestBaseline01619E,decideSiteTest01615A,getSiteTestReviewInbox01615A,previewSelectiveSiteTestApply01615B,applyApprovedSiteTest01615B,rollbackAppliedSiteTest01615B,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
@@ -894,6 +894,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
+  // 01623E: demo has its own Netlify identity, deployment table and site-scoped permission.
+  if(p[2]==='sites'&&p[3]&&p[4]==='demo-publish-status'&&req.method==='GET')return sendJson(res,200,await getSiteDemoStatus01623E(scope,p[3]));
+  if(p[2]==='sites'&&p[3]&&p[4]==='demo-publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSiteDemo01623E(scope,session.userId,p[3],await readSitePublishingJson01609C(req)));}
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
   if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readSitePublishingJson01609C(req)));}
   if(p[2]==='sites'&&req.method==='GET'&&p.length===3){

@@ -16,13 +16,19 @@ export function createBuilderSitesService01170({repo,netlify}={}){
     async delete(scope,userId,id){
       const siteId=clean(id);if(!siteId)throw httpError('Builder site id is required');
       const target=await repo.getDeleteTarget(scope,siteId);if(!target)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');
+      // 01623E: remove isolated DEMO before production. Never leave an orphan preview project.
+      let demoRemote={deleted:false,alreadyMissing:false,skipped:true};
+      if(clean(target.netlifyDemoSiteId)){
+        try{demoRemote=await netlify.deleteSite({siteId:target.netlifyDemoSiteId});}
+        catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)demoRemote={deleted:true,alreadyMissing:true,skipped:false};else throw e;}
+      }
       let remote={deleted:false,alreadyMissing:false,skipped:true};
       if(clean(target.netlifySiteId)){
         try{remote=await netlify.deleteSite({siteId:target.netlifySiteId});}
         catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)remote={deleted:true,alreadyMissing:true,skipped:false};else throw e;}
       }
       const removed=await repo.remove(scope,siteId);if(!removed)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');
-      return {deleted:true,siteId,deletedByUserId:userId,netlify:remote};
+      return {deleted:true,siteId,deletedByUserId:userId,netlify:remote,netlifyDemo:demoRemote};
     },
   };
 }
