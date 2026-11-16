@@ -38,6 +38,14 @@ export function assertOnlineSiteAccess01613B(scope,decision,method,parts){
     if(!permissions.has('site.pages.edit'))throw deny('ST_TEST_EDIT_REQUIRED_01613D','site.pages.edit');
     return true;
   }
+  // 01623G: isolated DEMO is editable by an explicitly assigned site editor.
+  // It is NEVER a permission to publish the canonical site; that route remains
+  // owner-only below, even if the same user knows its endpoint.
+  if(parts.length===5&&parts[4]==='demo-publish'&&verb==='POST'){
+    if(!permissions.has('site.pages.edit'))throw deny('ST_DEMO_EDIT_REQUIRED_01623G','site.pages.edit');
+    if(!permissions.has('api.mode.site_actions'))throw deny('ST_ONLINE_SITE_PRECISE_MODE_REQUIRED_01613B','api.mode.site_actions');
+    return true;
+  }
   if(parts.length===3||verb==='DELETE'&&parts.length===4||
      parts[4]==='publish'&&verb==='POST'||
      parts[4]==='revisions'&&parts[6]==='publish'&&verb==='POST'){
