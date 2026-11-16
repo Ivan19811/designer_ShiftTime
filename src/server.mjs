@@ -37,6 +37,7 @@ import {classifyNotificationAccess01605B} from './access-audit-core-01605b.mjs';
 import {assertUnmanagedAdminOperation01605} from './access-audit-service-01605.mjs';
 import {listAccessHistory01605C,recordDeniedAccess01605C} from './access-history-service-01605c.mjs';
 import {inspectProtectedAccess01600,assertLegacyForUnmanaged01600} from './access-enforcement-service-01600.mjs';
+import {assertOnlineSiteAccess01613B,isOnlineSiteRoute01613B} from './secure-online-site-01613b.mjs';
 import {classifySiteAction01606E,assertSiteAction01606E,isPreciseSiteMode01606E} from './access-site-actions-core-01606e.mjs';
 import {classifyCanvasRoute01606F,assertCanvasActions01606F} from './access-canvas-actions-core-01606f.mjs';
 import {normalizeCanvasAtomicInput01606F} from './site-canvas-atomic-core-01606f.mjs';
@@ -51,14 +52,27 @@ import {listAuthorizedStoreContexts01088} from './auth-context-service-01088.mjs
 import {getAccountProfile01579} from './auth-profile-service-01579.mjs';
 import {listPlatformUsers01592,getPlatformUser01592,myServices01592,noteServiceUseSafely01592} from './platform-user-registry-service-01592.mjs';
 import {customerSession01595,logoutSiteCustomer01595,siteAccountHeaders01595} from './site-customer-account-service-01595.mjs';
+import {getPublishedSiteAdminAccess01623} from './site-admin-access-01623.mjs';
+import {createPublicMessengerChat01609,getPublicMessengerChat01609,replyPublicMessengerChat01609,linkMessengerProductionOrder01609} from './messenger-service-01609.mjs';
+import {listVerifiedMessengerChannels01611,startMessengerVerification01611,verifyMessengerChannel01611,assertMessengerChannelProof01611} from './messenger-verification-service-01611.mjs';
+import {getVisitorContact01611A,linkVisitorContactToAuthenticatedUser01611A} from './messenger-contact-profiles-01611a.mjs';
+import {listMessengerAccountThreads01611E,getMessengerAccountThread01611E,replyMessengerAccountThread01611E} from './messenger-account-sync-01611e.mjs';
+import {revealMessengerPhone01611C} from './messenger-contact-reveal-01611c.mjs';
 import {limitCustomerAuth01595} from './site-customer-account-core-01595.mjs';
-import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
+import {startSiteCustomerFlow01595,flowPublicInfo01595,finishHostedIdentity01595,finishHostedIdentityFromSso01611F,exchangeSiteCustomerCode01595} from './site-customer-flow-01595.mjs';
 import {assertPlatformSuperadmin01592} from './platform-user-registry-core-01592.mjs';
-import {createSsoHandoff01581,establishSso01581,authorizeSso01581,exchangeSso01581} from './sso-service-01581.mjs';
+import {createSsoHandoff01581,establishSso01581,authorizeSso01581,ssoUserFromCookie01611F,exchangeSso01581} from './sso-service-01581.mjs';
 import {ssoCookieHeader01581,clearSsoCookie01581,appendSsoCallback01581,validState01581} from './sso-core-01581.mjs';
 import {buildAuthSessionResponse01089} from './auth-session-response-01089.mjs';
-import {registerUser01084,loginUser01084,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
+import {requestPasswordReset01612A,completePasswordReset01612A,limitResetRequest01612A} from './password-reset-01612a.mjs';
+import {getEmailUsage01612C} from './email-usage-01612c.mjs';
+import {listSiteInvites01613C,createSiteInvite01613C,revokeSiteInvite01613C,acceptSiteInvite01613C,assertSiteOnlyBoundary01613C} from './site-collaboration-01613c.mjs';
+import {listModuleDelegations01613C4,setModuleDelegation01613C4,moduleRoutePermission01613C4,currentDelegatedModules01613C4,allowedDelegatedCloudMedia01621} from './delegated-modules-01613c4.mjs';
+import {assertProductMutation01621,assertDelegatedCatalogOperation01621,assertDelegatedImageInput01621} from './delegated-product-fields-01621.mjs';
+import {verifyDelegatedUploadOwner01621} from './delegated-media-owner-01621.mjs';
+import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
+import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
 import {loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
@@ -108,9 +122,13 @@ import {getAdminOverview01087,listMembers01087,updateMembership01087,listInvitat
 import {getDatabaseOverview01087,listDatabaseTables01087,getDatabaseTableSchema01087,getDatabaseTableRows01087,listDatabaseMigrations01087} from './database-explorer-service-01087.mjs';
 import {listAuthorizedTables01092,getAuthorizedTable01092,createAuthorizedTable01092,updateAuthorizedTable01092,deleteAuthorizedTable01092,createAuthorizedTableField01092,updateAuthorizedTableField01092,deleteAuthorizedTableField01092,createAuthorizedTableRecord01092,updateAuthorizedTableRecord01092,deleteAuthorizedTableRecord01092,createAuthorizedTableView01092,updateAuthorizedTableView01092,deleteAuthorizedTableView01092} from './tables-service-01092.mjs';
 import {TABLE_RICH_TEXT_VERSION_01108} from './tables-rich-text-01108.mjs';
-import {publishSite01143,getSitePublishStatus01143} from './site-publishing-service-01143.mjs';
+import {publishSite01143,getSitePublishStatus01143,publishSiteDemo01623E,getSiteDemoStatus01623E} from './site-publishing-service-01143.mjs';
+import {saveSiteTestShell01614A} from './site-test-shell-01614a.mjs';
+import {getSiteTestChangeChoices01618,planSiteTestSelectedChanges01618,applySiteTestSelectedChanges01618,rollbackSiteTestSelectedChanges01618,planSiteTestOriginalRepair01618H,applySiteTestOriginalRepair01618H} from './site-test-change-workflow-01618.mjs';
+import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,getSiteTestBaseline01619E,decideSiteTest01615A,getSiteTestReviewInbox01615A,previewSelectiveSiteTestApply01615B,applyApprovedSiteTest01615B,rollbackAppliedSiteTest01615B,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
+import {getSiteDeleteCheck01623M,deleteAllDraftRevisions01623M} from './site-destructive-guards-01623m.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
 import {listTrafficHistogram01474,getTrafficHistogramDetails01474} from './traffic-histogram-01474.mjs';
 import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201,listTrafficSites01203,listTrafficStorage01206,listTrafficR2Inventory01210,refreshTrafficR2Inventory01210,listTrafficSiteResourceInventory01213,getTrafficSiteResourceInventory01213,cleanupTrafficSiteBrokenReference01219,listTrafficCleanupAudit01221} from './traffic-service-01194.mjs';
@@ -153,17 +171,42 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
 
 
+  // 01612A · Dedicated first-party reset page. Tokens are in the URL fragment,
+  // never in the HTTP request, server logs or referrer.
+  if(req.method==='GET'&&p[0]==='identity'&&p[1]==='reset'&&p.length<=3){
+    const asset=p[2]||'index.html',files={'index.html':['password-reset-01612a.html','text/html; charset=utf-8'],'script.js':['password-reset-01612a.js','text/javascript; charset=utf-8']};
+    if(!files[asset])return sendJson(res,404,{error:'PASSWORD_RESET_ASSET_01612A'});
+    const [name,type]=files[asset],bytes=await readFile(new URL('../public/'+name,import.meta.url));
+    res.writeHead(200,{'content-type':type,'cache-control':'no-store','referrer-policy':'no-referrer','x-content-type-options':'nosniff','x-frame-options':'DENY','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'content-length':bytes.length});return res.end(bytes);
+  }
   if(req.method==='GET'&&p.length===1&&p[0]==='health'){try{await pool.query('SELECT 1');return sendJson(res,200,{ok:true,stage:config.stage,database:'postgresql',time:new Date().toISOString(),requestId:rid});}catch(e){return sendJson(res,503,{ok:false,stage:config.stage,database:'unavailable',error:e.message,requestId:rid});}}
   if(p[0]!=='api'||p[1]!=='v1')return sendJson(res,404,{error:'Not found',requestId:rid});
   const publishedTrafficIdentity=await resolveRequestPublishedTrafficIdentity01203(req);if(publishedTrafficIdentity){setTrafficScope01194(res,publishedTrafficIdentity);updateTrafficContext01201(publishedTrafficIdentity);}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='traffic'&&p[4]==='ping'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'Published site identity required',stage:'01228',requestId:rid});const body=await readJson(req,{limit:8192});setTrafficMetadata01228(res,{sessionId:String(body?.sessionId||'').trim().slice(0,120),pagePath:String(body?.pagePath||'').trim().slice(0,500),referrerPath:String(body?.referrerPath||'').trim().slice(0,500),clientStage:'01228'});return sendJson(res,200,{ok:true,stage:'01228',siteId:publishedTrafficIdentity.siteId,requestId:rid});}
+  // 01612A · Public password reset endpoints. No user/tenant privileges are granted.
+  if(p[2]==='auth'&&p[3]==='password-reset'&&p.length===5){
+    if(req.method!=='POST')return sendJson(res,405,{error:'PASSWORD_RESET_METHOD_01612A'});
+    if(!['request','complete'].includes(p[4]))return sendJson(res,404,{error:'PASSWORD_RESET_ROUTE_01612A'});
+    const input=await readJson(req,{limit:1536});
+    if(p[4]==='request'){
+      limitResetRequest01612A(requestClientAddress01414(req));
+      const output=await requestPasswordReset01612A(input.email);
+      return sendJson(res,200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+    }
+    const output=await completePasswordReset01612A(input);
+    return sendJson(res,200,{...output,requestId:rid},{'cache-control':'no-store','referrer-policy':'no-referrer'});
+  }
   // 01595 · Customer sessions are NOT Builder/CRM sessions. Credentials live only on trusted Render.
   if(p[2]==='public'&&p[3]==='site'&&p[4]==='account'&&p.length===6){
     const action=p[5],site=publishedTrafficIdentity;
     if(!site)return sendJson(res,401,{error:'SITE_ACCOUNT_SITE_REQUIRED_01595',stage:'01595',requestId:rid},siteAccountHeaders01595);
-    if(!['start','exchange','me','logout'].includes(action))return sendJson(res,404,{error:'SITE_ACCOUNT_ROUTE_01595',requestId:rid},siteAccountHeaders01595);
+    if(!['start','exchange','me','logout','admin-access'].includes(action))return sendJson(res,404,{error:'SITE_ACCOUNT_ROUTE_01595',requestId:rid},siteAccountHeaders01595);
     if(action==='me'&&req.method==='GET')return sendJson(res,200,{...(await customerSession01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
-    if(req.method!=='POST'||action==='me')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
+    if(action==='admin-access'&&req.method==='GET'){
+      const identity=await customerSession01595(site,String(req.headers['x-st-customer-session']||''),{updateSeen:false});
+      return sendJson(res,200,{...(await getPublishedSiteAdminAccess01623(site,identity.user.id)),requestId:rid},siteAccountHeaders01595);
+    }
+    if(req.method!=='POST'||action==='me'||action==='admin-access')return sendJson(res,405,{error:'SITE_ACCOUNT_METHOD_01595',requestId:rid},siteAccountHeaders01595);
     if(action==='logout')return sendJson(res,200,{...(await logoutSiteCustomer01595(site,String(req.headers['x-st-customer-session']||''))),requestId:rid},siteAccountHeaders01595);
     limitCustomerAuth01595(site.siteId,requestClientAddress01414(req));
     const input=await readJson(req,{limit:2048});
@@ -180,7 +223,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const input=await readJson(req,{limit:2048});
     limitCustomerAuth01595(String(input.tx||'').slice(0,120),requestClientAddress01414(req));
     const output=await finishHostedIdentity01595(input.tx,action,input);
-    return sendJson(res,200,{...output,requestId:rid},siteAccountHeaders01595);
+    // 01611F: a password entered only on the Render-owned identity host also
+    // establishes the shared, first-party ShiftTime SSO session. Never expose
+    // the shared Bearer or session ID to the published site or its JavaScript.
+    const {_ssoUserId,...publicOutput}=output;
+    let cookie={};
+    if(String(process.env.SSO_COOKIE_SECRET||'').length>=32){
+      const sso=await createSessionForUser01581(_ssoUserId);
+      cookie=ssoLoginCookie01581(req,sso.sessionId);
+    }
+    return sendJson(res,200,{...publicOutput,requestId:rid},{...siteAccountHeaders01595,...cookie});
   }
   // 01570: buyer's own published cart + site identity, no manager involvement.
   if(p[2]==='public'&&p[3]==='shop'&&p[4]==='direct-checkout'&&p.length===6){
@@ -280,6 +332,18 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const out=await hubDirectory01543(kind,kind==='cities'?u.searchParams.get('q'):u.searchParams.get('cityRef'),{source:'crm',clientId:client});
     return sendJson(res,200,out,{'cache-control':'private, max-age=30'});
   }
+  // 01611F · Continue an already authenticated ShiftTime session into a
+  // verified published site. Only the user-specific, first-party SSO cookie
+  // is read; no phone number, email match or CRM role is accepted as proof.
+  if(req.method==='GET'&&p[2]==='auth'&&p[3]==='sso'&&p[4]==='site-continue'&&p.length===5){
+    const tx=new URL(req.url,'http://localhost').searchParams.get('tx')||'';
+    // Validate flow before returning even to the hosted fallback page.
+    await flowPublicInfo01595(tx);
+    const userId=await ssoUserFromCookie01611F(req);
+    if(!userId)return ssoRedirect01581(res,'/identity/site/?tx='+encodeURIComponent(tx)+'&sso=login_required');
+    const out=await finishHostedIdentityFromSso01611F(tx,userId);
+    return ssoRedirect01581(res,out.redirectUrl);
+  }
   // 01581 · Central first-party SSO broker. Redirects must match explicit SSO_ALLOWED_CALLBACKS.
   if(p[2]==='auth'&&p[3]==='sso'&&p[4]==='authorize'&&req.method==='GET'){
     const q=new URL(req.url,'http://localhost').searchParams;
@@ -311,6 +375,34 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='media'&&p[4]){const out=await getPublicCloudMediaDelivery01081(p[4]);res.statusCode=302;res.setHeader('location',out.url);res.setHeader('cache-control',out.public?'public, max-age=300':'private, no-store');return res.end();}
   if(req.method==='GET'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='search'){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await searchPublicMarketplace(Object.fromEntries(u.searchParams.entries())));}
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='marketplace'&&p[4]==='orders'){const token=String(req.headers['x-st-cart-id']||'');const out=await checkoutPublicCart(token,await readJson(req),{siteId:publishedTrafficIdentity?.siteId||'',siteName:publishedTrafficIdentity?.siteName||''});return sendJson(res,201,out,{'x-st-cart-id':out.nextCartId});}
+  // 01609: Public messenger requires published site identity + unguessable visitor capability.
+  if(p[2]==='public'&&p[3]==='site'&&p[4]==='messenger'){
+    if(!publishedTrafficIdentity)return sendJson(res,401,{error:'MESSENGER_SITE_REQUIRED_01609',requestId:rid});
+    const guest=String(req.headers['x-st-messenger-visitor']||'');
+    const bearer=String(req.headers['x-st-customer-session']||'');
+    const user=bearer?(await customerSession01595(publishedTrafficIdentity,bearer,{updateSeen:false})).user:null;
+    const meta={remoteAddress:requestClientAddress01414(req),userAgent:req.headers['user-agent']||'',customerUserId:user?.id||null,customerName:user?.name||'',customerEmail:user?.email||''};
+    // 01611E: only a valid site-customer session can read linked history across devices.
+    // Never fall through to guest-capability routes, and never infer identity from a phone number.
+    if(p[5]==='account'){
+      if(!user?.id)return sendJson(res,401,{error:'MESSENGER_ACCOUNT_LOGIN_REQUIRED_01611E',requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p.length===7&&req.method==='GET')return sendJson(res,200,{...(await listMessengerAccountThreads01611E(publishedTrafficIdentity,user.id)),requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p[7]&&p.length===8&&req.method==='GET')return sendJson(res,200,{...(await getMessengerAccountThread01611E(publishedTrafficIdentity,user.id,p[7])),requestId:rid},{'cache-control':'no-store'});
+      if(p[6]==='threads'&&p[7]&&p[8]==='turns'&&p.length===9&&req.method==='POST'){
+        const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyMessengerAccountThread01611E(publishedTrafficIdentity,user.id,p[7],input.body)),requestId:rid},{'cache-control':'no-store'});
+      }
+      return sendJson(res,404,{error:'MESSENGER_ACCOUNT_ROUTE_NOT_FOUND_01611E',requestId:rid},{'cache-control':'no-store'});
+    }
+    if(req.method==='GET'&&p[5]==='contact'&&p.length===6)return sendJson(res,200,{...(await getVisitorContact01611A(publishedTrafficIdentity,guest)),requestId:rid},{'cache-control':'no-store'});
+    if(req.method==='POST'&&p[5]==='contact'&&p[6]==='link'&&p.length===7){await readJson(req,{limit:512});return sendJson(res,200,{...(await linkVisitorContactToAuthenticatedUser01611A(publishedTrafficIdentity,guest,user?.id||null)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='GET'&&p[5]==='channels'&&p.length===6)return sendJson(res,200,{...(await listVerifiedMessengerChannels01611(publishedTrafficIdentity,guest)),requestId:rid},{'cache-control':'no-store'});
+    if(req.method==='POST'&&p[5]==='verification'&&p[6]==='start'&&p.length===7){const input=await readJson(req,{limit:2048});return sendJson(res,201,{...(await startMessengerVerification01611(publishedTrafficIdentity,guest,input,meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='POST'&&p[5]==='verification'&&p[6]==='verify'&&p.length===7){const input=await readJson(req,{limit:2048});return sendJson(res,200,{...(await verifyMessengerChannel01611(publishedTrafficIdentity,guest,input)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='POST'&&p.length===5){await assertMessengerChannelProof01611(publishedTrafficIdentity,guest);const input=await readJson(req,{limit:16384});return sendJson(res,201,{...(await createPublicMessengerChat01609(publishedTrafficIdentity,{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    if(req.method==='GET'&&p[5]&&p.length===6)return sendJson(res,200,{...(await getPublicMessengerChat01609(publishedTrafficIdentity,p[5],guest,meta)),requestId:rid},{'cache-control':'no-store'});
+    if(req.method==='POST'&&p[5]&&p[6]==='turns'&&p.length===7){await assertMessengerChannelProof01611(publishedTrafficIdentity,guest);const input=await readJson(req,{limit:8192});return sendJson(res,201,{...(await replyPublicMessengerChat01609(publishedTrafficIdentity,p[5],{...input,visitorKey:guest},meta)),requestId:rid},{'cache-control':'no-store'});}
+    return sendJson(res,404,{error:'MESSENGER_ROUTE_NOT_FOUND_01609',requestId:rid});
+  }
   if(req.method==='POST'&&p[2]==='public'&&p[3]==='site'&&p[4]==='messages'){if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01404',stage:'01404',requestId:rid});const out=await createPublicCustomerMessage01404(publishedTrafficIdentity,await readJson(req,{limit:32*1024}),{remoteAddress:req.socket?.remoteAddress||'',userAgent:req.headers['user-agent']||''});return sendJson(res,201,{...out,requestId:rid});}
   if(p[2]==='public'&&p[3]==='ai-consultant'){
     if(!publishedTrafficIdentity)return sendJson(res,401,{error:'PUBLISHED_SITE_IDENTITY_REQUIRED_01414',stage:'01414',requestId:rid});
@@ -363,18 +455,34 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       return sendJson(res,200,{...out,requestId:rid},{'cache-control':'private, max-age=30'});
     }
   }
-  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
+  const scope=await resolveAuthorizedStore(session.userId,req.headers['x-st-store-id']);await assertSiteOnlyBoundary01613C(scope,session.userId,p,{method:req.method});setScopeHeaders(res,scope,rid);const publishedSiteId=publishedTrafficIdentity&&sameTrafficTenant01203(publishedTrafficIdentity,scope)?publishedTrafficIdentity.siteId:'';setTrafficScope01194(res,{...scope,actorUserId:session.userId,siteId:publishedSiteId});updateAuthenticatedTrafficContext01204({scope,actorUserId:session.userId,publishedSiteId});
   // 01600 · Central server gate runs before route-specific parsing/mutations.
   // Non-catalogued operations retain pre-existing guards, and are not claimed as covered.
   const protectedAction01600=classifyLegacyMerchantAction01605F(req.method,p)||classifyLegacyReadAction01605E(req.method,p)||classifyTenantIsolationAction01605D(req.method,p)||classifyNotificationAccess01605B(req.method,p)||classifyProtectedAction01600(req.method,p)||classifyExtendedAction01601(req.method,p);
   const auditedAction01605=effectiveAuditedAction01605(req.method,p,protectedAction01600);
+  // 01622 · Route-shape whitelist only. The authenticated user's accepted, store-scoped
+  // photo grant is resolved independently by inspectProtectedAccess01600.
+  const delegatedMediaRoute01622=scope.role!=='owner'&&allowedDelegatedCloudMedia01621(req.method,p,{marketplace:'edit',productPermissions:['photos']});
   const protectedDecision01600=auditedAction01605
-    ? await inspectProtectedAccess01600(scope,session.userId,auditedAction01605).catch(async error=>{
+    ? await inspectProtectedAccess01600(scope,session.userId,{...auditedAction01605,delegatedModuleRoute:moduleRoutePermission01613C4(req.method,p)===auditedAction01605.permission,delegatedMediaRoute:delegatedMediaRoute01622&&['builder.media.view','builder.media.upload'].includes(auditedAction01605.permission)}).catch(async error=>{
         // Never lose a denial even when persistence fails; no request content is logged.
         if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,auditedAction01605,error.code||error.message);}catch{console.warn('[01605C] access audit write unavailable');}
         throw error;
       })
     : null;
+  // 01613B · Dedicated multi-user online site boundary. Denials happen before
+  // project JSON, Canvas actions or Netlify publishing packages are read.
+  if(isOnlineSiteRoute01613B(p)){
+    try{assertOnlineSiteAccess01613B(scope,protectedDecision01600,req.method,p);
+      assertNoOriginalWrite01613D(scope,p,req.method);}
+    catch(error){
+      if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{
+        permission:error.permission||auditedAction01605?.permission||'site.pages.view',
+        siteId:p[2]==='sites'&&p[3]?p[3]:''
+      },error.code);}catch{console.warn('[01613B] site denial journal unavailable');}
+      throw error;
+    }
+  }
   // 01606E · For site mutation routes the original site-scoped 01600 check
   // has already completed (including tenant and membership verification).
   // Do not parse or persist a caller-supplied project before this action gate.
@@ -467,10 +575,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(p[4]==='orders-production'&&p.length===5){
       if(req.method!=='GET')return sendJson(res,405,{error:'ORDERS_PRODUCTION_METHOD_01566',requestId:rid});
       const u=new URL(req.url,'http://localhost');const limit=u.searchParams.has('limit')?Number(u.searchParams.get('limit')):20,offset=u.searchParams.has('offset')?Number(u.searchParams.get('offset')):0;
-      return sendJson(res,200,{...(await listProductionOrders01566(scope,{limit,offset})),requestId:rid},{'cache-control':'private, no-store'});
+      return sendJson(res,200,{...(await listProductionOrders01566(scope,{limit,offset},{authorization:protectedDecision01600})),requestId:rid},{'cache-control':'private, no-store'});
     }
     if(p[4]==='orders-review'&&p[5]&&p.length===7&&p[6]==='production-order'){
-      if(req.method==='GET')return sendJson(res,200,{...(await getProductionOrderForDraft01566(scope,p[5])),requestId:rid},{'cache-control':'private, no-store'});
+      if(req.method==='GET')return sendJson(res,200,{...(await getProductionOrderForDraft01566(scope,p[5],{authorization:protectedDecision01600})),requestId:rid},{'cache-control':'private, no-store'});
       if(req.method==='POST'){
         const body=await readJson(req,{limit:1024});
         const data=await createProductionOrder01566(scope,p[5],body);
@@ -623,6 +731,8 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       const messageId=p[5]||'';
       if(req.method==='GET'&&messageId&&p.length===6){const u=new URL(req.url,'http://localhost');return sendJson(res,200,await getCustomerMessageThread01410(scope,messageId,{markRead:u.searchParams.get('markRead')==='1',actorUserId:session.userId}));}
       if(req.method==='PATCH'&&messageId&&p.length===6){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,200,await updateCustomerMessage01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
+      if(req.method==='POST'&&messageId&&p[6]==='reveal-phone'&&p.length===7){const input=await readJson(req,{limit:1024});return sendJson(res,200,await revealMessengerPhone01611C(scope,session.userId,messageId,input),{'cache-control':'private, no-store, max-age=0','referrer-policy':'no-referrer','pragma':'no-cache'});}
+      if(req.method==='POST'&&messageId&&p[6]==='order-link'&&p.length===7){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);const input=await readJson(req,{limit:4096});return sendJson(res,200,await linkMessengerProductionOrder01609(scope,messageId,input.orderId));}
       if(req.method==='POST'&&messageId&&p[6]==='thread'){if(protectedDecision01600?.mode==='legacy')assertWriteRole(scope);return sendJson(res,201,await addCustomerMessageThreadEntry01410(scope,messageId,await readJson(req,{limit:16384}),{userId:session.userId,name:session.name,email:session.email}));}
       return sendJson(res,404,{error:'CUSTOMER_MESSAGES_INBOX_ROUTE_NOT_FOUND_01410',stage:'01410',requestId:rid});
     }
@@ -696,7 +806,43 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='POST'&&p[4]==='read'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await readPrivateGoogleSheet01398(scope,await readJson(req,{limit:64*1024})));}
     return sendJson(res,404,{error:'Google Sheets integration route not found',stage:'01398',requestId:rid});
   }
-  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null)});
+  if(req.method==='GET'&&p[2]==='site-revisions'&&p.length===3)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,'',protectedDecision01600?.allowedSiteIds??null,undefined,scope.role==='owner'?'':session.userId)});
+  // 01613D: all test branches are server scoped; the manager cannot see
+  // or change another manager's revision, nor edit original site project JSON.
+  if(p[2]==='sites'&&p[3]&&p[4]==='test'){
+    const siteId=p[3],testId=p[5]||'',action=p[6]||'';
+    if(req.method==='POST'&&p.length===8&&testId==='changes'&&action==='repair'&&p[7]==='plan')return sendJson(res,200,await planSiteTestOriginalRepair01618H(scope,session.userId,siteId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===8&&testId==='changes'&&action==='repair'&&p[7]==='apply')return sendJson(res,200,await applySiteTestOriginalRepair01618H(scope,session.userId,siteId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
+    if(req.method==='GET'&&p.length===6&&testId==='changes')return sendJson(res,200,await getSiteTestChangeChoices01618(scope,session.userId,siteId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&testId==='changes'&&action==='plan')return sendJson(res,200,await planSiteTestSelectedChanges01618(scope,session.userId,siteId,await readJson(req,{limit:65536})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&testId==='changes'&&action==='apply')return sendJson(res,200,await applySiteTestSelectedChanges01618(scope,session.userId,siteId,await readJson(req,{limit:65536})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===8&&testId==='changes'&&action==='rollback')return sendJson(res,200,await rollbackSiteTestSelectedChanges01618(scope,session.userId,siteId,p[7]),{'cache-control':'private, no-store'});
+    if(req.method==='GET'&&p.length===5)return sendJson(res,200,await listSiteTests01613D(scope,session.userId,siteId),{'cache-control':'private, no-store'});
+    if(req.method==='GET'&&p.length===6&&testId==='inbox')return sendJson(res,200,await getSiteTestReviewInbox01615A(scope,siteId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===5)return sendJson(res,201,await createSiteTest01613D(scope,session.userId,siteId));
+    if(req.method==='GET'&&p.length===7&&action==='compare')return sendJson(res,200,await compareSiteTest01614B(scope,session.userId,siteId,testId),{'cache-control':'private, no-store'});
+    if(req.method==='GET'&&p.length===7&&action==='baseline')return sendJson(res,200,await getSiteTestBaseline01619E(scope,session.userId,siteId,testId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='preview')return sendJson(res,202,await previewSiteTest01613D(scope,session.userId,siteId,testId,await readSitePublishingJson01609C(req)));
+    if(req.method==='POST'&&p.length===7&&action==='reset')return sendJson(res,200,await resetSiteTest01613D2(scope,session.userId,siteId,testId));
+    if(req.method==='POST'&&p.length===7&&action==='submit')return sendJson(res,200,await submitSiteTest01613D(scope,session.userId,siteId,testId,await readJson(req,{limit:4096})));
+    if(req.method==='POST'&&p.length===7&&action==='review')return sendJson(res,200,await decideSiteTest01615A(scope,session.userId,siteId,testId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='apply-plan')return sendJson(res,200,await previewSelectiveSiteTestApply01615B(scope,session.userId,siteId,testId,await readJson(req,{limit:32768})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='apply')return sendJson(res,200,await applyApprovedSiteTest01615B(scope,session.userId,siteId,testId,await readJson(req,{limit:32768})),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='rollback')return sendJson(res,200,await rollbackAppliedSiteTest01615B(scope,session.userId,siteId,testId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===7&&action==='promote')return sendJson(res,200,await promoteSiteTest01613D(scope,session.userId,siteId,testId));
+    return sendJson(res,404,{error:'ST_TEST_ROUTE_NOT_FOUND_01613D'});
+  }
+  if(scope.role!=='owner'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'){
+    // Only dedicated POST /test creates a delegated editable copy.
+    if(req.method==='POST'&&(p.length===5||(p.length===6&&p[5]==='from-source')))
+      throw Object.assign(new Error('ST_TEST_DRAFT_CREATE_ONLY_01613D'),{code:'ST_TEST_DRAFT_CREATE_ONLY_01613D',statusCode:403});
+    if(p[5]&&p[5]!=='from-source')await requireSiteTestRevisionAccess01613D(scope,session.userId,p[3],p[5],{write:req.method!=='GET'});
+  }
+  // 01614A: strictly scoped Header/Footer edits on the actor's own test draft.
+  if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]&&p[6]==='test-shell'&&p.length===7){
+    return sendJson(res,200,await saveSiteTestShell01614A(scope,session.userId,p[3],p[5],
+      await readJson(req,{limit:3*1024*1024})),{'cache-control':'private, no-store'});
+  }
   // 01606F · Atomic Main Canvas edits. 01600 checks site.pages.edit and tenant
   // membership before reading payload; this secondary gate checks each action.
   if(classifyCanvasRoute01606F(req.method,p)){
@@ -713,13 +859,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   // The 01600 site.pages.edit + tenant gate ran before parsing the request.
   if(req.method==='POST'&&p[2]==='sites'&&p[3]&&p[4]==='revisions'&&p[5]&&p[6]==='canvas'&&p.length===7){
     assertLegacyForUnmanaged01600(scope,protectedDecision01600);
-    const input=normalizeDraftCanvasInput01606G(await readJson(req,{limit:512*1024}));
+    // 01619L: the service validates the raw request again inside its scoped
+    // transaction. Passing the normalized value would smuggle the internal
+    // expectedRevision=1 back into its external-input validator, which correctly
+    // rejects that field with ST_CANVAS_DRAFT_INVALID_01606G (HTTP 400).
+    // Keep both independent validation steps and authorization checks intact.
+    const rawInput01619L=await readJson(req,{limit:512*1024});
+    const input=normalizeDraftCanvasInput01606G(rawInput01619L);
     try{assertCanvasActions01606F(protectedDecision01600,input.operations);}
     catch(error){
       if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:error.permission,siteId:p[3]},error.code);}catch{console.warn('[01606G] draft canvas denial journal unavailable');}
       throw error;
     }
-    return sendJson(res,200,await applyDraftCanvas01606G(scope,session.userId,p[3],p[5],input),{'cache-control':'private, no-store'});
+    return sendJson(res,200,await applyDraftCanvas01606G(scope,session.userId,p[3],p[5],rawInput01619L),{'cache-control':'private, no-store'});
   }
   // 01606G: create a draft from an existing same-site revision without accepting
   // a caller-supplied project. The precise draft_create gate applies above.
@@ -734,17 +886,38 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
-    if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId)});
+    if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId,null,undefined,scope.role==='owner'?'':session.userId)});
+    if(req.method==='POST'&&revisionId==='delete-all'&&p.length===6){
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      const payload=await readJson(req,{limit:4096});
+      console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'bulk-drafts-request',requestId:rid,siteId,expectedCount:payload?.expectedCount}));
+      return sendJson(res,200,{requestId:rid,...await deleteAllDraftRevisions01623M(scope,siteId,payload)});
+    }
     if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
-    if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId)});
+    if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId,session.userId)});
     if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
-    if(req.method==='DELETE'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId))});}
+    if(req.method==='DELETE'&&revisionId&&p.length===6){
+      // 01623K: correlate one deletion request with a PostgreSQL before/after snapshot.
+      console.info('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-request',requestId:rid,siteId,revisionId}));
+      try{
+        assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+        const result=await deleteSiteDraft01231(scope,siteId,revisionId,session.userId);
+        console.info('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-response',requestId:rid,siteId,revisionId,deleted:result.deleted===true,archived:result.archived===true}));
+        return sendJson(res,200,{stage:'01623K',requestId:rid,...result});
+      }catch(error){
+        console.error('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-error',requestId:rid,siteId,revisionId,status:Number(error?.statusCode||500),code:String(error?.code||'UNKNOWN')}));
+        throw error;
+      }
+    }
     if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
+  // 01623E: demo has its own Netlify identity, deployment table and site-scoped permission.
+  if(p[2]==='sites'&&p[3]&&p[4]==='demo-publish-status'&&req.method==='GET')return sendJson(res,200,await getSiteDemoStatus01623E(scope,p[3]));
+  if(p[2]==='sites'&&p[3]&&p[4]==='demo-publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSiteDemo01623E(scope,session.userId,p[3],await readSitePublishingJson01609C(req)));}
   if(p[2]==='sites'&&p[3]&&p[4]==='publish-status'&&req.method==='GET')return sendJson(res,200,await getSitePublishStatus01143(scope,p[3]));
-  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readJson(req,{limit:32*1024*1024})));}
+  if(p[2]==='sites'&&p[3]&&p[4]==='publish'&&req.method==='POST'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,202,await publishSite01143(scope,session.userId,p[3],await readSitePublishingJson01609C(req)));}
   if(p[2]==='sites'&&req.method==='GET'&&p.length===3){
     const summary=new URL(req.url,'http://localhost').searchParams.get('view')==='summary';
     const sites=await (summary?listBuilderSiteSummaries01476(scope):listBuilderSites01170(scope));
@@ -762,7 +935,26 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(summary){const {project,...metadata}=site;return sendJson(res,200,{stage:'01476',site:metadata});}
     return sendJson(res,200,{stage:'01170',site});
   }
-  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
+  // 01623M: read-only, authoritative eligibility check before showing Delete Site modal.
+  if(p[2]==='sites'&&p[3]&&p[4]==='delete-check'&&req.method==='GET'&&p.length===5){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    return sendJson(res,200,{requestId:rid,...await getSiteDeleteCheck01623M(scope,p[3])},{'cache-control':'private, no-store'});
+  }
+  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    const siteId=p[3];
+    const input=await readJson(req,{limit:4096});
+    const check=await getSiteDeleteCheck01623M(scope,siteId);
+    if(!input||input.confirmSiteId!==siteId||input.confirmSiteName!==check.siteName)
+      return sendJson(res,400,{stage:'01623M',requestId:rid,code:'ST_SITE_DELETE_CONFIRM_REQUIRED_01623M',error:'Type the exact site name before deletion'});
+    if(!check.canDelete){
+      console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'site-delete-blocked-revisions',requestId:rid,siteId,revisions:check.revisions}));
+      return sendJson(res,409,{stage:'01623M',requestId:rid,code:'ST_SITE_HAS_REVISIONS_01623M',revisions:check.revisions,error:'Спочатку видаліть усі наявні редакції сайту. Опубліковані й архівні версії захищені.'});
+    }
+    const result=await deleteBuilderSite01170(scope,session.userId,siteId);
+    console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'site-delete-confirmed',requestId:rid,siteId,deleted:result.deleted===true,netlifyDeleted:result.netlify?.deleted===true}));
+    return sendJson(res,200,{stage:'01623M',requestId:rid,...result});
+  }
   // 01605B · Prevent enrolled narrow roles inheriting legacy admin capabilities.
   if(p[2]==='admin'){
     assertAdminView01087(scope);
@@ -783,6 +975,13 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       if(req.method==='GET'&&action==='assignments'&&p.length===5)return sendJson(res,200,{stage:'01597',assignments:await accessPolicyService01597.assignments(scope)},{'cache-control':'private, no-store'});
       if(req.method==='POST'&&action==='assignments'&&p.length===5)return sendJson(res,201,{stage:'01597',assignment:await accessPolicyService01597.assign(scope,session.userId,await readJson(req,{limit:4096}))});
       if(req.method==='POST'&&action==='assignments'&&id&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,{stage:'01597',assignment:await accessPolicyService01597.revoke(scope,session.userId,id)});
+      if(action==='site-invites'){
+        if(req.method==='GET'&&p.length===5)return sendJson(res,200,await listSiteInvites01613C(scope),{'cache-control':'private, no-store'});
+        if(req.method==='GET'&&p[5]==='module-grants'&&p.length===6)return sendJson(res,200,await listModuleDelegations01613C4(scope),{'cache-control':'private, no-store'});
+        if(req.method==='PUT'&&p[5]&&p[6]==='modules'&&p.length===7)return sendJson(res,200,await setModuleDelegation01613C4(scope,session.userId,p[5],await readJson(req,{limit:4096})),{'cache-control':'private, no-store'});
+        if(req.method==='POST'&&p.length===5)return sendJson(res,201,await createSiteInvite01613C(scope,session.userId,await readJson(req,{limit:4096})),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
+        if(req.method==='POST'&&p[5]&&p[6]==='revoke'&&p.length===7)return sendJson(res,200,await revokeSiteInvite01613C(scope,session.userId,p[5]),{'cache-control':'private, no-store'});
+      }
       if(req.method==='GET'&&action==='preview'&&p.length===5)return sendJson(res,200,await accessPolicyService01597.preview(scope,u.searchParams.get('userId')||'',u.searchParams.get('siteId')||''),{'cache-control':'private, no-store'});
       return sendJson(res,404,{error:'ST_ACCESS_ROUTE_NOT_FOUND_01597',requestId:rid});
     }
@@ -791,6 +990,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');
       const u=new URL(req.url,'http://localhost'),params=Object.fromEntries(u.searchParams.entries());
       return sendJson(res,200,await (p[5]==='details'?getTrafficHistogramDetails01474(scope,params):listTrafficHistogram01474(scope,params)));
+    }
+    if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='email-usage'){
+      assertPlatformSuperadmin01592(session.userId);
+      return sendJson(res,200,await getEmailUsage01612C(),{'cache-control':'private, no-store'});
     }
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='summary'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');return sendJson(res,200,await getTrafficSummary01194(scope));}
     if(req.method==='GET'&&p[3]==='traffic'&&p[4]==='events'){assertCapability01087(scope,'admin.traffic.view','Traffic Control view permission required');const u=new URL(req.url,'http://localhost');return sendJson(res,200,await listTrafficEvents01194(scope,{limit:u.searchParams.get('limit')}));} 
@@ -818,7 +1021,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Admin route not found',stage:'01087',requestId:rid});
   }
   if(req.method==='GET'&&p[2]==='deployment'&&p[3]==='status')return sendJson(res,200,await getDeploymentStatus01080(scope));
+  // 01613C · invitation acceptance is authenticated, but must not require membership
+  // in the inviting tenant. The invite token never grants authority without email match.
+  if(p[2]==='collaboration'&&p[3]==='accept'&&req.method==='POST'&&p.length===4){
+    const input=await readJson(req,{limit:2048});
+    return sendJson(res,200,await acceptSiteInvite01613C(session.userId,input.token),{'cache-control':'private, no-store','referrer-policy':'no-referrer'});
+  }
   if(p[2]==='media'){
+    const delegatedMediaLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
+    const delegatedImageAllowed01621=allowedDelegatedCloudMedia01621(req.method,p,delegatedMediaLevels01621);
     const candidateSiteId=String(req.headers['x-st-site-id']||'').trim();
     const verifiedSiteId=candidateSiteId?await resolveAuthorizedMediaTrafficSite01206(scope,candidateSiteId):'';
     const mediaSiteId=verifiedSiteId||publishedSiteId;
@@ -827,9 +1038,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&p[3]==='storage'&&p[4]==='status')return sendJson(res,200,getCloudMediaStorageInfo01081());
     if(req.method==='POST'&&p[3]==='remote-image'&&p[4]==='fetch'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const body=await readJson(req,{limit:64*1024}),remote=await fetchRemoteImage01396(body?.url);const bytes=remote.bytes;res.__stTrafficOutboundBytes01194=bytes.length;res.writeHead(200,{'content-type':remote.mimeType,'content-length':bytes.length,'content-disposition':`attachment; filename="${remote.fileName.replace(/["\\]/g,'_')}"`,'x-st-remote-final-url':remote.finalUrl,'x-st-remote-source-bytes':String(remote.sizeBytes),'cache-control':'no-store'});return res.end(bytes);}
     if(req.method==='GET'&&p[3]==='assets'&&!p[4])return sendJson(res,200,await listAuthorizedCloudMediaAssets01081(scope));
-    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,await readJson(req)));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType:String(req.headers['content-type']||''),width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));}
-    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
+    if(req.method==='POST'&&p[3]==='uploads'&&!p[4]){if(!delegatedImageAllowed01621)assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedImageAllowed01621)assertDelegatedImageInput01621(input);return sendJson(res,201,await beginAuthorizedCloudMediaUpload01081(mediaScope,input));}
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]==='proxy'){
+      // 01623I: never bypass central access gate; delegated path is image-only and requires accepted photos grant.
+      if(!delegatedImageAllowed01621)assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      const mimeType=String(req.headers['content-type']||'');
+      if(delegatedImageAllowed01621)assertDelegatedImageInput01621({kind:'image',mimeType});
+      const u=new URL(req.url,'http://localhost'),bytes=await readBuffer(req,{limit:config.mediaMaxUploadBytes});
+      return sendJson(res,201,await uploadAuthorizedCloudMediaBytes01108(mediaScope,{fileName:u.searchParams.get('fileName')||'image',mimeType,width:u.searchParams.get('width'),height:u.searchParams.get('height'),lastModified:u.searchParams.get('lastModified'),folder:u.searchParams.get('folder')||'tables'},bytes));
+    }
+    if(req.method==='POST'&&p[3]==='uploads'&&p[4]&&p[5]==='complete'){if(!delegatedImageAllowed01621)assertLegacyForUnmanaged01600(scope,protectedDecision01600);if(delegatedImageAllowed01621)await verifyDelegatedUploadOwner01621(mediaScope,session.userId,p[4]);return sendJson(res,200,await completeAuthorizedCloudMediaUpload01081(mediaScope,p[4],await readJson(req)));}
     if(req.method==='DELETE'&&p[3]==='assets'&&p[4]){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,await deleteAuthorizedCloudMediaAsset01081(scope,p[4]));}
     return sendJson(res,404,{error:'Media cloud route not found',requestId:rid});
   }
@@ -896,6 +1114,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,404,{error:'Network route not found',requestId:rid});
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
+  const delegatedProductLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
   if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
     const input=await readJson(req,{limit:1024*1024});
     const plan=normalizeCatalogOperations01606D(input);
@@ -903,10 +1122,11 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     // permission for this endpoint does not authorize any mutations by itself.
     const checked=new Map();
     for(const op of plan.operations){
+      if(delegatedProductLevels01621?.marketplace==='edit')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,op.collection,op.action,op.value);
       const basePermission=op.action==='delete'?'shop.products.delete':'shop.products.edit';
       if(!checked.has(basePermission)){
         let result;
-        try{result=await inspectProtectedAccess01600(scope,session.userId,{permission:basePermission,siteId:'',legacy:'write'});}
+        try{result=await inspectProtectedAccess01600(scope,session.userId,{permission:basePermission,siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace});}
         catch(error){if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{permission:basePermission,siteId:''},error.code||error.message);}catch{}throw error;}
         checked.set(basePermission,result);
       }
@@ -969,12 +1189,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(key){const id=p[4]||'';
     if(req.method==='GET'&&!id&&p.length===4)return sendJson(res,200,await listResource(scope,key));
     if(req.method==='GET'&&id&&p.length===5){const one=await getResource(scope,key,id);return one?sendJson(res,200,one):sendJson(res,404,{error:'Entity not found',requestId:rid});}
-    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,201,await createResource(scope,key,input));}
-    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,200,await updateResource(scope,key,id,input));}
-    if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const removed=await deleteResource(scope,key,id);return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
+    if(req.method==='POST'&&!id&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedProductLevels01621?.marketplace==='edit'){if(key==='products')assertProductMutation01621(delegatedProductLevels01621,input,{creating:true});else assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'create',input);}if(key==='products')await assertProductGate01606B(productStatusAction01606B(input));if(key==='products'&&delegatedProductLevels01621?.marketplace==='edit'){delete input.createdAt;delete input.updatedAt;}return sendJson(res,201,await createResource(scope,key,input,{actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''}));}
+    if(req.method==='PATCH'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);const input=await readJson(req);if(delegatedProductLevels01621?.marketplace==='edit'&&key!=='products')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'update',input);if(key==='products'&&delegatedProductLevels01621?.marketplace!=='edit')await assertProductGate01606B(productStatusAction01606B(input));return sendJson(res,200,await updateResource(scope,key,id,input,{validateUpdate:delegatedProductLevels01621?.marketplace==='edit'&&key==='products'?(current,patch)=>assertProductMutation01621(delegatedProductLevels01621,patch,{before:current}):null,actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''}));}
+    if(req.method==='DELETE'&&id&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);if(delegatedProductLevels01621?.marketplace==='edit'&&key!=='products')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,key,'delete');const removed=await deleteResource(scope,key,id,{actorUserId:delegatedProductLevels01621?.marketplace==='edit'?session.userId:''});return removed?sendNoContent(res,204):sendJson(res,404,{error:'Entity not found',requestId:rid});}
   }
   return sendJson(res,404,{error:'Not found',requestId:rid});
 }
-const server=http.createServer((req,res)=>{const rid=requestId(req);res.setHeader('x-st-request-id',rid);attachHttpTrafficMeter01194(req,res);runTrafficContext01201({requestId:rid,method:req.method,pathname:new URL(req.url||'/','http://localhost').pathname},()=>route(req,res,rid)).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||rid});}else res.end();});});
+const server=http.createServer((req,res)=>{const rid=requestId(req);res.setHeader('x-st-request-id',rid);attachHttpTrafficMeter01194(req,res);runTrafficContext01201({requestId:rid,method:req.method,pathname:new URL(req.url||'/','http://localhost').pathname},()=>route(req,res,rid)).catch(err=>{console.error(`[${config.stage}]`,err);if(!res.headersSent){applyCors(req,res,config.corsOrigin);sendJson(res,err.statusCode||500,{error:err.message||'Internal Server Error',stage:config.stage,requestId:res.getHeader('x-st-request-id')||rid,...(err.statusCode===403&&/^ST_ACCESS_ACTION_DENIED_01600$/.test(String(err.code||err.message||''))?{requiredPermission:String(err.permission||''),accessDenialReason:String(err.denialReason||'missing-effective-permission')}:{})});}else res.end();});});
 server.listen(config.port,config.host,()=>{console.log(`[${config.stage}] ShiftTime Backend http://${config.host}:${config.port}`);startSupplierSyncScheduler01399();startNotificationPreferencesScheduler01417({enabled:config.notificationPreferencesSchedulerEnabled,pollSeconds:config.notificationPreferencesPollSeconds,maxJobs:config.notificationPreferencesMaxJobs});});
 for(const sig of ['SIGINT','SIGTERM'])process.on(sig,()=>{stopSupplierSyncScheduler01399();stopNotificationPreferencesScheduler01417();server.close(async()=>{try{await closeTrafficRecorder01194();}finally{await pool.end();process.exit(0);}});});
