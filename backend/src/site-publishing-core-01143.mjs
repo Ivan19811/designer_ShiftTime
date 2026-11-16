@@ -16,6 +16,17 @@ function buildEnvironmentFiles01623E(files,environment){
   return result;
 }
 function publicUrl(r){return clean(r?.netlifySslUrl||r?.netlifyUrl);}
+// 01623H: Only Netlify's metadata for THE SAME deployed site can certify a
+// custom-domain association. Neither a browser URL nor a Store profile domain
+// is allowed to redirect the publish target to another site.
+export function customDomainFromNetlify01623H(meta,siteId){
+  if(!meta||clean(meta.id)!==clean(siteId))return '';
+  const raw=clean(meta.custom_domain).toLowerCase().replace(/\.$/,'');
+  if(!raw||raw.length>253||raw.includes('/')||raw.includes(':')||raw.includes('@')||raw.includes('..')||/^(localhost|.*\.localhost|.*\.netlify\.app)$/.test(raw))return '';
+  if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(raw))return '';
+  return `https://${raw}/`;
+}
+
 
 function assertOfflinePreflight01151(pkg){
   const exporterVersion=clean(pkg?.exporterVersion);
@@ -39,6 +50,20 @@ export function createSitePublishingService01143({repo,netlify,buildFiles=buildP
   if(!['production','demo'].includes(environment))throw new TypeError('Unknown publish environment');
   if(!repo)throw new TypeError('Publishing repository is required');if(!netlify)throw new TypeError('Netlify client is required');
   void createZip;
+  async function verifiedProductionUrl01623H(row){
+    const technicalUrl=publicUrl(row),siteId=clean(row?.netlifySiteId);
+    if(environment==='demo'||!siteId||typeof netlify.getSite!=='function')return {url:technicalUrl,technicalUrl,domainSource:'netlify'};
+    try{
+      const meta=await netlify.getSite({siteId});
+      const alias=customDomainFromNetlify01623H(meta,siteId);
+      if(alias)return {url:alias,technicalUrl,domainSource:'netlify-custom',verifiedByNetlify:true};
+    }catch{/* Netlify metadata unavailable: never claim an alias is verified. */}
+    return {url:technicalUrl,technicalUrl,domainSource:'netlify'};
+  }
+  async function verifiedStatus01623H(row){
+    const base=toStatus(row,{configured});if(!row)return base;
+    return {...base,...await verifiedProductionUrl01623H(row)};
+  }
   async function publish(scope,userId,builderSiteId,pkg){
     const sid=clean(builderSiteId);if(!sid||clean(pkg?.site?.id)!==sid)throw Object.assign(new Error('Publish package site id does not match requested site id'),{statusCode:400});if(clean(pkg?.version)!=='01143')throw Object.assign(new Error('Unsupported publish package version'),{statusCode:400});if(!clean(pkg?.revision))throw Object.assign(new Error('Publish revision is required'),{statusCode:400});
     assertOfflinePreflight01151(pkg);
@@ -54,13 +79,13 @@ export function createSitePublishingService01143({repo,netlify,buildFiles=buildP
       const site=await netlify.createSiteWithSafeName({preferredName:preferred});
       record=await repo.saveIdentity(scope,{builderSiteId:sid,siteName:clean(pkg?.site?.name),siteSlug:clean(pkg?.site?.slug),netlifySiteId:clean(site.id),netlifySiteName:clean(site.name),netlifyUrl:clean(site.url),netlifySslUrl:clean(site.ssl_url),netlifyAdminUrl:clean(site.admin_url),createdByUserId:userId});
       await ensureTrafficIdentity();
-      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:publicUrl(record),apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
+      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:(await verifiedProductionUrl01623H(record)).url,apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
     }else{
       await ensureTrafficIdentity();
-      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:publicUrl(record),apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
+      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:(await verifiedProductionUrl01623H(record)).url,apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
     }
     let deploy;try{deploy=await netlify.deployFiles({siteId:record.netlifySiteId,files});}catch(err){await repo.updateDeploy(scope,{builderSiteId:sid,state:'error',error:clean(err.message)}).catch(()=>{});throw err;}
-    record=await repo.recordDeploy(scope,{builderSiteId:sid,netlifyDeployId:clean(deploy.id),revision:clean(pkg.revision),state:clean(deploy.state)||'new',createdByUserId:userId});return toStatus(record);
+    record=await repo.recordDeploy(scope,{builderSiteId:sid,netlifyDeployId:clean(deploy.id),revision:clean(pkg.revision),state:clean(deploy.state)||'new',createdByUserId:userId});return await verifiedStatus01623H(record);
   }
   async function status(scope,builderSiteId){
     const sid=clean(builderSiteId);let record=await repo.get(scope,sid);if(!record)return toStatus(null,{configured});
@@ -80,7 +105,7 @@ export function createSitePublishingService01143({repo,netlify,buildFiles=buildP
         record=await repo.updateDeploy(scope,{builderSiteId:sid,netlifyDeployId:record.lastDeployId,state:finalState,error:finalError,publishedRevision:ready?record.requestedRevision:'',publishedAt:ready?now().toISOString():null});
       }catch(err){if(Number(err?.netlifyStatus)===404)record=await repo.updateDeploy(scope,{builderSiteId:sid,netlifyDeployId:record.lastDeployId,state:'error',error:'Netlify deploy was not found'});else throw err;}
     }
-    return toStatus(record,{configured});
+    return await verifiedStatus01623H(record);
   }
   return {publish,status};
 }

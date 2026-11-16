@@ -94,6 +94,8 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     }
     return deploy;
   }
+  // 01623H: Site metadata is read only. The deploy target remains the existing Netlify Site ID.
+  async function getSite({siteId}={}){const sid=clean(siteId);if(!sid)throw Object.assign(new Error('Netlify site id is required'),{statusCode:400});return request(`/sites/${encodeURIComponent(sid)}`,{method:'GET'});}
   async function getDeploy({deployId}={}){if(!clean(deployId))throw Object.assign(new Error('Netlify deploy id is required'),{statusCode:400});return request(`/deploys/${encodeURIComponent(clean(deployId))}`,{method:'GET'});}
   async function restoreSiteDeploy({siteId,deployId}={}){
     const sid=clean(siteId),did=clean(deployId);if(!sid||!did)throw Object.assign(new Error('Netlify deploy identifiers are required'),{statusCode:400});
@@ -110,5 +112,5 @@ export function createNetlifyClient01143({token='',baseUrl='https://api.netlify.
     if(!filePath||filePath.includes('?')||filePath.includes('#'))throw Object.assign(new Error('Netlify file path is required'),{statusCode:400});
     return request(`/sites/${encodeURIComponent(sid)}/files/${encodeURIComponent(filePath)}`,{method:'GET'});
   }
-  return {createSite,createSiteWithSafeName,deployZip,deployFiles,getDeploy,restoreSiteDeploy,getSiteFile,deleteSite};
+  return {createSite,createSiteWithSafeName,deployZip,deployFiles,getSite,getDeploy,restoreSiteDeploy,getSiteFile,deleteSite};
 }
