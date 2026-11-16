@@ -3,6 +3,7 @@ import {withClient} from './db.mjs';
 import {draftFingerprint01606G} from './site-canvas-draft-service-01606g.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {classifyTestDraftDelete01623D} from './site-revision-delete-policy-01623d.mjs';
+import {checkRevisionDeleteScope01623K} from './site-delete-audit-01623k.mjs';
 
 const clean=v=>String(v??'').trim();
 const clone=v=>v==null?v:structuredClone(v);
@@ -70,6 +71,25 @@ export async function updateSiteDraftDetails01232(scope,userId,siteId,revisionId
   return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET label=CASE WHEN $1<>'' THEN $1 ELSE label END,comment=$2,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4 AND id=$5 AND kind='draft' RETURNING *`,[label,comment,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
+// 01623K diagnostic: state fingerprint is restricted to ONE site and contains no content or credentials.
+async function snapshotDeleteScope01623K(c,siteId,revisionId){
+  const q=await c.query(`SELECT
+    (SELECT COUNT(*)::int FROM shifttime_builder_sites WHERE id=$1) AS site_count,
+    (SELECT COUNT(*)::int FROM shifttime_builder_site_projects WHERE site_id=$1) AS project_count,
+    (SELECT COUNT(*)::int FROM shifttime_builder_site_revisions WHERE site_id=$1) AS total,
+    (SELECT COUNT(*)::int FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='draft') AS drafts,
+    (SELECT COUNT(*)::int FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='archived') AS archived,
+    (SELECT COUNT(*)::int FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2) AS target`,[siteId,revisionId]);
+  return q.rows[0];
+}
+function logDelete01623K(event,siteId,revisionId,counts,extra={}){
+  console.info('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event,siteId,revisionId,...counts,...extra}));
+}
+function assertDeleteScope01623K(before,after,{archived=false}={}){
+  if(!checkRevisionDeleteScope01623K(before,after,{archived}))
+    throw httpError('Deletion affected unexpected records; transaction rolled back',409,'ST_REVISION_DELETE_SCOPE_MISMATCH_01623K');
+}
+
 // 01623D: authoritatively authorize deletion, with history/approval protection.
 
 export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId=''){
@@ -78,6 +98,8 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
     await c.query('BEGIN');
     try{
       await assertSite(c,scope,sid);
+      const before01623K=await snapshotDeleteScope01623K(c,sid,rid);
+      logDelete01623K('revision-delete-before',sid,rid,before01623K);
       const existing=await c.query(`SELECT id,slot,kind FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 FOR UPDATE`,[sid,rid]);
       if(!existing.rowCount||existing.rows[0].kind!=='draft')throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
       const test=await c.query(`SELECT id,state,author_user_id,review_cycle,review_snapshot_sha FROM shifttime_site_test_branches_01613d WHERE site_id=$1 AND revision_id=$2 FOR UPDATE`,[sid,rid]);
@@ -113,6 +135,9 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
             SET kind='archived',slot=0,updated_at=now()
             WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id`,[sid,rid]);
           if(!archived.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+          const after01623K=await snapshotDeleteScope01623K(c,sid,rid);
+          logDelete01623K('revision-delete-after-archive',sid,rid,after01623K);
+          assertDeleteScope01623K(before01623K,after01623K,{archived:true});
           await c.query('COMMIT');
           return {deleted:true,archived:true,id:rid,slot:Number(existing.rows[0].slot||0)};
         }
@@ -121,9 +146,16 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
       // test branch without removing any immutable review or publication audit.
       const q=await c.query(`DELETE FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' RETURNING id,slot`,[sid,rid]);
       if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+      const after01623K=await snapshotDeleteScope01623K(c,sid,rid);
+      logDelete01623K('revision-delete-after',sid,rid,after01623K);
+      assertDeleteScope01623K(before01623K,after01623K,{archived:false});
       await c.query('COMMIT');
       return {deleted:true,archived:false,id:clean(q.rows[0].id),slot:Number(q.rows[0].slot||0)};
-    }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}
+    }catch(e){
+      try{await c.query('ROLLBACK');}catch{}
+      console.error('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-rollback',siteId:sid,revisionId:rid,code:String(e?.code||'UNKNOWN'),status:Number(e?.statusCode||500)}));
+      throw e;
+    }
   });
 }
 

@@ -890,7 +890,19 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId,session.userId)});
     if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='PATCH'&&revisionId&&action==='details'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await updateSiteDraftDetails01232(scope,session.userId,siteId,revisionId,await readJson(req,{limit:64*1024}))});}
-    if(req.method==='DELETE'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',...(await deleteSiteDraft01231(scope,siteId,revisionId,session.userId))});}
+    if(req.method==='DELETE'&&revisionId&&p.length===6){
+      // 01623K: correlate one deletion request with a PostgreSQL before/after snapshot.
+      console.info('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-request',requestId:rid,siteId,revisionId}));
+      try{
+        assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+        const result=await deleteSiteDraft01231(scope,siteId,revisionId,session.userId);
+        console.info('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-response',requestId:rid,siteId,revisionId,deleted:result.deleted===true,archived:result.archived===true}));
+        return sendJson(res,200,{stage:'01623K',requestId:rid,...result});
+      }catch(error){
+        console.error('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-error',requestId:rid,siteId,revisionId,status:Number(error?.statusCode||500),code:String(error?.code||'UNKNOWN')}));
+        throw error;
+      }
+    }
     if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
@@ -916,7 +928,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(summary){const {project,...metadata}=site;return sendJson(res,200,{stage:'01476',site:metadata});}
     return sendJson(res,200,{stage:'01170',site});
   }
-  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){assertLegacyForUnmanaged01600(scope,protectedDecision01600,'admin');return sendJson(res,200,{stage:'01170',...(await deleteBuilderSite01170(scope,session.userId,p[3]))});}
+  if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){
+    // 01623K DIAGNOSTIC MODE: stop physical site deletion and associated ON DELETE CASCADE.
+    // This intentionally disables the whole-site delete action until the incident is resolved.
+    console.warn('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'whole-site-delete-BLOCKED',requestId:rid,siteId:p[3]}));
+    return sendJson(res,423,{stage:'01623K',requestId:rid,code:'ST_WHOLE_SITE_DELETE_TEMP_BLOCKED_01623K',error:'Whole-site deletion is temporarily disabled during revision deletion diagnostics'});
+  }
   // 01605B · Prevent enrolled narrow roles inheriting legacy admin capabilities.
   if(p[2]==='admin'){
     assertAdminView01087(scope);
