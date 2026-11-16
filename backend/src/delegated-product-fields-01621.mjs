@@ -86,6 +86,7 @@ export function allowedDelegatedCloudMedia01621(method,parts,tiers){
  return (m==='GET'&&parts[3]==='assets'&&parts.length===4)
   ||(m==='GET'&&parts[3]==='storage'&&parts[4]==='status'&&parts.length===5)
   ||(m==='POST'&&parts[3]==='uploads'&&parts.length===4)
+  ||(m==='POST'&&parts[3]==='uploads'&&parts[4]==='proxy'&&parts.length===5) // 01623I: image-only server fallback for verified photo editors
   ||(m==='POST'&&parts[3]==='uploads'&&parts[4]&&parts[5]==='complete'&&parts.length===6);
 }
 export function assertDelegatedImageInput01621(input){
