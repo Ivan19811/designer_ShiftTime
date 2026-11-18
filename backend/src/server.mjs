@@ -128,6 +128,7 @@ import {getSiteTestChangeChoices01618,planSiteTestSelectedChanges01618,applySite
 import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,getSiteTestBaseline01619E,decideSiteTest01615A,getSiteTestReviewInbox01615A,previewSelectiveSiteTestApply01615B,applyApprovedSiteTest01615B,rollbackAppliedSiteTest01615B,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
 import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
+import {getSiteDeleteCheck01623M,deleteAllDraftRevisions01623M} from './site-destructive-guards-01623m.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
 import {listTrafficHistogram01474,getTrafficHistogramDetails01474} from './traffic-histogram-01474.mjs';
 import {getTrafficSummary01194,listTrafficEvents01194,listTrafficIntegrationEvents01201,listTrafficSites01203,listTrafficStorage01206,listTrafficR2Inventory01210,refreshTrafficR2Inventory01210,listTrafficSiteResourceInventory01213,getTrafficSiteResourceInventory01213,cleanupTrafficSiteBrokenReference01219,listTrafficCleanupAudit01221} from './traffic-service-01194.mjs';
@@ -886,6 +887,12 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId,null,undefined,scope.role==='owner'?'':session.userId)});
+    if(req.method==='POST'&&revisionId==='delete-all'&&p.length===6){
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      const payload=await readJson(req,{limit:4096});
+      console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'bulk-drafts-request',requestId:rid,siteId,expectedCount:payload?.expectedCount}));
+      return sendJson(res,200,{requestId:rid,...await deleteAllDraftRevisions01623M(scope,siteId,payload)});
+    }
     if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId,session.userId)});
     if(req.method==='PUT'&&revisionId&&p.length===6){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01232',revision:await saveSiteDraft01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:32*1024*1024}))});}
@@ -903,7 +910,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         throw error;
       }
     }
-    if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId)});}
+    if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:4096}))});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
   }
   // 01623E: demo has its own Netlify identity, deployment table and site-scoped permission.
@@ -919,7 +926,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     return sendJson(res,200,{stage:'01476',sites:Array.isArray(onlySites)&&Array.isArray(sites)?sites.filter(s=>onlySites.includes(s.id)):sites});
   }
   if(p[2]==='sites'&&p[3]&&req.method==='GET'&&p.length===4)return sendJson(res,200,{stage:'01170',site:await getBuilderSite01170(scope,p[3])});
-  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}),{createOnly:isPreciseSiteMode01606E(protectedDecision01600)})});}
+  if(p[2]==='sites'&&req.method==='POST'&&p.length===3){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01170',site:await createBuilderSite01170(scope,session.userId,await readJson(req,{limit:32*1024*1024}),{createOnly:isPreciseSiteMode01606E(protectedDecision01600)||new URL(req.url,'http://localhost').searchParams.get('createOnly')==='1'})});}
   if(p[2]==='sites'&&p[3]&&p[4]==='metadata'&&req.method==='PATCH'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',site:await saveBuilderSiteMetadata01231(scope,p[3],await readJson(req,{limit:1024*1024}))});}
   if(p[2]==='sites'&&p[3]&&req.method==='PUT'&&p.length===4){
     assertLegacyForUnmanaged01600(scope,protectedDecision01600);
@@ -928,11 +935,25 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     if(summary){const {project,...metadata}=site;return sendJson(res,200,{stage:'01476',site:metadata});}
     return sendJson(res,200,{stage:'01170',site});
   }
+  // 01623M: read-only, authoritative eligibility check before showing Delete Site modal.
+  if(p[2]==='sites'&&p[3]&&p[4]==='delete-check'&&req.method==='GET'&&p.length===5){
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    return sendJson(res,200,{requestId:rid,...await getSiteDeleteCheck01623M(scope,p[3])},{'cache-control':'private, no-store'});
+  }
   if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4){
-    // 01623K DIAGNOSTIC MODE: stop physical site deletion and associated ON DELETE CASCADE.
-    // This intentionally disables the whole-site delete action until the incident is resolved.
-    console.warn('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'whole-site-delete-BLOCKED',requestId:rid,siteId:p[3]}));
-    return sendJson(res,423,{stage:'01623K',requestId:rid,code:'ST_WHOLE_SITE_DELETE_TEMP_BLOCKED_01623K',error:'Whole-site deletion is temporarily disabled during revision deletion diagnostics'});
+    assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+    const siteId=p[3];
+    const input=await readJson(req,{limit:4096});
+    const check=await getSiteDeleteCheck01623M(scope,siteId);
+    if(!input||input.confirmSiteId!==siteId||input.confirmSiteName!==check.siteName)
+      return sendJson(res,400,{stage:'01623M',requestId:rid,code:'ST_SITE_DELETE_CONFIRM_REQUIRED_01623M',error:'Type the exact site name before deletion'});
+    if(!check.canDelete){
+      console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'site-delete-blocked-revisions',requestId:rid,siteId,revisions:check.revisions}));
+      return sendJson(res,409,{stage:'01623M',requestId:rid,code:'ST_SITE_HAS_REVISIONS_01623M',revisions:check.revisions,error:'Спочатку видаліть усі наявні редакції сайту. Опубліковані й архівні версії захищені.'});
+    }
+    const result=await deleteBuilderSite01170(scope,session.userId,siteId);
+    console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'site-delete-confirmed',requestId:rid,siteId,deleted:result.deleted===true,netlifyDeleted:result.netlify?.deleted===true}));
+    return sendJson(res,200,{stage:'01623M',requestId:rid,...result});
   }
   // 01605B · Prevent enrolled narrow roles inheriting legacy admin capabilities.
   if(p[2]==='admin'){

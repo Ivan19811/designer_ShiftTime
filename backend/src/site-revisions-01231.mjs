@@ -3,6 +3,7 @@ import {withClient} from './db.mjs';
 import {draftFingerprint01606G} from './site-canvas-draft-service-01606g.mjs';
 import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {classifyTestDraftDelete01623D} from './site-revision-delete-policy-01623d.mjs';
+import {planOriginalPromotion01623U} from './site-original-promotion-01623u.mjs';
 import {checkRevisionDeleteScope01623K} from './site-delete-audit-01623k.mjs';
 
 const clean=v=>String(v??'').trim();
@@ -97,6 +98,7 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
   return withClient(async c=>{
     await c.query('BEGIN');
     try{
+      await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[sid]);
       await assertSite(c,scope,sid);
       const before01623K=await snapshotDeleteScope01623K(c,sid,rid);
       logDelete01623K('revision-delete-before',sid,rid,before01623K);
@@ -159,8 +161,39 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
   });
 }
 
-export async function publishSiteRevision01231(scope,userId,siteId,revisionIdValue){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{operation:'publish'});const d=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' FOR UPDATE`,[sid,rid]);if(!d.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'`,[sid]);const q=await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$1,updated_at=now() WHERE site_id=$2 AND id=$3 RETURNING *`,[userId,sid,rid]);await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
+export async function publishSiteRevision01231(scope,userId,siteId,revisionIdValue,input={},run=withClient){
+  const sid=clean(siteId),rid=clean(revisionIdValue);
+  return run(async c=>{await c.query('BEGIN');try{
+    await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[sid]);
+    await assertSite(c,scope,sid);
+    await assertEditableSiteTestRevision01615B(c,sid,rid,{operation:'publish',role:scope.role,userId});
+    const d=await c.query(`SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' FOR UPDATE`,[sid,rid]);
+    if(!d.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+    const draft=d.rows[0], fingerprint=draftFingerprint01606G(draft.project_json);
+    const expected=clean(input?.expectedFingerprint);
+    if(expected&&expected!==fingerprint)throw httpError('Draft changed during publication',409,'ST_PUBLISH_DRAFT_CHANGED_01623U');
+    // Same lock order as original writes / manager approval; never erase an independent original.
+    const original=await c.query(`SELECT p.revision,p.project_json,
+      EXISTS (SELECT 1 FROM shifttime_builder_site_revisions r WHERE r.site_id=p.site_id AND r.kind='published' AND r.project_json=p.project_json) AS previous_matches,
+      p.project_json=$2::jsonb AS next_matches,
+      (EXISTS (SELECT 1 FROM shifttime_site_test_apply_events_01615b WHERE site_id=p.site_id) OR
+       EXISTS (SELECT 1 FROM shifttime_site_test_change_batches_01618 WHERE site_id=p.site_id)) AS reviewed
+      FROM shifttime_builder_site_projects p WHERE p.site_id=$1 FOR UPDATE OF p`,[sid,JSON.stringify(draft.project_json)]);
+    const base=original.rows[0]||{};
+    const plan=planOriginalPromotion01623U({siteId:sid,role:scope.role,confirmed:!!expected,
+      canonical:base.project_json,revision:base.revision,previousMatches:base.previous_matches,nextMatches:base.next_matches,reviewed:base.reviewed,project:draft.project_json});
+    let originalSync01623U=plan;
+    if(plan.status==='sync'){
+      const updated=await c.query(`UPDATE shifttime_builder_site_projects SET project_json=$1::jsonb,schema_version=$2,revision=revision+1,updated_by_user_id=$3,updated_at=now() WHERE site_id=$4 AND revision=$5 RETURNING revision`,[JSON.stringify(draft.project_json),draft.schema_version,userId,sid,base.revision]);
+      if(!updated.rowCount)throw httpError('Original changed during publication',409,'ST_ORIGINAL_STALE_REVISION_01617');
+      originalSync01623U={...plan,status:'synced',revision:Number(updated.rows[0].revision)};
+    }
+    await c.query(`UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'`,[sid]);
+    const q=await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$1,updated_at=now() WHERE site_id=$2 AND id=$3 RETURNING *`,[userId,sid,rid]);
+    await c.query('COMMIT');
+    console.info('[ST_ORIGINAL_SYNC_01623U]',JSON.stringify({siteId:sid,revisionId:rid,...originalSync01623U}));
+    return {...mapRow(q.rows[0],{includeProject:true}),originalSync01623U};
+  }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
 // No application-level maximum number of draft revisions per site (01613D3).
