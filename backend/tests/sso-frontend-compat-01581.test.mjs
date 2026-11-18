@@ -13,7 +13,7 @@ test('Builder preserves its existing auth runtime and only accepts verified SSO 
  const auth=await read('../../js/marketplace/data/marketplace-auth-runtime-01084.js');
  const bridge=await read('../../js/account/builder-sso-bridge-01581.js');
  assert.match(auth,/acceptMarketplaceSsoSession01581/);assert.match(bridge,/ssoFinish01581/);
- assert.match(bridge,/login:success/);assert.match(bridge,/ssoEstablish01581/);
+ assert.doesNotMatch(bridge,/handoff\(\s*['\"]builder['\"]/);assert.match(bridge,/handoff\(['\"]crm['\"]/);assert.match(bridge,/ssoEstablish01581/);
 });
 test('server guards SSO via session and explicit origin callback allowlist',async()=>{
  const core=await read('../src/sso-core-01581.mjs'),service=await read('../src/sso-service-01581.mjs'),server=await read('../src/server.mjs');

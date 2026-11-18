@@ -21,7 +21,9 @@ test('01622 photo grant reveals upload UI but never exposes deletion, import or 
  assert.ok(!modulePermissions01613C4(tiers(['texts'])).includes('builder.media.upload'));
  assert.ok(allowedDelegatedCloudMedia01621('POST',mediaPath('uploads'),tiers(['photos'])));
  assert.ok(allowedDelegatedCloudMedia01621('POST',mediaPath('uploads','asset1','complete'),tiers(['photos'])));
- assert.ok(!allowedDelegatedCloudMedia01621('POST',mediaPath('uploads','proxy'),tiers(['photos'])));
+ assert.ok(allowedDelegatedCloudMedia01621('POST',mediaPath('uploads','proxy'),tiers(['photos'])));
+ assert.ok(!allowedDelegatedCloudMedia01621('POST',mediaPath('uploads','proxy'),tiers(['texts'])));
+ assert.ok(!allowedDelegatedCloudMedia01621('POST',mediaPath('uploads','proxy'),{marketplace:'view',productPermissions:['photos']}));
  assert.ok(!allowedDelegatedCloudMedia01621('DELETE',mediaPath('assets','asset1'),tiers(['photos'])));
 });
 test('01622 Cloud Media routes require a verified accepted-photo grant, even for legacy viewer',async()=>{

@@ -31,13 +31,13 @@ test('01170 service lists/gets scoped cloud sites and preserves imported builder
   assert.equal(saved.name,'Legacy 2');
 });
 
-test('01170 delete removes Netlify first, then cloud site',async()=>{
+test('01623M delete removes cloud site after its SQL guard, before Netlify effects',async()=>{
   const repo=fakeRepo();repo.seed({id:'site_1',name:'One',slug:'one',revision:1,netlifySiteId:'netlify_1'});
   const calls=[];
   const service=createBuilderSitesService01170({repo,netlify:{async deleteSite({siteId}){calls.push(['netlify',siteId]);return {deleted:true,alreadyMissing:false};}}});
   const out=await service.delete(scope,'user_1','site_1');
   assert.deepEqual(calls,[['netlify','netlify_1']]);
-  assert.equal(repo.calls.at(-1)[0],'remove');
+  assert.ok(repo.calls.some(x=>x[0]==='remove'));
   assert.equal(out.deleted,true);
   assert.equal(out.netlify.deleted,true);
 });
@@ -48,13 +48,15 @@ test('01170 delete treats Netlify 404 as already absent and still removes cloud 
   const out=await service.delete(scope,'user_1','site_1');
   assert.equal(out.deleted,true);
   assert.equal(out.netlify.alreadyMissing,true);
-  assert.equal(repo.calls.at(-1)[0],'remove');
+  assert.ok(repo.calls.some(x=>x[0]==='remove'));
 });
 
-test('01170 delete preserves cloud record when Netlify deletion fails',async()=>{
+test('01623M completed SQL deletion reports Netlify cleanup failure without pretending site still exists',async()=>{
   const repo=fakeRepo();repo.seed({id:'site_1',name:'One',slug:'one',revision:1,netlifySiteId:'netlify_1'});
   const service=createBuilderSitesService01170({repo,netlify:{async deleteSite(){const e=new Error('Netlify unavailable');e.statusCode=502;throw e;}}});
-  await assert.rejects(()=>service.delete(scope,'user_1','site_1'),/Netlify unavailable/);
-  assert.equal(repo.calls.some(x=>x[0]==='remove'),false);
-  assert.ok(await repo.get(scope,'site_1'));
+  const out=await service.delete(scope,'user_1','site_1');
+  assert.equal(out.deleted,true);
+  assert.equal(out.netlify.error,true);
+  assert.equal(repo.calls.some(x=>x[0]==='remove'),true);
+  assert.equal(await repo.get(scope,'site_1'),null);
 });

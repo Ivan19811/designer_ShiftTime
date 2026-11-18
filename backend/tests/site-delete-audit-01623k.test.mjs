@@ -20,12 +20,13 @@ test('01623K changing other site/project data cannot be committed',()=>{
   assert.equal(valid(before,{...before,site_count:0,total:4,drafts:4,target:0}),false);
   assert.equal(valid(before,{...before,project_count:0,total:4,drafts:4,target:0}),false);
 });
-test('01623K production site DELETE route has an explicit kill switch and never calls destructive service',()=>{
+test('01623M site DELETE route verifies server counts and typed confirmation',()=>{
   const server=readFileSync(new URL('../src/server.mjs',import.meta.url),'utf8');
   const start=server.indexOf("if(p[2]==='sites'&&p[3]&&req.method==='DELETE'&&p.length===4)");
   const end=server.indexOf('  // 01605B',start);
   assert.ok(start>0&&end>start);
   const route=server.slice(start,end);
-  assert.match(route,/ST_WHOLE_SITE_DELETE_TEMP_BLOCKED_01623K/);
-  assert.doesNotMatch(route,/await deleteBuilderSite01170/);
+  assert.match(route,/ST_SITE_HAS_REVISIONS_01623M/);
+  assert.match(route,/input.confirmSiteName!==check.siteName/);
+  assert.match(route,/await deleteBuilderSite01170/);
 });

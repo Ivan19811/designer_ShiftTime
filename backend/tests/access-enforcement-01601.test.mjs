@@ -109,7 +109,9 @@ test('01601 backend gate executes after auth and before request parsing and rout
  assert.ok(gate<source.indexOf("if(p[2]==='tables')"));
  assert.ok(gate<source.indexOf("if(p[2]==='network'&&p[3]==='payments')"));
  assert.ok(gate<source.indexOf("if(p[3]==='supplier-sync-approvals')"));
- assert.match(source,/if\(req\.method==='POST'&&p\[3\]==='uploads'&&p\[4\]==='proxy'\)\{assertLegacyForUnmanaged01600\(scope,protectedDecision01600\);const u=/);
+ assert.match(source,/if\(req\.method==='POST'&&p\[3\]==='uploads'&&p\[4\]==='proxy'\)\{/);
+ assert.match(source,/if\(!delegatedImageAllowed01621\)assertLegacyForUnmanaged01600\(scope,protectedDecision01600\)/);
+ assert.match(source,/if\(delegatedImageAllowed01621\)assertDelegatedImageInput01621\(\{kind:'image',mimeType\}\)/);
  assert.match(source,/if\(req\.method==='PATCH'&&p\[4\]&&p\.length===5\)\{assertLegacyForUnmanaged01600\(scope,protectedDecision01600\);return sendJson\(res,200,await transitionAuthorizedPayment/);
 });
 test('01601 new UI labels are canonical i18n, no text literal in permission definitions',()=>{

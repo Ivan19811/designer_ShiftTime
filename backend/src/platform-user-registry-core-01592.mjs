@@ -22,7 +22,13 @@ export function normalizeRegistryFilters01592(query={}){
   if(evidence&&!['confirmed','inferred'].includes(evidence)){const e=new Error('INVALID_EVIDENCE_FILTER_01592');e.statusCode=400;throw e;}
   const status=clean(query.status).toLowerCase();
   if(status&&!['active','invited','disabled'].includes(status)){const e=new Error('INVALID_STATUS_FILTER_01592');e.statusCode=400;throw e;}
-  return {limit,offset,search,service,evidence,status};
+  const role=clean(query.role).toLowerCase();
+  if(role&&!['owner','admin','manager','editor','viewer'].includes(role)){const e=new Error('INVALID_ROLE_FILTER_01593');e.statusCode=400;throw e;}
+  const sort=clean(query.sort)||'createdAt';
+  if(!['createdAt','name','email','siteCount','storeCount'].includes(sort)){const e=new Error('INVALID_SORT_FILTER_01593');e.statusCode=400;throw e;}
+  const order=clean(query.order).toLowerCase()||'desc';
+  if(!['asc','desc'].includes(order)){const e=new Error('INVALID_ORDER_FILTER_01593');e.statusCode=400;throw e;}
+  return {limit,offset,search,service,evidence,status,role,sort,order};
 }
 export function serviceFlags01592(rows=[]){
   const flags=Object.fromEntries(SERVICE_CODES_01592.map(k=>[k,{status:'none',lastSeenAt:null}]));

@@ -16,18 +16,22 @@ export function createBuilderSitesService01170({repo,netlify}={}){
     async delete(scope,userId,id){
       const siteId=clean(id);if(!siteId)throw httpError('Builder site id is required');
       const target=await repo.getDeleteTarget(scope,siteId);if(!target)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');
-      // 01623E: remove isolated DEMO before production. Never leave an orphan preview project.
+      // 01623M: repository verifies ZERO revisions inside a single SQL transaction
+      // BEFORE any remote side effects; this also protects against concurrent draft creation.
+      const removed=await repo.remove(scope,siteId);
+      if(!removed)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');
       let demoRemote={deleted:false,alreadyMissing:false,skipped:true};
       if(clean(target.netlifyDemoSiteId)){
         try{demoRemote=await netlify.deleteSite({siteId:target.netlifyDemoSiteId});}
-        catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)demoRemote={deleted:true,alreadyMissing:true,skipped:false};else throw e;}
+        catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)demoRemote={deleted:true,alreadyMissing:true,skipped:false};
+          else{console.error('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'netlify-demo-cleanup-failed',siteId,code:clean(e?.code)||'NETLIFY_ERROR'}));demoRemote={deleted:false,skipped:false,error:true};}}
       }
       let remote={deleted:false,alreadyMissing:false,skipped:true};
       if(clean(target.netlifySiteId)){
         try{remote=await netlify.deleteSite({siteId:target.netlifySiteId});}
-        catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)remote={deleted:true,alreadyMissing:true,skipped:false};else throw e;}
+        catch(e){if(Number(e?.netlifyStatus||e?.statusCode)===404)remote={deleted:true,alreadyMissing:true,skipped:false};
+          else{console.error('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'netlify-cleanup-failed',siteId,code:clean(e?.code)||'NETLIFY_ERROR'}));remote={deleted:false,skipped:false,error:true};}}
       }
-      const removed=await repo.remove(scope,siteId);if(!removed)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');
       return {deleted:true,siteId,deletedByUserId:userId,netlify:remote,netlifyDemo:demoRemote};
     },
   };
