@@ -1,3 +1,4 @@
+import {assertManagerDemo01624A} from './site-manager-demo-guard-01624a.mjs';
 import crypto from 'node:crypto';
 import {withClient} from './db.mjs';
 import {config} from './config.mjs';
@@ -49,6 +50,7 @@ export async function getSitePublishStatus01143(scope,builderSiteId){try{const s
 
 // 01623E: demo records never affect shifttime_published_sites or production deploy history.
 export async function publishSiteDemo01623E(scope,userId,builderSiteId,pkg){
+  if(scope.role!=='owner')await withClient(c=>assertManagerDemo01624A({scope,userId,siteId:builderSiteId,pkg,query:(sql,params)=>c.query(sql,params)}));
   return demoService01623E.publish(scope,userId,builderSiteId,pkg);
 }
 export async function getSiteDemoStatus01623E(scope,builderSiteId){
