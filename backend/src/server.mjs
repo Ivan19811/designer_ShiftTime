@@ -1,3 +1,5 @@
+import {FAST_MODE,normalizeFastPlan} from './marketplace-fast-catalog-core-01624h.mjs';
+import {commitFastCatalog01624H} from './commerce-snapshot-service.mjs';
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -1115,8 +1117,29 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   }
   if(p[2]!=='marketplace')return sendJson(res,404,{error:'Not found',requestId:rid});
   const delegatedProductLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
+  const commitFastEditorRequest01624H=async input=>{
+      const fast=normalizeFastPlan(input);
+      const decision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.edit',siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace});
+      const hasProductMove=fast.operations.some(op=>op.collection==='products'&&(op.patch.categoryIds||op.patch.order));
+      const moveDecision=hasProductMove?await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.import',siteId:'',legacy:'write'}):null;
+      if(moveDecision)assertLegacyForUnmanaged01600(scope,moveDecision);
+      for(const op of fast.operations){
+        if(op.collection==='categories'){
+          if(delegatedProductLevels01621?.marketplace==='edit')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,'categories','update',op.patch);
+          await assertCatalogGate01606D(catalogAction01606D('categories','edit'),decision);
+        }else{
+          // Preserve legacy restrictions: delegated fields do not include status or tree-order configuration.
+          if(delegatedProductLevels01621?.marketplace==='edit')throw Object.assign(new Error('ST_DELEGATED_PRODUCT_FIELD_DENIED_01621'),{statusCode:403});
+          assertLegacyForUnmanaged01600(scope,decision);
+          if(Object.hasOwn(op.patch,'status'))assertProductAction01606B(decision,productStatusAction01606B(op.patch,{bulk:op.bulk}));
+          if(op.patch.categoryIds||op.patch.order)assertProductAction01606B(moveDecision,{permission:'shop.products.actions.snapshot_replace'});
+        }
+      }
+      return sendJson(res,200,await commitFastCatalog01624H({...scope,userId:session.userId},fast));
+  };
   if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
-    const input=await readJson(req,{limit:1024*1024});
+    const input=await readJson(req,{limit:8*1024*1024});
+    if(input?.mode===FAST_MODE)return commitFastEditorRequest01624H(input);
     const plan=normalizeCatalogOperations01606D(input);
     // Inspect each distinct base permission from the authenticated DB. The initial read
     // permission for this endpoint does not authorize any mutations by itself.

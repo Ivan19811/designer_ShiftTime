@@ -1,3 +1,4 @@
+import {normalizeFastPlan,applyFastCatalog} from './marketplace-fast-catalog-core-01624h.mjs';
 import {normalizeCatalogOperations01606D,applyAtomicCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
 import {planProductReplacement01528,applyProductReplacement01528} from './marketplace-product-replacement-core-01528.mjs';
 import {planBulkProductStatus01523} from './marketplace-bulk-status-core-01523.mjs';
@@ -31,6 +32,18 @@ export async function atomicCatalogEdit01606D(scope,input={}){
    count:plan.operations.length,operations:plan.operations.map(({collection,action,id})=>({collection,action,id}))
   });
   return {stage:'01606D',revision:next.revision,changed:plan.operations.length};
+ });
+}
+// 01624H: one locked transaction, optimistic revision, durable idempotency receipt.
+export async function commitFastCatalog01624H(scope,input){
+ const plan=normalizeFastPlan(input),digest=crypto.createHash('sha256').update(JSON.stringify(plan)).digest('hex');
+ return withTransaction(async client=>{
+  const before=await ensureRow(client,scope.storeId);
+  const receipt=await client.query("SELECT payload FROM commerce_outbox WHERE store_id=$1 AND event_type='commerce.catalog.fast-editor-01624H' AND payload->>'batchId'=$2 LIMIT 1",[scope.storeId,plan.batchId]);
+  if(receipt.rowCount){const p=receipt.rows[0].payload;if(p.digest!==digest||p.actor!==scope.userId)throw Object.assign(new Error('ST_FAST_CATALOG_BATCH_CONFLICT_01624H'),{statusCode:409});return {revision:p.revision,changed:p.count,batchId:plan.batchId,replayed:true};}
+  const modified=applyFastCatalog(before,plan);
+  const next=await persist(client,scope,modified,'commerce.catalog.fast-editor-01624H',{batchId:plan.batchId,digest,actor:scope.userId,revision:before.revision+1,count:plan.operations.length});
+  return {revision:next.revision,changed:plan.operations.length,batchId:plan.batchId};
  });
 }
 export async function bulkSetProductStatus01523(scope,input={}){
