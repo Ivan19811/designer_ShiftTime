@@ -1119,16 +1119,26 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   const delegatedProductLevels01621=scope.role!=='owner'?await currentDelegatedModules01613C4(scope,session.userId):null;
   const commitFastEditorRequest01624H=async input=>{
       const fast=normalizeFastPlan(input);
-      const decision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.edit',siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace});
+      const hasEdit=fast.operations.some(op=>!op.patch.deleted);
+      const hasDelete=fast.operations.some(op=>op.patch.deleted);
+      const decision=hasEdit?await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.edit',siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace}):null;
+      // 01624I: deletion requires explicit shop.products.delete, even if edit is granted.
+      const deleteDecision=hasDelete?await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.delete',siteId:'',legacy:'write',delegatedModuleRoute:!!delegatedProductLevels01621?.marketplace}):null;
       const hasProductMove=fast.operations.some(op=>op.collection==='products'&&(op.patch.categoryIds||op.patch.order));
       const moveDecision=hasProductMove?await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.import',siteId:'',legacy:'write'}):null;
       if(moveDecision)assertLegacyForUnmanaged01600(scope,moveDecision);
       for(const op of fast.operations){
+        if(op.patch.deleted){
+          if(delegatedProductLevels01621?.marketplace==='edit')throw Object.assign(new Error('ST_DELEGATED_PRODUCT_DELETE_DENIED_01624I'),{statusCode:403});
+          assertLegacyForUnmanaged01600(scope,deleteDecision);
+          if(op.collection==='categories')await assertCatalogGate01606D(catalogAction01606D('categories','delete'),deleteDecision);
+          else assertProductAction01606B(deleteDecision,{permission:'shop.products.delete'});
+          continue;
+        }
         if(op.collection==='categories'){
           if(delegatedProductLevels01621?.marketplace==='edit')assertDelegatedCatalogOperation01621(delegatedProductLevels01621,'categories','update',op.patch);
           await assertCatalogGate01606D(catalogAction01606D('categories','edit'),decision);
         }else{
-          // Preserve legacy restrictions: delegated fields do not include status or tree-order configuration.
           if(delegatedProductLevels01621?.marketplace==='edit')throw Object.assign(new Error('ST_DELEGATED_PRODUCT_FIELD_DENIED_01621'),{statusCode:403});
           assertLegacyForUnmanaged01600(scope,decision);
           if(Object.hasOwn(op.patch,'status'))assertProductAction01606B(decision,productStatusAction01606B(op.patch,{bulk:op.bulk}));
