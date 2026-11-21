@@ -1,0 +1,512 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 0px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  color: #333;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.category-button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.category-button:hover {
+  background-color: #0056b3;
+}
+
+
+/*========== <!-- header.html --> ======*/
+.widget-header {
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.widget-header .logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00bfff;
+}
+
+.nav-links a {
+  margin-left: 20px;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.nav-links a:hover {
+  color: #fff;
+}
+
+
+/*=============вирівнювання даних в таблиці замовлення =========================*/
+ .center-column {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  /*====================================================================*/
+  /* 🌐 Загальні стилі для всіх заголовків і клітинок Таблиці Замовлення*/
+
+#orderTable th,
+#orderTable td {
+  padding: 6px 8px;            /* Відступи всередині клітинок */
+  font-size: 14px;             /* Розмір шрифту */
+  text-align: center;          /* Вирівнювання по центру за замовчуванням */
+  vertical-align: middle;      /* Вирівнювання по вертикалі */
+}
+
+/* 📏 Індивідуальні ширини та специфічне вирівнювання */
+#orderTable td:nth-child(1),
+#orderTable th:nth-child(1) {
+  width: 10px;                 /* Ширина для № */
+}
+
+#orderTable td:nth-child(2),
+#orderTable th:nth-child(2) {                /* Ширина для "Товар" */
+  text-align: left;            /* Вирівнювання по лівому краю лише для цієї колонки */
+  width: 70%;   
+}
+
+#orderTable td:nth-child(3),
+#orderTable th:nth-child(3) {
+  width: 10%;
+  min-width: 7%;
+  max-width: 20%;                 /* Розмір */
+}
+
+#orderTable td:nth-child(4),
+#orderTable th:nth-child(4) {
+  width: 7%;                 /* Додатково */
+}
+
+
+
+#orderTable td:nth-child(5),
+#orderTable th:nth-child(5) {
+  width: 7%;                 /* Ціна */
+}
+
+
+
+#orderTable td:nth-child(6),
+#orderTable th:nth-child(6) {
+  width: 7%;                 /* Видалити */
+}
+
+#orderTable td:nth-child(7),
+#orderTable th:nth-child(7) {
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;           /* Перетягування */
+}
+
+/* ================= ПОРЯДОК ТОВАРІВ: DRAG & DROP ================= */
+#orderTable .order-drag-column {
+  font-size: 18px;
+  user-select: none;
+}
+
+#orderTable .order-drag-cell {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.order-drag-handle {
+  width: 30px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+
+.order-drag-handle:hover {
+  background: #e0edff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  transform: scale(1.04);
+}
+
+.order-drag-handle:active {
+  cursor: grabbing;
+  background: #dbeafe;
+}
+
+.order-drag-handle svg {
+  width: 18px;
+  height: 22px;
+  display: block;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+#orderBody tr {
+  transition: opacity .14s ease, background-color .14s ease, box-shadow .14s ease;
+}
+
+#orderBody tr.order-row-drag-ready {
+  background: #eff6ff;
+}
+
+#orderBody tr.order-row-dragging {
+  opacity: .3;
+  background: #dbeafe;
+}
+
+#orderBody tr.order-row-drop-before td {
+  border-top: 4px solid #2563eb !important;
+  box-shadow: inset 0 5px 0 rgba(37, 99, 235, .12);
+}
+
+#orderBody tr.order-row-drop-after td {
+  border-bottom: 4px solid #2563eb !important;
+  box-shadow: inset 0 -5px 0 rgba(37, 99, 235, .12);
+}
+
+body.order-row-is-dragging,
+body.order-row-is-dragging * {
+  cursor: grabbing !important;
+}
+
+.order-drag-ghost {
+  position: fixed;
+  left: -10000px;
+  top: -10000px;
+  z-index: 999999;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #ffffff;
+  color: #111827;
+  opacity: .96;
+  pointer-events: none;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, .35);
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.order-drag-ghost td {
+  padding: 6px 8px;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  vertical-align: middle;
+}
+
+.order-drag-ghost button,
+.order-drag-ghost .order-drag-handle {
+  pointer-events: none;
+}
+/* ==============🔹 Колір фону всієї таблиці ======================*/
+#orderTable {
+  background-color: #ffffff;        /* Світлий фон всієї таблиці */
+  border: 1px solid #ece6e6;           /* Світла рамка */
+  border-collapse: collapse;        /* Прибирає подвійні лінії */
+}
+
+/* 🔹 Колір фону заголовка таблиці (перший рядок <th>) */
+#orderTable thead {
+  background-color: #f0f0f0;        /* Сіренький фон */
+}
+
+/* 🔹 Колір тексту заголовків */
+#orderTable th {
+  color: #000000;                      /* Темно-сірий текст */
+  font-weight: bold;
+  text-transform: uppercase;        /* Всі літери великі (за бажанням) */
+}
+
+/* =============🔷 Основний стиль для блоків ============================= */
+.category-block {
+  display: block;                              /* Робимо блок повноширинним */
+  padding: 12px 20px;
+  margin: 8px;
+  background: linear-gradient(145deg, #f3f4f6, #ffffff);
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  
+}
+
+/* 🔹 Ефект при наведенні */
+.category-block:hover {
+  background-color: #e8f0ff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: scale(1.005);
+}
+
+/* 🔸 При натисканні (опціонально) */
+.category-block:active {
+  transform: scale(0.98);
+  background-color: #d6e3ff;
+}
+
+.active-category-button {
+  background-color: #2b90d9;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.delivery-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delivery-input {
+  display: none;
+  width: 120px;
+}
+
+/* Уніфікований рядок картки (заголовок + кнопка) */
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;                 /* відступ між заголовком і кнопкою */
+}
+
+/* Заголовок тягнеться, щоб кнопка лишилась компактною */
+.card-row .card-title {
+  flex: 1 1 auto;
+}
+
+/* Кнопка в аксесуарах і в 'Додатково' — компактна */
+#accessoryContainer .category-button,
+/* Тільки в блоці ДОДАТКОВО – не розтягувати кнопку */
+#extraContainer .category-button{
+  width: auto !important;
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  align-self: center;
+  min-width: 90px;      /* щоб не стискалась занадто */
+  white-space: nowrap;  /* один рядок */
+  text-align: center;
+  padding-left: 16px;   /* як у решти кнопок */
+  padding-right: 16px;
+}
+
+/* ================= ПРИМІТКА ДО ЗАМОВЛЕННЯ ================= */
+.order-note-control {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.order-note-trigger {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #1f2937;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, .08);
+  transition: border-color .15s ease, background-color .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.order-note-trigger:hover {
+  border-color: #dc2626;
+  color: #b91c1c;
+  background: #fff5f5;
+  box-shadow: 0 5px 14px rgba(220, 38, 38, .14);
+  transform: translateY(-1px);
+}
+
+.order-note-trigger.has-note {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.order-note-trigger-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.order-note-badge {
+  min-width: 24px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 6px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.order-note-modal[hidden] { display: none !important; }
+
+.order-note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.order-note-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, .68);
+  backdrop-filter: blur(4px);
+}
+
+.order-note-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .38);
+}
+
+.order-note-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.order-note-eyebrow {
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.order-note-dialog h3 {
+  margin: 4px 0 0;
+  color: #111827;
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.order-note-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.order-note-close:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+.order-note-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.order-note-input {
+  width: 100%;
+  min-height: 170px;
+  resize: vertical;
+  box-sizing: border-box;
+  border: 2px solid #cbd5e1;
+  border-radius: 13px;
+  padding: 14px 15px;
+  background: #f8fafc;
+  color: #111827;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.order-note-input:focus {
+  border-color: #ef4444;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, .12);
+}
+
+.order-note-hint {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.order-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.order-note-cancel,
+.order-note-save {
+  border-radius: 10px;
+  padding: 10px 19px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.order-note-cancel { border: 1px solid #cbd5e1; background: #ffffff; color: #475569; }
+.order-note-cancel:hover { background: #f1f5f9; }
+.order-note-save { border: 1px solid #b91c1c; background: #dc2626; color: #ffffff; box-shadow: 0 5px 15px rgba(220, 38, 38, .2); }
+.order-note-save:hover { background: #b91c1c; }
+
+body.order-note-modal-open { overflow: hidden; }
+
+@media (max-width: 720px) {
+  .order-note-dialog { padding: 17px; }
+  .order-note-actions { flex-direction: column-reverse; }
+  .order-note-cancel, .order-note-save { width: 100%; }
+}

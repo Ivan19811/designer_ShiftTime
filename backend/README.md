@@ -1,4 +1,4 @@
-# ShiftTime Commerce Backend · 01081
+# ShiftTime Tables + Commerce Backend · 01094
 
 Production boundary remains:
 
@@ -113,6 +113,14 @@ Payment creation recalculates the order snapshot first. Payment amount is the Ma
 
 `npm run db:seed-dev` safely inserts `MP-DEMO-01079` with two SellerOrders and two independent Delivery records: items `5580 UAH`, shipping `85 + 70 = 155 UAH`, discount `0`, grand total `5735 UAH`. Existing orders/products are not deleted.
 
+## ShiftTime Tables · 01094
+
+Migration `014_shifttime_tables_foundation.sql` adds the storage-neutral Tables core: tables, fields, JSONB records, views, table permissions and reusable templates. Tables support `personal`, `account`, `workspace` and `store` scope. Every `/api/v1/tables*` request is authorized through the current session, Membership and server-resolved scope; browser-supplied IDs are never treated as proof of access.
+
+Migration `015_shifttime_tables_null_default_repair.sql` repairs the 01092 null-serialization defect: legacy empty-object field defaults and record cells become JSON `null`. New fields now store real JSON null values, so optional Email and other typed columns no longer block creation of a new row. Existing tables are repaired automatically during deploy; deleting or recreating them is not required.
+
+`Tables Studio → TableStore → TableRepository → HTTPS API → PostgreSQL` is the production path. LocalTableRepository remains DEV/demo only. The field engine validates typed values on both browser and backend boundaries and reserves strict typed cell drag-and-drop contracts for the 01095 interaction engine.
+
 
 ## Real PostgreSQL Deployment / Migration · 01080
 
@@ -148,3 +156,9 @@ Important stage boundary: `db:seed-dev` remains a DEV fixture only and is not re
 ## 01081 media cloud
 
 Binary media is stored in R2/S3-compatible object storage through backend-generated presigned URLs. PostgreSQL stores only metadata in `media_cloud_assets`, derivative jobs and audit events. See `MEDIA-CLOUD-01081.md`.
+
+## 01143 · Automatic Netlify production publishing
+
+01143 adds server-side Netlify publishing for Builder-created sites. The browser sends an authenticated ShiftTime site package to `POST /api/v1/sites/:siteId/publish`; the Render backend owns the Netlify credential, creates the Netlify Site on first publish, stores its identity in PostgreSQL, and reuses the same Site for later deploys.
+
+Render requires `NETLIFY_AUTH_TOKEN`. `NETLIFY_API_BASE_URL` defaults to `https://api.netlify.com/api/v1`, and `PUBLIC_API_BASE_URL` defaults to `https://designer-shifttime.onrender.com`. Migration `016_netlify_site_publishing.sql` creates the publishing binding and deploy-history tables. Never expose `NETLIFY_AUTH_TOKEN` to frontend code or generated site files.

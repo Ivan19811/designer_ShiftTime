@@ -1,0 +1,187 @@
+import {injectAiConsultantPublicRuntime01414,buildAiConsultantResultsPage01414} from './ai-consultant-public-page-01414.mjs';
+import {installPublishedCustomerAccount01595} from './site-customer-account-publish-01595.mjs';
+import {installPublishedMessenger01609} from './site-messenger-publish-01609.mjs';
+const clean=value=>String(value??'').trim();
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+
+function safeScriptJson01203(value){return JSON.stringify(clean(value)).replace(/</g,'\\u003c');}
+export function buildPublishedTrafficBridge01203(identity={},apiProxyTarget=''){
+  const token=clean(identity?.token),siteId=clean(identity?.siteId);if(!token||!siteId)return '';
+  let apiOrigin='';try{apiOrigin=new URL(clean(apiProxyTarget)||'http://invalid.local').origin;}catch{}
+  return `<script data-st-published-traffic="01203" data-st-published-telemetry="01228">(()=>{const token=${safeScriptJson01203(token)},siteId=${safeScriptJson01203(siteId)},apiOrigin=${safeScriptJson01203(apiOrigin)},nativeFetch=globalThis.fetch?.bind(globalThis);globalThis.__ST_PUBLISHED_SITE_IDENTITY__=Object.freeze({stage:'01228',siteId});if(!nativeFetch)return;globalThis.fetch=(input,init={})=>{try{const raw=typeof input==='string'||input instanceof URL?String(input):String(input?.url||''),url=new URL(raw,globalThis.location?.href||'http://localhost/'),allowed=url.pathname.startsWith('/api/')&&(url.origin===globalThis.location?.origin||url.origin===apiOrigin);if(!allowed)return nativeFetch(input,init);const headers=new Headers(input instanceof Request?input.headers:undefined);new Headers(init?.headers||{}).forEach((value,key)=>headers.set(key,value));headers.set('x-st-site-token',token);if(input instanceof Request)return nativeFetch(new Request(input,{...init,headers}));return nativeFetch(input,{...init,headers});}catch{return nativeFetch(input,init);}};if(!globalThis.__ST_CUSTOMER_MESSAGE_BRIDGE_01404__){globalThis.__ST_CUSTOMER_MESSAGE_BRIDGE_01404__=true;document.addEventListener('submit',async event=>{const form=event.target?.closest?.('[data-st-customer-message-form]');if(!form)return;event.preventDefault();const data=new FormData(form),pick=(...keys)=>{for(const key of keys){const value=String(data.get(key)||'').trim();if(value)return value;}return '';},productRoot=form.closest?.('[data-commerce-component=\"product-details\"]')||document.querySelector?.('[data-commerce-component=\"product-details\"]'),productDataset=productRoot?.dataset||{},productId=String(form.dataset.stProductId||productDataset.productDetailsResolvedProductId||productDataset.productDetailsSelectedProductId||productDataset.productDetailsModelId||document.documentElement?.dataset?.currentProductId||document.body?.dataset?.currentProductId||''),productName=String(form.dataset.stProductName||productRoot?.querySelector?.('[data-product-details-role=\"title\"]')?.textContent||'').trim(),setFeedback=status=>{for(const [key,active] of [['sending',status==='sending'],['success',status==='sent'],['error',status==='error']]){const el=form.querySelector?.('[data-st-message-'+key+']');if(el)el.hidden=!active;}const host=form.querySelector?.('[data-st-message-feedback]');if(host)host.setAttribute('aria-live','polite');},payload={channel:String(form.dataset.stMessageChannel||'contact-form'),subject:pick('subject','topic'),body:pick('message','body','comment'),customer:{name:pick('name','customerName'),email:pick('email','customerEmail'),phone:pick('phone','customerPhone')},context:{pagePath:location.pathname+location.search,productId,productName,referrer:document.referrer||''}};form.dataset.stMessageStatus='sending';setFeedback('sending');try{const response=await globalThis.fetch('/api/v1/public/site/messages',{method:'POST',headers:{accept:'application/json','content-type':'application/json'},body:JSON.stringify(payload)}),result=await response.json().catch(()=>({}));if(!response.ok)throw Object.assign(new Error(result?.error||('HTTP '+response.status)),{code:result?.error||''});form.dataset.stMessageStatus='sent';setFeedback('sent');form.dispatchEvent(new CustomEvent('st:customer-message-sent',{bubbles:true,detail:{id:result?.id||'',stage:'01404',feature:'01411'}}));if(form.hasAttribute('data-st-message-reset'))form.reset();}catch(error){form.dataset.stMessageStatus='error';setFeedback('error');form.dispatchEvent(new CustomEvent('st:customer-message-failed',{bubbles:true,detail:{code:String(error?.code||error?.message||'CUSTOMER_MESSAGE_FAILED_01404'),stage:'01404',feature:'01411'}}));}});}if(!globalThis.__ST_PUBLISHED_SITE_PING_01204__){globalThis.__ST_PUBLISHED_SITE_PING_01204__=true;Promise.resolve().then(async()=>{try{let sessionId='';try{const key='st.site.session.01228';sessionId=sessionStorage.getItem(key)||'';if(!sessionId){sessionId='ss_'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2)+Date.now().toString(36));sessionStorage.setItem(key,sessionId);}}catch{sessionId='ss_'+Math.random().toString(36).slice(2)+Date.now().toString(36);}let referrerPath='';try{const ref=document.referrer?new URL(document.referrer,location.href):null;if(ref?.origin===location.origin)referrerPath=ref.pathname+ref.search;}catch{}const response=await globalThis.fetch('/api/v1/public/traffic/ping',{method:'POST',headers:{accept:'application/json','content-type':'application/json'},body:JSON.stringify({sessionId,pagePath:location.pathname+location.search,referrerPath}),cache:'no-store',keepalive:true});const payload=await response.json().catch(()=>({}));if(response.ok)console.info('[ShiftTime 01228] published-site ping success',{siteId,status:response.status,requestId:payload?.requestId||''});else console.warn('[ShiftTime 01228] published-site ping failed',{siteId,status:response.status});}catch(error){console.warn('[ShiftTime 01228] published-site ping failed',{siteId,error:String(error?.message||error||'unknown')});}});}})();</script>`;
+}
+// 01551 · Transport only: protected buyer-cart shipping API for published sites.
+// The site token is added by the existing 01203 fetch wrapper; the cart capability
+// stays in the caller's memory and is not embedded in the published HTML.
+export function buildPublishedShippingBridge01551(){
+  return `<script data-st-published-shipping="01551">(()=>{if(globalThis.__ST_PUBLIC_SHIPPING_01551__)return;const call=async(path,cartId,data)=>{if(!/^cart_[a-z0-9]{24,48}$/i.test(String(cartId||'')))throw Object.assign(new Error('NP_PUBLIC_CART_REQUIRED_01551'),{code:'NP_PUBLIC_CART_REQUIRED_01551'});const response=await fetch('/api/v1/public/shipping/nova-poshta/'+path,{method:'POST',headers:{accept:'application/json','content-type':'application/json','x-st-cart-id':cartId},body:JSON.stringify(data||{}),cache:'no-store'});const body=await response.json().catch(()=>({}));if(!response.ok)throw Object.assign(new Error(/^[A-Z0-9_]{5,110}$/.test(body.error||'')?body.error:'NP_PUBLIC_PACKING_REQUEST_FAILED_01551'),{status:response.status});return body;};globalThis.__ST_PUBLIC_SHIPPING_01551__=Object.freeze({load:(cartId)=>call('cart-packing-layout',cartId,{action:'load'}),save:(cartId,moves,expectedRevision)=>call('cart-packing-layout',cartId,{action:'save',moves,expectedRevision}),reset:(cartId,expectedRevision)=>call('cart-packing-layout',cartId,{action:'reset',expectedRevision}),quote:(cartId,cityRecipient,warehouseRef)=>call('cart-multiplace-quote',cartId,{cityRecipient,warehouseRef})});})();</script>`;
+}
+export function injectPublishedTrafficBridge01203(html,{publishedSiteIdentity={},apiProxyTarget=''}={}){
+  const traffic=buildPublishedTrafficBridge01203(publishedSiteIdentity,apiProxyTarget);if(!traffic)return String(html||'');const bridge=traffic+buildPublishedShippingBridge01551();
+  const source=String(html||'');if(/<\/head\s*>/i.test(source))return source.replace(/<\/head\s*>/i,`${bridge}</head>`);return `${bridge}${source}`;
+}
+
+
+const ROUTE_TITLE_ALIASES_01146=Object.freeze({
+  'головна':['home','main'],
+  'про-нас':['about','about-us'],
+  'контакти':['contact','contacts'],
+  'доставка-і-оплата':['delivery','shipping','shipping-and-payment'],
+  'доставка-та-оплата':['delivery','shipping','shipping-and-payment'],
+  'гарантія-і-повернення':['warranty','returns','warranty-and-returns'],
+  'гарантія-та-повернення':['warranty','returns','warranty-and-returns'],
+  'блог':['blog'],
+  'каталог':['catalog'],
+  'товари':['products','shop'],
+  'послуги':['services'],
+  'новини':['news'],
+  'акції':['sale','promotions'],
+  'гравіювання':['engraving'],
+});
+
+function routeKey01146(value){
+  return clean(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[’'`]/g,'').replace(/[^a-z0-9а-яіїєґ]+/giu,'-').replace(/^-+|-+$/g,'').replace(/-+/g,'-');
+}
+function normalizedRoute01146(value){let v=clean(value)||'/';if(!v.startsWith('/'))v='/'+v;v=v.split('#')[0].split('?')[0].replace(/\/{2,}/g,'/');return v==='/'?'/':v.replace(/\/+$/,'');}
+function stripTags01146(value){return String(value||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&#39;|&apos;/gi,"'").replace(/&quot;/gi,'"').replace(/\s+/g,' ').trim();}
+function buildRouteIndex01146(pages){
+  const byAlias=new Map(),byTitle=new Map(),routes=new Set();
+  for(const page of Array.isArray(pages)?pages:[]){
+    const route=normalizedRoute01146(page?.path||'/');routes.add(route);
+    const titleKey=routeKey01146(page?.title||page?.name);if(titleKey){byTitle.set(titleKey,route);byAlias.set(titleKey,route);}
+    const pathKey=routeKey01146(route.replace(/^\/+/,''));if(pathKey)byAlias.set(pathKey,route);
+    if(route==='/'){byAlias.set('home',route);byAlias.set('main',route);byAlias.set('головна',route);}
+    for(const alias of ROUTE_TITLE_ALIASES_01146[titleKey]||[])byAlias.set(routeKey01146(alias),route);
+  }
+  return {byAlias,byTitle,routes};
+}
+function resolvePublishedHref01146(href,label,index){
+  const raw=clean(href);if(!raw)return raw;
+  if(/^(?:https?:|mailto:|tel:|javascript:|data:|blob:|\/\/)/i.test(raw))return raw;
+  const labelRoute=index.byTitle.get(routeKey01146(label));
+  if(raw==='#')return labelRoute||raw;
+  if(raw.startsWith('#')){const route=index.byAlias.get(routeKey01146(raw.slice(1)));return route||labelRoute||raw;}
+  if(raw.startsWith('/')){const normalized=normalizedRoute01146(raw);if(index.routes.has(normalized))return normalized;const route=index.byAlias.get(routeKey01146(normalized.replace(/^\/+/,'')));return route||raw;}
+  const route=index.byAlias.get(routeKey01146(raw));return route||raw;
+}
+export function rewritePublishedNavigation01146(html,pages){
+  const index=buildRouteIndex01146(pages);
+  return String(html||'').replace(/<a\b([^>]*?\bhref\s*=\s*)(["'])(.*?)\2([^>]*)>([\s\S]*?)<\/a>/gi,(match,before,quote,href,after,inner)=>{
+    const next=resolvePublishedHref01146(href,stripTags01146(inner),index);if(next===href)return match;return `<a${before}${quote}${next}${quote}${after}>${inner}</a>`;
+  });
+}
+
+export function outputPathForRoute01143(route){
+  let value=clean(route)||'/';
+  value=value.split('#')[0].split('?')[0].replace(/\\/g,'/');
+  if(!value.startsWith('/'))value='/'+value;
+  value=value.replace(/\/{2,}/g,'/');
+  const parts=value.split('/').filter(Boolean).map(part=>encodeURIComponent(decodeURIComponent(part)));
+  return parts.length?`${parts.join('/')}/index.html`:'index.html';
+}
+
+function canonicalForRoute(base,route){
+  const root=clean(base).replace(/\/+$/,'');
+  let path=clean(route)||'/';
+  path=path.split('#')[0].split('?')[0];if(!path.startsWith('/'))path='/'+path;
+  return `${root}${path==='/'?'/':path.replace(/\/+$/,'')}`;
+}
+
+function removeMarkedElement(html,markerPattern){
+  const paired=new RegExp(`<([a-z][\\w:-]*)\\b(?=[^>]*${markerPattern})[^>]*>[\\s\\S]*?<\\/\\1\\s*>`,'gi');
+  const single=new RegExp(`<([a-z][\\w:-]*)\\b(?=[^>]*${markerPattern})[^>]*\\/?>`,'gi');
+  return String(html||'').replace(paired,'').replace(single,'');
+}
+
+export function sanitizeProductionHtml01143(raw){
+  let html=String(raw||'');
+  const markers=[
+    `class=["'][^"']*(?:st-selection-ui|st-resize(?:-[\\w-]+)?|st-resize-handle|st-section-handle|st-block-handle|st-drag-handle|st-drag-marker|st-drop-marker|st-col-resizer|st-sec-resizer|hb-panel|fb-panel|builder__)[^"']*["']`,
+    `(?:id=["'](?:st-header-builder-toolbar|st-footer-builder-toolbar)["']|data-st-table-section-design-edge(?:=[^\\s>]+)?|data-st-fx-runtime=["']?1["']?)`,
+  ];
+  for(const marker of markers)html=removeMarkedElement(html,marker);
+  html=html.replace(/\s(?:contenteditable|draggable|aria-grabbed)(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?/gi,'');
+  html=html.replace(/class=(['"])(.*?)\1/gi,(match,quote,value)=>{
+    const removed=new Set(['is-selected','hb-dom-active','hb-dom-selected','sf-selection-current','sf-edit-selected','sf-main-drag-source','sf-main-drag-target','is-drop-target']);
+    const tokens=String(value).split(/\s+/).filter(Boolean).filter(token=>!removed.has(token)&&!token.startsWith('builder__'));
+    return tokens.length?`class=${quote}${tokens.join(' ')}${quote}`:'';
+  });
+  return html.trim();
+}
+
+function normalizeAssets(assets){
+  const out=[];for(const asset of Array.isArray(assets)?assets:[]){const path=clean(asset?.path).replace(/^\/+/, '');if(!path)continue;let content;if(Buffer.isBuffer(asset.content))content=asset.content;else if(clean(asset?.encoding).toLowerCase()==='base64')content=Buffer.from(String(asset?.content??''),'base64');else content=Buffer.from(String(asset?.content??''));out.push({path,content});}
+  return out;
+}
+
+function renderPage(pkg,page,{canonicalBaseUrl}){
+  const cssPaths=normalizeAssets(pkg.assets).map(x=>x.path).filter(path=>path.endsWith('.css'));
+  const runtime=normalizeAssets(pkg.assets).some(x=>x.path==='assets/site-runtime-01143.js');
+  const title=clean(page?.title||page?.name||pkg?.site?.name)||'ShiftTime Site';
+  const description=clean(page?.description||pkg?.site?.description);
+  const canonical=canonicalForRoute(canonicalBaseUrl,page?.path||'/');
+  const header=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.header),pkg?.pages);
+  const main=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.main),pkg?.pages);
+  const footer=rewritePublishedNavigation01146(sanitizeProductionHtml01143(page?.html?.footer),pkg?.pages);
+  const styles=cssPaths.map(path=>`  <link rel="stylesheet" href="/${esc(path)}">`).join('\n');
+  return `<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${esc(title)}</title>
+  ${description?`<meta name="description" content="${esc(description)}">`:''}
+  <link rel="canonical" href="${esc(canonical)}">
+  <meta property="og:title" content="${esc(title)}">
+  ${description?`<meta property="og:description" content="${esc(description)}">`:''}
+  <meta property="og:url" content="${esc(canonical)}">
+${styles}
+</head>
+<body data-st-published="01143" data-site-id="${esc(pkg?.site?.id||'')}" data-page-id="${esc(page?.id||'')}" data-page-mode="${esc(page?.pageMode||'standard')}">
+  <div id="site-root" class="site-root" data-page-id="${esc(page?.id||'')}" data-site-id="${esc(pkg?.site?.id||'')}">
+    <div id="st-site-header-slot" class="st-site-header-slot" data-site-frame-area="header">${header}</div>
+    <main id="st-site-main-slot" class="st-site-main-slot" data-site-frame-area="main">${main}</main>
+    <div id="st-site-footer-slot" class="st-site-footer-slot" data-site-frame-area="footer">${footer}</div>
+  </div>
+  ${runtime?'<script type="module" src="/assets/site-runtime-01143.js"></script>':''}
+</body>
+</html>`;
+}
+
+
+const CANONICAL_BASE_TOKEN_01151='__ST_CANONICAL_BASE_01151__';
+
+export function materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={},aiConsultantPublicConfig={}}={}){
+  const files=new Map();
+  const root=clean(canonicalBaseUrl).replace(/\/+$/,'');
+  for(const raw of Array.isArray(pkg?.files)?pkg.files:[]){
+    const path=clean(raw?.path).replace(/^\/+/, '');
+    if(!path)continue;
+    if(files.has(path))throw Object.assign(new Error(`Duplicate production file: ${path}`),{statusCode:400,code:'ST_PUBLISH_FILE_COLLISION'});
+    const encoding=clean(raw?.encoding).toLowerCase()==='base64'?'base64':'utf8';
+    if(encoding==='base64')files.set(path,Buffer.from(String(raw?.content??''),'base64'));
+    else{
+      let text=String(raw?.content??'');
+      if(path.endsWith('.html')){text=text.split(CANONICAL_BASE_TOKEN_01151).join(root);text=injectPublishedTrafficBridge01203(text,{publishedSiteIdentity,apiProxyTarget});text=injectAiConsultantPublicRuntime01414(text,{config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414});}
+      files.set(path,Buffer.from(text,'utf8'));
+    }
+  }
+  if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:root});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
+  const target=clean(apiProxyTarget).replace(/\/+$/,'');
+  if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
+  return installPublishedMessenger01609(installPublishedCustomerAccount01595(files));
+}
+
+export function buildProductionFiles01143(pkg,{canonicalBaseUrl='',apiProxyTarget='',publishedSiteIdentity={},aiConsultantPublicConfig={}}={}){
+  if(clean(pkg?.exporterVersion)==='01151')return materializeOfflineProductionFiles01151(pkg,{canonicalBaseUrl,apiProxyTarget,publishedSiteIdentity,aiConsultantPublicConfig});
+  if(!pkg||typeof pkg!=='object')throw Object.assign(new Error('Publish package is required'),{statusCode:400});
+  if(!clean(pkg?.site?.id))throw Object.assign(new Error('Builder site id is required'),{statusCode:400});
+  const pages=Array.isArray(pkg.pages)?pkg.pages:[];if(!pages.length)throw Object.assign(new Error('At least one page is required'),{statusCode:400});
+  const files=new Map();
+  for(const asset of normalizeAssets(pkg.assets))files.set(asset.path,asset.content);
+  for(const page of pages){const path=outputPathForRoute01143(page?.path||'/');if(files.has(path))throw Object.assign(new Error(`Duplicate published route: ${page?.path||'/'}`),{statusCode:400});let html=injectPublishedTrafficBridge01203(renderPage(pkg,page,{canonicalBaseUrl}),{publishedSiteIdentity,apiProxyTarget});html=injectAiConsultantPublicRuntime01414(html,{config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414});files.set(path,Buffer.from(html,'utf8'));}
+  if(aiConsultantPublicConfig?.enabled){const resultPath='ai-results/index.html';if(files.has(resultPath))throw Object.assign(new Error('AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'),{statusCode:400,code:'AI_CONSULTANT_RESULTS_ROUTE_COLLISION_01414'});const page=buildAiConsultantResultsPage01414({siteName:pkg?.site?.name||'',config:aiConsultantPublicConfig,i18n:pkg?.publicI18n?.aiConsultant01414,canonicalBaseUrl:clean(canonicalBaseUrl).replace(/\/+$/,'')});if(page)files.set(resultPath,Buffer.from(injectPublishedTrafficBridge01203(page,{publishedSiteIdentity,apiProxyTarget}),'utf8'));}
+  const target=clean(apiProxyTarget).replace(/\/+$/,'');if(target)files.set('_redirects',Buffer.from(`/api/* ${target}/api/:splat 200\n`,'utf8'));
+  return installPublishedMessenger01609(installPublishedCustomerAccount01595(files));
+}

@@ -1,0 +1,111 @@
+const clean=v=>String(v??'').trim();
+function buildEnvironmentFiles01623E(files,environment){
+  if(environment!=='demo')return files;
+  const result=new Map(files);
+  result.set('robots.txt',Buffer.from('User-agent: *\nDisallow: /\n','utf8'));
+  result.set('_headers',Buffer.from(String(result.get('_headers')||'')+'\n/*\n  X-Robots-Tag: noindex, nofollow\n','utf8'));
+  const meta='<meta name="robots" content="noindex,nofollow,noarchive">';
+  const banner='<div id="st-demo-label-01623e" style="position:fixed;z-index:2147483600;right:16px;bottom:16px;pointer-events:none;background:#eab308;color:#221703;border-radius:10px;padding:9px 15px;font:800 14px system-ui;box-shadow:0 5px 20px #0005">ДЕМО · ТЕСТОВИЙ САЙТ</div>';
+  for(const [path,contents] of result){
+    if(!/\.html?$/i.test(path))continue;
+    const html=Buffer.isBuffer(contents)?contents.toString('utf8'):String(contents??'');
+    const marked=html.replace(/<head([^>]*)>/i,(full,attrs)=>`<head${attrs}>${meta}`)
+      .replace(/<body([^>]*)>/i,(full,attrs)=>`<body${attrs}>${banner}`);
+    result.set(path,Buffer.from(marked,'utf8'));
+  }
+  return result;
+}
+function publicUrl(r){return clean(r?.netlifySslUrl||r?.netlifyUrl);}
+// 01623H: Only Netlify's metadata for THE SAME deployed site can certify a
+// custom-domain association. Neither a browser URL nor a Store profile domain
+// is allowed to redirect the publish target to another site.
+export function customDomainFromNetlify01623H(meta,siteId){
+  if(!meta||clean(meta.id)!==clean(siteId))return '';
+  const raw=clean(meta.custom_domain).toLowerCase().replace(/\.$/,'');
+  if(!raw||raw.length>253||raw.includes('/')||raw.includes(':')||raw.includes('@')||raw.includes('..')||/^(localhost|.*\.localhost|.*\.netlify\.app)$/.test(raw))return '';
+  if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(raw))return '';
+  return `https://${raw}/`;
+}
+
+
+function assertOfflinePreflight01151(pkg){
+  const exporterVersion=clean(pkg?.exporterVersion);
+  const preflight=pkg?.preflight;
+  if(exporterVersion!=='01151'||!preflight||preflight.ok!==true||clean(preflight.exporterVersion)!=='01151'){
+    throw Object.assign(new Error('Offline production preflight 01151 is required'),{statusCode:400,code:'ST_PUBLISH_OFFLINE_PREFLIGHT_REQUIRED'});
+  }
+  const files=Array.isArray(preflight.files)?preflight.files.map(clean):[];
+  const pages=Array.isArray(preflight.pages)?preflight.pages:[];
+  if(!files.includes('index.html'))throw Object.assign(new Error('Offline preflight is missing root index.html'),{statusCode:400,code:'ST_PUBLISH_ROOT_MISSING'});
+  const roots=pages.filter(p=>clean(p?.route)==='/');
+  if(roots.length!==1||clean(roots[0]?.pageId)!=='page_home')throw Object.assign(new Error('Offline preflight has invalid canonical Home'),{statusCode:400,code:'ST_PUBLISH_HOME_REQUIRED'});
+  if(pages.some(p=>p?.ok!==true))throw Object.assign(new Error('Offline preflight contains an invalid page'),{statusCode:400,code:'ST_PUBLISH_OFFLINE_PREFLIGHT_FAILED'});
+  return preflight;
+}
+function toStatus(r,{configured=true}={}){if(!r)return {stage:'01143',provider:'netlify',configured,state:'not-published',netlifySiteId:'',deployId:'',deployState:'not-published',url:'',publishedRevision:'',requestedRevision:'',lastPublishedAt:null,lastError:''};return {
+  stage:'01143',provider:'netlify',configured,state:r.lastDeployState||'not-published',builderSiteId:r.builderSiteId||'',netlifySiteId:r.netlifySiteId||'',siteName:r.netlifySiteName||r.siteName||'',url:publicUrl(r),adminUrl:r.netlifyAdminUrl||'',deployId:r.lastDeployId||'',deployState:r.lastDeployState||'not-published',requestedRevision:r.requestedRevision||'',publishedRevision:r.publishedRevision||'',lastPublishedAt:r.lastPublishedAt||null,lastError:r.lastPublishError||''
+};}
+
+export function createSitePublishingService01143({repo,netlify,buildFiles=buildProductionFiles01143,createZip=createZip01143,createTrafficToken=()=>'',getPublicAiConsultantConfig=async()=>({enabled:false}),now=()=>new Date(),apiProxyTarget='',configured=true,environment='production'}={}){
+  if(!['production','demo'].includes(environment))throw new TypeError('Unknown publish environment');
+  if(!repo)throw new TypeError('Publishing repository is required');if(!netlify)throw new TypeError('Netlify client is required');
+  void createZip;
+  async function verifiedProductionUrl01623H(row){
+    const technicalUrl=publicUrl(row),siteId=clean(row?.netlifySiteId);
+    if(environment==='demo'||!siteId||typeof netlify.getSite!=='function')return {url:technicalUrl,technicalUrl,domainSource:'netlify'};
+    try{
+      const meta=await netlify.getSite({siteId});
+      const alias=customDomainFromNetlify01623H(meta,siteId);
+      if(alias)return {url:alias,technicalUrl,domainSource:'netlify-custom',verifiedByNetlify:true};
+    }catch{/* Netlify metadata unavailable: never claim an alias is verified. */}
+    return {url:technicalUrl,technicalUrl,domainSource:'netlify'};
+  }
+  async function verifiedStatus01623H(row){
+    const base=toStatus(row,{configured});if(!row)return base;
+    return {...base,...await verifiedProductionUrl01623H(row)};
+  }
+  async function publish(scope,userId,builderSiteId,pkg){
+    const sid=clean(builderSiteId);if(!sid||clean(pkg?.site?.id)!==sid)throw Object.assign(new Error('Publish package site id does not match requested site id'),{statusCode:400});if(clean(pkg?.version)!=='01143')throw Object.assign(new Error('Unsupported publish package version'),{statusCode:400});if(!clean(pkg?.revision))throw Object.assign(new Error('Publish revision is required'),{statusCode:400});
+    assertOfflinePreflight01151(pkg);
+    const aiConsultantPublicConfig=await getPublicAiConsultantConfig(scope,sid);
+    let record=await repo.get(scope,sid);
+    const ensureTrafficIdentity=async()=>{if(clean(record?.trafficIdentityToken))return record;if(typeof repo.ensureTrafficIdentity!=='function')return record;record=await repo.ensureTrafficIdentity(scope,sid,clean(createTrafficToken()));return record;};
+    const validateRoot01150=(files)=>{if(!(files instanceof Map)||!files.has('index.html'))throw Object.assign(new Error('Production build is missing root index.html'),{statusCode:500,code:'ST_PUBLISH_ROOT_MISSING'});return files;};
+    let files;
+    if(!clean(record?.netlifySiteId)){
+      // 01150: validate the real production build before creating any remote Netlify project.
+      validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:'',apiProxyTarget,aiConsultantPublicConfig}),environment));
+      const preferred=environment==='demo'?`demo-${clean(pkg?.site?.slug||pkg?.site?.name||sid)}`:clean(pkg?.site?.slug||pkg?.site?.name||sid);
+      const site=await netlify.createSiteWithSafeName({preferredName:preferred});
+      record=await repo.saveIdentity(scope,{builderSiteId:sid,siteName:clean(pkg?.site?.name),siteSlug:clean(pkg?.site?.slug),netlifySiteId:clean(site.id),netlifySiteName:clean(site.name),netlifyUrl:clean(site.url),netlifySslUrl:clean(site.ssl_url),netlifyAdminUrl:clean(site.admin_url),createdByUserId:userId});
+      await ensureTrafficIdentity();
+      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:(await verifiedProductionUrl01623H(record)).url,apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
+    }else{
+      await ensureTrafficIdentity();
+      files=validateRoot01150(buildEnvironmentFiles01623E(buildFiles(pkg,{canonicalBaseUrl:(await verifiedProductionUrl01623H(record)).url,apiProxyTarget,publishedSiteIdentity:{siteId:sid,token:clean(record?.trafficIdentityToken)},aiConsultantPublicConfig}),environment));
+    }
+    let deploy;try{deploy=await netlify.deployFiles({siteId:record.netlifySiteId,files});}catch(err){await repo.updateDeploy(scope,{builderSiteId:sid,state:'error',error:clean(err.message)}).catch(()=>{});throw err;}
+    record=await repo.recordDeploy(scope,{builderSiteId:sid,netlifyDeployId:clean(deploy.id),revision:clean(pkg.revision),state:clean(deploy.state)||'new',createdByUserId:userId});return await verifiedStatus01623H(record);
+  }
+  async function status(scope,builderSiteId){
+    const sid=clean(builderSiteId);let record=await repo.get(scope,sid);if(!record)return toStatus(null,{configured});
+    const needsVerification=record.lastDeployId&&record.lastDeployState!=='error'&&(record.lastDeployState!=='ready'||clean(record.publishedRevision)!==clean(record.requestedRevision));
+    if(needsVerification){
+      try{
+        const dep=await netlify.getDeploy({deployId:record.lastDeployId});const state=clean(dep.state)||record.lastDeployState;let ready=state==='ready';const failed=['error','failed'].includes(state);
+        let verificationError='';
+        if(ready){
+          try{await netlify.getSiteFile({siteId:record.netlifySiteId,path:'index.html'});}catch(err){
+            if(Number(err?.netlifyStatus)===404){ready=false;verificationError='Netlify deploy is ready but published /index.html is missing';}
+            else throw err;
+          }
+        }
+        const finalError=failed?clean(dep.error_message||dep.message||'Netlify deploy failed'):verificationError;
+        const finalState=failed||verificationError?'error':state;
+        record=await repo.updateDeploy(scope,{builderSiteId:sid,netlifyDeployId:record.lastDeployId,state:finalState,error:finalError,publishedRevision:ready?record.requestedRevision:'',publishedAt:ready?now().toISOString():null});
+      }catch(err){if(Number(err?.netlifyStatus)===404)record=await repo.updateDeploy(scope,{builderSiteId:sid,netlifyDeployId:record.lastDeployId,state:'error',error:'Netlify deploy was not found'});else throw err;}
+    }
+    return await verifiedStatus01623H(record);
+  }
+  return {publish,status};
+}

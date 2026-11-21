@@ -1,0 +1,58 @@
+import {assertManagerDemo01624A} from './site-manager-demo-guard-01624a.mjs';
+import crypto from 'node:crypto';
+import {withClient} from './db.mjs';
+import {config} from './config.mjs';
+import {createNetlifyClient01143} from './netlify-client-01143.mjs';
+import {buildProductionFiles01143} from './site-production-build-01143.mjs';
+import {createZip01143} from './zip-01143.mjs';
+import {createSitePublishingService01143} from './site-publishing-core-01143.mjs';
+import {createPublishedSiteTrafficToken01203} from './published-site-identity-01203.mjs';
+import {recordSiteNotificationEvent01414} from './site-notification-provider-01414.mjs';
+import {classifySitePublishingFailure01414} from './site-notification-core-01414.mjs';
+import {getAiConsultantPublishConfig01414} from './ai-consultant-public-01414.mjs';
+
+const id=(prefix)=>`${prefix}_${crypto.randomUUID().replace(/-/g,'')}`;
+function mapRow(r){if(!r)return null;return {
+  id:r.id,builderSiteId:r.builder_site_id,siteName:r.site_name||'',siteSlug:r.site_slug||'',provider:r.provider||'netlify',
+  netlifySiteId:r.netlify_site_id||'',netlifySiteName:r.netlify_site_name||'',netlifyUrl:r.netlify_url||'',netlifySslUrl:r.netlify_ssl_url||'',netlifyAdminUrl:r.netlify_admin_url||'',
+  lastDeployId:r.last_deploy_id||'',lastDeployState:r.last_deploy_state||'not-published',requestedRevision:r.requested_revision||'',publishedRevision:r.published_revision||'',lastPublishError:r.last_publish_error||'',
+  lastPublishedAt:r.last_published_at?new Date(r.last_published_at).toISOString():null,trafficIdentityToken:r.traffic_identity_token||'',
+};}
+
+export function createPostgresPublishingRepository01143({environment='production'}={}){
+  if(!['production','demo'].includes(environment))throw new TypeError('Unknown publish environment');
+  // Static allowlist: no user-supplied SQL identifier can reach a query.
+  const siteTable=environment==='demo'?'shifttime_published_demo_sites':'shifttime_published_sites';
+  const deploymentsTable=environment==='demo'?'shifttime_site_demo_deployments':'shifttime_site_deployments';
+  return {
+    async get(scope,builderSiteId){return withClient(async c=>{const q=await c.query(`SELECT * FROM ${siteTable} WHERE account_id=$1 AND workspace_id=$2 AND store_id=$3 AND builder_site_id=$4 LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,builderSiteId]);return mapRow(q.rows[0]);});},
+    async saveIdentity(scope,data){return withClient(async c=>{const q=await c.query(`INSERT INTO ${siteTable}(id,account_id,workspace_id,store_id,builder_site_id,site_name,site_slug,provider,netlify_site_id,netlify_site_name,netlify_url,netlify_ssl_url,netlify_admin_url,created_by_user_id)
+      VALUES($1,$2,$3,$4,$5,$6,$7,'netlify',$8,$9,$10,$11,$12,$13)
+      ON CONFLICT(store_id,builder_site_id) DO UPDATE SET site_name=EXCLUDED.site_name,site_slug=EXCLUDED.site_slug,netlify_site_id=COALESCE(${siteTable}.netlify_site_id,EXCLUDED.netlify_site_id),netlify_site_name=CASE WHEN ${siteTable}.netlify_site_id IS NULL THEN EXCLUDED.netlify_site_name ELSE ${siteTable}.netlify_site_name END,netlify_url=CASE WHEN ${siteTable}.netlify_site_id IS NULL THEN EXCLUDED.netlify_url ELSE ${siteTable}.netlify_url END,netlify_ssl_url=CASE WHEN ${siteTable}.netlify_site_id IS NULL THEN EXCLUDED.netlify_ssl_url ELSE ${siteTable}.netlify_ssl_url END,netlify_admin_url=CASE WHEN ${siteTable}.netlify_site_id IS NULL THEN EXCLUDED.netlify_admin_url ELSE ${siteTable}.netlify_admin_url END,updated_at=now()
+      RETURNING *`,[id('pubsite'),scope.accountId,scope.workspaceId,scope.storeId,data.builderSiteId,data.siteName||'',data.siteSlug||'',data.netlifySiteId||null,data.netlifySiteName||'',data.netlifyUrl||'',data.netlifySslUrl||'',data.netlifyAdminUrl||'',data.createdByUserId||null]);return mapRow(q.rows[0]);});},
+    async ensureTrafficIdentity(scope,builderSiteId,token){return withClient(async c=>{const q=await c.query(`UPDATE ${siteTable} SET traffic_identity_token=CASE WHEN COALESCE(traffic_identity_token,'')='' THEN $1 ELSE traffic_identity_token END,updated_at=now() WHERE account_id=$2 AND workspace_id=$3 AND store_id=$4 AND builder_site_id=$5 RETURNING *`,[token,scope.accountId,scope.workspaceId,scope.storeId,builderSiteId]);if(!q.rowCount)throw Object.assign(new Error('Published site identity not found'),{statusCode:404});return mapRow(q.rows[0]);});},
+    async recordDeploy(scope,data){return withClient(async c=>{await c.query('BEGIN');try{const s=await c.query(`UPDATE ${siteTable} SET last_deploy_id=$1,last_deploy_state=$2,requested_revision=$3,last_publish_error='',updated_at=now() WHERE account_id=$4 AND workspace_id=$5 AND store_id=$6 AND builder_site_id=$7 RETURNING *`,[data.netlifyDeployId,data.state||'new',data.revision||'',scope.accountId,scope.workspaceId,scope.storeId,data.builderSiteId]);if(!s.rowCount)throw Object.assign(new Error('Published site identity not found'),{statusCode:404});await c.query(`INSERT INTO ${deploymentsTable}(id,published_site_id,netlify_deploy_id,revision,state,created_by_user_id) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(netlify_deploy_id) DO UPDATE SET state=EXCLUDED.state,updated_at=now()`,[id('deploy'),s.rows[0].id,data.netlifyDeployId,data.revision||'',data.state||'new',data.createdByUserId||null]);await c.query('COMMIT');return mapRow(s.rows[0]);}catch(e){await c.query('ROLLBACK');throw e;}});},
+    async updateDeploy(scope,data){return withClient(async c=>{await c.query('BEGIN');try{const publishedAt=data.publishedAt||null;const q=await c.query(`UPDATE ${siteTable} SET last_deploy_state=$1,last_publish_error=$2,published_revision=CASE WHEN $3::text<>'' THEN $3 ELSE published_revision END,last_published_at=COALESCE($4::timestamptz,last_published_at),updated_at=now() WHERE account_id=$5 AND workspace_id=$6 AND store_id=$7 AND builder_site_id=$8 RETURNING *`,[data.state||'error',data.error||'',data.publishedRevision||'',publishedAt,scope.accountId,scope.workspaceId,scope.storeId,data.builderSiteId]);if(data.netlifyDeployId)await c.query(`UPDATE ${deploymentsTable} SET state=$1,error=$2,published_at=COALESCE($3::timestamptz,published_at),updated_at=now() WHERE netlify_deploy_id=$4`,[data.state||'error',data.error||'',publishedAt,data.netlifyDeployId]);await c.query('COMMIT');return mapRow(q.rows[0]);}catch(e){await c.query('ROLLBACK');throw e;}});},
+  };
+}
+
+
+const defaultRepo=createPostgresPublishingRepository01143();
+const defaultNetlify=createNetlifyClient01143({token:config.netlifyAuthToken,baseUrl:config.netlifyApiBaseUrl});
+const demoRepo01623E=createPostgresPublishingRepository01143({environment:'demo'});
+const demoService01623E=createSitePublishingService01143({repo:demoRepo01623E,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,getPublicAiConsultantConfig:getAiConsultantPublishConfig01414,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken),environment:'demo'});
+const defaultService=createSitePublishingService01143({repo:defaultRepo,netlify:defaultNetlify,buildFiles:buildProductionFiles01143,createZip:createZip01143,createTrafficToken:createPublishedSiteTrafficToken01203,getPublicAiConsultantConfig:getAiConsultantPublishConfig01414,apiProxyTarget:config.publicApiBaseUrl,configured:Boolean(config.netlifyAuthToken)});
+
+function notificationInput01414(builderSiteId,status={},pkg={},eventType='',error=''){return {eventType,builderSiteId,siteName:status.siteName||pkg?.site?.name||'',siteSlug:pkg?.site?.slug||'',provider:status.provider||'netlify',url:status.url||'',adminUrl:status.adminUrl||'',netlifySiteId:status.netlifySiteId||'',deployId:status.deployId||'',state:status.deployState||status.state||'',revision:status.publishedRevision||status.requestedRevision||pkg?.revision||'',requestedRevision:status.requestedRevision||pkg?.revision||'',publishedRevision:status.publishedRevision||'',error:String(error||status.lastError||'').slice(0,1000)};}
+async function emitStatusNotification01414(scope,builderSiteId,status,pkg={}){const state=String(status?.deployState||status?.state||'').trim();if(state==='ready')return recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,pkg,'site.published',''));if(['error','failed'].includes(state)){const eventType=classifySitePublishingFailure01414(status?.lastError||'');return recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,pkg,eventType,status?.lastError||''));}return null;}
+export async function publishSite01143(scope,userId,builderSiteId,pkg){try{const status=await defaultService.publish(scope,userId,builderSiteId,pkg);try{await emitStatusNotification01414(scope,builderSiteId,status,pkg);}catch{}return status;}catch(error){try{const record=await defaultRepo.get(scope,builderSiteId),status=record?{...record,provider:record.provider||'netlify',url:record.netlifySslUrl||record.netlifyUrl||'',adminUrl:record.netlifyAdminUrl||'',deployId:'',deployState:'error',lastError:String(error?.message||error||'')}:{provider:'netlify',deployState:'error',lastError:String(error?.message||error||'')};const eventType=classifySitePublishingFailure01414(error);await recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,pkg,eventType,error?.message||error));}catch{}throw error;}}
+export async function getSitePublishStatus01143(scope,builderSiteId){try{const status=await defaultService.status(scope,builderSiteId);try{await emitStatusNotification01414(scope,builderSiteId,status,{});}catch{}return status;}catch(error){try{const record=await defaultRepo.get(scope,builderSiteId);if(record?.lastDeployId){const status={...record,provider:record.provider||'netlify',url:record.netlifySslUrl||record.netlifyUrl||'',adminUrl:record.netlifyAdminUrl||'',deployId:record.lastDeployId,deployState:'error',lastError:String(error?.message||error||'')};const eventType=classifySitePublishingFailure01414(error);await recordSiteNotificationEvent01414(scope,notificationInput01414(builderSiteId,status,{},eventType,error?.message||error));}}catch{}throw error;}}
+
+// 01623E: demo records never affect shifttime_published_sites or production deploy history.
+export async function publishSiteDemo01623E(scope,userId,builderSiteId,pkg){
+  if(scope.role!=='owner')await withClient(c=>assertManagerDemo01624A({scope,userId,siteId:builderSiteId,pkg,query:(sql,params)=>c.query(sql,params)}));
+  return demoService01623E.publish(scope,userId,builderSiteId,pkg);
+}
+export async function getSiteDemoStatus01623E(scope,builderSiteId){
+  return demoService01623E.status(scope,builderSiteId);
+}

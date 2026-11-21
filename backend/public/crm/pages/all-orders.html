@@ -1,0 +1,36 @@
+<section id="ordersWidget" class="space-y-4 w-full min-w-0 max-w-full">
+  <div id="ordersFiltersHeader" class="flex w-full min-w-0 max-w-full flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3">
+    <h2 id="visibleOrdersCount" class="shrink-0 text-lg font-semibold">Усі замовлення - 0</h2>
+    <div id="ordersFiltersControls" class="ml-auto flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2">
+      <input id="searchBox" type="text" placeholder="Пошук…"
+             class="h-9 w-56 min-w-0 max-w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm outline-none">
+      <select id="statusFilter" multiple size="7">
+        <option value="Виготовляється">Виготовляється</option>
+        <option value="Комплектується">Комплектується</option>
+        <option value="Відправлено">Відправлено</option>
+        <option value="В дорозі">В дорозі</option>
+        <option value="Прибуло до відділення">Прибуло до відділення</option>
+        <option value="Отримано">Отримано</option>
+        <option value="Створено ТТН УП">Створено ТТН УП</option>
+        <option value="Прийнято у відділенні">Прийнято у відділенні</option>
+        <option value="Надіслано">Надіслано</option>
+        <option value="Прибуло у відділення">Прибуло у відділення</option>
+        <option value="Повернення">Повернення</option>
+        <option value="__EMPTY__">(Без статусу)</option>
+      </select>
+      <div id="ao-toolbar" class="flex shrink-0 items-center gap-2"></div>
+    </div>
+  </div>
+
+  <!-- ЄДИНИЙ контейнер: шапка + тіло зі скролом -->
+  <div id="ordersBox" class="rounded-2xl border border-zinc-800 bg-zinc-900/40 w-full
+                            flex flex-col min-h-0">
+    <div id="ordersHead"
+         class="px-4 py-2 text-[11px] uppercase tracking-wide text-zinc-500 sticky top-0 z-10
+                bg-zinc-900/80 backdrop-blur">
+    </div>
+    <div id="ordersBody" class="flex-1 min-h-0 overflow-auto"></div>
+  </div>
+</section>
+
+<div id="send-modal-root"></div>

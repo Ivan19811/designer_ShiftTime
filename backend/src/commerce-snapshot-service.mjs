@@ -1,5 +1,12 @@
+import {normalizeFastPlan,applyFastCatalog} from './marketplace-fast-catalog-core-01624h.mjs';
+import {normalizeCatalogOperations01606D,applyAtomicCatalogOperations01606D} from './marketplace-atomic-catalog-core-01606d.mjs';
+import {planProductReplacement01528,applyProductReplacement01528} from './marketplace-product-replacement-core-01528.mjs';
+import {planBulkProductStatus01523} from './marketplace-bulk-status-core-01523.mjs';
+import {assignProductGroup01512,assignSnapshotProductGroups01512} from './marketplace-product-group-01512.mjs';
 import crypto from 'node:crypto';
 import {withTransaction} from './db.mjs';
+import {persistMarketplaceImportRollback01397} from './marketplace-import-rollback-01397.mjs';
+import {assertUniqueCategoryIdentity01490} from './marketplace-category-identity-core-01490.mjs';
 const COLLECTIONS=Object.freeze({products:'prod',categories:'cat',attributes:'attr',attributeValues:'attrv',variants:'var',media:'media',collections:'col',filters:'filter',recommendations:'rec',feeds:'feed'});
 function clone(v){return v==null?v:JSON.parse(JSON.stringify(v));}
 function nowIso(){return new Date().toISOString();}
@@ -13,14 +20,88 @@ export async function loadSnapshot(scope){return withTransaction(async client=>e
 function importCounts01080(s={}){const out={};for(const key of Object.keys(COLLECTIONS))out[key]=Array.isArray(s?.[key])?s[key].length:0;return out;}
 function stable01080(v){if(Array.isArray(v))return v.map(stable01080);if(v&&typeof v==='object'){const o={};for(const k of Object.keys(v).sort())o[k]=stable01080(v[k]);return o;}return v;}
 function importHash01080(s={}){const c=clone(s||{});delete c.revision;delete c.updatedAt;return crypto.createHash('sha256').update(JSON.stringify(stable01080(c))).digest('hex');}
-export async function replaceSnapshot(scope,input,{sourceKind='api-snapshot-replace'}={}){return withTransaction(async client=>{await ensureRow(client,scope.storeId);const normalized=normalizeSnapshot(input);const next=await persist(client,scope,normalized,'commerce.snapshot.replaced',{revision:Number(input?.revision)||0,sourceKind});try{await client.query(`INSERT INTO commerce_store_imports(id,account_id,workspace_id,store_id,imported_by_user_id,source_kind,source_revision,imported_revision,snapshot_sha256,entity_counts) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)`,[uid('import'),scope.accountId,scope.workspaceId,scope.storeId,scope.userId||null,String(sourceKind||'api-snapshot-replace').slice(0,80),Number(normalized.revision)||0,Number(next.revision)||0,importHash01080(next),JSON.stringify(importCounts01080(next))]);await client.query(`UPDATE platform_deployment_state SET last_import_at=now(),updated_at=now() WHERE id='primary'`);}catch(e){if(e?.code!=='42P01')throw e;}return next;});}
+export async function replaceSnapshot(scope,input,{sourceKind='api-snapshot-replace',rollbackJobId='',expectedRevision=null}={}){return withTransaction(async client=>{const previous=await ensureRow(client,scope.storeId);if(expectedRevision!==null&&expectedRevision!==undefined&&Number(previous.revision)!==Number(expectedRevision)){const e=new Error('MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400');e.code='MARKETPLACE_SNAPSHOT_REVISION_CONFLICT_01400';e.statusCode=409;e.expectedRevision=Number(expectedRevision);e.actualRevision=Number(previous.revision)||0;throw e;}const normalized=assignSnapshotProductGroups01512(normalizeSnapshot(input));const next=await persist(client,scope,normalized,'commerce.snapshot.replaced',{revision:Number(input?.revision)||0,sourceKind,rollbackJobId:String(rollbackJobId||'')});if(String(rollbackJobId||'').trim())await persistMarketplaceImportRollback01397(client,scope,{historyId:String(rollbackJobId||'').trim(),sourceKind,before:previous,after:next,preRevision:Number(previous.revision)||0,postRevision:Number(next.revision)||0});try{await client.query(`INSERT INTO commerce_store_imports(id,account_id,workspace_id,store_id,imported_by_user_id,source_kind,source_revision,imported_revision,snapshot_sha256,entity_counts) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)`,[uid('import'),scope.accountId,scope.workspaceId,scope.storeId,scope.userId||null,String(sourceKind||'api-snapshot-replace').slice(0,80),Number(normalized.revision)||0,Number(next.revision)||0,importHash01080(next),JSON.stringify(importCounts01080(next))]);await client.query(`UPDATE platform_deployment_state SET last_import_at=now(),updated_at=now() WHERE id='primary'`);}catch(e){if(e?.code!=='42P01')throw e;}return next;});}
+// 01606D: one revision-checked, store-scoped transaction with allowlisted catalog operations.
+// Caller MUST enforce both the base permission and per-operation action permission.
+export async function atomicCatalogEdit01606D(scope,input={}){
+ const plan=normalizeCatalogOperations01606D(input);
+ return withTransaction(async client=>{
+  const before=await ensureRow(client,scope.storeId);
+  const modified=applyAtomicCatalogOperations01606D(before,plan);
+  const next=await persist(client,scope,modified,'commerce.catalog.atomic-edit-01606D',{
+   count:plan.operations.length,operations:plan.operations.map(({collection,action,id})=>({collection,action,id}))
+  });
+  return {stage:'01606D',revision:next.revision,changed:plan.operations.length};
+ });
+}
+// 01624H: one locked transaction, optimistic revision, durable idempotency receipt.
+export async function commitFastCatalog01624H(scope,input){
+ const plan=normalizeFastPlan(input),digest=crypto.createHash('sha256').update(JSON.stringify(plan)).digest('hex');
+ return withTransaction(async client=>{
+  const before=await ensureRow(client,scope.storeId);
+  const receipt=await client.query("SELECT payload FROM commerce_outbox WHERE store_id=$1 AND event_type='commerce.catalog.fast-editor-01624H' AND payload->>'batchId'=$2 LIMIT 1",[scope.storeId,plan.batchId]);
+  if(receipt.rowCount){const p=receipt.rows[0].payload;if(p.digest!==digest||p.actor!==scope.userId)throw Object.assign(new Error('ST_FAST_CATALOG_BATCH_CONFLICT_01624H'),{statusCode:409});return {revision:p.revision,changed:p.count,batchId:plan.batchId,replayed:true,rebased:!!p.rebased};}
+  const rebased=before.revision!==plan.expectedRevision;
+  const modified=applyFastCatalog(before,plan);
+  const next=await persist(client,scope,modified,'commerce.catalog.fast-editor-01624H',{batchId:plan.batchId,digest,actor:scope.userId,revision:before.revision+1,count:plan.operations.length,rebased,baseRevision:plan.expectedRevision});
+  return {revision:next.revision,changed:plan.operations.length,batchId:plan.batchId,rebased};
+ });
+}
+export async function bulkSetProductStatus01523(scope,input={}){
+  const expectedRevision=Number(input.expectedRevision);
+  if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)throw Object.assign(new Error('MARKETPLACE_BULK_EXPECTED_REVISION_REQUIRED_01523'),{statusCode:400});
+  // One locked PostgreSQL transaction for up to 5000 changes, not N status PATCH requests.
+  return withTransaction(async client=>{
+    const before=await ensureRow(client,scope.storeId);
+    if(Number(before.revision)!==expectedRevision)throw Object.assign(new Error('MARKETPLACE_BULK_REVISION_CONFLICT_01523'),{statusCode:409});
+    const plan=planBulkProductStatus01523(before,input);
+    if(!plan.changedIds.length)return {stage:'01523',requested:plan.requested,changed:0,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:before.revision,changedIds:[]};
+    const next=await persist(client,scope,{...before,products:plan.products},'commerce.products.bulk-status',{status:plan.status,changed:plan.changedIds.length,requested:plan.requested});
+    return {stage:'01523',requested:plan.requested,changed:plan.changedIds.length,skippedMissing:plan.missing.length,skippedArchived:plan.archived.length,alreadySet:plan.unchanged.length,revision:next.revision,changedIds:plan.changedIds};
+  });
+}
+
+// 01528 · read-only preview; one locked transaction for the final replacement.
+export async function previewProductReplacement01528(scope,input={}){
+  const state=await loadSnapshot(scope);
+  return planProductReplacement01528(state,input);
+}
+export async function executeProductReplacement01528(scope,input={}){
+  return withTransaction(async client=>{
+    const before=await ensureRow(client,scope.storeId);
+    const applied=applyProductReplacement01528(before,input);
+    const after=await persist(client,scope,applied.snapshot,'commerce.products.replaced-01528',applied.report);
+    const rollbackId=uid('replace01528');
+    await persistMarketplaceImportRollback01397(client,scope,{historyId:rollbackId,sourceKind:'product-replacement-01528',before,after,preRevision:before.revision,postRevision:after.revision});
+    return {...applied.report,revision:after.revision,rollbackId};
+  });
+}
 export async function resetSnapshot(scope){return withTransaction(async client=>{await ensureRow(client,scope.storeId);const next=await persist(client,scope,emptySnapshot(),'commerce.snapshot.reset',{});return next;});}
 export async function listResource(scope,key){const s=await loadSnapshot(scope);return clone(s[key]||[]);}
 export async function getResource(scope,key,id){const s=await loadSnapshot(scope);return clone((s[key]||[]).find(x=>String(x.id)===String(id))||null);}
-export async function createResource(scope,key,input={}){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const t=nowIso();const entity={...(input||{})};entity.id=String(entity.id||uid(COLLECTIONS[key]));entity.createdAt=entity.createdAt||t;entity.updatedAt=t;if(arr.some(x=>x.id===entity.id))throw Object.assign(new Error(`${key} id already exists`),{statusCode:409});if(key==='products'&&entity.sku&&arr.some(x=>String(x.sku||'')===String(entity.sku)))throw Object.assign(new Error(`SKU already exists: ${entity.sku}`),{statusCode:409});const next={...s,[key]:[...arr,entity]};await persist(client,scope,next,`commerce.${key}.created`,{id:entity.id});return clone(entity);});}
-export async function updateResource(scope,key,id,patch={}){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const idx=arr.findIndex(x=>String(x.id)===String(id));if(idx<0)throw Object.assign(new Error(`${key} entity not found`),{statusCode:404});const current=arr[idx];const entity={...current,...(patch||{}),id:current.id,createdAt:current.createdAt,updatedAt:nowIso()};if(key==='products'&&entity.sku&&arr.some(x=>x.id!==current.id&&String(x.sku||'')===String(entity.sku)))throw Object.assign(new Error(`SKU already exists: ${entity.sku}`),{statusCode:409});const copy=arr.slice();copy[idx]=entity;await persist(client,scope,{...s,[key]:copy},`commerce.${key}.updated`,{id:entity.id});return clone(entity);});}
-export async function deleteResource(scope,key,id){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const next=arr.filter(x=>String(x.id)!==String(id));const removed=next.length!==arr.length;if(removed)await persist(client,scope,{...s,[key]:next},`commerce.${key}.deleted`,{id:String(id)});return removed;});}
+async function auditDelegatedWrite01621(client,scope,actor,action,key,id,fields=[]){
+ if(!actor)return;
+ await client.query(`INSERT INTO platform_admin_audit_log(account_id,workspace_id,store_id,actor_user_id,action,target_type,target_id,payload)
+  VALUES($1,$2,$3,$4,$5,'delegated_catalog',$6,$7::jsonb)`,[scope.accountId,scope.workspaceId,scope.storeId,actor,action,String(id),JSON.stringify({collection:key,fields:fields.filter(k=>!['__proto__','constructor','prototype'].includes(k)).slice(0,48)})]);
+}
+export async function createResource(scope,key,input={},options={}){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const t=nowIso();const entity={...(input||{})};entity.id=String(entity.id||uid(COLLECTIONS[key]));entity.createdAt=entity.createdAt||t;entity.updatedAt=t;if(key==='products')Object.assign(entity,assignProductGroup01512(entity,arr,s.categories));if(arr.some(x=>x.id===entity.id))throw Object.assign(new Error(`${key} id already exists`),{statusCode:409});if(key==='categories')assertUniqueCategoryIdentity01490(arr,entity);if(key==='products'&&entity.sku&&arr.some(x=>String(x.sku||'')===String(entity.sku)))throw Object.assign(new Error(`SKU already exists: ${entity.sku}`),{statusCode:409});const next={...s,[key]:[...arr,entity]};await persist(client,scope,next,`commerce.${key}.created`,{id:entity.id});await auditDelegatedWrite01621(client,scope,options.actorUserId,'commerce.delegated.create',key,entity.id,Object.keys(input||{}));return clone(entity);});}
+export async function updateResource(scope,key,id,patch={},options={}){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const idx=arr.findIndex(x=>String(x.id)===String(id));if(idx<0)throw Object.assign(new Error(`${key} entity not found`),{statusCode:404});const current=arr[idx];if(typeof options?.validateUpdate==='function')options.validateUpdate(current,patch);const entity={...current,...(patch||{}),id:current.id,createdAt:current.createdAt,updatedAt:nowIso()};if(key==='products')Object.assign(entity,assignProductGroup01512(entity,arr.filter(x=>x.id!==current.id),s.categories));if(key==='products'&&entity.sku&&arr.some(x=>x.id!==current.id&&String(x.sku||'')===String(entity.sku)))throw Object.assign(new Error(`SKU already exists: ${entity.sku}`),{statusCode:409});if(key==='categories')assertUniqueCategoryIdentity01490(arr,entity,{exceptId:id});const copy=arr.slice();copy[idx]=entity;await persist(client,scope,{...s,[key]:copy},`commerce.${key}.updated`,{id:entity.id});await auditDelegatedWrite01621(client,scope,options.actorUserId,'commerce.delegated.edit',key,entity.id,Object.keys(patch||{}).filter(k=>JSON.stringify(current[k])!==JSON.stringify(patch[k])));return clone(entity);});}
+export async function deleteResource(scope,key,id,options={}){if(!COLLECTIONS[key])throw Object.assign(new Error('Unknown commerce resource'),{statusCode:404});return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const arr=Array.isArray(s[key])?s[key]:[];const next=arr.filter(x=>String(x.id)!==String(id));const removed=next.length!==arr.length;if(removed){await persist(client,scope,{...s,[key]:next},`commerce.${key}.deleted`,{id:String(id)});await auditDelegatedWrite01621(client,scope,options.actorUserId,'commerce.delegated.delete',key,id);}return removed;});}
 function mergeObject(a,b){return {...(a&&typeof a==='object'&&!Array.isArray(a)?a:{}),...(b&&typeof b==='object'&&!Array.isArray(b)?b:{})};}
 export async function getSeo(scope){const s=await loadSnapshot(scope);return clone(s.seo||{});}
 export async function updateSeo(scope,patch={}){return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const current=s.seo&&typeof s.seo==='object'?s.seo:{};const seo={...current,...patch};for(const k of ['defaults','sitemap','structuredData','indexing','openGraph','diagnostics'])seo[k]=mergeObject(current[k],patch[k]);await persist(client,scope,{...s,seo},'commerce.seo.updated',{});return clone(seo);});}
 export const RESOURCE_PATHS_01071=Object.freeze({'products':'products','categories':'categories','attributes':'attributes','attribute-values':'attributeValues','variants':'variants','media':'media','collections':'collections','filters':'filters','recommendations':'recommendations','feeds':'feeds'});
+
+// 01626: one revision-checked transaction for explicit add/update decisions by immutable product ID.
+export async function commitSelectiveProducts01626(scope,input){
+ const {applySelectiveProducts01626}=await import('./marketplace-selective-transfer-core-01626.mjs');
+ return withTransaction(async client=>{
+   const before=await ensureRow(client,scope.storeId);
+   const modified=applySelectiveProducts01626(before,input);
+   const next=await persist(client,scope,modified.snapshot,'commerce.products.selective-id-import-01626',{
+     actor:scope.userId,rows:input.rows.length,added:modified.added,updated:modified.updated,
+     ids:input.rows.slice(0,100).map(r=>r.id)
+   });
+   return {stage:'01626',revision:next.revision,updated:modified.updated,added:modified.added,mode:'explicit-actions-by-id'};
+ });
+}
