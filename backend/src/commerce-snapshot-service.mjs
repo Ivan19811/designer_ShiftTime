@@ -90,3 +90,16 @@ function mergeObject(a,b){return {...(a&&typeof a==='object'&&!Array.isArray(a)?
 export async function getSeo(scope){const s=await loadSnapshot(scope);return clone(s.seo||{});}
 export async function updateSeo(scope,patch={}){return withTransaction(async client=>{const s=await ensureRow(client,scope.storeId);const current=s.seo&&typeof s.seo==='object'?s.seo:{};const seo={...current,...patch};for(const k of ['defaults','sitemap','structuredData','indexing','openGraph','diagnostics'])seo[k]=mergeObject(current[k],patch[k]);await persist(client,scope,{...s,seo},'commerce.seo.updated',{});return clone(seo);});}
 export const RESOURCE_PATHS_01071=Object.freeze({'products':'products','categories':'categories','attributes':'attributes','attribute-values':'attributeValues','variants':'variants','media':'media','collections':'collections','filters':'filters','recommendations':'recommendations','feeds':'feeds'});
+
+// 01625: only patch existing IDs, within one store and one revision-checked transaction.
+export async function commitSelectiveProducts01625(scope,input){
+ const {applySelectiveProducts01625}=await import('./marketplace-selective-transfer-core-01625.mjs');
+ return withTransaction(async client=>{
+   const before=await ensureRow(client,scope.storeId);
+   const modified=applySelectiveProducts01625(before,input);
+   const next=await persist(client,scope,modified,'commerce.products.selective-id-import-01625',{
+     actor:scope.userId,rows:input.rows.length,ids:input.rows.slice(0,100).map(r=>r.id)
+   });
+   return {stage:'01625',revision:next.revision,updated:input.rows.length,mode:'existing-products-by-id'};
+ });
+}

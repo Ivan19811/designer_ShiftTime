@@ -75,9 +75,10 @@ import {verifyDelegatedUploadOwner01621} from './delegated-media-owner-01621.mjs
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
-import {loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
+import {commitSelectiveProducts01625,loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
+import {storeSiteLinksView01625,changeStoreSiteLink01625} from './store-site-links-service-01625.mjs';
 import {getNetworkView,ensureSeller,updateSeller,updatePolicy,publishProduct as publishNetworkProduct,syncProduct as syncNetworkProduct,unpublishListing} from './marketplace-network-service.mjs';
 import {searchPublicMarketplace} from './marketplace-public-catalog-service.mjs';
 import {getPublicCart,addPublicCartOffer,setPublicCartQuantity,removePublicCartItem,clearPublicCart,refreshPublicCart} from './marketplace-cart-service.mjs';
@@ -1057,6 +1058,14 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
   if(req.method==='GET'&&p[2]==='platform'&&p[3]==='context'){const result=await getAuthorizedPlatformSnapshot(session.userId,scope);await noteServiceUseSafely01592(session.userId,'builder','builder_context');return sendJson(res,200,result);}
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='workspaces'){await assertUnmanagedAdminOperation01605(scope,session.userId);return sendJson(res,201,await createAuthorizedWorkspace(session.userId,scope.accountId,await readJson(req)));}
   if(req.method==='POST'&&p[2]==='platform'&&p[3]==='stores'){await assertUnmanagedAdminOperation01605(scope,session.userId);const body=await readJson(req);return sendJson(res,201,await createAuthorizedStore(session.userId,String(body.workspaceId||scope.workspaceId),body));}
+  // 01625 · Site ⇄ Store registry. Only workspace-level owner/admin can manage links.
+  if(p[2]==='platform'&&p[3]==='store-site-links'){
+    if(req.method==='GET'&&p.length===4)return sendJson(res,200,await storeSiteLinksView01625(scope,session.userId),{'cache-control':'private, no-store'});
+    if(req.method==='POST'&&p.length===4){await assertUnmanagedAdminOperation01605(scope,session.userId);const body=await readJson(req,{limit:4096});return sendJson(res,200,await changeStoreSiteLink01625(scope,session.userId,{siteId:body?.siteId,storeId:body?.storeId,attach:true}));}
+    if(req.method==='DELETE'&&p.length===6){await assertUnmanagedAdminOperation01605(scope,session.userId);return sendJson(res,200,await changeStoreSiteLink01625(scope,session.userId,{siteId:p[4],storeId:p[5],attach:false}));}
+    return sendJson(res,405,{error:'ST_STORE_SITE_METHOD_DENIED_01625'});
+  }
+
   if(p[2]==='tables'){
     const tableId=p[3]||'',resource=p[4]||'',resourceId=p[5]||'';
     if(req.method==='GET'&&!tableId)return sendJson(res,200,{stage:'01108',tablesRichTextVersion:TABLE_RICH_TEXT_VERSION_01108,tables:await listAuthorizedTables01092(scope,session.userId)});
@@ -1147,6 +1156,16 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       }
       return sendJson(res,200,await commitFastCatalog01624H({...scope,userId:session.userId},fast));
   };
+  // 01625 · ID-only selective import. Never create/delete or match by array index.
+  if(p[3]==='selective-id-import'&&p.length===4&&req.method==='POST'){
+    if(delegatedProductLevels01621?.marketplace==='edit')throw Object.assign(new Error('ST_DELEGATED_SELECTIVE_IMPORT_DENIED_01625'),{statusCode:403});
+    const decision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.import',siteId:'',legacy:'write'});
+    assertLegacyForUnmanaged01600(scope,decision);
+    const editDecision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.edit',siteId:'',legacy:'write'});
+    assertLegacyForUnmanaged01600(scope,editDecision);
+    const input=await readJson(req,{limit:8*1024*1024});
+    return sendJson(res,200,await commitSelectiveProducts01625({...scope,userId:session.userId},input),{'cache-control':'private, no-store'});
+  }
   if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
     const input=await readJson(req,{limit:8*1024*1024});
     if(input?.mode===FAST_MODE)return commitFastEditorRequest01624H(input);
