@@ -75,7 +75,7 @@ import {verifyDelegatedUploadOwner01621} from './delegated-media-owner-01621.mjs
 import {registerUser01084,loginUser01084,createSessionForUser01581,activatePasswordForUser01084,revokeSession01084,revokeAllUserSessions01084} from './auth-service-01084.mjs';
 import {applyCors,sendJson,sendNoContent,readJson,readBuffer,requestId} from './http-utils.mjs';
 import {readSitePublishingJson01609C} from './site-publish-upload-01609c.mjs';
-import {commitSelectiveProducts01625,loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
+import {commitSelectiveProducts01626,loadSnapshot,replaceSnapshot,resetSnapshot,atomicCatalogEdit01606D,bulkSetProductStatus01523,previewProductReplacement01528,executeProductReplacement01528,listResource,getResource,createResource,updateResource,deleteResource,getSeo,updateSeo,RESOURCE_PATHS_01071} from './commerce-snapshot-service.mjs';
 import {resolveCategoryPath01490,previewCategoryMerge01490,executeCategoryMerge01490} from './marketplace-category-identity-01490.mjs';
 import {getAuthorizedPlatformSnapshot,createAuthorizedWorkspace,createAuthorizedStore} from './platform-service.mjs';
 import {storeSiteLinksView01625,changeStoreSiteLink01625} from './store-site-links-service-01625.mjs';
@@ -1156,7 +1156,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       }
       return sendJson(res,200,await commitFastCatalog01624H({...scope,userId:session.userId},fast));
   };
-  // 01625 · ID-only selective import. Never create/delete or match by array index.
+  // 01626 · Explicit add/update per ID; never delete or match by array index.
   if(p[3]==='selective-id-import'&&p.length===4&&req.method==='POST'){
     if(delegatedProductLevels01621?.marketplace==='edit')throw Object.assign(new Error('ST_DELEGATED_SELECTIVE_IMPORT_DENIED_01625'),{statusCode:403});
     const decision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.import',siteId:'',legacy:'write'});
@@ -1164,7 +1164,15 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     const editDecision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.edit',siteId:'',legacy:'write'});
     assertLegacyForUnmanaged01600(scope,editDecision);
     const input=await readJson(req,{limit:8*1024*1024});
-    return sendJson(res,200,await commitSelectiveProducts01625({...scope,userId:session.userId},input),{'cache-control':'private, no-store'});
+    if(Array.isArray(input?.rows)&&input.rows.some(row=>row?.action==='add')){
+      const createDecision=await inspectProtectedAccess01600(scope,session.userId,{permission:'shop.products.create',siteId:'',legacy:'write'});
+      assertLegacyForUnmanaged01600(scope,createDecision);
+    }
+    if(Array.isArray(input?.rows))for(const status of new Set(input.rows.filter(row=>row?.action==='update'&&Object.hasOwn(row?.patch||{},'status')).map(row=>row.patch.status))){
+      const statusAction=productStatusAction01606B({status});
+      if(statusAction)assertProductAction01606B(editDecision,statusAction);
+    }
+    return sendJson(res,200,await commitSelectiveProducts01626({...scope,userId:session.userId},input),{'cache-control':'private, no-store'});
   }
   if(p[3]==='atomic-catalog'&&p.length===4&&req.method==='POST'){
     const input=await readJson(req,{limit:8*1024*1024});
