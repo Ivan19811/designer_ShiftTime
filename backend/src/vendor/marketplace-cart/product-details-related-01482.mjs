@@ -3,6 +3,7 @@
 // Reads the existing canonical 01480 relations. No duplicated product links, writes or prices.
 import { resolveMatchedAccessoriesForProduct01480, resolveAccessoryTargets01480, normalizeProductAccessoryLinks01480 } from './marketplace-accessory-matching-01480.mjs';
 import { effectiveProductRole01472 } from './marketplace-catalog-role-01472.mjs';
+import {accessorySelectionMode01637,accessorySelectionGroup01637,normalizeAccessorySelections01637} from './marketplace-accessory-selection-01637.mjs';
 const str=v=>String(v??'').trim();
 const arr=v=>Array.isArray(v)?v:[];
 const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
@@ -48,7 +49,7 @@ export function resolveProductDetailsOffers01482(state={}, {productId='',sourceP
     const hasVariants=variants.some(v=>str(v.productId)===str(p.id)&&active(v));
     if(hasVariants&&!actual)continue;
     const match=compatible.find(pair=>!actual||str(pair.accessoryVariantId)===str(actual.id))||compatible[0];
-    accessories.push({id:str(p.id),productId:str(p.id),variantId:str(actual?.id),name:str(p.name||p.sku),variantName:str(actual?.displayName01260||actual?.name||Object.values(obj(actual?.options))[0]||match?.label),price:Number(actual?.price??p.price)||0,currency:str(p.currency||state?.settings?.currency||'UAH'),stock:Number(actual?.stock??p.stock)||0,attributeId:str(item.attributeId),value:str(match?.label),source:'matched'});
+    accessories.push({id:str(p.id),productId:str(p.id),variantId:str(actual?.id),name:str(p.name||p.sku),variantName:str(actual?.displayName01260||actual?.name||Object.values(obj(actual?.options))[0]||match?.label),price:Number(actual?.price??p.price)||0,currency:str(p.currency||state?.settings?.currency||'UAH'),stock:Number(actual?.stock??p.stock)||0,attributeId:str(item.attributeId),value:str(match?.label),source:'matched',selectionMode01637:accessorySelectionMode01637(p),group01637:accessorySelectionGroup01637(p,state.categories)});
   }
   // 01487: the SAME stored accessoryTargets01485 ledger contains service owners.
   // No category-rule/runtime matching, and never widen one variant to another.
@@ -59,7 +60,7 @@ export function resolveProductDetailsOffers01482(state={}, {productId='',sourceP
       if(!service||!active(service)||effectiveProductRole01472(service,state.categories)!=='service')continue;
       const variant=arr(item.pairs).map(pair=>variants.find(v=>str(v.id)===str(pair.accessoryVariantId)&&str(v.productId)===str(service.id)&&active(v))).find(Boolean);
       if(variants.some(v=>str(v.productId)===str(service.id)&&active(v))&&!variant)continue;
-      const entry=serviceMap.get(str(service.id))||{id:str(service.id),productId:str(service.id),name:str(service.name||service.sku),variantId:str(variant?.id),variantName:str(variant?.displayName01260||variant?.name||Object.values(obj(variant?.options))[0]||''),price:Number(variant?.price??service.price)||0,currency:str(service.currency||state?.settings?.currency||'UAH'),stock:Number(variant?.stock??service.stock)||0,requiresAccessory:true,accessoryIds:[]};
+      const entry=serviceMap.get(str(service.id))||{id:str(service.id),productId:str(service.id),name:str(service.name||service.sku),variantId:str(variant?.id),variantName:str(variant?.displayName01260||variant?.name||Object.values(obj(variant?.options))[0]||''),price:Number(variant?.price??service.price)||0,currency:str(service.currency||state?.settings?.currency||'UAH'),stock:Number(variant?.stock??service.stock)||0,requiresAccessory:true,accessoryIds:[],serviceGroup01637:str(service?.configuration?.serviceGroup01637||service?.configuration?.accessoryGroup01637)||str((service.categoryIds||[]).slice(-1)[0])||accessorySelectionGroup01637(service,state.categories)};
       if(!accessoryId){entry.requiresAccessory=false;entry.variantId=str(variant?.id);}
       else if(!entry.accessoryIds.includes(accessoryId))entry.accessoryIds.push(accessoryId);
       serviceMap.set(str(service.id),entry);
@@ -72,9 +73,7 @@ export function resolveProductDetailsOffers01482(state={}, {productId='',sourceP
 }
 
 export function reconcileProductDetailsRelated01482(offers={}, selected={}){
-  const accessories=dedupe(arr(selected.accessories)).filter(id=>arr(offers.accessories).some(x=>x.id===id));
-  const services=dedupe(arr(selected.services)).filter(id=>arr(offers.services).some(x=>x.id===id&&( !x.requiresAccessory||x.accessoryIds.some(a=>accessories.includes(a)))));
-  return {accessories,services};
+  return normalizeAccessorySelections01637(offers,selected);
 }
 
 // 01529 · Read-only bundle-price projection from the same canonical offers

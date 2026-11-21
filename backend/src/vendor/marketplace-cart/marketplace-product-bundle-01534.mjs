@@ -47,6 +47,7 @@ export function resolveAuthoredBundle01534(state={},request={}){
   const requested={accessories:[...new Set(arr(request.accessories).map(str).filter(Boolean))],services:[...new Set(arr(request.services).map(str).filter(Boolean))]};
   const selected=reconcileProductDetailsRelated01482(offers,requested);
   if(selected.accessories.length!==requested.accessories.length||selected.services.length!==requested.services.length)fail('SELECTION_CHANGED');
+  if(selected.missingRequired?.length)fail('ACCESSORY_REQUIRED_01637');
   const accessoryOffers=arr(offers.accessories).filter(row=>selected.accessories.includes(str(row.id)));
   const serviceOffers=arr(offers.services).filter(row=>selected.services.includes(str(row.id)));
   const accessoryLines=accessoryOffers.map(row=>{

@@ -58,6 +58,7 @@ function baseColumns01391(labels){
     ['catalogRole01472',l('catalogRole01472','Category Accessories Marker')],
     ['additionalServices01487',l('additionalServices01487','Additional Services')],
     ['accessoryProducts01485',l('accessoryProducts01485','Accessory Products')],
+    ['accessorySelection01637',l('accessorySelection01637','Мітка вибору аксесуара')],
     ['productImages',l('productImages','Product Images')],
     ['primaryProductImage',l('primaryProductImage','Primary Product Image')]
   ];
@@ -123,6 +124,7 @@ export function buildMarketplaceCatalogExport01391(state,options={}){
       // 01486: XLSX exports the SAME stored ledger used by the storefront.
       // Never infer additional matches from category rules at export time.
       row.accessoryProducts01485=serializeAccessoryPriceRefs01485(state,explicitAccessoryPriceRefs01485(product,variant)||[]);
+      row.accessorySelection01637=effectiveProductRole01472(product,categories)==='accessory'?({one:'Один',multiple:'Кілька',required:'Обов’язково'})[String(product?.configuration?.accessorySelection01637||'one')]||'Один':'';
       row.additionalServices01487=serializeAdditionalServices01487(state,product,variant,{index:additionalServiceIndex01487});
       rows.push(row);
     }
