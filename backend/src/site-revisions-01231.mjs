@@ -5,6 +5,8 @@ import {nextFreeDraftSlot01613D3} from './site-revision-slots-01613d3.mjs';
 import {classifyTestDraftDelete01623D} from './site-revision-delete-policy-01623d.mjs';
 import {planOriginalPromotion01623U} from './site-original-promotion-01623u.mjs';
 import {checkRevisionDeleteScope01623K} from './site-delete-audit-01623k.mjs';
+import {mergeOwnerProject01646} from './site-owner-merge-01646.mjs';
+import {saveOwnerHistoryInTransaction01646} from './site-owner-history-01646.mjs';
 
 const clean=v=>String(v??'').trim();
 const clone=v=>v==null?v:structuredClone(v);
@@ -13,7 +15,7 @@ function projectValue(value){return value&&typeof value==='object'&&!Array.isArr
 function mapRow(row,{includeProject=false}={}){if(!row)return null;const out={
   id:clean(row.id),siteId:clean(row.site_id),kind:clean(row.kind),slot:Number(row.slot||0),label:clean(row.label),comment:String(row.comment??''),schemaVersion:clean(row.schema_version)||'01231',dirty:row.dirty===true,sourceRevisionId:clean(row.source_revision_id),
   createdByUserId:clean(row.created_by_user_id),
-  createdAt:row.created_at?new Date(row.created_at).toISOString():null,updatedAt:row.updated_at?new Date(row.updated_at).toISOString():null,publishedAt:row.published_at?new Date(row.published_at).toISOString():null,
+  createdAt:row.created_at?new Date(row.created_at).toISOString():null,updatedAt:row.updated_at?new Date(row.updated_at).toISOString():null,publishedAt:row.published_at?new Date(row.published_at).toISOString():null,baseOriginalRevision:row.base_original_revision==null?null:Number(row.base_original_revision),preparedOriginalRevision:row.prepared_original_revision==null?null:Number(row.prepared_original_revision),
 };if(includeProject){out.project=projectValue(row.project_json);out.fingerprint=draftFingerprint01606G(out.project);}return out;}
 async function assertSite(c,scope,siteId){const q=await c.query(`SELECT s.id,p.project_json,p.schema_version FROM shifttime_builder_sites s LEFT JOIN shifttime_builder_site_projects p ON p.site_id=s.id WHERE s.account_id=$1 AND s.workspace_id=$2 AND s.store_id=$3 AND s.id=$4 AND s.status<>'archived' LIMIT 1`,[scope.accountId,scope.workspaceId,scope.storeId,siteId]);if(!q.rowCount)throw httpError('Builder site not found',404,'ST_BUILDER_SITE_NOT_FOUND');return q.rows[0];}
 function revisionId(){return `rev_${crypto.randomUUID().replaceAll('-','')}`;}
@@ -46,7 +48,17 @@ export async function createSiteDraft01231(scope,userId,siteId,input={}){
   const sid=clean(siteId);return withClient(async c=>{await c.query('BEGIN');try{await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[sid]);const site=await assertSite(c,scope,sid);const drafts=await c.query(`SELECT id,slot FROM shifttime_builder_site_revisions WHERE site_id=$1 AND kind='draft' ORDER BY slot FOR UPDATE`,[sid]);const slot=nextFreeDraftSlot01613D3(drafts.rows);
       let sourceProject=null,sourceRevisionId='';const requestedSource=clean(input.sourceRevisionId);if(requestedSource){const q=await c.query(`SELECT id,project_json,kind,created_by_user_id FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind IN ('draft','published') LIMIT 1`,[sid,requestedSource]);if(!q.rowCount)throw httpError('Source revision not found',404,'ST_SITE_REVISION_SOURCE_NOT_FOUND');if(scope.role!=='owner'&&q.rows[0].kind==='draft'&&q.rows[0].created_by_user_id!==userId)throw httpError('Other manager revision is private',403,'ST_TEST_AUTHOR_REQUIRED_01613D');sourceProject=projectValue(q.rows[0].project_json);sourceRevisionId=clean(q.rows[0].id);}else if(input.project&&typeof input.project==='object'){sourceProject=projectValue(input.project);}else{sourceProject=projectValue(site.project_json);}
       const id=revisionId(),schemaVersion=clean(input.schemaVersion||sourceProject?.version||site.schema_version)||'01231',label=clean(input.label),comment=String(input.comment??'').slice(0,4000),dirty=input.dirty===true;
-      const q=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,comment,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id) VALUES($1,$2,'draft',$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$10) RETURNING *`,[id,sid,slot,label,comment,schemaVersion,JSON.stringify(sourceProject),dirty,sourceRevisionId||null,userId]);await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});
+      // 01646: capture the original as a durable three-way merge baseline;
+      // the client never supplies this authority. Owner and manager workspaces
+      // stay separate even if the owner is editing an older starting snapshot.
+      const base=scope.role==='owner'?await c.query('SELECT project_json,revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[sid]):{rows:[]};
+      const baseline=base.rows[0]||{};
+      const q=await c.query(`INSERT INTO shifttime_builder_site_revisions(id,site_id,kind,slot,label,comment,schema_version,project_json,dirty,source_revision_id,created_by_user_id,updated_by_user_id,base_original_project_json,base_original_revision) VALUES($1,$2,'draft',$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$10,$11::jsonb,$12) RETURNING *`,[id,sid,slot,label,comment,schemaVersion,JSON.stringify(sourceProject),dirty,sourceRevisionId||null,userId,scope.role==='owner'&&baseline.project_json?JSON.stringify(baseline.project_json):null,scope.role==='owner'?baseline.revision??null:null]);
+      if(scope.role==='owner'&&baseline.project_json){
+        const exists=await c.query('SELECT slot FROM shifttime_builder_site_history_01646 WHERE site_id=$1 LIMIT 1',[sid]);
+        if(!exists.rowCount)await saveOwnerHistoryInTransaction01646(c,sid,baseline.project_json,{reason:'original',label:'Original Render'});
+      }
+      await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});
     }catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
 }
 
@@ -60,7 +72,7 @@ async function assertEditableSiteTestRevision01615B(client,siteId,revisionId,{op
  throw httpError('ShiftTime Test revision is protected',409,'ST_TEST_DRAFT_LOCKED_01614A');
 }
 export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,input={}){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,prepared_original_revision=NULL,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
       await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
         WHERE revision_id=$1 AND site_id=$2`,[rid,sid]);
       await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
@@ -161,6 +173,30 @@ export async function deleteSiteDraft01231(scope,siteId,revisionIdValue,userId='
   });
 }
 
+
+// 01646: before Netlify sees any files, reconcile the saved owner draft with
+// the CURRENT Render original in one server transaction. This returns the
+// precise project to export, never a mixture of browser/editor snapshots.
+export async function prepareOwnerPublication01646(scope,userId,siteId,revisionIdValue,{expectedFingerprint}={}){
+ const sid=clean(siteId),rid=clean(revisionIdValue);
+ return withClient(async c=>{await c.query('BEGIN');try{
+  if(scope.role!=='owner')throw httpError('Only owner can publish',403,'ST_OWNER_PUBLISH_REQUIRED_01646');
+  await c.query('SELECT pg_advisory_xact_lock(hashtext($1))',[sid]);
+  await assertSite(c,scope,sid);
+  const d=await c.query("SELECT * FROM shifttime_builder_site_revisions WHERE site_id=$1 AND id=$2 AND kind='draft' FOR UPDATE",[sid,rid]);
+  if(!d.rowCount||clean(d.rows[0].created_by_user_id)!==clean(userId))throw httpError('Own draft required',403,'ST_OWNER_DRAFT_REQUIRED_01646');
+  const draft=d.rows[0];
+  if(clean(expectedFingerprint)&&draftFingerprint01606G(draft.project_json)!==clean(expectedFingerprint))throw httpError('Draft changed',409,'ST_PUBLISH_DRAFT_CHANGED_01623U');
+  if(!draft.base_original_project_json||draft.base_original_revision==null)throw httpError('This is a legacy revision. Open Edit to start from the verified original.',409,'ST_OWNER_DRAFT_BASE_REQUIRED_01646');
+  const o=await c.query('SELECT project_json,revision FROM shifttime_builder_site_projects WHERE site_id=$1 FOR UPDATE',[sid]);
+  if(!o.rowCount)throw httpError('Original not found',404,'ST_OWNER_ORIGINAL_NOT_FOUND_01646');
+  const current=o.rows[0],merged=mergeOwnerProject01646({siteId:sid,base:draft.base_original_project_json,edited:draft.project_json,current:current.project_json});
+  const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,prepared_original_revision=$2,updated_at=now()
+    WHERE site_id=$3 AND id=$4 AND kind='draft' RETURNING *`,[JSON.stringify(merged),current.revision,sid,rid]);
+  await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});
+ }catch(error){try{await c.query('ROLLBACK');}catch{}throw error;}});
+}
+
 export async function publishSiteRevision01231(scope,userId,siteId,revisionIdValue,input={},run=withClient){
   const sid=clean(siteId),rid=clean(revisionIdValue);
   return run(async c=>{await c.query('BEGIN');try{
@@ -180,6 +216,19 @@ export async function publishSiteRevision01231(scope,userId,siteId,revisionIdVal
        EXISTS (SELECT 1 FROM shifttime_site_test_change_batches_01618 WHERE site_id=p.site_id)) AS reviewed
       FROM shifttime_builder_site_projects p WHERE p.site_id=$1 FOR UPDATE OF p`,[sid,JSON.stringify(draft.project_json)]);
     const base=original.rows[0]||{};
+    if(scope.role==='owner'&&draft.base_original_project_json){
+      // A publish without a confirmed preflight could upload files from a
+      // different Canvas. Refuse it, without touching either original or live.
+      if(draft.prepared_original_revision==null||Number(draft.prepared_original_revision)!==Number(base.revision))
+        throw httpError('Original changed during publication. Retry using the current owner revision.',409,'ST_OWNER_PUBLISH_STALE_01646');
+      const updated=await c.query(`UPDATE shifttime_builder_site_projects SET project_json=$1::jsonb,schema_version=$2,revision=revision+1,updated_by_user_id=$3,updated_at=now()
+        WHERE site_id=$4 AND revision=$5 RETURNING revision`,[JSON.stringify(draft.project_json),draft.schema_version,userId,sid,base.revision]);
+      if(!updated.rowCount)throw httpError('Original changed',409,'ST_OWNER_PUBLISH_STALE_01646');
+      await c.query("UPDATE shifttime_builder_site_revisions SET kind='archived',slot=0,updated_at=now() WHERE site_id=$1 AND kind='published'",[sid]);
+      const published=await c.query(`UPDATE shifttime_builder_site_revisions SET kind='published',slot=0,dirty=false,published_at=now(),updated_by_user_id=$1,updated_at=now() WHERE site_id=$2 AND id=$3 RETURNING *`,[userId,sid,rid]);
+      await saveOwnerHistoryInTransaction01646(c,sid,draft.project_json,{reason:'published',label:'Published',revisionId:rid});
+      await c.query('COMMIT');return {...mapRow(published.rows[0],{includeProject:true}),originalSync01623U:{status:'synced',reason:'owner-merged-01646',revision:Number(updated.rows[0].revision)}};
+    }
     const plan=planOriginalPromotion01623U({siteId:sid,role:scope.role,confirmed:!!expected,
       canonical:base.project_json,revision:base.revision,previousMatches:base.previous_matches,nextMatches:base.next_matches,reviewed:base.reviewed,project:draft.project_json});
     let originalSync01623U=plan;

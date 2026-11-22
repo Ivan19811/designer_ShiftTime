@@ -40,6 +40,8 @@ export function classifySiteAction01606E(method,parts){
   }
   if(p[4]!=='revisions'||!p[5])return null;
   if(p.length===6&&p[5]==='from-source'&&m==='POST')return ACTIONS.revisionFromSource;
+  if(p.length===6&&p[5]==='delete-all'&&m==='POST')return ACTIONS.revisionDelete;
+  if(p.length===7&&p[6]==='prepare-owner-publish'&&m==='POST')return ACTIONS.publishRevision;
   if(p.length===6){if(m==='PUT')return ACTIONS.revisionReplace;if(m==='DELETE')return ACTIONS.revisionDelete;return null;}
   if(p.length===7&&p[6]==='details'&&m==='PATCH')return ACTIONS.revisionDetails;
   if(p.length===7&&p[6]==='publish'&&m==='POST')return ACTIONS.publishRevision;

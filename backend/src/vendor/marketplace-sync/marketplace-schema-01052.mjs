@@ -151,6 +151,7 @@ export function createMarketplaceCategory01052(input={}){
     description: cleanString(input.description),
     imageMediaId: cleanString(input.imageMediaId),
     imageSecondaryMediaId: cleanString(input.imageSecondaryMediaId),
+    galleryMediaIds01650: cleanIdArray(input.galleryMediaIds01650).slice(0,50),
     icon: cleanString(input.icon),
     productIds: cleanIdArray(input.productIds),
     attributes: cleanObject(input.attributes),

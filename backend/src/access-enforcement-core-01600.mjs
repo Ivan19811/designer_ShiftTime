@@ -45,6 +45,19 @@ export function classifyProtectedAction01600(method,parts){
       if(p.length===7&&['apply-plan','apply','rollback'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
       if(p.length===7&&p[6]==='promote'&&m==='POST')return decision('site.publish.execute',siteId);
     }
+    // 01648: These owner-specific routes were introduced in 01623M / 01646 /
+    // 01647 but were omitted from the canonical 01600 allowlist. As a result,
+    // the 01613B fail-closed gate rejected the request BEFORE the real owner,
+    // tenant and selected-revision safeguards could execute. Classify exact
+    // routes here, not by a broad path-prefix exception.
+    if(p[4]==='delete-check'&&p.length===5&&m==='GET')
+      return decision('site.publish.delete',siteId,'read');
+    if(p[4]==='owner-history'){
+      if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===7&&p[5]&&p[6]==='save'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[5]&&p[6]==='restore'&&m==='POST')return decision('site.pages.edit',siteId);
+      return null;
+    }
     if(p[4]==='demo-publish-status'&&p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
     if(p[4]==='demo-publish'&&p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
     if(p[4]==='publish-status'&&p.length>=5&&m==='GET')return decision('site.pages.view',siteId,'read');
@@ -55,6 +68,9 @@ export function classifyProtectedAction01600(method,parts){
       if(match(m,'GET')&&[5,6].includes(p.length))return decision('site.pages.view',siteId,'read');
       if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
       if(p.length===6&&p[5]==='from-source'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===6&&p[5]==='delete-all'&&m==='POST')return decision('site.pages.delete',siteId);
+      if(p.length===7&&p[5]&&p[6]==='prepare-owner-publish'&&m==='POST')
+        return decision('site.publish.execute',siteId);
       if(p.length===6){
         if(m==='PUT')return decision('site.pages.edit',siteId);
         if(m==='DELETE')return decision('site.pages.delete',siteId);

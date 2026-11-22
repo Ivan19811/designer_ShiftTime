@@ -12,6 +12,12 @@ export function assertOnlineSiteAccess01613B(scope,decision,method,parts){
   // No unknown site action may reach a handler on a permissions fallback.
   if(!decision?.allowed)throw deny('ST_ONLINE_SITE_UNCLASSIFIED_01613B');
   if(scope?.role==='owner')return true;
+  const ownerOnly01648=parts[2]==='sites'&&Boolean(parts[3])&&(
+    parts[4]==='owner-history'||parts[4]==='delete-check'||
+    (parts[4]==='revisions'&&(
+      (parts.length===6&&parts[5]==='delete-all')||
+      (parts.length===7&&parts[6]==='prepare-owner-publish'))));
+  if(ownerOnly01648)throw deny('ST_ONLINE_SITE_OWNER_APPROVAL_REQUIRED_01613B','site.publish.execute');
   if(decision.mode!=='custom')throw deny('ST_ONLINE_SITE_EXPLICIT_GRANT_REQUIRED_01613B',decision.permission);
   const permissions=new Set(Array.isArray(decision.permissions)?decision.permissions:[]);
   if(parts[2]==='site-revisions'){

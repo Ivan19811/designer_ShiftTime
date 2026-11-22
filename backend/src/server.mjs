@@ -130,7 +130,8 @@ import {saveSiteTestShell01614A} from './site-test-shell-01614a.mjs';
 import {getSiteTestChangeChoices01618,planSiteTestSelectedChanges01618,applySiteTestSelectedChanges01618,rollbackSiteTestSelectedChanges01618,planSiteTestOriginalRepair01618H,applySiteTestOriginalRepair01618H} from './site-test-change-workflow-01618.mjs';
 import {listSiteTests01613D,createSiteTest01613D,previewSiteTest01613D,submitSiteTest01613D,promoteSiteTest01613D,resetSiteTest01613D2,compareSiteTest01614B,getSiteTestBaseline01619E,decideSiteTest01615A,getSiteTestReviewInbox01615A,previewSelectiveSiteTestApply01615B,applyApprovedSiteTest01615B,rollbackAppliedSiteTest01615B,requireSiteTestRevisionAccess01613D,assertNoOriginalWrite01613D} from './site-test-workflow-01613d.mjs';
 import {listBuilderSites01170,listBuilderSiteSummaries01476,getBuilderSite01170,createBuilderSite01170,saveBuilderSite01170,saveBuilderSiteMetadata01231,deleteBuilderSite01170} from './builder-sites-service-01170.mjs';
-import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231} from './site-revisions-01231.mjs';
+import {listSiteRevisions01231,getSiteRevision01231,createSiteDraft01231,saveSiteDraft01231,updateSiteDraftDetails01232,deleteSiteDraft01231,publishSiteRevision01231,prepareOwnerPublication01646} from './site-revisions-01231.mjs';
+import {listOwnerHistory01646,saveOwnerHistory01646,restoreOwnerHistory01646} from './site-owner-history-01646.mjs';
 import {getSiteDeleteCheck01623M,deleteAllDraftRevisions01623M} from './site-destructive-guards-01623m.mjs';
 import {attachHttpTrafficMeter01194,setTrafficScope01194,setTrafficMetadata01228,closeTrafficRecorder01194} from './traffic-recorder-01194.mjs';
 import {listTrafficHistogram01474,getTrafficHistogramDetails01474} from './traffic-histogram-01474.mjs';
@@ -139,7 +140,7 @@ import {getSiteGrowthAnalytics01228} from './site-growth-service-01228.mjs';
 import {runTrafficContext01201,updateTrafficContext01201,updateAuthenticatedTrafficContext01204} from './traffic-integration-01201.mjs';
 import {resolvePublishedSiteTrafficIdentity01203} from './published-site-identity-01203.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
-function setScopeHeaders(res,scope,rid){res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
+function setScopeHeaders(res,scope,rid){res.setHeader('x-st-backend-release','01658');res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 function sameTrafficTenant01203(a={},b={}){return String(a.accountId||'')===String(b.accountId||'')&&String(a.workspaceId||'')===String(b.workspaceId||'')&&String(a.storeId||'')===String(b.storeId||'');}
 function sendGoogleOAuthPopup01398(res,{ok=false,code='',targetOrigin=''}={}){const origin=String(targetOrigin||'').trim()||'*',message=JSON.stringify({type:'st:google-sheets-oauth:01398',ok:!!ok,code:String(code||'')}).replace(/</g,'\u003c'),target=JSON.stringify(origin).replace(/</g,'\u003c'),body=`<!doctype html><meta charset=\"utf-8\"><script>try{window.opener&&window.opener.postMessage(${message},${target})}catch{};try{window.close()}catch{}</script>`;res.writeHead(ok?200:400,{'content-type':'text/html; charset=utf-8','content-length':Buffer.byteLength(body),'cache-control':'no-store'});res.end(body);}
 async function resolveRequestPublishedTrafficIdentity01203(req){const token=String(req?.headers?.['x-st-site-token']||'').trim();return token?resolvePublishedSiteTrafficIdentity01203(token):null;}
@@ -479,6 +480,9 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     try{assertOnlineSiteAccess01613B(scope,protectedDecision01600,req.method,p);
       assertNoOriginalWrite01613D(scope,p,req.method);}
     catch(error){
+      // 01658: limited diagnostic metadata for failed site preflight; never log credentials or project body.
+      if(error?.statusCode===403&&req.method==='POST'&&p[2]==='sites'&&p[4]==='revisions'&&p[6]==='prepare-owner-publish')
+        console.warn('[01658] owner-publish-preflight-denied',JSON.stringify({requestId:rid,route:'owner-prepare',method:'POST',code:String(error.code||error.message||'').slice(0,100),scopeRole:scope.role,siteId:p[3]||'',decisionPresent:!!protectedDecision01600,decisionAllowed:protectedDecision01600?.allowed===true,decisionPermission:protectedDecision01600?.permission||'',backendRelease:'01658'}));
       if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{
         permission:error.permission||auditedAction01605?.permission||'site.pages.view',
         siteId:p[2]==='sites'&&p[3]?p[3]:''
@@ -887,6 +891,21 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       return sendJson(res,400,{error:'ST_DRAFT_SOURCE_INVALID_01606G',stage:'01606G',requestId:rid});
     return sendJson(res,201,{stage:'01606G',revision:await createSiteDraft01231(scope,session.userId,p[3],{sourceRevisionId:input.sourceRevisionId,label:input.label,dirty:false})});
   }
+  // 01646: owner-only history; never shares a manager revision or live deploy.
+  if(p[2]==='sites'&&p[3]&&p[4]==='owner-history'&&p.length>=5){
+    const sid=p[3],slot=p[5]||'',action=p[6]||'';
+    if(scope.role!=='owner')return sendJson(res,403,{error:'ST_HISTORY_OWNER_REQUIRED_01646'});
+    if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01646',history:await listOwnerHistory01646(scope,sid)});
+    if(req.method==='POST'&&p.length===7&&action==='restore'){
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      return sendJson(res,201,{stage:'01646',revision:await restoreOwnerHistory01646(scope,sid,session.userId,slot)});
+    }
+    if(req.method==='POST'&&p.length===7&&action==='save'){
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      return sendJson(res,201,{stage:'01646',entry:await saveOwnerHistory01646(scope,sid,session.userId,slot,{reason:'saved'})});
+    }
+    return sendJson(res,404,{error:'ST_HISTORY_ROUTE_INVALID_01646'});
+  }
   if(p[2]==='sites'&&p[3]&&p[4]==='revisions'){
     const siteId=p[3],revisionId=p[5]||'',action=p[6]||'';
     if(req.method==='GET'&&p.length===5)return sendJson(res,200,{stage:'01231',revisions:await listSiteRevisions01231(scope,siteId,null,undefined,scope.role==='owner'?'':session.userId)});
@@ -894,7 +913,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
       assertLegacyForUnmanaged01600(scope,protectedDecision01600);
       const payload=await readJson(req,{limit:4096});
       console.warn('[ST_DELETE_AUDIT_01623M]',JSON.stringify({event:'bulk-drafts-request',requestId:rid,siteId,expectedCount:payload?.expectedCount}));
-      return sendJson(res,200,{requestId:rid,...await deleteAllDraftRevisions01623M(scope,siteId,payload)});
+      return sendJson(res,200,{requestId:rid,...await deleteAllDraftRevisions01623M(scope,siteId,payload,undefined,session.userId)});
     }
     if(req.method==='POST'&&p.length===5){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,201,{stage:'01231',revision:await createSiteDraft01231(scope,session.userId,siteId,await readJson(req,{limit:32*1024*1024}))});}
     if(req.method==='GET'&&revisionId&&p.length===6)return sendJson(res,200,{stage:'01231',revision:await getSiteRevision01231(scope,siteId,revisionId,session.userId)});
@@ -912,6 +931,10 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
         console.error('[ST_DELETE_AUDIT_01623K]',JSON.stringify({event:'revision-delete-error',requestId:rid,siteId,revisionId,status:Number(error?.statusCode||500),code:String(error?.code||'UNKNOWN')}));
         throw error;
       }
+    }
+    if(req.method==='POST'&&revisionId&&action==='prepare-owner-publish'&&p.length===7){
+      assertLegacyForUnmanaged01600(scope,protectedDecision01600);
+      return sendJson(res,200,{stage:'01646',revision:await prepareOwnerPublication01646(scope,session.userId,siteId,revisionId,await readJson(req,{limit:4096}))});
     }
     if(req.method==='POST'&&revisionId&&action==='publish'&&p.length===7){assertLegacyForUnmanaged01600(scope,protectedDecision01600);return sendJson(res,200,{stage:'01231',revision:await publishSiteRevision01231(scope,session.userId,siteId,revisionId,await readJson(req,{limit:4096}))});}
     return sendJson(res,404,{error:'Site revision route not found',stage:'01232',requestId:rid});
