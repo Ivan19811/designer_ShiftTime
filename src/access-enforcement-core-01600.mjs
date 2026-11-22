@@ -1,0 +1,146 @@
+// 01600 · Precise allowlist for high-impact merchant API routes.
+// A route not listed here is NOT claimed to be protected by this stage.
+const get=v=>String(v||'').toUpperCase();
+const clean=v=>String(v||'').trim();
+const match=(m,...verbs)=>verbs.includes(m);
+const decision=(permission,siteId='',legacy='write')=>({permission,siteId:clean(siteId),legacy});
+export function classifyProtectedAction01600(method,parts){
+  const m=get(method),p=parts;
+  if(!Array.isArray(p)||p[0]!=='api'||p[1]!=='v1')return null;
+  if(p[2]==='sites'){
+    if(p.length===3&&m==='POST')return decision('site.pages.create');
+    if(p.length===3&&m==='GET')return {...decision('site.pages.view','','read'),siteList:true};
+    if(!p[3])return null;
+    const siteId=p[3];
+    if(p.length===4){
+      if(m==='GET')return decision('site.pages.view',siteId,'read');
+      if(m==='PUT')return decision('site.pages.edit',siteId);
+      if(m==='DELETE')return decision('site.publish.delete',siteId,'admin');
+    }
+    // 01613D: explicit test workflow routes; no permission to alter the original.
+    if(p[4]==='test'){
+      // 01618B: classify owner-only per-node review endpoints *before* the
+      // fail-closed 01613B online-site boundary. The 01618 workflow still
+      // checks role=owner and tenant/site scope on every request.
+      if(p[5]==='changes'){
+        if(p.length===6&&m==='GET')return decision('site.pages.view',siteId,'read');
+        if(p.length===7&&['plan','apply'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
+        if(p.length===8&&p[6]==='rollback'&&m==='POST'&&p[7])return decision('site.publish.execute',siteId);
+        // 01618J: the owner-only original-Home repair API added in 01618H
+        // must be explicitly classified *before* the 01613B fail-closed gate.
+        // Both preflight and apply require the same site-scoped owner permission;
+        // the workflow verifies role=owner, immutable source and confirmation.
+        if(p.length===8&&p[6]==='repair'&&['plan','apply'].includes(p[7])&&m==='POST')
+          return decision('site.publish.execute',siteId);
+        return null;
+      }
+      if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===6&&p[5]==='inbox'&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===7&&['compare','baseline'].includes(p[6])&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='reset'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='preview'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='submit'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='review'&&m==='POST')return decision('site.publish.execute',siteId);
+      if(p.length===7&&['apply-plan','apply','rollback'].includes(p[6])&&m==='POST')return decision('site.publish.execute',siteId);
+      if(p.length===7&&p[6]==='promote'&&m==='POST')return decision('site.publish.execute',siteId);
+    }
+    // 01648: These owner-specific routes were introduced in 01623M / 01646 /
+    // 01647 but were omitted from the canonical 01600 allowlist. As a result,
+    // the 01613B fail-closed gate rejected the request BEFORE the real owner,
+    // tenant and selected-revision safeguards could execute. Classify exact
+    // routes here, not by a broad path-prefix exception.
+    if(p[4]==='delete-check'&&p.length===5&&m==='GET')
+      return decision('site.publish.delete',siteId,'read');
+    if(p[4]==='owner-history'){
+      if(p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
+      if(p.length===7&&p[5]&&p[6]==='save'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[5]&&p[6]==='restore'&&m==='POST')return decision('site.pages.edit',siteId);
+      return null;
+    }
+    if(p[4]==='demo-publish-status'&&p.length===5&&m==='GET')return decision('site.pages.view',siteId,'read');
+    if(p[4]==='demo-publish'&&p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
+    if(p[4]==='publish-status'&&p.length>=5&&m==='GET')return decision('site.pages.view',siteId,'read');
+    if(p[4]==='canvas'&&p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
+    if(p[4]==='metadata'&&p.length===5&&m==='PATCH')return decision('site.pages.edit',siteId);
+    if(p[4]==='publish'&&p.length>=5&&m==='POST')return decision('site.publish.execute',siteId);
+    if(p[4]==='revisions'){
+      if(match(m,'GET')&&[5,6].includes(p.length))return decision('site.pages.view',siteId,'read');
+      if(p.length===5&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===6&&p[5]==='from-source'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===6&&p[5]==='delete-all'&&m==='POST')return decision('site.pages.delete',siteId);
+      if(p.length===7&&p[5]&&p[6]==='prepare-owner-publish'&&m==='POST')
+        return decision('site.publish.execute',siteId);
+      if(p.length===6){
+        if(m==='PUT')return decision('site.pages.edit',siteId);
+        if(m==='DELETE')return decision('site.pages.delete',siteId);
+      }
+      if(p.length===7&&p[6]==='canvas'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='test-shell'&&m==='POST')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='details'&&m==='PATCH')return decision('site.pages.edit',siteId);
+      if(p.length===7&&p[6]==='publish'&&m==='POST')return decision('site.publish.execute',siteId);
+    }
+    return null;
+  }
+  if(p[2]==='marketplace'){
+    const resource=p[3],id=p[4];
+    if(resource==='snapshot'){
+      if(m==='GET')return decision('shop.products.view','','read');
+      if(m==='PUT')return decision('shop.products.import');
+      if(m==='DELETE')return decision('shop.products.delete');
+    }
+    if(resource==='atomic-catalog'&&m==='POST'&&p.length===4)return decision('shop.products.view','','read');
+    if(resource==='products'){
+      if(id==='replacement-apply'&&m==='POST')return decision('shop.products.import');
+      if(id==='bulk-status'&&m==='POST')return decision('shop.products.edit');
+      if(id==='replacement-preview'&&m==='POST')return decision('shop.products.view','', 'read');
+    }
+    // All catalog entity mutations are protected; using /variants or /feeds cannot bypass the product gate.
+    if(['products','categories','attributes','attribute-values','variants','media','collections','filters','recommendations','feeds'].includes(resource)){
+      if(m==='GET'&&p.length>=4)return decision('shop.products.view','','read');
+      if(p.length===4&&m==='POST')return decision(resource==='products'?'shop.products.create':'shop.products.edit');
+      if(p.length>=5&&m==='PATCH')return decision('shop.products.edit');
+      if(p.length>=5&&m==='DELETE')return decision('shop.products.delete');
+    }
+    if(resource==='category-merge'&&id==='apply'&&m==='POST')return decision('shop.products.edit');
+    if(resource==='category-path'&&id==='resolve'&&m==='POST')return decision('shop.products.edit');
+    return null;
+  }
+  if(p[2]==='network'){
+    if(p[3]==='orders'){
+      if(p.length===4&&m==='GET')return decision('shop.orders.view','','order-read');
+      if(p.length>=5&&m==='PATCH')return decision('shop.orders.edit','','order-write');
+    }
+    if(p[3]==='products'&&p.length>=6&&['publish','sync'].includes(p[5])&&m==='POST')return decision('shop.products.edit');
+    if(p[3]==='listings'&&p.length>=6&&p[5]==='unpublish'&&m==='POST')return decision('shop.products.edit');
+    return null;
+  }
+  if(p[2]==='integrations'&&p[3]==='shipping-hub'){
+    if(p[4]==='orders-production'&&p.length===5&&m==='GET')return decision('shop.orders.view','','order-read');
+    if(p[4]==='orders-review'){
+      if(p.length===5&&m==='GET')return decision('shop.orders.view','','order-read');
+      if(p[5]==='managers'&&p.length===6&&m==='GET')return decision('shop.orders.view','','order-read');
+      if(p.length===7){
+        if(m==='GET')return decision('shop.orders.view','','order-read');
+        if(m==='PATCH'&&p[6]==='workflow')return decision('shop.orders.status','','order-write');
+        if(m==='PATCH'&&p[6]==='priority')return decision('shop.orders.edit','','order-write');
+        if(m==='POST'&&['notes','buyer-offer','production-order','carrier-quote'].includes(p[6]))return decision('shop.orders.edit','','order-write');
+      }
+    }
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='prepare-review'&&m==='POST')return decision('shop.orders.edit','','order-write');
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===8&&p[7]==='contacts'&&match(m,'POST','DELETE'))return decision('shop.orders.edit','','order-write');
+    if(p[4]==='nova-poshta'&&p[5]==='checkout-draft'&&p.length===6&&m==='POST')return decision('shop.orders.edit','','order-write');
+    return null;
+  }
+  return null;
+}
+export function grantDecision01600({role='',enrolled=false,permissions=[],permission,legacyAllowed=false}={}){
+  // Exact owner bypass only. No super-admin bypass from untrusted headers.
+  if(role==='owner')return {allowed:true,mode:'owner'};
+  if(!enrolled)return {allowed:!!legacyAllowed,mode:'legacy'};
+  return {allowed:Array.isArray(permissions)&&permissions.includes(permission),mode:'custom'};
+}
+export function requireProtectedAccess01600(result,permission){
+  if(result?.allowed)return result;
+  throw Object.assign(new Error('ST_ACCESS_ACTION_DENIED_01600'),{code:'ST_ACCESS_ACTION_DENIED_01600',statusCode:403,permission});
+}

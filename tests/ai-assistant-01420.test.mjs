@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {normalizeAiAssistantMode01420,normalizeAiAssistantCapabilities01420,sanitizeAiAssistantPlan01420,parseAiAssistantJson01420} from '../src/ai-assistant-core-01420.mjs';
+test('01420 modes normalize safely',()=>{assert.equal(normalizeAiAssistantMode01420('execute'),'execute');assert.equal(normalizeAiAssistantMode01420('root'),'prepare');});
+test('01420 capabilities reject unknown modules/actions',()=>{const c=normalizeAiAssistantCapabilities01420([{id:'tables',status:'ready',actions:['tables.open','evil']},{id:'root',status:'ready',actions:['x']}]);assert.deepEqual(c,[{id:'tables',status:'ready',actions:['tables.open'],detail:''}]);});
+test('01420 plan marks unavailable tools',()=>{const c=normalizeAiAssistantCapabilities01420([{id:'pages',status:'ready',actions:['pages.open']}]);const p=sanitizeAiAssistantPlan01420({actions:[{module:'pages',tool:'pages.open',risk:'low'},{module:'pages',tool:'pages.delete',risk:'high'}]},c);assert.equal(p.actions[0].available,true);assert.equal(p.actions[1].available,false);assert.equal(p.actions[1].requiresConfirmation,true);});
+test('01420 parses fenced json',()=>{assert.equal(parseAiAssistantJson01420('```json\n{"message":"ok"}\n```').message,'ok');});
