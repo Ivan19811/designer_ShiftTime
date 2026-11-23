@@ -72,7 +72,18 @@ async function assertEditableSiteTestRevision01615B(client,siteId,revisionId,{op
  throw httpError('ShiftTime Test revision is protected',409,'ST_TEST_DRAFT_LOCKED_01614A');
 }
 export async function saveSiteDraft01231(scope,userId,siteId,revisionIdValue,input={}){
-  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});const q=await c.query(`UPDATE shifttime_builder_site_revisions SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,prepared_original_revision=NULL,updated_by_user_id=$5,updated_at=now() WHERE site_id=$6 AND id=$7 AND kind='draft' RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
+  const sid=clean(siteId),rid=clean(revisionIdValue);return withClient(async c=>{await c.query('BEGIN');try{await assertSite(c,scope,sid);await assertEditableSiteTestRevision01615B(c,sid,rid,{userId,role:scope.role});// 01661: a late pre-publish autosave must not erase the owner preflight.
+      // JSONB equality is authoritative (not serialized JS key order). An identical
+      // PUT is idempotent and retains the preflight; a genuinely changed draft
+      // invalidates preflight and must be prepared again before a new publish.
+      const q=await c.query(`UPDATE shifttime_builder_site_revisions
+        SET project_json=$1::jsonb,schema_version=$2,label=COALESCE(NULLIF($3,''),label),dirty=$4,
+          prepared_original_revision=CASE WHEN project_json=$1::jsonb AND schema_version=$2
+            THEN prepared_original_revision ELSE NULL END,
+          updated_by_user_id=$5,updated_at=now()
+        WHERE site_id=$6 AND id=$7 AND kind='draft'
+        RETURNING *`,[JSON.stringify(projectValue(input.project)),clean(input.schemaVersion||input.project?.version)||'01231',clean(input.label),input.dirty!==false,userId,sid,rid]);
+      if(!q.rowCount)throw httpError('Draft revision not found',404,'ST_SITE_REVISION_NOT_FOUND');
       await c.query(`UPDATE shifttime_site_test_branches_01613d SET state='editing',preview_snapshot_sha=NULL,candidate_deploy_id=NULL,preview_deploy_id=NULL,preview_url=NULL,submitted_at=NULL,updated_at=now()
         WHERE revision_id=$1 AND site_id=$2`,[rid,sid]);
       await c.query('COMMIT');return mapRow(q.rows[0],{includeProject:true});}catch(e){try{await c.query('ROLLBACK');}catch{}throw e;}});
@@ -219,8 +230,14 @@ export async function publishSiteRevision01231(scope,userId,siteId,revisionIdVal
     if(scope.role==='owner'&&draft.base_original_project_json){
       // A publish without a confirmed preflight could upload files from a
       // different Canvas. Refuse it, without touching either original or live.
-      if(draft.prepared_original_revision==null||Number(draft.prepared_original_revision)!==Number(base.revision))
+      if(draft.prepared_original_revision==null||Number(draft.prepared_original_revision)!==Number(base.revision)){
+        // Diagnosis only: no project content, user data, or credentials in logs.
+        console.warn('[ST_OWNER_PUBLISH_SYNC_01661]',JSON.stringify({siteId:sid,
+          reason:draft.prepared_original_revision==null?'preflight-invalidated':'original-revision-changed',
+          preparedRevision:draft.prepared_original_revision==null?null:Number(draft.prepared_original_revision),
+          currentRevision:Number(base.revision)}));
         throw httpError('Original changed during publication. Retry using the current owner revision.',409,'ST_OWNER_PUBLISH_STALE_01646');
+      }
       const updated=await c.query(`UPDATE shifttime_builder_site_projects SET project_json=$1::jsonb,schema_version=$2,revision=revision+1,updated_by_user_id=$3,updated_at=now()
         WHERE site_id=$4 AND revision=$5 RETURNING revision`,[JSON.stringify(draft.project_json),draft.schema_version,userId,sid,base.revision]);
       if(!updated.rowCount)throw httpError('Original changed',409,'ST_OWNER_PUBLISH_STALE_01646');

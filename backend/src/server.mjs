@@ -140,7 +140,7 @@ import {getSiteGrowthAnalytics01228} from './site-growth-service-01228.mjs';
 import {runTrafficContext01201,updateTrafficContext01201,updateAuthenticatedTrafficContext01204} from './traffic-integration-01201.mjs';
 import {resolvePublishedSiteTrafficIdentity01203} from './published-site-identity-01203.mjs';
 function pathParts(url){return new URL(url,'http://localhost').pathname.split('/').filter(Boolean).map(decodeURIComponent);}
-function setScopeHeaders(res,scope,rid){res.setHeader('x-st-backend-release','01658');res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
+function setScopeHeaders(res,scope,rid){res.setHeader('x-st-backend-release','01661');res.setHeader('x-st-request-id',rid);res.setHeader('x-st-account-id',scope.accountId);res.setHeader('x-st-workspace-id',scope.workspaceId);res.setHeader('x-st-store-id',scope.storeId);}
 function sameTrafficTenant01203(a={},b={}){return String(a.accountId||'')===String(b.accountId||'')&&String(a.workspaceId||'')===String(b.workspaceId||'')&&String(a.storeId||'')===String(b.storeId||'');}
 function sendGoogleOAuthPopup01398(res,{ok=false,code='',targetOrigin=''}={}){const origin=String(targetOrigin||'').trim()||'*',message=JSON.stringify({type:'st:google-sheets-oauth:01398',ok:!!ok,code:String(code||'')}).replace(/</g,'\u003c'),target=JSON.stringify(origin).replace(/</g,'\u003c'),body=`<!doctype html><meta charset=\"utf-8\"><script>try{window.opener&&window.opener.postMessage(${message},${target})}catch{};try{window.close()}catch{}</script>`;res.writeHead(ok?200:400,{'content-type':'text/html; charset=utf-8','content-length':Buffer.byteLength(body),'cache-control':'no-store'});res.end(body);}
 async function resolveRequestPublishedTrafficIdentity01203(req){const token=String(req?.headers?.['x-st-site-token']||'').trim();return token?resolvePublishedSiteTrafficIdentity01203(token):null;}
@@ -482,7 +482,7 @@ async function route(req,res,rid=requestId(req)){applyCors(req,res,config.corsOr
     catch(error){
       // 01658: limited diagnostic metadata for failed site preflight; never log credentials or project body.
       if(error?.statusCode===403&&req.method==='POST'&&p[2]==='sites'&&p[4]==='revisions'&&p[6]==='prepare-owner-publish')
-        console.warn('[01658] owner-publish-preflight-denied',JSON.stringify({requestId:rid,route:'owner-prepare',method:'POST',code:String(error.code||error.message||'').slice(0,100),scopeRole:scope.role,siteId:p[3]||'',decisionPresent:!!protectedDecision01600,decisionAllowed:protectedDecision01600?.allowed===true,decisionPermission:protectedDecision01600?.permission||'',backendRelease:'01658'}));
+        console.warn('[01658] owner-publish-preflight-denied',JSON.stringify({requestId:rid,route:'owner-prepare',method:'POST',code:String(error.code||error.message||'').slice(0,100),scopeRole:scope.role,siteId:p[3]||'',decisionPresent:!!protectedDecision01600,decisionAllowed:protectedDecision01600?.allowed===true,decisionPermission:protectedDecision01600?.permission||'',backendRelease:'01661'}));
       if(error?.statusCode===403)try{await recordDeniedAccess01605C(scope,session.userId,{
         permission:error.permission||auditedAction01605?.permission||'site.pages.view',
         siteId:p[2]==='sites'&&p[3]?p[3]:''
